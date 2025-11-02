@@ -1745,37 +1745,345 @@
             document.getElementById('managementModal').style.display = 'none';
         }
 
-        // 기본 관리 함수들 (간단 구현)
+        // DB 관리 함수들
         function manageMenus() {
-            alert('메뉴 관리 기능은 추후 구현 예정입니다.');
+            const menus = JSON.parse(localStorage.getItem(getAdminKey('menus')) || '[]');
+            let content = `
+                <div class="mb-4">
+                    <button onclick="addNewMenu()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">새 메뉴 추가</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse border border-gray-300">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="border border-gray-300 p-2">메뉴명</th>
+                                <th class="border border-gray-300 p-2">30분</th>
+                                <th class="border border-gray-300 p-2">60분</th>
+                                <th class="border border-gray-300 p-2">90분</th>
+                                <th class="border border-gray-300 p-2">120분</th>
+                                <th class="border border-gray-300 p-2">작업</th>
+                            </tr>
+                        </thead>
+                        <tbody id="menuManagementTable">
+            `;
+            
+            menus.forEach(menu => {
+                content += `
+                    <tr>
+                        <td class="border border-gray-300 p-2">${menu.name}</td>
+                        <td class="border border-gray-300 p-2">${menu.prices[30] ? `${menu.prices[30].price}/${menu.prices[30].commission}` : '-'}</td>
+                        <td class="border border-gray-300 p-2">${menu.prices[60] ? `${menu.prices[60].price}/${menu.prices[60].commission}` : '-'}</td>
+                        <td class="border border-gray-300 p-2">${menu.prices[90] ? `${menu.prices[90].price}/${menu.prices[90].commission}` : '-'}</td>
+                        <td class="border border-gray-300 p-2">${menu.prices[120] ? `${menu.prices[120].price}/${menu.prices[120].commission}` : '-'}</td>
+                        <td class="border border-gray-300 p-2">
+                            <button onclick="editMenu(${menu.id})" class="bg-blue-500 text-white px-2 py-1 rounded text-sm mr-1">수정</button>
+                            <button onclick="deleteMenu(${menu.id})" class="bg-red-500 text-white px-2 py-1 rounded text-sm">삭제</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            content += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '메뉴 관리';
+            document.getElementById('managementContent').innerHTML = content;
+            document.getElementById('managementModal').style.display = 'block';
         }
 
         function manageStaff() {
-            alert('직원 관리 기능은 추후 구현 예정입니다.');
+            const staff = JSON.parse(localStorage.getItem(getAdminKey('staff')) || '[]');
+            let content = `
+                <div class="mb-4">
+                    <button onclick="addNewStaff()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">새 직원 추가</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse border border-gray-300">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="border border-gray-300 p-2">직원명</th>
+                                <th class="border border-gray-300 p-2">전화번호</th>
+                                <th class="border border-gray-300 p-2">은행</th>
+                                <th class="border border-gray-300 p-2">계좌번호</th>
+                                <th class="border border-gray-300 p-2">상태</th>
+                                <th class="border border-gray-300 p-2">작업</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            staff.forEach(member => {
+                content += `
+                    <tr>
+                        <td class="border border-gray-300 p-2">${member.name}</td>
+                        <td class="border border-gray-300 p-2">${member.phone}</td>
+                        <td class="border border-gray-300 p-2">${member.bank}</td>
+                        <td class="border border-gray-300 p-2">${member.account}</td>
+                        <td class="border border-gray-300 p-2">${member.status || '정직원'}</td>
+                        <td class="border border-gray-300 p-2">
+                            <button onclick="editStaff(${member.id})" class="bg-blue-500 text-white px-2 py-1 rounded text-sm mr-1">수정</button>
+                            <button onclick="deleteStaff(${member.id})" class="bg-red-500 text-white px-2 py-1 rounded text-sm">삭제</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            content += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '직원 관리';
+            document.getElementById('managementContent').innerHTML = content;
+            document.getElementById('managementModal').style.display = 'block';
         }
 
         function manageRooms() {
-            alert('방 관리 기능은 추후 구현 예정입니다.');
+            const rooms = JSON.parse(localStorage.getItem(getAdminKey('rooms')) || '[]');
+            let content = `
+                <div class="mb-4">
+                    <button onclick="addNewRoom()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">새 방 추가</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse border border-gray-300">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="border border-gray-300 p-2">방번호</th>
+                                <th class="border border-gray-300 p-2">수용인원</th>
+                                <th class="border border-gray-300 p-2">작업</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            rooms.forEach(room => {
+                content += `
+                    <tr>
+                        <td class="border border-gray-300 p-2">${room.roomNumber}</td>
+                        <td class="border border-gray-300 p-2">${room.capacity}명</td>
+                        <td class="border border-gray-300 p-2">
+                            <button onclick="editRoom(${room.id})" class="bg-blue-500 text-white px-2 py-1 rounded text-sm mr-1">수정</button>
+                            <button onclick="deleteRoom(${room.id})" class="bg-red-500 text-white px-2 py-1 rounded text-sm">삭제</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            content += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '방 관리';
+            document.getElementById('managementContent').innerHTML = content;
+            document.getElementById('managementModal').style.display = 'block';
         }
 
         function manageCustomers() {
-            alert('고객 관리 기능은 추후 구현 예정입니다.');
+            const customers = JSON.parse(localStorage.getItem(getAdminKey('customers')) || '[]');
+            let content = `
+                <div class="mb-4">
+                    <button onclick="addNewCustomer()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">새 고객 추가</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse border border-gray-300">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="border border-gray-300 p-2">고객명</th>
+                                <th class="border border-gray-300 p-2">전화번호</th>
+                                <th class="border border-gray-300 p-2">고객번호</th>
+                                <th class="border border-gray-300 p-2">작업</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            customers.forEach(customer => {
+                content += `
+                    <tr>
+                        <td class="border border-gray-300 p-2">${customer.name}</td>
+                        <td class="border border-gray-300 p-2">${customer.phone}</td>
+                        <td class="border border-gray-300 p-2">${customer.customerNumber}</td>
+                        <td class="border border-gray-300 p-2">
+                            <button onclick="editCustomer(${customer.id})" class="bg-blue-500 text-white px-2 py-1 rounded text-sm mr-1">수정</button>
+                            <button onclick="deleteCustomer(${customer.id})" class="bg-red-500 text-white px-2 py-1 rounded text-sm">삭제</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            content += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '고객 관리';
+            document.getElementById('managementContent').innerHTML = content;
+            document.getElementById('managementModal').style.display = 'block';
         }
 
         function manageAdmins() {
-            alert('관리자 관리 기능은 추후 구현 예정입니다.');
+            if (currentAdmin.type !== 'super') {
+                alert('최고 관리자만 접근할 수 있습니다.');
+                return;
+            }
+            
+            const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
+            let content = `
+                <div class="mb-4">
+                    <button onclick="addNewAdmin()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">새 관리자 추가</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse border border-gray-300">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="border border-gray-300 p-2">아이디</th>
+                                <th class="border border-gray-300 p-2">타입</th>
+                                <th class="border border-gray-300 p-2">상점명</th>
+                                <th class="border border-gray-300 p-2">전화번호</th>
+                                <th class="border border-gray-300 p-2">작업</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            admins.forEach(admin => {
+                content += `
+                    <tr>
+                        <td class="border border-gray-300 p-2">${admin.username}</td>
+                        <td class="border border-gray-300 p-2">${admin.type === 'super' ? '최고관리자' : '일반관리자'}</td>
+                        <td class="border border-gray-300 p-2">${admin.shopName || '-'}</td>
+                        <td class="border border-gray-300 p-2">${admin.phone || '-'}</td>
+                        <td class="border border-gray-300 p-2">
+                            <button onclick="editAdmin(${admin.id})" class="bg-blue-500 text-white px-2 py-1 rounded text-sm mr-1">수정</button>
+                            ${admin.id !== 1 ? `<button onclick="deleteAdmin(${admin.id})" class="bg-red-500 text-white px-2 py-1 rounded text-sm">삭제</button>` : ''}
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            content += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '관리자 관리';
+            document.getElementById('managementContent').innerHTML = content;
+            document.getElementById('managementModal').style.display = 'block';
         }
 
         function manageCurrency() {
-            alert('화폐 단위 관리 기능은 추후 구현 예정입니다.');
+            const currency = JSON.parse(localStorage.getItem(getAdminKey('currency')) || '{"symbol":"","name":"원"}');
+            let content = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">화폐 기호:</label>
+                        <input type="text" id="currencySymbol" value="${currency.symbol}" class="w-full border rounded px-3 py-2" placeholder="예: ₩, $, €">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">화폐 이름:</label>
+                        <input type="text" id="currencyName" value="${currency.name}" class="w-full border rounded px-3 py-2" placeholder="예: 원, 달러, 유로">
+                    </div>
+                    <button onclick="saveCurrency()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">저장</button>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '화폐 단위 관리';
+            document.getElementById('managementContent').innerHTML = content;
+            document.getElementById('managementModal').style.display = 'block';
         }
 
         function managePaymentMethods() {
-            alert('입금방식 관리 기능은 추후 구현 예정입니다.');
+            const paymentMethods = JSON.parse(localStorage.getItem(getAdminKey('paymentMethods')) || '[]');
+            let content = `
+                <div class="mb-4">
+                    <button onclick="addNewPaymentMethod()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">새 입금방식 추가</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse border border-gray-300">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="border border-gray-300 p-2">입금방식명</th>
+                                <th class="border border-gray-300 p-2">작업</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            paymentMethods.forEach(method => {
+                content += `
+                    <tr>
+                        <td class="border border-gray-300 p-2">${method.name}</td>
+                        <td class="border border-gray-300 p-2">
+                            <button onclick="editPaymentMethod(${method.id})" class="bg-blue-500 text-white px-2 py-1 rounded text-sm mr-1">수정</button>
+                            <button onclick="deletePaymentMethod(${method.id})" class="bg-red-500 text-white px-2 py-1 rounded text-sm">삭제</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            content += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '입금방식 관리';
+            document.getElementById('managementContent').innerHTML = content;
+            document.getElementById('managementModal').style.display = 'block';
         }
 
         function manageGuarantee() {
-            alert('Guarantee 관리 기능은 추후 구현 예정입니다.');
+            const guarantees = JSON.parse(localStorage.getItem(getAdminKey('guarantees')) || '[]');
+            let content = `
+                <div class="mb-4">
+                    <button onclick="addNewGuarantee()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">새 Guarantee 추가</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse border border-gray-300">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="border border-gray-300 p-2">날짜</th>
+                                <th class="border border-gray-300 p-2">직원명</th>
+                                <th class="border border-gray-300 p-2">금액</th>
+                                <th class="border border-gray-300 p-2">메모</th>
+                                <th class="border border-gray-300 p-2">작업</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            guarantees.forEach(guarantee => {
+                content += `
+                    <tr>
+                        <td class="border border-gray-300 p-2">${guarantee.date}</td>
+                        <td class="border border-gray-300 p-2">${guarantee.staffName}</td>
+                        <td class="border border-gray-300 p-2">${guarantee.amount.toLocaleString()}</td>
+                        <td class="border border-gray-300 p-2">${guarantee.memo || '-'}</td>
+                        <td class="border border-gray-300 p-2">
+                            <button onclick="editGuarantee(${guarantee.id})" class="bg-blue-500 text-white px-2 py-1 rounded text-sm mr-1">수정</button>
+                            <button onclick="deleteGuarantee(${guarantee.id})" class="bg-red-500 text-white px-2 py-1 rounded text-sm">삭제</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            content += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = 'Guarantee 관리';
+            document.getElementById('managementContent').innerHTML = content;
+            document.getElementById('managementModal').style.display = 'block';
         }
 
         // 통계 관련 함수들
@@ -2378,9 +2686,1007 @@
             loadStaffOrder(); // 순번 화면 새로고침
         }
 
+        // DB 관리 세부 기능들
+        
+        // 메뉴 관리 함수들
+        function addNewMenu() {
+            const content = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">메뉴명:</label>
+                        <input type="text" id="newMenuName" class="w-full border rounded px-3 py-2" placeholder="메뉴명을 입력하세요">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">30분 가격/커미션:</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="menu30Price" class="flex-1 border rounded px-2 py-1" placeholder="가격">
+                                <input type="number" id="menu30Commission" class="flex-1 border rounded px-2 py-1" placeholder="커미션">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">60분 가격/커미션:</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="menu60Price" class="flex-1 border rounded px-2 py-1" placeholder="가격">
+                                <input type="number" id="menu60Commission" class="flex-1 border rounded px-2 py-1" placeholder="커미션">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">90분 가격/커미션:</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="menu90Price" class="flex-1 border rounded px-2 py-1" placeholder="가격">
+                                <input type="number" id="menu90Commission" class="flex-1 border rounded px-2 py-1" placeholder="커미션">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">120분 가격/커미션:</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="menu120Price" class="flex-1 border rounded px-2 py-1" placeholder="가격">
+                                <input type="number" id="menu120Commission" class="flex-1 border rounded px-2 py-1" placeholder="커미션">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="saveNewMenu()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">저장</button>
+                        <button onclick="manageMenus()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '새 메뉴 추가';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function saveNewMenu() {
+            const name = document.getElementById('newMenuName').value;
+            if (!name) {
+                alert('메뉴명을 입력해주세요.');
+                return;
+            }
+
+            const menus = JSON.parse(localStorage.getItem(getAdminKey('menus')) || '[]');
+            const newId = Math.max(...menus.map(m => m.id), 0) + 1;
+            
+            const prices = {};
+            const durations = [30, 60, 90, 120];
+            
+            durations.forEach(duration => {
+                const price = parseInt(document.getElementById(`menu${duration}Price`).value);
+                const commission = parseInt(document.getElementById(`menu${duration}Commission`).value);
+                
+                if (price && commission) {
+                    prices[duration] = { price, commission };
+                }
+            });
+
+            if (Object.keys(prices).length === 0) {
+                alert('최소 하나의 시간대에 대한 가격과 커미션을 입력해주세요.');
+                return;
+            }
+
+            menus.push({
+                id: newId,
+                name: name,
+                prices: prices
+            });
+
+            localStorage.setItem(getAdminKey('menus'), JSON.stringify(menus));
+            alert('메뉴가 추가되었습니다.');
+            manageMenus();
+        }
+
+        function editMenu(id) {
+            const menus = JSON.parse(localStorage.getItem(getAdminKey('menus')) || '[]');
+            const menu = menus.find(m => m.id === id);
+            
+            if (!menu) return;
+
+            const content = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">메뉴명:</label>
+                        <input type="text" id="editMenuName" value="${menu.name}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">30분 가격/커미션:</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="editMenu30Price" value="${menu.prices[30]?.price || ''}" class="flex-1 border rounded px-2 py-1" placeholder="가격">
+                                <input type="number" id="editMenu30Commission" value="${menu.prices[30]?.commission || ''}" class="flex-1 border rounded px-2 py-1" placeholder="커미션">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">60분 가격/커미션:</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="editMenu60Price" value="${menu.prices[60]?.price || ''}" class="flex-1 border rounded px-2 py-1" placeholder="가격">
+                                <input type="number" id="editMenu60Commission" value="${menu.prices[60]?.commission || ''}" class="flex-1 border rounded px-2 py-1" placeholder="커미션">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">90분 가격/커미션:</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="editMenu90Price" value="${menu.prices[90]?.price || ''}" class="flex-1 border rounded px-2 py-1" placeholder="가격">
+                                <input type="number" id="editMenu90Commission" value="${menu.prices[90]?.commission || ''}" class="flex-1 border rounded px-2 py-1" placeholder="커미션">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">120분 가격/커미션:</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="editMenu120Price" value="${menu.prices[120]?.price || ''}" class="flex-1 border rounded px-2 py-1" placeholder="가격">
+                                <input type="number" id="editMenu120Commission" value="${menu.prices[120]?.commission || ''}" class="flex-1 border rounded px-2 py-1" placeholder="커미션">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="updateMenu(${id})" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">수정</button>
+                        <button onclick="manageMenus()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '메뉴 수정';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function updateMenu(id) {
+            const name = document.getElementById('editMenuName').value;
+            if (!name) {
+                alert('메뉴명을 입력해주세요.');
+                return;
+            }
+
+            const menus = JSON.parse(localStorage.getItem(getAdminKey('menus')) || '[]');
+            const menuIndex = menus.findIndex(m => m.id === id);
+            
+            if (menuIndex === -1) return;
+
+            const prices = {};
+            const durations = [30, 60, 90, 120];
+            
+            durations.forEach(duration => {
+                const price = parseInt(document.getElementById(`editMenu${duration}Price`).value);
+                const commission = parseInt(document.getElementById(`editMenu${duration}Commission`).value);
+                
+                if (price && commission) {
+                    prices[duration] = { price, commission };
+                }
+            });
+
+            menus[menuIndex] = {
+                id: id,
+                name: name,
+                prices: prices
+            };
+
+            localStorage.setItem(getAdminKey('menus'), JSON.stringify(menus));
+            alert('메뉴가 수정되었습니다.');
+            manageMenus();
+        }
+
+        function deleteMenu(id) {
+            if (confirm('정말 삭제하시겠습니까?')) {
+                const menus = JSON.parse(localStorage.getItem(getAdminKey('menus')) || '[]');
+                const filteredMenus = menus.filter(m => m.id !== id);
+                localStorage.setItem(getAdminKey('menus'), JSON.stringify(filteredMenus));
+                alert('메뉴가 삭제되었습니다.');
+                manageMenus();
+            }
+        }
+
+        // 직원 관리 함수들
+        function addNewStaff() {
+            const content = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">직원명:</label>
+                        <input type="text" id="newStaffName" class="w-full border rounded px-3 py-2" placeholder="직원명을 입력하세요">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">전화번호:</label>
+                        <input type="text" id="newStaffPhone" class="w-full border rounded px-3 py-2" placeholder="전화번호를 입력하세요">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">은행명:</label>
+                        <input type="text" id="newStaffBank" class="w-full border rounded px-3 py-2" placeholder="은행명을 입력하세요">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">계좌번호:</label>
+                        <input type="text" id="newStaffAccount" class="w-full border rounded px-3 py-2" placeholder="계좌번호를 입력하세요">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">상태:</label>
+                        <select id="newStaffStatus" class="w-full border rounded px-3 py-2">
+                            <option value="정직원">정직원</option>
+                            <option value="단기고용">단기고용</option>
+                            <option value="퇴사">퇴사</option>
+                        </select>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="saveNewStaff()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">저장</button>
+                        <button onclick="manageStaff()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '새 직원 추가';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function saveNewStaff() {
+            const name = document.getElementById('newStaffName').value;
+            const phone = document.getElementById('newStaffPhone').value;
+            const bank = document.getElementById('newStaffBank').value;
+            const account = document.getElementById('newStaffAccount').value;
+            const status = document.getElementById('newStaffStatus').value;
+
+            if (!name) {
+                alert('직원명을 입력해주세요.');
+                return;
+            }
+
+            const staff = JSON.parse(localStorage.getItem(getAdminKey('staff')) || '[]');
+            const newId = Math.max(...staff.map(s => s.id), 0) + 1;
+
+            staff.push({
+                id: newId,
+                name: name,
+                phone: phone,
+                bank: bank,
+                account: account,
+                status: status
+            });
+
+            localStorage.setItem(getAdminKey('staff'), JSON.stringify(staff));
+            alert('직원이 추가되었습니다.');
+            manageStaff();
+        }
+
+        function editStaff(id) {
+            const staff = JSON.parse(localStorage.getItem(getAdminKey('staff')) || '[]');
+            const member = staff.find(s => s.id === id);
+            
+            if (!member) return;
+
+            const content = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">직원명:</label>
+                        <input type="text" id="editStaffName" value="${member.name}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">전화번호:</label>
+                        <input type="text" id="editStaffPhone" value="${member.phone}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">은행명:</label>
+                        <input type="text" id="editStaffBank" value="${member.bank}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">계좌번호:</label>
+                        <input type="text" id="editStaffAccount" value="${member.account}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">상태:</label>
+                        <select id="editStaffStatus" class="w-full border rounded px-3 py-2">
+                            <option value="정직원" ${member.status === '정직원' ? 'selected' : ''}>정직원</option>
+                            <option value="단기고용" ${member.status === '단기고용' ? 'selected' : ''}>단기고용</option>
+                            <option value="퇴사" ${member.status === '퇴사' ? 'selected' : ''}>퇴사</option>
+                        </select>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="updateStaff(${id})" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">수정</button>
+                        <button onclick="manageStaff()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '직원 수정';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function updateStaff(id) {
+            const name = document.getElementById('editStaffName').value;
+            if (!name) {
+                alert('직원명을 입력해주세요.');
+                return;
+            }
+
+            const staff = JSON.parse(localStorage.getItem(getAdminKey('staff')) || '[]');
+            const staffIndex = staff.findIndex(s => s.id === id);
+            
+            if (staffIndex === -1) return;
+
+            staff[staffIndex] = {
+                id: id,
+                name: name,
+                phone: document.getElementById('editStaffPhone').value,
+                bank: document.getElementById('editStaffBank').value,
+                account: document.getElementById('editStaffAccount').value,
+                status: document.getElementById('editStaffStatus').value
+            };
+
+            localStorage.setItem(getAdminKey('staff'), JSON.stringify(staff));
+            alert('직원 정보가 수정되었습니다.');
+            manageStaff();
+        }
+
+        function deleteStaff(id) {
+            if (confirm('정말 삭제하시겠습니까?')) {
+                const staff = JSON.parse(localStorage.getItem(getAdminKey('staff')) || '[]');
+                const filteredStaff = staff.filter(s => s.id !== id);
+                localStorage.setItem(getAdminKey('staff'), JSON.stringify(filteredStaff));
+                alert('직원이 삭제되었습니다.');
+                manageStaff();
+            }
+        }
+
+        // 방 관리 함수들
+        function addNewRoom() {
+            const content = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">방번호:</label>
+                        <input type="text" id="newRoomNumber" class="w-full border rounded px-3 py-2" placeholder="방번호를 입력하세요">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">수용인원:</label>
+                        <input type="number" id="newRoomCapacity" class="w-full border rounded px-3 py-2" placeholder="수용인원을 입력하세요" min="1">
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="saveNewRoom()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">저장</button>
+                        <button onclick="manageRooms()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '새 방 추가';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function saveNewRoom() {
+            const roomNumber = document.getElementById('newRoomNumber').value;
+            const capacity = parseInt(document.getElementById('newRoomCapacity').value);
+
+            if (!roomNumber) {
+                alert('방번호를 입력해주세요.');
+                return;
+            }
+
+            if (!capacity || capacity < 1) {
+                alert('올바른 수용인원을 입력해주세요.');
+                return;
+            }
+
+            const rooms = JSON.parse(localStorage.getItem(getAdminKey('rooms')) || '[]');
+            const newId = Math.max(...rooms.map(r => r.id), 0) + 1;
+
+            rooms.push({
+                id: newId,
+                roomNumber: roomNumber,
+                capacity: capacity
+            });
+
+            localStorage.setItem(getAdminKey('rooms'), JSON.stringify(rooms));
+            alert('방이 추가되었습니다.');
+            manageRooms();
+        }
+
+        function editRoom(id) {
+            const rooms = JSON.parse(localStorage.getItem(getAdminKey('rooms')) || '[]');
+            const room = rooms.find(r => r.id === id);
+            
+            if (!room) return;
+
+            const content = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">방번호:</label>
+                        <input type="text" id="editRoomNumber" value="${room.roomNumber}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">수용인원:</label>
+                        <input type="number" id="editRoomCapacity" value="${room.capacity}" class="w-full border rounded px-3 py-2" min="1">
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="updateRoom(${id})" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">수정</button>
+                        <button onclick="manageRooms()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '방 수정';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function updateRoom(id) {
+            const roomNumber = document.getElementById('editRoomNumber').value;
+            const capacity = parseInt(document.getElementById('editRoomCapacity').value);
+
+            if (!roomNumber) {
+                alert('방번호를 입력해주세요.');
+                return;
+            }
+
+            if (!capacity || capacity < 1) {
+                alert('올바른 수용인원을 입력해주세요.');
+                return;
+            }
+
+            const rooms = JSON.parse(localStorage.getItem(getAdminKey('rooms')) || '[]');
+            const roomIndex = rooms.findIndex(r => r.id === id);
+            
+            if (roomIndex === -1) return;
+
+            rooms[roomIndex] = {
+                id: id,
+                roomNumber: roomNumber,
+                capacity: capacity
+            };
+
+            localStorage.setItem(getAdminKey('rooms'), JSON.stringify(rooms));
+            alert('방 정보가 수정되었습니다.');
+            manageRooms();
+        }
+
+        function deleteRoom(id) {
+            if (confirm('정말 삭제하시겠습니까?')) {
+                const rooms = JSON.parse(localStorage.getItem(getAdminKey('rooms')) || '[]');
+                const filteredRooms = rooms.filter(r => r.id !== id);
+                localStorage.setItem(getAdminKey('rooms'), JSON.stringify(filteredRooms));
+                alert('방이 삭제되었습니다.');
+                manageRooms();
+            }
+        }
+
+        // 고객 관리 함수들
+        function addNewCustomer() {
+            const content = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">고객명:</label>
+                        <input type="text" id="newCustomerName" class="w-full border rounded px-3 py-2" placeholder="고객명을 입력하세요">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">전화번호:</label>
+                        <input type="text" id="newCustomerPhone" class="w-full border rounded px-3 py-2" placeholder="전화번호를 입력하세요">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">고객번호:</label>
+                        <input type="text" id="newCustomerNumber" class="w-full border rounded px-3 py-2" placeholder="고객번호를 입력하세요">
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="saveNewCustomer()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">저장</button>
+                        <button onclick="manageCustomers()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '새 고객 추가';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function saveNewCustomer() {
+            const name = document.getElementById('newCustomerName').value;
+            const phone = document.getElementById('newCustomerPhone').value;
+            const customerNumber = document.getElementById('newCustomerNumber').value;
+
+            if (!name) {
+                alert('고객명을 입력해주세요.');
+                return;
+            }
+
+            const customers = JSON.parse(localStorage.getItem(getAdminKey('customers')) || '[]');
+            const newId = Math.max(...customers.map(c => c.id), 0) + 1;
+
+            customers.push({
+                id: newId,
+                name: name,
+                phone: phone,
+                customerNumber: customerNumber
+            });
+
+            localStorage.setItem(getAdminKey('customers'), JSON.stringify(customers));
+            alert('고객이 추가되었습니다.');
+            manageCustomers();
+        }
+
+        function editCustomer(id) {
+            const customers = JSON.parse(localStorage.getItem(getAdminKey('customers')) || '[]');
+            const customer = customers.find(c => c.id === id);
+            
+            if (!customer) return;
+
+            const content = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">고객명:</label>
+                        <input type="text" id="editCustomerName" value="${customer.name}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">전화번호:</label>
+                        <input type="text" id="editCustomerPhone" value="${customer.phone}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">고객번호:</label>
+                        <input type="text" id="editCustomerNumber" value="${customer.customerNumber}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="updateCustomer(${id})" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">수정</button>
+                        <button onclick="manageCustomers()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '고객 수정';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function updateCustomer(id) {
+            const name = document.getElementById('editCustomerName').value;
+            if (!name) {
+                alert('고객명을 입력해주세요.');
+                return;
+            }
+
+            const customers = JSON.parse(localStorage.getItem(getAdminKey('customers')) || '[]');
+            const customerIndex = customers.findIndex(c => c.id === id);
+            
+            if (customerIndex === -1) return;
+
+            customers[customerIndex] = {
+                id: id,
+                name: name,
+                phone: document.getElementById('editCustomerPhone').value,
+                customerNumber: document.getElementById('editCustomerNumber').value
+            };
+
+            localStorage.setItem(getAdminKey('customers'), JSON.stringify(customers));
+            alert('고객 정보가 수정되었습니다.');
+            manageCustomers();
+        }
+
+        function deleteCustomer(id) {
+            if (confirm('정말 삭제하시겠습니까?')) {
+                const customers = JSON.parse(localStorage.getItem(getAdminKey('customers')) || '[]');
+                const filteredCustomers = customers.filter(c => c.id !== id);
+                localStorage.setItem(getAdminKey('customers'), JSON.stringify(filteredCustomers));
+                alert('고객이 삭제되었습니다.');
+                manageCustomers();
+            }
+        }
+
+        // 화폐 단위 저장
+        function saveCurrency() {
+            const symbol = document.getElementById('currencySymbol').value;
+            const name = document.getElementById('currencyName').value;
+
+            if (!name) {
+                alert('화폐 이름을 입력해주세요.');
+                return;
+            }
+
+            const currency = { symbol, name };
+            localStorage.setItem(getAdminKey('currency'), JSON.stringify(currency));
+            
+            alert('화폐 단위가 저장되었습니다.');
+            updateCurrencyDisplay();
+            closeManagementModal();
+        }
+
+        // 입금방식 관리 함수들
+        function addNewPaymentMethod() {
+            const content = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">입금방식명:</label>
+                        <input type="text" id="newPaymentMethodName" class="w-full border rounded px-3 py-2" placeholder="입금방식명을 입력하세요">
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="saveNewPaymentMethod()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">저장</button>
+                        <button onclick="managePaymentMethods()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '새 입금방식 추가';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function saveNewPaymentMethod() {
+            const name = document.getElementById('newPaymentMethodName').value;
+
+            if (!name) {
+                alert('입금방식명을 입력해주세요.');
+                return;
+            }
+
+            const paymentMethods = JSON.parse(localStorage.getItem(getAdminKey('paymentMethods')) || '[]');
+            const newId = Math.max(...paymentMethods.map(p => p.id), 0) + 1;
+
+            paymentMethods.push({
+                id: newId,
+                name: name
+            });
+
+            localStorage.setItem(getAdminKey('paymentMethods'), JSON.stringify(paymentMethods));
+            alert('입금방식이 추가되었습니다.');
+            managePaymentMethods();
+        }
+
+        function editPaymentMethod(id) {
+            const paymentMethods = JSON.parse(localStorage.getItem(getAdminKey('paymentMethods')) || '[]');
+            const method = paymentMethods.find(p => p.id === id);
+            
+            if (!method) return;
+
+            const content = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">입금방식명:</label>
+                        <input type="text" id="editPaymentMethodName" value="${method.name}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="updatePaymentMethod(${id})" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">수정</button>
+                        <button onclick="managePaymentMethods()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '입금방식 수정';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function updatePaymentMethod(id) {
+            const name = document.getElementById('editPaymentMethodName').value;
+            if (!name) {
+                alert('입금방식명을 입력해주세요.');
+                return;
+            }
+
+            const paymentMethods = JSON.parse(localStorage.getItem(getAdminKey('paymentMethods')) || '[]');
+            const methodIndex = paymentMethods.findIndex(p => p.id === id);
+            
+            if (methodIndex === -1) return;
+
+            paymentMethods[methodIndex] = {
+                id: id,
+                name: name
+            };
+
+            localStorage.setItem(getAdminKey('paymentMethods'), JSON.stringify(paymentMethods));
+            alert('입금방식이 수정되었습니다.');
+            managePaymentMethods();
+        }
+
+        function deletePaymentMethod(id) {
+            if (confirm('정말 삭제하시겠습니까?')) {
+                const paymentMethods = JSON.parse(localStorage.getItem(getAdminKey('paymentMethods')) || '[]');
+                const filteredMethods = paymentMethods.filter(p => p.id !== id);
+                localStorage.setItem(getAdminKey('paymentMethods'), JSON.stringify(filteredMethods));
+                alert('입금방식이 삭제되었습니다.');
+                managePaymentMethods();
+            }
+        }
+
+        // Guarantee 관리 함수들
+        function addNewGuarantee() {
+            const staff = JSON.parse(localStorage.getItem(getAdminKey('staff')) || '[]');
+            const activeStaff = staff.filter(s => s.status !== '퇴사');
+            
+            let staffOptions = '';
+            activeStaff.forEach(s => {
+                staffOptions += `<option value="${s.name}">${s.name}</option>`;
+            });
+
+            const content = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">날짜:</label>
+                        <input type="date" id="newGuaranteeDate" value="${new Date().toISOString().split('T')[0]}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">직원명:</label>
+                        <select id="newGuaranteeStaff" class="w-full border rounded px-3 py-2">
+                            <option value="">직원을 선택하세요</option>
+                            ${staffOptions}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">금액:</label>
+                        <input type="number" id="newGuaranteeAmount" class="w-full border rounded px-3 py-2" placeholder="금액을 입력하세요">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">메모:</label>
+                        <textarea id="newGuaranteeMemo" class="w-full border rounded px-3 py-2" rows="3" placeholder="메모를 입력하세요 (선택사항)"></textarea>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="saveNewGuarantee()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">저장</button>
+                        <button onclick="manageGuarantee()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '새 Guarantee 추가';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function saveNewGuarantee() {
+            const date = document.getElementById('newGuaranteeDate').value;
+            const staffName = document.getElementById('newGuaranteeStaff').value;
+            const amount = parseInt(document.getElementById('newGuaranteeAmount').value);
+            const memo = document.getElementById('newGuaranteeMemo').value;
+
+            if (!date || !staffName || !amount) {
+                alert('날짜, 직원명, 금액을 모두 입력해주세요.');
+                return;
+            }
+
+            const guarantees = JSON.parse(localStorage.getItem(getAdminKey('guarantees')) || '[]');
+            const newId = Math.max(...guarantees.map(g => g.id), 0) + 1;
+
+            guarantees.push({
+                id: newId,
+                date: date,
+                staffName: staffName,
+                amount: amount,
+                memo: memo
+            });
+
+            localStorage.setItem(getAdminKey('guarantees'), JSON.stringify(guarantees));
+            alert('Guarantee가 추가되었습니다.');
+            manageGuarantee();
+        }
+
+        function editGuarantee(id) {
+            const guarantees = JSON.parse(localStorage.getItem(getAdminKey('guarantees')) || '[]');
+            const guarantee = guarantees.find(g => g.id === id);
+            
+            if (!guarantee) return;
+
+            const staff = JSON.parse(localStorage.getItem(getAdminKey('staff')) || '[]');
+            const activeStaff = staff.filter(s => s.status !== '퇴사');
+            
+            let staffOptions = '';
+            activeStaff.forEach(s => {
+                const selected = s.name === guarantee.staffName ? 'selected' : '';
+                staffOptions += `<option value="${s.name}" ${selected}>${s.name}</option>`;
+            });
+
+            const content = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">날짜:</label>
+                        <input type="date" id="editGuaranteeDate" value="${guarantee.date}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">직원명:</label>
+                        <select id="editGuaranteeStaff" class="w-full border rounded px-3 py-2">
+                            ${staffOptions}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">금액:</label>
+                        <input type="number" id="editGuaranteeAmount" value="${guarantee.amount}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">메모:</label>
+                        <textarea id="editGuaranteeMemo" class="w-full border rounded px-3 py-2" rows="3">${guarantee.memo || ''}</textarea>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="updateGuarantee(${id})" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">수정</button>
+                        <button onclick="manageGuarantee()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = 'Guarantee 수정';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function updateGuarantee(id) {
+            const date = document.getElementById('editGuaranteeDate').value;
+            const staffName = document.getElementById('editGuaranteeStaff').value;
+            const amount = parseInt(document.getElementById('editGuaranteeAmount').value);
+            const memo = document.getElementById('editGuaranteeMemo').value;
+
+            if (!date || !staffName || !amount) {
+                alert('날짜, 직원명, 금액을 모두 입력해주세요.');
+                return;
+            }
+
+            const guarantees = JSON.parse(localStorage.getItem(getAdminKey('guarantees')) || '[]');
+            const guaranteeIndex = guarantees.findIndex(g => g.id === id);
+            
+            if (guaranteeIndex === -1) return;
+
+            guarantees[guaranteeIndex] = {
+                id: id,
+                date: date,
+                staffName: staffName,
+                amount: amount,
+                memo: memo
+            };
+
+            localStorage.setItem(getAdminKey('guarantees'), JSON.stringify(guarantees));
+            alert('Guarantee가 수정되었습니다.');
+            manageGuarantee();
+        }
+
+        function deleteGuarantee(id) {
+            if (confirm('정말 삭제하시겠습니까?')) {
+                const guarantees = JSON.parse(localStorage.getItem(getAdminKey('guarantees')) || '[]');
+                const filteredGuarantees = guarantees.filter(g => g.id !== id);
+                localStorage.setItem(getAdminKey('guarantees'), JSON.stringify(filteredGuarantees));
+                alert('Guarantee가 삭제되었습니다.');
+                manageGuarantee();
+            }
+        }
+
+        // 관리자 관리 함수들 (최고 관리자 전용)
+        function addNewAdmin() {
+            const content = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">아이디:</label>
+                        <input type="text" id="newAdminUsername" class="w-full border rounded px-3 py-2" placeholder="아이디를 입력하세요">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">비밀번호:</label>
+                        <input type="password" id="newAdminPassword" class="w-full border rounded px-3 py-2" placeholder="비밀번호를 입력하세요">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">타입:</label>
+                        <select id="newAdminType" class="w-full border rounded px-3 py-2">
+                            <option value="normal">일반관리자</option>
+                            <option value="super">최고관리자</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">상점명:</label>
+                        <input type="text" id="newAdminShopName" class="w-full border rounded px-3 py-2" placeholder="상점명을 입력하세요">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">전화번호:</label>
+                        <input type="text" id="newAdminPhone" class="w-full border rounded px-3 py-2" placeholder="전화번호를 입력하세요">
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="saveNewAdmin()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">저장</button>
+                        <button onclick="manageAdmins()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '새 관리자 추가';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function saveNewAdmin() {
+            const username = document.getElementById('newAdminUsername').value;
+            const password = document.getElementById('newAdminPassword').value;
+            const type = document.getElementById('newAdminType').value;
+            const shopName = document.getElementById('newAdminShopName').value;
+            const phone = document.getElementById('newAdminPhone').value;
+
+            if (!username || !password) {
+                alert('아이디와 비밀번호를 입력해주세요.');
+                return;
+            }
+
+            const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
+            
+            // 중복 아이디 체크
+            if (admins.some(a => a.username === username)) {
+                alert('이미 존재하는 아이디입니다.');
+                return;
+            }
+
+            const newId = Math.max(...admins.map(a => a.id), 0) + 1;
+
+            admins.push({
+                id: newId,
+                username: username,
+                password: password,
+                type: type,
+                shopName: shopName,
+                phone: phone
+            });
+
+            localStorage.setItem('globalAdmins', JSON.stringify(admins));
+            alert('관리자가 추가되었습니다.');
+            manageAdmins();
+        }
+
+        function editAdmin(id) {
+            const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
+            const admin = admins.find(a => a.id === id);
+            
+            if (!admin) return;
+
+            const content = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">아이디:</label>
+                        <input type="text" id="editAdminUsername" value="${admin.username}" class="w-full border rounded px-3 py-2" ${id === 1 ? 'readonly' : ''}>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">비밀번호:</label>
+                        <input type="password" id="editAdminPassword" value="${admin.password}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">타입:</label>
+                        <select id="editAdminType" class="w-full border rounded px-3 py-2" ${id === 1 ? 'disabled' : ''}>
+                            <option value="normal" ${admin.type === 'normal' ? 'selected' : ''}>일반관리자</option>
+                            <option value="super" ${admin.type === 'super' ? 'selected' : ''}>최고관리자</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">상점명:</label>
+                        <input type="text" id="editAdminShopName" value="${admin.shopName || ''}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">전화번호:</label>
+                        <input type="text" id="editAdminPhone" value="${admin.phone || ''}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="updateAdmin(${id})" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">수정</button>
+                        <button onclick="manageAdmins()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '관리자 수정';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function updateAdmin(id) {
+            const username = document.getElementById('editAdminUsername').value;
+            const password = document.getElementById('editAdminPassword').value;
+            const type = document.getElementById('editAdminType').value;
+            const shopName = document.getElementById('editAdminShopName').value;
+            const phone = document.getElementById('editAdminPhone').value;
+
+            if (!username || !password) {
+                alert('아이디와 비밀번호를 입력해주세요.');
+                return;
+            }
+
+            const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
+            const adminIndex = admins.findIndex(a => a.id === id);
+            
+            if (adminIndex === -1) return;
+
+            admins[adminIndex] = {
+                id: id,
+                username: username,
+                password: password,
+                type: type,
+                shopName: shopName,
+                phone: phone
+            };
+
+            localStorage.setItem('globalAdmins', JSON.stringify(admins));
+            alert('관리자 정보가 수정되었습니다.');
+            manageAdmins();
+        }
+
+        function deleteAdmin(id) {
+            if (id === 1) {
+                alert('기본 관리자는 삭제할 수 없습니다.');
+                return;
+            }
+
+            if (confirm('정말 삭제하시겠습니까?')) {
+                const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
+                const filteredAdmins = admins.filter(a => a.id !== id);
+                localStorage.setItem('globalAdmins', JSON.stringify(filteredAdmins));
+                alert('관리자가 삭제되었습니다.');
+                manageAdmins();
+            }
+        }
+
         // 앱 초기화
         initializeApp();
         updateTranslations();
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'997c7e7ac0d9130f',t:'MTc2MjAxMTY2Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'997c8c1d91054ba0',t:'MTc2MjAxMjIyMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
