@@ -40,7 +40,19 @@
         }
         .selection-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .menu-selection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .duration-selection-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
             gap: 10px;
             margin: 10px 0;
         }
@@ -1028,27 +1040,28 @@
                     ${menuRows.length > 1 ? `<button onclick="removeMenuRow(${menuRowId})" class="bg-red-500 text-white px-2 py-1 rounded text-sm hover:bg-red-600">× 삭제</button>` : ''}
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium mb-2">메뉴 선택</label>
-                        <select id="menuSelect_${menuRowId}" class="w-full border rounded px-3 py-2" onchange="selectMenuForRow(${menuRowId})">
-                            <option value="">메뉴를 선택하세요</option>
-                            ${menus.map(m => `<option value="${m.id}">${m.name}</option>`).join('')}
-                        </select>
+                        <div id="menuSelection_${menuRowId}" class="menu-selection-grid">
+                            ${menus.map(m => `
+                                <div class="selection-item" data-menu-id="${m.id}" onclick="selectMenuForRow(${menuRowId}, ${m.id}, '${m.name}')">
+                                    ${m.name}
+                                </div>
+                            `).join('')}
+                        </div>
                     </div>
                     
-                    <div>
+                    <div id="durationContainer_${menuRowId}" style="display: none;">
                         <label class="block text-sm font-medium mb-2">시간 선택</label>
-                        <select id="durationSelect_${menuRowId}" class="w-full border rounded px-3 py-2" onchange="selectDurationForRow(${menuRowId})" disabled>
-                            <option value="">시간을 선택하세요</option>
-                        </select>
+                        <div id="durationSelection_${menuRowId}" class="duration-selection-grid">
+                        </div>
                     </div>
                     
-                    <div>
-                        <label class="block text-sm font-medium mb-2">가격 정보</label>
-                        <div class="text-sm">
-                            <div>가격: <span id="menuPrice_${menuRowId}">0</span><span class="currency-symbol"></span></div>
-                            <div>커미션: <span id="menuCommission_${menuRowId}">0</span><span class="currency-symbol"></span></div>
+                    <div id="priceInfo_${menuRowId}" class="p-3 bg-gray-50 rounded" style="display: none;">
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div>가격: <span id="menuPrice_${menuRowId}" class="font-bold">0</span><span class="currency-symbol"></span></div>
+                            <div>커미션: <span id="menuCommission_${menuRowId}" class="font-bold">0</span><span class="currency-symbol"></span></div>
                         </div>
                     </div>
                 </div>
@@ -1084,75 +1097,91 @@
             updateMenuTimeSettings();
         }
 
-        function selectMenuForRow(menuRowId) {
-            const menuSelect = document.getElementById(`menuSelect_${menuRowId}`);
-            const durationSelect = document.getElementById(`durationSelect_${menuRowId}`);
-            const menuId = parseInt(menuSelect.value);
-            
+        function selectMenuForRow(menuRowId, menuId, menuName) {
             const menuRow = menuRows.find(row => row.id === menuRowId);
             if (!menuRow) return;
             
-            if (menuId) {
-                const menus = JSON.parse(localStorage.getItem(getAdminKey('menus')) || '[]');
-                const menu = menus.find(m => m.id === menuId);
+            // 이전 선택 해제
+            const menuSelection = document.getElementById(`menuSelection_${menuRowId}`);
+            menuSelection.querySelectorAll('.selection-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            // 현재 선택 표시
+            const selectedItem = menuSelection.querySelector(`[data-menu-id="${menuId}"]`);
+            if (selectedItem) {
+                selectedItem.classList.add('selected');
+            }
+            
+            const menus = JSON.parse(localStorage.getItem(getAdminKey('menus')) || '[]');
+            const menu = menus.find(m => m.id === menuId);
+            
+            if (menu) {
+                menuRow.menuId = menuId;
+                menuRow.menuName = menuName;
                 
-                if (menu) {
-                    menuRow.menuId = menuId;
-                    menuRow.menuName = menu.name;
+                // 시간 선택 영역 표시 및 업데이트
+                const durationContainer = document.getElementById(`durationContainer_${menuRowId}`);
+                const durationSelection = document.getElementById(`durationSelection_${menuRowId}`);
+                
+                durationContainer.style.display = 'block';
+                durationSelection.innerHTML = '';
+                
+                Object.keys(menu.prices).forEach(duration => {
+                    const durationKey = `duration${duration}`;
+                    const durationText = translations[currentLanguage][durationKey] || `${duration}분`;
                     
-                    // 시간 선택 옵션 업데이트
-                    durationSelect.innerHTML = '<option value="">시간을 선택하세요</option>';
-                    Object.keys(menu.prices).forEach(duration => {
-                        const durationKey = `duration${duration}`;
-                        const durationText = translations[currentLanguage][durationKey] || `${duration}분`;
-                        durationSelect.innerHTML += `<option value="${duration}">${durationText}</option>`;
-                    });
-                    durationSelect.disabled = false;
-                }
-            } else {
-                menuRow.menuId = null;
-                menuRow.menuName = '';
+                    const durationDiv = document.createElement('div');
+                    durationDiv.className = 'selection-item';
+                    durationDiv.setAttribute('data-duration', duration);
+                    durationDiv.textContent = durationText;
+                    durationDiv.onclick = () => selectDurationForRow(menuRowId, parseInt(duration));
+                    
+                    durationSelection.appendChild(durationDiv);
+                });
+                
+                // 이전 시간 선택 초기화
                 menuRow.duration = null;
                 menuRow.price = 0;
                 menuRow.commission = 0;
                 
-                durationSelect.innerHTML = '<option value="">시간을 선택하세요</option>';
-                durationSelect.disabled = true;
-                
                 document.getElementById(`menuPrice_${menuRowId}`).textContent = '0';
                 document.getElementById(`menuCommission_${menuRowId}`).textContent = '0';
+                document.getElementById(`priceInfo_${menuRowId}`).style.display = 'none';
             }
             
             updateTotalPrices();
         }
 
-        function selectDurationForRow(menuRowId) {
-            const durationSelect = document.getElementById(`durationSelect_${menuRowId}`);
-            const duration = parseInt(durationSelect.value);
-            
+        function selectDurationForRow(menuRowId, duration) {
             const menuRow = menuRows.find(row => row.id === menuRowId);
             if (!menuRow || !menuRow.menuId) return;
             
-            if (duration) {
-                const menus = JSON.parse(localStorage.getItem(getAdminKey('menus')) || '[]');
-                const menu = menus.find(m => m.id === menuRow.menuId);
+            // 이전 선택 해제
+            const durationSelection = document.getElementById(`durationSelection_${menuRowId}`);
+            durationSelection.querySelectorAll('.selection-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            // 현재 선택 표시
+            const selectedItem = durationSelection.querySelector(`[data-duration="${duration}"]`);
+            if (selectedItem) {
+                selectedItem.classList.add('selected');
+            }
+            
+            const menus = JSON.parse(localStorage.getItem(getAdminKey('menus')) || '[]');
+            const menu = menus.find(m => m.id === menuRow.menuId);
+            
+            if (menu && menu.prices[duration]) {
+                menuRow.duration = duration;
+                menuRow.price = menu.prices[duration].price;
+                menuRow.commission = menu.prices[duration].commission;
                 
-                if (menu && menu.prices[duration]) {
-                    menuRow.duration = duration;
-                    menuRow.price = menu.prices[duration].price;
-                    menuRow.commission = menu.prices[duration].commission;
-                    
-                    document.getElementById(`menuPrice_${menuRowId}`).textContent = menuRow.price.toLocaleString();
-                    document.getElementById(`menuCommission_${menuRowId}`).textContent = menuRow.commission.toLocaleString();
-                }
-            } else {
-                menuRow.duration = null;
-                menuRow.price = 0;
-                menuRow.commission = 0;
-                menuRow.startTime = '';
+                document.getElementById(`menuPrice_${menuRowId}`).textContent = menuRow.price.toLocaleString();
+                document.getElementById(`menuCommission_${menuRowId}`).textContent = menuRow.commission.toLocaleString();
                 
-                document.getElementById(`menuPrice_${menuRowId}`).textContent = '0';
-                document.getElementById(`menuCommission_${menuRowId}`).textContent = '0';
+                // 가격 정보 표시
+                document.getElementById(`priceInfo_${menuRowId}`).style.display = 'block';
             }
             
             updateTotalPrices();
@@ -3688,5 +3717,5 @@
         initializeApp();
         updateTranslations();
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'997c8c1d91054ba0',t:'MTc2MjAxMjIyMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9985cc8b432614aa',t:'MTc2MjEwOTIzNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
