@@ -95,10 +95,6 @@
             color: red;
             font-weight: bold;
         }
-        .guarantee-applied {
-            background-color: #f0fdf4;
-            border-left: 4px solid #22c55e;
-        }
     </style>
   <style>@view-transition { navigation: auto; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
@@ -260,9 +256,7 @@
         <tr class="bg-gray-100">
          <th class="border border-gray-300 p-2" data-translate="staff">마사지사</th>
          <th class="border border-gray-300 p-2" data-translate="totalPrice">총 가격</th>
-         <th class="border border-gray-300 p-2">실제 커미션</th>
-         <th class="border border-gray-300 p-2" data-translate="totalCommission">최종 커미션</th>
-         <th class="border border-gray-300 p-2">상태</th>
+         <th class="border border-gray-300 p-2" data-translate="totalCommission">총 커미션</th>
         </tr>
        </thead>
        <tbody id="statsTable">
@@ -318,7 +312,7 @@
      <div class="mt-4"><button onclick="exportAllDataExcel()" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700" data-translate="exportAllDataButton">전체 데이터 엑셀 내보내기</button>
      </div>
     </div>
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4"><button onclick="manageMenus()" class="bg-blue-500 text-white py-3 px-4 rounded hover:bg-blue-600" data-translate="menuManagement">메뉴 관리</button> <button onclick="manageStaff()" class="bg-green-500 text-white py-3 px-4 rounded hover:bg-green-600" data-translate="staffManagement">직원 관리</button> <button onclick="manageRooms()" class="bg-purple-500 text-white py-3 px-4 rounded hover:bg-purple-600" data-translate="roomManagement">방 관리</button> <button onclick="manageCustomers()" class="bg-orange-500 text-white py-3 px-4 rounded hover:bg-orange-600" data-translate="customerManagement">고객 관리</button> <button onclick="manageCurrency()" class="bg-pink-500 text-white py-3 px-4 rounded hover:bg-pink-600" data-translate="currencyManagement">화폐 단위</button> <button onclick="managePaymentMethods()" class="bg-yellow-500 text-white py-3 px-4 rounded hover:bg-yellow-600" data-translate="paymentMethodManagement">입금방식 관리</button> <button onclick="manageGuarantee()" class="bg-teal-500 text-white py-3 px-4 rounded hover:bg-teal-600">보장금액 관리</button>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4"><button onclick="manageMenus()" class="bg-blue-500 text-white py-3 px-4 rounded hover:bg-blue-600" data-translate="menuManagement">메뉴 관리</button> <button onclick="manageStaff()" class="bg-green-500 text-white py-3 px-4 rounded hover:bg-green-600" data-translate="staffManagement">직원 관리</button> <button onclick="manageRooms()" class="bg-purple-500 text-white py-3 px-4 rounded hover:bg-purple-600" data-translate="roomManagement">방 관리</button> <button onclick="manageCustomers()" class="bg-orange-500 text-white py-3 px-4 rounded hover:bg-orange-600" data-translate="customerManagement">고객 관리</button> <button onclick="manageCurrency()" class="bg-pink-500 text-white py-3 px-4 rounded hover:bg-pink-600" data-translate="currencyManagement">화폐 단위</button> <button onclick="managePaymentMethods()" class="bg-yellow-500 text-white py-3 px-4 rounded hover:bg-yellow-600" data-translate="paymentMethodManagement">입금방식 관리</button> <button onclick="manageGuarantee()" class="bg-teal-500 text-white py-3 px-4 rounded hover:bg-teal-600">Guarantee 관리</button>
      <div id="superAdminButtons" style="display: none;"><button onclick="manageAdmins()" class="bg-red-500 text-white py-3 px-4 rounded hover:bg-red-600" data-translate="adminManagement">관리자 관리</button>
      </div>
     </div>
@@ -2656,6 +2650,2628 @@
                     <tr class="${rowClass}">
                         <td class="border border-gray-300 p-2">${admin.username}</td>
                         <td class="border border-gray-300 p-2">${admin.type === 'super' ? '최고관리자' : '일반관리자'}</td>
-                        <td class="border border-gray</script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'998dc72bf4ff4b89',t:'MTc2MjE5Mjg5OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+                        <td class="border border-gray-300 p-2">${admin.shopName || '-'}</td>
+                        <td class="border border-gray-300 p-2">${admin.phone || '-'}</td>
+                        <td class="border border-gray-300 p-2 ${isExpired ? 'text-red-600 font-bold' : ''}">${validityStatus}</td>
+                        <td class="border border-gray-300 p-2">
+                            <button onclick="editAdmin(${admin.id})" class="bg-blue-500 text-white px-2 py-1 rounded text-sm mr-1">수정</button>
+                            ${admin.id !== 1 ? `<button onclick="deleteAdmin(${admin.id})" class="bg-red-500 text-white px-2 py-1 rounded text-sm">삭제</button>` : ''}
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            content += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '관리자 관리';
+            document.getElementById('managementContent').innerHTML = content;
+            document.getElementById('managementModal').style.display = 'block';
+        }
+
+        function manageCurrency() {
+            const currency = JSON.parse(localStorage.getItem(getAdminKey('currency')) || '{"symbol":"","name":"원"}');
+            let content = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">화폐 기호:</label>
+                        <input type="text" id="currencySymbol" value="${currency.symbol}" class="w-full border rounded px-3 py-2" placeholder="예: ₩, $, €">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">화폐 이름:</label>
+                        <input type="text" id="currencyName" value="${currency.name}" class="w-full border rounded px-3 py-2" placeholder="예: 원, 달러, 유로">
+                    </div>
+                    <button onclick="saveCurrency()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">저장</button>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '화폐 단위 관리';
+            document.getElementById('managementContent').innerHTML = content;
+            document.getElementById('managementModal').style.display = 'block';
+        }
+
+        function managePaymentMethods() {
+            const paymentMethods = JSON.parse(localStorage.getItem(getAdminKey('paymentMethods')) || '[]');
+            let content = `
+                <div class="mb-4">
+                    <button onclick="addNewPaymentMethod()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">새 입금방식 추가</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse border border-gray-300">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="border border-gray-300 p-2">입금방식명</th>
+                                <th class="border border-gray-300 p-2">작업</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            paymentMethods.forEach(method => {
+                content += `
+                    <tr>
+                        <td class="border border-gray-300 p-2">${method.name}</td>
+                        <td class="border border-gray-300 p-2">
+                            <button onclick="editPaymentMethod(${method.id})" class="bg-blue-500 text-white px-2 py-1 rounded text-sm mr-1">수정</button>
+                            <button onclick="deletePaymentMethod(${method.id})" class="bg-red-500 text-white px-2 py-1 rounded text-sm">삭제</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            content += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '입금방식 관리';
+            document.getElementById('managementContent').innerHTML = content;
+            document.getElementById('managementModal').style.display = 'block';
+        }
+
+        function manageGuarantee() {
+            const guarantees = JSON.parse(localStorage.getItem(getAdminKey('guarantees')) || '[]');
+            let content = `
+                <div class="mb-4">
+                    <button onclick="addNewGuarantee()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">새 Guarantee 추가</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse border border-gray-300">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="border border-gray-300 p-2">날짜</th>
+                                <th class="border border-gray-300 p-2">직원명</th>
+                                <th class="border border-gray-300 p-2">금액</th>
+                                <th class="border border-gray-300 p-2">메모</th>
+                                <th class="border border-gray-300 p-2">작업</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            guarantees.forEach(guarantee => {
+                content += `
+                    <tr>
+                        <td class="border border-gray-300 p-2">${guarantee.date}</td>
+                        <td class="border border-gray-300 p-2">${guarantee.staffName}</td>
+                        <td class="border border-gray-300 p-2">${guarantee.amount.toLocaleString()}</td>
+                        <td class="border border-gray-300 p-2">${guarantee.memo || '-'}</td>
+                        <td class="border border-gray-300 p-2">
+                            <button onclick="editGuarantee(${guarantee.id})" class="bg-blue-500 text-white px-2 py-1 rounded text-sm mr-1">수정</button>
+                            <button onclick="deleteGuarantee(${guarantee.id})" class="bg-red-500 text-white px-2 py-1 rounded text-sm">삭제</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            content += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = 'Guarantee 관리';
+            document.getElementById('managementContent').innerHTML = content;
+            document.getElementById('managementModal').style.display = 'block';
+        }
+
+        // 통계 관련 함수들
+        let currentStatsType = 'daily';
+
+        function showDailyStats() {
+            currentStatsType = 'daily';
+            updateStatsButtonStyles();
+            showDateSelection('daily');
+            loadStatistics();
+        }
+
+        function showWeeklyStats() {
+            currentStatsType = 'weekly';
+            updateStatsButtonStyles();
+            showDateSelection('range');
+            setThisWeek(); // 기본값으로 이번 주 설정
+            loadStatistics();
+        }
+
+        function showMonthlyStats() {
+            currentStatsType = 'monthly';
+            updateStatsButtonStyles();
+            showDateSelection('range');
+            setThisMonth(); // 기본값으로 이번 달 설정
+            loadStatistics();
+        }
+
+        function updateStatsButtonStyles() {
+            // 모든 버튼을 기본 스타일로 초기화
+            document.getElementById('dailyStatsBtn').className = 'bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400';
+            document.getElementById('weeklyStatsBtn').className = 'bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400';
+            document.getElementById('monthlyStatsBtn').className = 'bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400';
+            
+            // 선택된 버튼만 활성화 스타일 적용
+            if (currentStatsType === 'daily') {
+                document.getElementById('dailyStatsBtn').className = 'bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600';
+            } else if (currentStatsType === 'weekly') {
+                document.getElementById('weeklyStatsBtn').className = 'bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600';
+            } else if (currentStatsType === 'monthly') {
+                document.getElementById('monthlyStatsBtn').className = 'bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600';
+            } else if (currentStatsType === 'menuSales') {
+                // 월간 메뉴 매출 버튼 활성화 (오렌지색 유지)
+            } else if (currentStatsType === 'monthlySalesChart') {
+                // 월간 매출 그래프 버튼 활성화 (핑크색 유지)
+            }
+        }
+
+        function showDateSelection(type) {
+            const dailySelection = document.getElementById('dailyDateSelection');
+            const rangeSelection = document.getElementById('rangeDateSelection');
+            const quickSelection = document.getElementById('quickDateSelection');
+            
+            if (type === 'daily') {
+                dailySelection.style.display = 'block';
+                rangeSelection.style.display = 'none';
+                quickSelection.style.display = 'none';
+            } else if (type === 'range') {
+                dailySelection.style.display = 'none';
+                rangeSelection.style.display = 'grid';
+                quickSelection.style.display = 'flex';
+            }
+        }
+
+        // 빠른 날짜 선택 함수들
+        function setThisWeek() {
+            const today = new Date();
+            const dayOfWeek = today.getDay(); // 0: 일요일, 1: 월요일, ...
+            const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // 월요일을 주의 시작으로
+            
+            const monday = new Date(today);
+            monday.setDate(today.getDate() + mondayOffset);
+            
+            const sunday = new Date(monday);
+            sunday.setDate(monday.getDate() + 6);
+            
+            document.getElementById('statsStartDate').value = monday.toISOString().split('T')[0];
+            document.getElementById('statsEndDate').value = sunday.toISOString().split('T')[0];
+            updateStats();
+        }
+
+        function setLastWeek() {
+            const today = new Date();
+            const dayOfWeek = today.getDay();
+            const lastMondayOffset = dayOfWeek === 0 ? -13 : -6 - dayOfWeek;
+            
+            const lastMonday = new Date(today);
+            lastMonday.setDate(today.getDate() + lastMondayOffset);
+            
+            const lastSunday = new Date(lastMonday);
+            lastSunday.setDate(lastMonday.getDate() + 6);
+            
+            document.getElementById('statsStartDate').value = lastMonday.toISOString().split('T')[0];
+            document.getElementById('statsEndDate').value = lastSunday.toISOString().split('T')[0];
+            updateStats();
+        }
+
+        function setThisMonth() {
+            const today = new Date();
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            
+            document.getElementById('statsStartDate').value = firstDay.toISOString().split('T')[0];
+            document.getElementById('statsEndDate').value = lastDay.toISOString().split('T')[0];
+            updateStats();
+        }
+
+        function setLastMonth() {
+            const today = new Date();
+            const firstDay = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+            const lastDay = new Date(today.getFullYear(), today.getMonth(), 0);
+            
+            document.getElementById('statsStartDate').value = firstDay.toISOString().split('T')[0];
+            document.getElementById('statsEndDate').value = lastDay.toISOString().split('T')[0];
+            updateStats();
+        }
+
+        function showMenuSales() {
+            currentStatsType = 'menuSales';
+            updateStatsButtonStyles();
+            showDateSelection('range');
+            setThisMonth(); // 기본값으로 이번 달 설정
+            loadMenuSalesStatistics();
+        }
+
+        function showMonthlySalesChart() {
+            currentStatsType = 'monthlySalesChart';
+            updateStatsButtonStyles();
+            showDateSelection('range');
+            setThisMonth(); // 기본값으로 이번 달 설정
+            loadMonthlySalesChart();
+        }
+
+        function downloadExcel() {
+            exportStatisticsToExcel();
+        }
+
+        function updateStats() {
+            loadStatistics();
+        }
+
+        // 통계 데이터 로딩 함수
+        function loadStatistics() {
+            const reservations = JSON.parse(localStorage.getItem(getAdminKey('reservations')) || '[]');
+            let startDate, endDate;
+            
+            if (currentStatsType === 'daily') {
+                startDate = endDate = document.getElementById('statsDate').value;
+            } else {
+                startDate = document.getElementById('statsStartDate').value;
+                endDate = document.getElementById('statsEndDate').value;
+            }
+            
+            if (!startDate || (!endDate && currentStatsType !== 'daily')) {
+                return;
+            }
+            
+            // 날짜 범위에 해당하는 입금 완료된 예약만 필터링
+            const filteredReservations = reservations.filter(r => {
+                if (!r.paid) return false;
+                const reservationDate = r.date;
+                return reservationDate >= startDate && reservationDate <= endDate;
+            });
+            
+            // 직원별 통계 계산
+            const staffStats = calculateStaffStatistics(filteredReservations);
+            displayStaffStatistics(staffStats);
+            
+            // 입금방식별 통계 계산
+            const paymentStats = calculatePaymentStatistics(filteredReservations);
+            displayPaymentStatistics(paymentStats);
+            
+            // 총계 계산 및 표시
+            displayTotalStatistics(filteredReservations);
+        }
+
+        // 직원별 통계 계산
+        function calculateStaffStatistics(reservations) {
+            const staffStats = {};
+            
+            reservations.forEach(r => {
+                if (!staffStats[r.staffName]) {
+                    staffStats[r.staffName] = {
+                        totalPrice: 0,
+                        totalCommission: 0
+                    };
+                }
+                
+                staffStats[r.staffName].totalPrice += r.price;
+                staffStats[r.staffName].totalCommission += r.commission;
+            });
+            
+            return staffStats;
+        }
+
+        // 입금방식별 통계 계산
+        function calculatePaymentStatistics(reservations) {
+            const paymentStats = {};
+            
+            reservations.forEach(r => {
+                if (r.paymentDetails) {
+                    Object.entries(r.paymentDetails).forEach(([method, amount]) => {
+                        if (!paymentStats[method]) {
+                            paymentStats[method] = 0;
+                        }
+                        paymentStats[method] += amount;
+                    });
+                }
+            });
+            
+            return paymentStats;
+        }
+
+        // 직원별 통계 표시
+        function displayStaffStatistics(staffStats) {
+            const tableBody = document.getElementById('statsTable');
+            const currency = JSON.parse(localStorage.getItem(getAdminKey('currency')) || '{"symbol":"","name":"원"}');
+            
+            tableBody.innerHTML = '';
+            
+            // 기본 테이블 헤더로 복원
+            const headerRow = tableBody.parentElement.querySelector('thead tr');
+            headerRow.innerHTML = `
+                <th class="border border-gray-300 p-2" data-translate="staff">마사지사</th>
+                <th class="border border-gray-300 p-2" data-translate="totalPrice">총 가격</th>
+                <th class="border border-gray-300 p-2" data-translate="totalCommission">총 커미션</th>
+            `;
+            
+            Object.entries(staffStats).forEach(([staffName, stats]) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="border border-gray-300 p-2">${staffName}</td>
+                    <td class="border border-gray-300 p-2">${stats.totalPrice.toLocaleString()}${currency.symbol}</td>
+                    <td class="border border-gray-300 p-2">${stats.totalCommission.toLocaleString()}${currency.symbol}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // 입금방식별 통계 표시
+        function displayPaymentStatistics(paymentStats) {
+            const tableBody = document.getElementById('paymentStatsTable');
+            const currency = JSON.parse(localStorage.getItem(getAdminKey('currency')) || '{"symbol":"","name":"원"}');
+            
+            tableBody.innerHTML = '';
+            
+            Object.entries(paymentStats).forEach(([method, amount]) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="border border-gray-300 p-2">${method}</td>
+                    <td class="border border-gray-300 p-2">${amount.toLocaleString()}${currency.symbol}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // 총계 표시
+        function displayTotalStatistics(reservations) {
+            const currency = JSON.parse(localStorage.getItem(getAdminKey('currency')) || '{"symbol":"","name":"원"}');
+            
+            // QR TIP을 제외한 총 금액 계산
+            let grandTotalPrice = 0;
+            let grandTotalCommission = 0;
+            let qrTipTotal = 0;
+            
+            reservations.forEach(r => {
+                grandTotalPrice += r.price;
+                grandTotalCommission += r.commission;
+                
+                // QR TIP 금액 계산
+                if (r.paymentDetails && r.paymentDetails['QR TIP']) {
+                    qrTipTotal += r.paymentDetails['QR TIP'];
+                }
+            });
+            
+            const profit = grandTotalPrice - grandTotalCommission;
+            
+            document.getElementById('grandTotalPrice').textContent = grandTotalPrice.toLocaleString();
+            document.getElementById('grandTotalCommission').textContent = grandTotalCommission.toLocaleString();
+            document.getElementById('totalProfit').textContent = profit.toLocaleString();
+            
+            // 화폐 단위 업데이트
+            document.getElementById('grandTotalCurrency').textContent = currency.symbol;
+            document.getElementById('grandTotalCommissionCurrency').textContent = currency.symbol;
+            document.getElementById('totalProfitCurrency').textContent = currency.symbol;
+        }
+
+        // 메뉴별 매출 통계 로딩
+        function loadMenuSalesStatistics() {
+            const reservations = JSON.parse(localStorage.getItem(getAdminKey('reservations')) || '[]');
+            const startDate = document.getElementById('statsStartDate').value;
+            const endDate = document.getElementById('statsEndDate').value;
+            
+            if (!startDate || !endDate) {
+                return;
+            }
+            
+            // 날짜 범위에 해당하는 입금 완료된 예약만 필터링
+            const filteredReservations = reservations.filter(r => {
+                if (!r.paid) return false;
+                const reservationDate = r.date;
+                return reservationDate >= startDate && reservationDate <= endDate;
+            });
+            
+            // 메뉴별 매출 계산
+            const menuSales = {};
+            filteredReservations.forEach(r => {
+                if (!menuSales[r.menuName]) {
+                    menuSales[r.menuName] = {
+                        count: 0,
+                        totalPrice: 0,
+                        totalCommission: 0
+                    };
+                }
+                menuSales[r.menuName].count++;
+                menuSales[r.menuName].totalPrice += r.price;
+                menuSales[r.menuName].totalCommission += r.commission;
+            });
+            
+            // 메뉴별 매출 표시
+            displayMenuSalesStatistics(menuSales);
+            
+            // 입금방식별 통계도 함께 표시
+            const paymentStats = calculatePaymentStatistics(filteredReservations);
+            displayPaymentStatistics(paymentStats);
+            
+            // 총계 표시
+            displayTotalStatistics(filteredReservations);
+        }
+
+        // 메뉴별 매출 통계 표시
+        function displayMenuSalesStatistics(menuSales) {
+            const tableBody = document.getElementById('statsTable');
+            const currency = JSON.parse(localStorage.getItem(getAdminKey('currency')) || '{"symbol":"","name":"원"}');
+            
+            tableBody.innerHTML = '';
+            
+            // 테이블 헤더 변경
+            const headerRow = tableBody.parentElement.querySelector('thead tr');
+            headerRow.innerHTML = `
+                <th class="border border-gray-300 p-2">메뉴명</th>
+                <th class="border border-gray-300 p-2">판매 횟수</th>
+                <th class="border border-gray-300 p-2">총 매출</th>
+                <th class="border border-gray-300 p-2">총 커미션</th>
+            `;
+            
+            Object.entries(menuSales).forEach(([menuName, stats]) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="border border-gray-300 p-2">${menuName}</td>
+                    <td class="border border-gray-300 p-2">${stats.count}회</td>
+                    <td class="border border-gray-300 p-2">${stats.totalPrice.toLocaleString()}${currency.symbol}</td>
+                    <td class="border border-gray-300 p-2">${stats.totalCommission.toLocaleString()}${currency.symbol}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // 월간 매출 차트 로딩
+        function loadMonthlySalesChart() {
+            const reservations = JSON.parse(localStorage.getItem(getAdminKey('reservations')) || '[]');
+            const startDate = document.getElementById('statsStartDate').value;
+            const endDate = document.getElementById('statsEndDate').value;
+            
+            if (!startDate || !endDate) {
+                return;
+            }
+            
+            // 날짜 범위에 해당하는 입금 완료된 예약만 필터링
+            const filteredReservations = reservations.filter(r => {
+                if (!r.paid) return false;
+                const reservationDate = r.date;
+                return reservationDate >= startDate && reservationDate <= endDate;
+            });
+            
+            // 일별 매출 계산
+            const dailySales = {};
+            filteredReservations.forEach(r => {
+                if (!dailySales[r.date]) {
+                    dailySales[r.date] = 0;
+                }
+                dailySales[r.date] += r.price;
+            });
+            
+            // 차트 데이터 표시 (간단한 텍스트 형태)
+            displayMonthlySalesChart(dailySales);
+            
+            // 입금방식별 통계도 함께 표시
+            const paymentStats = calculatePaymentStatistics(filteredReservations);
+            displayPaymentStatistics(paymentStats);
+            
+            // 총계 표시
+            displayTotalStatistics(filteredReservations);
+        }
+
+        // 월간 매출 차트 표시 (간단한 텍스트 형태)
+        function displayMonthlySalesChart(dailySales) {
+            const tableBody = document.getElementById('statsTable');
+            const currency = JSON.parse(localStorage.getItem(getAdminKey('currency')) || '{"symbol":"","name":"원"}');
+            
+            tableBody.innerHTML = '';
+            
+            // 테이블 헤더 변경
+            const headerRow = tableBody.parentElement.querySelector('thead tr');
+            headerRow.innerHTML = `
+                <th class="border border-gray-300 p-2">날짜</th>
+                <th class="border border-gray-300 p-2">일일 매출</th>
+                <th class="border border-gray-300 p-2">매출 그래프</th>
+            `;
+            
+            // 최대 매출 계산 (그래프 스케일용)
+            const maxSales = Math.max(...Object.values(dailySales));
+            
+            Object.entries(dailySales).sort().forEach(([date, sales]) => {
+                const percentage = maxSales > 0 ? (sales / maxSales) * 100 : 0;
+                const barWidth = Math.max(percentage, 5); // 최소 5% 너비
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="border border-gray-300 p-2">${date}</td>
+                    <td class="border border-gray-300 p-2">${sales.toLocaleString()}${currency.symbol}</td>
+                    <td class="border border-gray-300 p-2">
+                        <div class="w-full bg-gray-200 rounded-full h-6">
+                            <div class="bg-blue-500 h-6 rounded-full flex items-center justify-center text-white text-xs" 
+                                 style="width: ${barWidth}%">
+                                ${percentage.toFixed(1)}%
+                            </div>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // 엑셀 내보내기 함수
+        function exportStatisticsToExcel() {
+            const reservations = JSON.parse(localStorage.getItem(getAdminKey('reservations')) || '[]');
+            let startDate, endDate;
+            
+            if (currentStatsType === 'daily') {
+                startDate = endDate = document.getElementById('statsDate').value;
+            } else {
+                startDate = document.getElementById('statsStartDate').value;
+                endDate = document.getElementById('statsEndDate').value;
+            }
+            
+            if (!startDate || (!endDate && currentStatsType !== 'daily')) {
+                alert('날짜를 선택해주세요.');
+                return;
+            }
+            
+            // 날짜 범위에 해당하는 입금 완료된 예약만 필터링
+            const filteredReservations = reservations.filter(r => {
+                if (!r.paid) return false;
+                const reservationDate = r.date;
+                return reservationDate >= startDate && reservationDate <= endDate;
+            });
+            
+            if (filteredReservations.length === 0) {
+                alert('해당 기간에 데이터가 없습니다.');
+                return;
+            }
+            
+            showExportDialog(filteredReservations, startDate, endDate, 'statistics');
+        }
+
+        function showExportDialog(data, startDate, endDate, exportType) {
+            const defaultFileName = exportType === 'statistics' ? 
+                `통계_${startDate}_${endDate}` : 
+                `전체데이터_${currentAdmin.username}_${new Date().toISOString().split('T')[0]}`;
+                
+            const content = `
+                <div class="space-y-4">
+                    <div class="text-center">
+                        <h3 class="text-lg font-bold mb-4">엑셀 내보내기</h3>
+                        <p class="text-gray-600 mb-4">데이터를 CSV 파일로 내보냅니다.</p>
+                    </div>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded p-3">
+                        <div class="text-sm text-blue-800">
+                            <div><strong>데이터 개수:</strong> ${data.length}개</div>
+                            <div><strong>기간:</strong> ${startDate}${endDate !== startDate ? ` ~ ${endDate}` : ''}</div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">파일명:</label>
+                        <input type="text" id="exportFileName" 
+                               value="${defaultFileName}" 
+                               class="w-full border rounded px-3 py-2" 
+                               placeholder="내보낼 파일명을 입력하세요">
+                        <div class="text-xs text-gray-500 mt-1">* .csv 확장자는 자동으로 추가됩니다</div>
+                    </div>
+                    
+                    <div class="bg-yellow-50 border border-yellow-200 rounded p-3">
+                        <div class="text-sm text-yellow-800">
+                            <strong>참고:</strong> 브라우저 보안상 저장 경로는 기본 다운로드 폴더로 설정됩니다.<br>
+                            다운로드 후 원하는 위치로 파일을 이동하실 수 있습니다.
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-2 justify-center">
+                        <button onclick="executeExport('${exportType}')" class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600">내보내기 실행</button>
+                        <button onclick="closeManagementModal()" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '엑셀 내보내기';
+            document.getElementById('managementContent').innerHTML = content;
+            document.getElementById('managementModal').style.display = 'block';
+            
+            // 전역 변수에 데이터 저장 (executeExport에서 사용)
+            window.exportData = { data, startDate, endDate };
+        }
+
+        function executeExport(exportType) {
+            const fileName = document.getElementById('exportFileName').value.trim();
+            if (!fileName) {
+                alert('파일명을 입력해주세요.');
+                return;
+            }
+
+            const { data, startDate, endDate } = window.exportData;
+            
+            try {
+                // CSV 형태로 데이터 생성
+                let csvContent = '\uFEFF'; // UTF-8 BOM
+                
+                if (exportType === 'statistics') {
+                    csvContent += '날짜,직원명,메뉴,시간,가격,커미션,방번호,고객명\n';
+                    data.forEach(r => {
+                        csvContent += `${r.date},${r.staffName},${r.menuName},${r.duration}분,${r.price},${r.commission},${r.roomNumber || ''},${r.customerName || ''}\n`;
+                    });
+                } else {
+                    csvContent += '날짜,직원명,메뉴,시간(분),시작시간,끝시간,가격,커미션,방번호,고객명,입금상태\n';
+                    data.forEach(r => {
+                        const endTime = calculateEndTime(r.startTime, r.duration);
+                        const paymentStatus = r.paid ? '입금완료' : '미입금';
+                        csvContent += `${r.date},${r.staffName},${r.menuName},${r.duration},${r.startTime || ''},${r.startTime ? endTime : ''},${r.price},${r.commission},${r.roomNumber || ''},${r.customerName || ''},${paymentStatus}\n`;
+                    });
+                }
+                
+                // 파일 다운로드
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', fileName.endsWith('.csv') ? fileName : `${fileName}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                
+                alert(`내보내기가 완료되었습니다.\n파일명: ${link.download}\n위치: 기본 다운로드 폴더`);
+                closeManagementModal();
+            } catch (error) {
+                alert('내보내기 중 오류가 발생했습니다: ' + error.message);
+            }
+        }
+
+        // 시작 날짜 입력시 자동으로 끝 날짜 설정
+        function autoSetEndDate() {
+            const startDateInput = document.getElementById('statsStartDate');
+            const endDateInput = document.getElementById('statsEndDate');
+            
+            if (!startDateInput.value) return;
+            
+            const startDate = new Date(startDateInput.value);
+            let endDate = new Date(startDate);
+            
+            // 현재 통계 타입에 따라 끝 날짜 자동 설정
+            if (currentStatsType === 'weekly') {
+                // 주간: 시작일로부터 6일 후 (일주일)
+                endDate.setDate(startDate.getDate() + 6);
+            } else if (currentStatsType === 'monthly' || currentStatsType === 'menuChart' || currentStatsType === 'monthlyChart') {
+                // 월간: 시작일이 속한 달의 마지막 날
+                endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
+            }
+            
+            endDateInput.value = endDate.toISOString().split('T')[0];
+            updateStats();
+        }
+
+        // 백업/복원 관련 함수들
+        function showLocalBackupDialog() {
+            const content = `
+                <div class="space-y-4">
+                    <div class="text-center">
+                        <h3 class="text-lg font-bold mb-4">로컬 백업</h3>
+                        <p class="text-gray-600 mb-4">현재 데이터를 JSON 파일로 백업합니다.</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">파일명:</label>
+                        <input type="text" id="backupFileName" 
+                               value="massage_backup_${currentAdmin.username}_${new Date().toISOString().split('T')[0]}" 
+                               class="w-full border rounded px-3 py-2" 
+                               placeholder="백업 파일명을 입력하세요">
+                        <div class="text-xs text-gray-500 mt-1">* .json 확장자는 자동으로 추가됩니다</div>
+                    </div>
+                    
+                    <div class="bg-yellow-50 border border-yellow-200 rounded p-3">
+                        <div class="text-sm text-yellow-800">
+                            <strong>모바일 앱 사용 시:</strong><br>
+                            • 백업 파일은 기본적으로 다운로드 폴더에 저장됩니다<br>
+                            • 일부 앱에서는 파일 관리자를 통해 저장 위치를 변경할 수 있습니다<br>
+                            • 백업 완료 후 파일 관리자에서 원하는 위치로 이동 가능합니다
+                        </div>
+                    </div>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded p-3">
+                        <div class="text-sm text-blue-800">
+                            <strong>대안 방법:</strong><br>
+                            • 백업 데이터를 클립보드에 복사하여 메모장 등에 저장<br>
+                            • 이메일로 백업 데이터 전송<br>
+                            • 클라우드 저장소 활용
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-2 justify-center">
+                        <button onclick="performLocalBackup()" class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600">파일 다운로드</button>
+                        <button onclick="performBackupToClipboard()" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">클립보드 복사</button>
+                        <button onclick="closeManagementModal()" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '로컬 백업';
+            document.getElementById('managementContent').innerHTML = content;
+            document.getElementById('managementModal').style.display = 'block';
+        }
+
+        function performLocalBackup() {
+            try {
+                const fileName = document.getElementById('backupFileName').value.trim();
+                if (!fileName) {
+                    alert('파일명을 입력해주세요.');
+                    return;
+                }
+
+                const backupData = createBackupData();
+                const jsonString = JSON.stringify(backupData, null, 2);
+                
+                // 모바일 환경 감지
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                
+                if (isMobile) {
+                    // 모바일에서는 더 안전한 방법 사용
+                    try {
+                        const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' });
+                        
+                        // Web Share API 지원 확인
+                        if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], fileName + '.json')] })) {
+                            const file = new File([blob], fileName + '.json', { type: 'application/json' });
+                            navigator.share({
+                                files: [file],
+                                title: '마사지샵 백업 파일',
+                                text: '백업 데이터를 저장하세요'
+                            }).then(() => {
+                                alert('백업 파일 공유가 완료되었습니다.');
+                                closeManagementModal();
+                            }).catch(() => {
+                                // 공유 실패시 기본 다운로드 방식 사용
+                                downloadBackupFile(blob, fileName);
+                            });
+                        } else {
+                            // Web Share API 미지원시 기본 다운로드
+                            downloadBackupFile(blob, fileName);
+                        }
+                    } catch (error) {
+                        // 모바일에서 오류 발생시 클립보드 복사 제안
+                        if (confirm('파일 다운로드에 실패했습니다. 클립보드에 백업 데이터를 복사하시겠습니까?')) {
+                            performBackupToClipboard();
+                        }
+                    }
+                } else {
+                    // 데스크톱에서는 기본 다운로드 방식
+                    const blob = new Blob([jsonString], { type: 'application/json' });
+                    downloadBackupFile(blob, fileName);
+                }
+            } catch (error) {
+                alert('백업 중 오류가 발생했습니다: ' + error.message);
+            }
+        }
+
+        function downloadBackupFile(blob, fileName) {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = fileName.endsWith('.json') ? fileName : `${fileName}.json`;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            alert(`백업이 완료되었습니다.\n파일명: ${link.download}\n위치: 다운로드 폴더`);
+            closeManagementModal();
+        }
+
+        function createBackupData() {
+            const backupData = {
+                timestamp: new Date().toISOString(),
+                adminUsername: currentAdmin.username,
+                data: {
+                    menus: localStorage.getItem(getAdminKey('menus')),
+                    staff: localStorage.getItem(getAdminKey('staff')),
+                    rooms: localStorage.getItem(getAdminKey('rooms')),
+                    customers: localStorage.getItem(getAdminKey('customers')),
+                    paymentMethods: localStorage.getItem(getAdminKey('paymentMethods')),
+                    reservations: localStorage.getItem(getAdminKey('reservations')),
+                    currency: localStorage.getItem(getAdminKey('currency')),
+                    guarantees: localStorage.getItem(getAdminKey('guarantees')),
+                    staffOrders: {}
+                }
+            };
+
+            // 모든 날짜별 순번 데이터 백업
+            for (let key in localStorage) {
+                if (key.startsWith(`${currentAdmin.username}_staffOrder_`)) {
+                    const date = key.replace(`${currentAdmin.username}_staffOrder_`, '');
+                    backupData.data.staffOrders[date] = localStorage.getItem(key);
+                }
+            }
+
+            return backupData;
+        }
+
+        function performBackupToClipboard() {
+            try {
+                const backupData = createBackupData();
+                const jsonString = JSON.stringify(backupData, null, 2);
+                
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(jsonString).then(() => {
+                        alert('백업 데이터가 클립보드에 복사되었습니다.\n메모장이나 텍스트 에디터에 붙여넣기하여 .json 파일로 저장하세요.');
+                        closeManagementModal();
+                    }).catch(() => {
+                        // 클립보드 API 실패시 대안 방법
+                        showBackupDataModal(jsonString);
+                    });
+                } else {
+                    // 클립보드 API 미지원시 대안 방법
+                    showBackupDataModal(jsonString);
+                }
+            } catch (error) {
+                alert('클립보드 복사 중 오류가 발생했습니다: ' + error.message);
+            }
+        }
+
+        function showBackupDataModal(jsonString) {
+            const content = `
+                <div class="space-y-4">
+                    <div class="text-center">
+                        <h3 class="text-lg font-bold mb-4">백업 데이터</h3>
+                        <p class="text-gray-600 mb-4">아래 데이터를 복사하여 .json 파일로 저장하세요</p>
+                    </div>
+                    
+                    <div>
+                        <textarea id="backupDataText" class="w-full h-64 border rounded px-3 py-2 text-xs font-mono" readonly>${jsonString}</textarea>
+                    </div>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded p-3">
+                        <div class="text-sm text-blue-800">
+                            <strong>저장 방법:</strong><br>
+                            1. 위 텍스트를 모두 선택하여 복사<br>
+                            2. 메모장이나 텍스트 에디터에 붙여넣기<br>
+                            3. 파일명.json으로 저장
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-2 justify-center">
+                        <button onclick="selectAllBackupData()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">전체 선택</button>
+                        <button onclick="closeManagementModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">닫기</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '백업 데이터 복사';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function selectAllBackupData() {
+            const textarea = document.getElementById('backupDataText');
+            if (textarea) {
+                textarea.select();
+                textarea.setSelectionRange(0, 99999); // 모바일 지원
+                
+                try {
+                    document.execCommand('copy');
+                    alert('백업 데이터가 클립보드에 복사되었습니다.');
+                } catch (err) {
+                    alert('복사에 실패했습니다. 수동으로 텍스트를 선택하여 복사해주세요.');
+                }
+            }
+        }
+
+        function showLocalRestoreDialog() {
+            const content = `
+                <div class="space-y-4">
+                    <div class="text-center">
+                        <h3 class="text-lg font-bold mb-4">로컬 복원</h3>
+                        <p class="text-gray-600 mb-4">백업 파일을 선택하여 데이터를 복원합니다.</p>
+                    </div>
+                    
+                    <div class="bg-red-50 border border-red-200 rounded p-3">
+                        <div class="text-sm text-red-800">
+                            <strong>⚠️ 주의:</strong> 현재 데이터가 모두 삭제되고 백업 데이터로 대체됩니다.<br>
+                            복원 전에 현재 데이터를 백업하는 것을 권장합니다.
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">백업 파일 선택:</label>
+                        <input type="file" id="restoreFileInput" accept=".json,application/json,text/json"
+                               class="w-full border rounded px-3 py-2 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                        <div class="text-xs text-gray-500 mt-1">* JSON 형식의 백업 파일만 선택 가능합니다</div>
+                    </div>
+                    
+                    <div id="fileInfo" class="hidden bg-blue-50 border border-blue-200 rounded p-3">
+                        <div class="text-sm text-blue-800">
+                            <div><strong>파일명:</strong> <span id="selectedFileName"></span></div>
+                            <div><strong>파일 크기:</strong> <span id="selectedFileSize"></span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-yellow-50 border border-yellow-200 rounded p-3">
+                        <div class="text-sm text-yellow-800">
+                            <strong>모바일 앱 사용 시:</strong><br>
+                            • 파일 선택 시 문서/파일 관리자가 열리지 않으면 '파일' 또는 '내 파일' 앱을 먼저 실행해주세요<br>
+                            • JSON 파일이 다운로드 폴더에 있는지 확인해주세요<br>
+                            • 카메라가 열리면 뒤로가기 후 다시 시도해주세요
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-2 justify-center">
+                        <button onclick="executeRestore()" class="bg-orange-500 text-white px-6 py-2 rounded hover:bg-orange-600">복원 실행</button>
+                        <button onclick="closeManagementModal()" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '로컬 복원';
+            document.getElementById('managementContent').innerHTML = content;
+            document.getElementById('managementModal').style.display = 'block';
+            
+            // 파일 선택 이벤트 리스너 추가
+            setTimeout(() => {
+                const fileInput = document.getElementById('restoreFileInput');
+                if (fileInput) {
+                    fileInput.addEventListener('change', function(event) {
+                        const file = event.target.files[0];
+                        if (file) {
+                            document.getElementById('selectedFileName').textContent = file.name;
+                            document.getElementById('selectedFileSize').textContent = formatFileSize(file.size);
+                            document.getElementById('fileInfo').classList.remove('hidden');
+                        } else {
+                            document.getElementById('fileInfo').classList.add('hidden');
+                        }
+                    });
+                }
+            }, 100);
+        }
+
+        function executeRestore() {
+            const fileInput = document.getElementById('restoreFileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                // 파일이 선택되지 않은 경우 텍스트 입력 방식 제안
+                if (confirm('파일이 선택되지 않았습니다. 텍스트로 백업 데이터를 입력하시겠습니까?')) {
+                    showTextRestoreModal();
+                }
+                return;
+            }
+
+            if (!confirm('현재 데이터가 모두 삭제되고 백업 데이터로 복원됩니다. 계속하시겠습니까?')) {
+                return;
+            }
+
+            restoreData({ target: { files: [file] } });
+        }
+
+        function showTextRestoreModal() {
+            const content = `
+                <div class="space-y-4">
+                    <div class="text-center">
+                        <h3 class="text-lg font-bold mb-4">텍스트로 복원</h3>
+                        <p class="text-gray-600 mb-4">백업 데이터를 텍스트로 붙여넣어 복원합니다</p>
+                    </div>
+                    
+                    <div class="bg-red-50 border border-red-200 rounded p-3">
+                        <div class="text-sm text-red-800">
+                            <strong>⚠️ 주의:</strong> 현재 데이터가 모두 삭제되고 백업 데이터로 대체됩니다.
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">백업 데이터 (JSON 형식):</label>
+                        <textarea id="restoreDataText" class="w-full h-64 border rounded px-3 py-2 text-xs font-mono" 
+                                  placeholder="백업 데이터를 여기에 붙여넣으세요..."></textarea>
+                    </div>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded p-3">
+                        <div class="text-sm text-blue-800">
+                            <strong>사용 방법:</strong><br>
+                            1. 백업 시 복사한 JSON 데이터를 위 텍스트 영역에 붙여넣기<br>
+                            2. 데이터가 올바른 JSON 형식인지 확인<br>
+                            3. '복원 실행' 버튼 클릭
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-2 justify-center">
+                        <button onclick="executeTextRestore()" class="bg-orange-500 text-white px-6 py-2 rounded hover:bg-orange-600">복원 실행</button>
+                        <button onclick="showLocalRestoreDialog()" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">파일 선택으로 돌아가기</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '텍스트로 복원';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function executeTextRestore() {
+            const textData = document.getElementById('restoreDataText').value.trim();
+            
+            if (!textData) {
+                alert('백업 데이터를 입력해주세요.');
+                return;
+            }
+
+            if (!confirm('현재 데이터가 모두 삭제되고 백업 데이터로 복원됩니다. 계속하시겠습니까?')) {
+                return;
+            }
+
+            try {
+                const backupData = JSON.parse(textData);
+                
+                if (!backupData.data || !backupData.adminUsername) {
+                    alert('올바르지 않은 백업 데이터입니다.');
+                    return;
+                }
+
+                if (backupData.adminUsername !== currentAdmin.username) {
+                    if (!confirm(`이 백업은 다른 관리자(${backupData.adminUsername})의 데이터입니다. 계속하시겠습니까?`)) {
+                        return;
+                    }
+                }
+
+                // 기존 데이터 삭제
+                const keysToRemove = [];
+                for (let key in localStorage) {
+                    if (key.startsWith(currentAdmin.username + '_')) {
+                        keysToRemove.push(key);
+                    }
+                }
+                keysToRemove.forEach(key => localStorage.removeItem(key));
+
+                // 백업 데이터 복원
+                if (backupData.data.menus) localStorage.setItem(getAdminKey('menus'), backupData.data.menus);
+                if (backupData.data.staff) localStorage.setItem(getAdminKey('staff'), backupData.data.staff);
+                if (backupData.data.rooms) localStorage.setItem(getAdminKey('rooms'), backupData.data.rooms);
+                if (backupData.data.customers) localStorage.setItem(getAdminKey('customers'), backupData.data.customers);
+                if (backupData.data.paymentMethods) localStorage.setItem(getAdminKey('paymentMethods'), backupData.data.paymentMethods);
+                if (backupData.data.reservations) localStorage.setItem(getAdminKey('reservations'), backupData.data.reservations);
+                if (backupData.data.currency) localStorage.setItem(getAdminKey('currency'), backupData.data.currency);
+                if (backupData.data.guarantees) localStorage.setItem(getAdminKey('guarantees'), backupData.data.guarantees);
+
+                // 순번 데이터 복원
+                if (backupData.data.staffOrders) {
+                    for (let date in backupData.data.staffOrders) {
+                        localStorage.setItem(getDailyStaffOrderKey(date), backupData.data.staffOrders[date]);
+                    }
+                }
+
+                alert(`텍스트 복원이 완료되었습니다!\n백업 날짜: ${new Date(backupData.timestamp).toLocaleString()}`);
+                
+                // 화면 새로고침
+                location.reload();
+            } catch (error) {
+                alert('복원 중 오류가 발생했습니다. JSON 형식이 올바른지 확인해주세요.\n오류: ' + error.message);
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function restoreData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!confirm('현재 데이터가 모두 삭제되고 백업 데이터로 복원됩니다. 계속하시겠습니까?')) {
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const backupData = JSON.parse(e.target.result);
+                    
+                    if (!backupData.data || !backupData.adminUsername) {
+                        alert('올바르지 않은 백업 파일입니다.');
+                        return;
+                    }
+
+                    if (backupData.adminUsername !== currentAdmin.username) {
+                        if (!confirm(`이 백업은 다른 관리자(${backupData.adminUsername})의 데이터입니다. 계속하시겠습니까?`)) {
+                            return;
+                        }
+                    }
+
+                    // 기존 데이터 삭제
+                    const keysToRemove = [];
+                    for (let key in localStorage) {
+                        if (key.startsWith(currentAdmin.username + '_')) {
+                            keysToRemove.push(key);
+                        }
+                    }
+                    keysToRemove.forEach(key => localStorage.removeItem(key));
+
+                    // 백업 데이터 복원
+                    if (backupData.data.menus) localStorage.setItem(getAdminKey('menus'), backupData.data.menus);
+                    if (backupData.data.staff) localStorage.setItem(getAdminKey('staff'), backupData.data.staff);
+                    if (backupData.data.rooms) localStorage.setItem(getAdminKey('rooms'), backupData.data.rooms);
+                    if (backupData.data.customers) localStorage.setItem(getAdminKey('customers'), backupData.data.customers);
+                    if (backupData.data.paymentMethods) localStorage.setItem(getAdminKey('paymentMethods'), backupData.data.paymentMethods);
+                    if (backupData.data.reservations) localStorage.setItem(getAdminKey('reservations'), backupData.data.reservations);
+                    if (backupData.data.currency) localStorage.setItem(getAdminKey('currency'), backupData.data.currency);
+                    if (backupData.data.guarantees) localStorage.setItem(getAdminKey('guarantees'), backupData.data.guarantees);
+
+                    // 순번 데이터 복원
+                    if (backupData.data.staffOrders) {
+                        for (let date in backupData.data.staffOrders) {
+                            localStorage.setItem(getDailyStaffOrderKey(date), backupData.data.staffOrders[date]);
+                        }
+                    }
+
+                    alert(`데이터 복원이 완료되었습니다. (백업 날짜: ${new Date(backupData.timestamp).toLocaleString()})`);
+                    
+                    // 화면 새로고침
+                    location.reload();
+                } catch (error) {
+                    alert('복원 중 오류가 발생했습니다: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function showGoogleBackupDialog() {
+            const content = `
+                <div class="space-y-4">
+                    <div class="text-center">
+                        <h3 class="text-lg font-bold mb-4">구글 드라이브 백업</h3>
+                        <p class="text-gray-600 mb-4">구글 드라이브에 데이터를 백업합니다.</p>
+                    </div>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded p-3">
+                        <div class="text-sm text-blue-800">
+                            <strong>참고:</strong> 구글 계정에 로그인하여 드라이브에 백업 파일을 저장합니다.<br>
+                            백업 파일은 "massage_backup_[날짜].json" 형식으로 저장됩니다.
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">파일명:</label>
+                        <input type="text" id="googleBackupFileName" 
+                               value="massage_backup_${currentAdmin.username}_${new Date().toISOString().split('T')[0]}" 
+                               class="w-full border rounded px-3 py-2" 
+                               placeholder="백업 파일명을 입력하세요">
+                        <div class="text-xs text-gray-500 mt-1">* .json 확장자는 자동으로 추가됩니다</div>
+                    </div>
+                    
+                    <div class="flex gap-2 justify-center">
+                        <button onclick="performGoogleBackup()" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">구글 로그인 후 백업</button>
+                        <button onclick="closeManagementModal()" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '구글 드라이브 백업';
+            document.getElementById('managementContent').innerHTML = content;
+            document.getElementById('managementModal').style.display = 'block';
+        }
+
+        function showGoogleRestoreDialog() {
+            const content = `
+                <div class="space-y-4">
+                    <div class="text-center">
+                        <h3 class="text-lg font-bold mb-4">구글 드라이브 복원</h3>
+                        <p class="text-gray-600 mb-4">구글 드라이브에서 백업 파일을 선택하여 복원합니다.</p>
+                    </div>
+                    
+                    <div class="bg-red-50 border border-red-200 rounded p-3">
+                        <div class="text-sm text-red-800">
+                            <strong>⚠️ 주의:</strong> 현재 데이터가 모두 삭제되고 백업 데이터로 대체됩니다.<br>
+                            복원 전에 현재 데이터를 백업하는 것을 권장합니다.
+                        </div>
+                    </div>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded p-3">
+                        <div class="text-sm text-blue-800">
+                            <strong>참고:</strong> 구글 계정에 로그인하여 드라이브에서 백업 파일을 선택합니다.<br>
+                            JSON 형식의 백업 파일만 복원 가능합니다.
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-2 justify-center">
+                        <button onclick="performGoogleRestore()" class="bg-orange-500 text-white px-6 py-2 rounded hover:bg-orange-600">구글 로그인 후 복원</button>
+                        <button onclick="closeManagementModal()" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '구글 드라이브 복원';
+            document.getElementById('managementContent').innerHTML = content;
+            document.getElementById('managementModal').style.display = 'block';
+        }
+
+        function closeGoogleLoginModal() {
+            document.getElementById('googleLoginModal').style.display = 'none';
+        }
+
+        function processGoogleLogin() {
+            const email = document.getElementById('googleEmail').value;
+            const password = document.getElementById('googlePassword').value;
+            
+            if (!email || !password) {
+                alert('이메일과 비밀번호를 입력해주세요.');
+                return;
+            }
+            
+            // 간단한 이메일 형식 검증
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('올바른 이메일 형식을 입력해주세요.');
+                return;
+            }
+            
+            // 구글 로그인 시뮬레이션 (실제로는 OAuth를 사용해야 함)
+            const loginButton = document.getElementById('googleLoginConfirm');
+            loginButton.textContent = '로그인 중...';
+            loginButton.disabled = true;
+            
+            setTimeout(() => {
+                // 로그인 성공 시뮬레이션
+                localStorage.setItem('googleAuth', JSON.stringify({
+                    email: email,
+                    authenticated: true,
+                    timestamp: new Date().toISOString()
+                }));
+                
+                alert(`구글 계정 로그인 성공!\n계정: ${email}`);
+                closeGoogleLoginModal();
+                
+                // 백업 또는 복원 작업 실행
+                if (window.googleAction === 'backup') {
+                    executeGoogleBackup();
+                } else if (window.googleAction === 'restore') {
+                    executeGoogleRestore();
+                }
+                
+                loginButton.textContent = '로그인';
+                loginButton.disabled = false;
+            }, 2000);
+        }
+
+        function performGoogleBackup() {
+            const fileName = document.getElementById('googleBackupFileName').value.trim();
+            if (!fileName) {
+                alert('파일명을 입력해주세요.');
+                return;
+            }
+            
+            window.googleAction = 'backup';
+            window.googleBackupFileName = fileName;
+            showGoogleLoginModal();
+        }
+
+        function performGoogleRestore() {
+            window.googleAction = 'restore';
+            showGoogleLoginModal();
+        }
+
+        function showGoogleLoginModal() {
+            document.getElementById('googleEmail').value = '';
+            document.getElementById('googlePassword').value = '';
+            document.getElementById('googleLoginModal').style.display = 'block';
+        }
+
+        function executeGoogleBackup() {
+            try {
+                const fileName = window.googleBackupFileName;
+                const backupData = {
+                    timestamp: new Date().toISOString(),
+                    adminUsername: currentAdmin.username,
+                    data: {
+                        menus: localStorage.getItem(getAdminKey('menus')),
+                        staff: localStorage.getItem(getAdminKey('staff')),
+                        rooms: localStorage.getItem(getAdminKey('rooms')),
+                        customers: localStorage.getItem(getAdminKey('customers')),
+                        paymentMethods: localStorage.getItem(getAdminKey('paymentMethods')),
+                        reservations: localStorage.getItem(getAdminKey('reservations')),
+                        currency: localStorage.getItem(getAdminKey('currency')),
+                        guarantees: localStorage.getItem(getAdminKey('guarantees')),
+                        staffOrders: {}
+                    }
+                };
+
+                // 모든 날짜별 순번 데이터 백업
+                for (let key in localStorage) {
+                    if (key.startsWith(`${currentAdmin.username}_staffOrder_`)) {
+                        const date = key.replace(`${currentAdmin.username}_staffOrder_`, '');
+                        backupData.data.staffOrders[date] = localStorage.getItem(key);
+                    }
+                }
+
+                // 구글 드라이브 업로드 시뮬레이션
+                const jsonString = JSON.stringify(backupData, null, 2);
+                
+                // 실제로는 Google Drive API를 사용해야 하지만, 여기서는 로컬 다운로드로 대체
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = fileName.endsWith('.json') ? fileName : `${fileName}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                alert(`구글 드라이브 백업이 완료되었습니다!\n파일명: ${link.download}\n\n* 현재는 로컬 다운로드로 제공됩니다.\n실제 구글 드라이브 연동은 추후 업데이트 예정입니다.`);
+                closeManagementModal();
+            } catch (error) {
+                alert('구글 백업 중 오류가 발생했습니다: ' + error.message);
+            }
+        }
+
+        function executeGoogleRestore() {
+            // 구글 드라이브에서 파일 선택 시뮬레이션
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = function(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                if (!confirm('구글 드라이브에서 선택한 파일로 현재 데이터를 복원하시겠습니까?\n현재 데이터가 모두 삭제됩니다.')) {
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const backupData = JSON.parse(e.target.result);
+                        
+                        if (!backupData.data || !backupData.adminUsername) {
+                            alert('올바르지 않은 백업 파일입니다.');
+                            return;
+                        }
+
+                        if (backupData.adminUsername !== currentAdmin.username) {
+                            if (!confirm(`이 백업은 다른 관리자(${backupData.adminUsername})의 데이터입니다. 계속하시겠습니까?`)) {
+                                return;
+                            }
+                        }
+
+                        // 기존 데이터 삭제
+                        const keysToRemove = [];
+                        for (let key in localStorage) {
+                            if (key.startsWith(currentAdmin.username + '_')) {
+                                keysToRemove.push(key);
+                            }
+                        }
+                        keysToRemove.forEach(key => localStorage.removeItem(key));
+
+                        // 백업 데이터 복원
+                        if (backupData.data.menus) localStorage.setItem(getAdminKey('menus'), backupData.data.menus);
+                        if (backupData.data.staff) localStorage.setItem(getAdminKey('staff'), backupData.data.staff);
+                        if (backupData.data.rooms) localStorage.setItem(getAdminKey('rooms'), backupData.data.rooms);
+                        if (backupData.data.customers) localStorage.setItem(getAdminKey('customers'), backupData.data.customers);
+                        if (backupData.data.paymentMethods) localStorage.setItem(getAdminKey('paymentMethods'), backupData.data.paymentMethods);
+                        if (backupData.data.reservations) localStorage.setItem(getAdminKey('reservations'), backupData.data.reservations);
+                        if (backupData.data.currency) localStorage.setItem(getAdminKey('currency'), backupData.data.currency);
+                        if (backupData.data.guarantees) localStorage.setItem(getAdminKey('guarantees'), backupData.data.guarantees);
+
+                        // 순번 데이터 복원
+                        if (backupData.data.staffOrders) {
+                            for (let date in backupData.data.staffOrders) {
+                                localStorage.setItem(getDailyStaffOrderKey(date), backupData.data.staffOrders[date]);
+                            }
+                        }
+
+                        alert(`구글 드라이브 복원이 완료되었습니다!\n백업 날짜: ${new Date(backupData.timestamp).toLocaleString()}\n\n* 현재는 로컬 파일 선택으로 제공됩니다.\n실제 구글 드라이브 연동은 추후 업데이트 예정입니다.`);
+                        
+                        // 화면 새로고침
+                        location.reload();
+                    } catch (error) {
+                        alert('구글 복원 중 오류가 발생했습니다: ' + error.message);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            
+            input.click();
+            closeManagementModal();
+        }
+
+        function exportAllDataExcel() {
+            try {
+                const reservations = JSON.parse(localStorage.getItem(getAdminKey('reservations')) || '[]');
+                
+                if (reservations.length === 0) {
+                    alert('내보낼 데이터가 없습니다.');
+                    return;
+                }
+                
+                // 날짜 범위 계산
+                const dates = reservations.map(r => r.date).sort();
+                const startDate = dates[0];
+                const endDate = dates[dates.length - 1];
+                
+                showExportDialog(reservations, startDate, endDate, 'allData');
+            } catch (error) {
+                alert('데이터 내보내기 중 오류가 발생했습니다: ' + error.message);
+            }
+        }
+
+        // 순번 관리 관련 함수들
+        function loadStaffOrder() {
+            const staff = JSON.parse(localStorage.getItem(getAdminKey('staff')) || '[]');
+            const currentDate = document.getElementById('currentDate').value;
+            const staffOrder = JSON.parse(localStorage.getItem(getDailyStaffOrderKey(currentDate)) || '{}');
+            
+            // 정직원과 단기고용 직원만 필터링
+            const activeStaff = staff.filter(s => {
+                const status = s.status || '정직원';
+                return status === '정직원' || status === '단기고용';
+            });
+            
+            const tableBody = document.getElementById('orderTable');
+            tableBody.innerHTML = '';
+
+            activeStaff.forEach(member => {
+                const currentOrder = staffOrder[member.id] !== undefined ? staffOrder[member.id] : 1;
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="border border-gray-300 p-2">${member.name}</td>
+                    <td class="border border-gray-300 p-2">${member.status || '정직원'}</td>
+                    <td class="border border-gray-300 p-2">
+                        <select id="order_${member.id}" class="w-full border rounded px-2 py-1">
+                            ${generateOrderOptions(currentOrder)}
+                        </select>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function generateOrderOptions(selectedOrder) {
+            let options = '';
+            for (let i = 0; i <= 99; i++) {
+                const selected = i === selectedOrder ? 'selected' : '';
+                const label = i === 0 ? `${i} (휴가)` : i;
+                options += `<option value="${i}" ${selected}>${label}</option>`;
+            }
+            return options;
+        }
+
+        function saveStaffOrder() {
+            const staff = JSON.parse(localStorage.getItem(getAdminKey('staff')) || '[]');
+            const activeStaff = staff.filter(s => {
+                const status = s.status || '정직원';
+                return status === '정직원' || status === '단기고용';
+            });
+            const currentDate = document.getElementById('currentDate').value;
+            const staffOrder = {};
+
+            activeStaff.forEach(member => {
+                const orderSelect = document.getElementById(`order_${member.id}`);
+                if (orderSelect) {
+                    staffOrder[member.id] = parseInt(orderSelect.value);
+                }
+            });
+
+            localStorage.setItem(getDailyStaffOrderKey(currentDate), JSON.stringify(staffOrder));
+            alert(`${currentDate} 날짜의 순번이 저장되었습니다.`);
+            loadReservationData(); // 예약 화면 업데이트
+            loadStaffOrder(); // 순번 화면 새로고침
+        }
+
+        // DB 관리 세부 기능들
+        
+        // 메뉴 관리 함수들
+        function addNewMenu() {
+            const content = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">메뉴명:</label>
+                        <input type="text" id="newMenuName" class="w-full border rounded px-3 py-2" placeholder="메뉴명을 입력하세요">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">30분 가격/커미션:</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="menu30Price" class="flex-1 border rounded px-2 py-1" placeholder="가격">
+                                <input type="number" id="menu30Commission" class="flex-1 border rounded px-2 py-1" placeholder="커미션">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">60분 가격/커미션:</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="menu60Price" class="flex-1 border rounded px-2 py-1" placeholder="가격">
+                                <input type="number" id="menu60Commission" class="flex-1 border rounded px-2 py-1" placeholder="커미션">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">90분 가격/커미션:</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="menu90Price" class="flex-1 border rounded px-2 py-1" placeholder="가격">
+                                <input type="number" id="menu90Commission" class="flex-1 border rounded px-2 py-1" placeholder="커미션">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">120분 가격/커미션:</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="menu120Price" class="flex-1 border rounded px-2 py-1" placeholder="가격">
+                                <input type="number" id="menu120Commission" class="flex-1 border rounded px-2 py-1" placeholder="커미션">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="saveNewMenu()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">저장</button>
+                        <button onclick="manageMenus()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '새 메뉴 추가';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function saveNewMenu() {
+            const name = document.getElementById('newMenuName').value;
+            if (!name) {
+                alert('메뉴명을 입력해주세요.');
+                return;
+            }
+
+            const menus = JSON.parse(localStorage.getItem(getAdminKey('menus')) || '[]');
+            const newId = Math.max(...menus.map(m => m.id), 0) + 1;
+            
+            const prices = {};
+            const durations = [30, 60, 90, 120];
+            
+            durations.forEach(duration => {
+                const price = parseInt(document.getElementById(`menu${duration}Price`).value);
+                const commission = parseInt(document.getElementById(`menu${duration}Commission`).value);
+                
+                if (price && commission) {
+                    prices[duration] = { price, commission };
+                }
+            });
+
+            if (Object.keys(prices).length === 0) {
+                alert('최소 하나의 시간대에 대한 가격과 커미션을 입력해주세요.');
+                return;
+            }
+
+            menus.push({
+                id: newId,
+                name: name,
+                prices: prices
+            });
+
+            localStorage.setItem(getAdminKey('menus'), JSON.stringify(menus));
+            alert('메뉴가 추가되었습니다.');
+            manageMenus();
+        }
+
+        function editMenu(id) {
+            const menus = JSON.parse(localStorage.getItem(getAdminKey('menus')) || '[]');
+            const menu = menus.find(m => m.id === id);
+            
+            if (!menu) return;
+
+            const content = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">메뉴명:</label>
+                        <input type="text" id="editMenuName" value="${menu.name}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">30분 가격/커미션:</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="editMenu30Price" value="${menu.prices[30]?.price || ''}" class="flex-1 border rounded px-2 py-1" placeholder="가격">
+                                <input type="number" id="editMenu30Commission" value="${menu.prices[30]?.commission || ''}" class="flex-1 border rounded px-2 py-1" placeholder="커미션">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">60분 가격/커미션:</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="editMenu60Price" value="${menu.prices[60]?.price || ''}" class="flex-1 border rounded px-2 py-1" placeholder="가격">
+                                <input type="number" id="editMenu60Commission" value="${menu.prices[60]?.commission || ''}" class="flex-1 border rounded px-2 py-1" placeholder="커미션">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">90분 가격/커미션:</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="editMenu90Price" value="${menu.prices[90]?.price || ''}" class="flex-1 border rounded px-2 py-1" placeholder="가격">
+                                <input type="number" id="editMenu90Commission" value="${menu.prices[90]?.commission || ''}" class="flex-1 border rounded px-2 py-1" placeholder="커미션">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">120분 가격/커미션:</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="editMenu120Price" value="${menu.prices[120]?.price || ''}" class="flex-1 border rounded px-2 py-1" placeholder="가격">
+                                <input type="number" id="editMenu120Commission" value="${menu.prices[120]?.commission || ''}" class="flex-1 border rounded px-2 py-1" placeholder="커미션">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="updateMenu(${id})" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">수정</button>
+                        <button onclick="manageMenus()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '메뉴 수정';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function updateMenu(id) {
+            const name = document.getElementById('editMenuName').value;
+            if (!name) {
+                alert('메뉴명을 입력해주세요.');
+                return;
+            }
+
+            const menus = JSON.parse(localStorage.getItem(getAdminKey('menus')) || '[]');
+            const menuIndex = menus.findIndex(m => m.id === id);
+            
+            if (menuIndex === -1) return;
+
+            const prices = {};
+            const durations = [30, 60, 90, 120];
+            
+            durations.forEach(duration => {
+                const price = parseInt(document.getElementById(`editMenu${duration}Price`).value);
+                const commission = parseInt(document.getElementById(`editMenu${duration}Commission`).value);
+                
+                if (price && commission) {
+                    prices[duration] = { price, commission };
+                }
+            });
+
+            menus[menuIndex] = {
+                id: id,
+                name: name,
+                prices: prices
+            };
+
+            localStorage.setItem(getAdminKey('menus'), JSON.stringify(menus));
+            alert('메뉴가 수정되었습니다.');
+            manageMenus();
+        }
+
+        function deleteMenu(id) {
+            if (confirm('정말 삭제하시겠습니까?')) {
+                const menus = JSON.parse(localStorage.getItem(getAdminKey('menus')) || '[]');
+                const filteredMenus = menus.filter(m => m.id !== id);
+                localStorage.setItem(getAdminKey('menus'), JSON.stringify(filteredMenus));
+                alert('메뉴가 삭제되었습니다.');
+                manageMenus();
+            }
+        }
+
+        // 직원 관리 함수들
+        function addNewStaff() {
+            const content = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">직원명:</label>
+                        <input type="text" id="newStaffName" class="w-full border rounded px-3 py-2" placeholder="직원명을 입력하세요">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">전화번호:</label>
+                        <input type="text" id="newStaffPhone" class="w-full border rounded px-3 py-2" placeholder="전화번호를 입력하세요">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">은행명:</label>
+                        <input type="text" id="newStaffBank" class="w-full border rounded px-3 py-2" placeholder="은행명을 입력하세요">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">계좌번호:</label>
+                        <input type="text" id="newStaffAccount" class="w-full border rounded px-3 py-2" placeholder="계좌번호를 입력하세요">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">상태:</label>
+                        <select id="newStaffStatus" class="w-full border rounded px-3 py-2">
+                            <option value="정직원">정직원</option>
+                            <option value="단기고용">단기고용</option>
+                            <option value="퇴사">퇴사</option>
+                        </select>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="saveNewStaff()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">저장</button>
+                        <button onclick="manageStaff()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '새 직원 추가';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function saveNewStaff() {
+            const name = document.getElementById('newStaffName').value;
+            const phone = document.getElementById('newStaffPhone').value;
+            const bank = document.getElementById('newStaffBank').value;
+            const account = document.getElementById('newStaffAccount').value;
+            const status = document.getElementById('newStaffStatus').value;
+
+            if (!name) {
+                alert('직원명을 입력해주세요.');
+                return;
+            }
+
+            const staff = JSON.parse(localStorage.getItem(getAdminKey('staff')) || '[]');
+            const newId = Math.max(...staff.map(s => s.id), 0) + 1;
+
+            staff.push({
+                id: newId,
+                name: name,
+                phone: phone,
+                bank: bank,
+                account: account,
+                status: status
+            });
+
+            localStorage.setItem(getAdminKey('staff'), JSON.stringify(staff));
+            alert('직원이 추가되었습니다.');
+            manageStaff();
+        }
+
+        function editStaff(id) {
+            const staff = JSON.parse(localStorage.getItem(getAdminKey('staff')) || '[]');
+            const member = staff.find(s => s.id === id);
+            
+            if (!member) return;
+
+            const content = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">직원명:</label>
+                        <input type="text" id="editStaffName" value="${member.name}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">전화번호:</label>
+                        <input type="text" id="editStaffPhone" value="${member.phone}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">은행명:</label>
+                        <input type="text" id="editStaffBank" value="${member.bank}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">계좌번호:</label>
+                        <input type="text" id="editStaffAccount" value="${member.account}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">상태:</label>
+                        <select id="editStaffStatus" class="w-full border rounded px-3 py-2">
+                            <option value="정직원" ${member.status === '정직원' ? 'selected' : ''}>정직원</option>
+                            <option value="단기고용" ${member.status === '단기고용' ? 'selected' : ''}>단기고용</option>
+                            <option value="퇴사" ${member.status === '퇴사' ? 'selected' : ''}>퇴사</option>
+                        </select>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="updateStaff(${id})" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">수정</button>
+                        <button onclick="manageStaff()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '직원 수정';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function updateStaff(id) {
+            const name = document.getElementById('editStaffName').value;
+            if (!name) {
+                alert('직원명을 입력해주세요.');
+                return;
+            }
+
+            const staff = JSON.parse(localStorage.getItem(getAdminKey('staff')) || '[]');
+            const staffIndex = staff.findIndex(s => s.id === id);
+            
+            if (staffIndex === -1) return;
+
+            staff[staffIndex] = {
+                id: id,
+                name: name,
+                phone: document.getElementById('editStaffPhone').value,
+                bank: document.getElementById('editStaffBank').value,
+                account: document.getElementById('editStaffAccount').value,
+                status: document.getElementById('editStaffStatus').value
+            };
+
+            localStorage.setItem(getAdminKey('staff'), JSON.stringify(staff));
+            alert('직원 정보가 수정되었습니다.');
+            manageStaff();
+        }
+
+        function deleteStaff(id) {
+            if (confirm('정말 삭제하시겠습니까?')) {
+                const staff = JSON.parse(localStorage.getItem(getAdminKey('staff')) || '[]');
+                const filteredStaff = staff.filter(s => s.id !== id);
+                localStorage.setItem(getAdminKey('staff'), JSON.stringify(filteredStaff));
+                alert('직원이 삭제되었습니다.');
+                manageStaff();
+            }
+        }
+
+        // 방 관리 함수들
+        function addNewRoom() {
+            const content = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">방번호:</label>
+                        <input type="text" id="newRoomNumber" class="w-full border rounded px-3 py-2" placeholder="방번호를 입력하세요">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">수용인원:</label>
+                        <input type="number" id="newRoomCapacity" class="w-full border rounded px-3 py-2" placeholder="수용인원을 입력하세요" min="1">
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="saveNewRoom()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">저장</button>
+                        <button onclick="manageRooms()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '새 방 추가';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function saveNewRoom() {
+            const roomNumber = document.getElementById('newRoomNumber').value;
+            const capacity = parseInt(document.getElementById('newRoomCapacity').value);
+
+            if (!roomNumber) {
+                alert('방번호를 입력해주세요.');
+                return;
+            }
+
+            if (!capacity || capacity < 1) {
+                alert('올바른 수용인원을 입력해주세요.');
+                return;
+            }
+
+            const rooms = JSON.parse(localStorage.getItem(getAdminKey('rooms')) || '[]');
+            const newId = Math.max(...rooms.map(r => r.id), 0) + 1;
+
+            rooms.push({
+                id: newId,
+                roomNumber: roomNumber,
+                capacity: capacity
+            });
+
+            localStorage.setItem(getAdminKey('rooms'), JSON.stringify(rooms));
+            alert('방이 추가되었습니다.');
+            manageRooms();
+        }
+
+        function editRoom(id) {
+            const rooms = JSON.parse(localStorage.getItem(getAdminKey('rooms')) || '[]');
+            const room = rooms.find(r => r.id === id);
+            
+            if (!room) return;
+
+            const content = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">방번호:</label>
+                        <input type="text" id="editRoomNumber" value="${room.roomNumber}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">수용인원:</label>
+                        <input type="number" id="editRoomCapacity" value="${room.capacity}" class="w-full border rounded px-3 py-2" min="1">
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="updateRoom(${id})" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">수정</button>
+                        <button onclick="manageRooms()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '방 수정';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function updateRoom(id) {
+            const roomNumber = document.getElementById('editRoomNumber').value;
+            const capacity = parseInt(document.getElementById('editRoomCapacity').value);
+
+            if (!roomNumber) {
+                alert('방번호를 입력해주세요.');
+                return;
+            }
+
+            if (!capacity || capacity < 1) {
+                alert('올바른 수용인원을 입력해주세요.');
+                return;
+            }
+
+            const rooms = JSON.parse(localStorage.getItem(getAdminKey('rooms')) || '[]');
+            const roomIndex = rooms.findIndex(r => r.id === id);
+            
+            if (roomIndex === -1) return;
+
+            rooms[roomIndex] = {
+                id: id,
+                roomNumber: roomNumber,
+                capacity: capacity
+            };
+
+            localStorage.setItem(getAdminKey('rooms'), JSON.stringify(rooms));
+            alert('방 정보가 수정되었습니다.');
+            manageRooms();
+        }
+
+        function deleteRoom(id) {
+            if (confirm('정말 삭제하시겠습니까?')) {
+                const rooms = JSON.parse(localStorage.getItem(getAdminKey('rooms')) || '[]');
+                const filteredRooms = rooms.filter(r => r.id !== id);
+                localStorage.setItem(getAdminKey('rooms'), JSON.stringify(filteredRooms));
+                alert('방이 삭제되었습니다.');
+                manageRooms();
+            }
+        }
+
+        // 고객 관리 함수들
+        function addNewCustomer() {
+            const content = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">고객명:</label>
+                        <input type="text" id="newCustomerName" class="w-full border rounded px-3 py-2" placeholder="고객명을 입력하세요">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">전화번호:</label>
+                        <input type="text" id="newCustomerPhone" class="w-full border rounded px-3 py-2" placeholder="전화번호를 입력하세요">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">고객번호:</label>
+                        <input type="text" id="newCustomerNumber" class="w-full border rounded px-3 py-2" placeholder="고객번호를 입력하세요">
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="saveNewCustomer()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">저장</button>
+                        <button onclick="manageCustomers()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '새 고객 추가';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function saveNewCustomer() {
+            const name = document.getElementById('newCustomerName').value;
+            const phone = document.getElementById('newCustomerPhone').value;
+            const customerNumber = document.getElementById('newCustomerNumber').value;
+
+            if (!name) {
+                alert('고객명을 입력해주세요.');
+                return;
+            }
+
+            const customers = JSON.parse(localStorage.getItem(getAdminKey('customers')) || '[]');
+            const newId = Math.max(...customers.map(c => c.id), 0) + 1;
+
+            customers.push({
+                id: newId,
+                name: name,
+                phone: phone,
+                customerNumber: customerNumber
+            });
+
+            localStorage.setItem(getAdminKey('customers'), JSON.stringify(customers));
+            alert('고객이 추가되었습니다.');
+            manageCustomers();
+        }
+
+        function editCustomer(id) {
+            const customers = JSON.parse(localStorage.getItem(getAdminKey('customers')) || '[]');
+            const customer = customers.find(c => c.id === id);
+            
+            if (!customer) return;
+
+            const content = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">고객명:</label>
+                        <input type="text" id="editCustomerName" value="${customer.name}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">전화번호:</label>
+                        <input type="text" id="editCustomerPhone" value="${customer.phone}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">고객번호:</label>
+                        <input type="text" id="editCustomerNumber" value="${customer.customerNumber}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="updateCustomer(${id})" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">수정</button>
+                        <button onclick="manageCustomers()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '고객 수정';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function updateCustomer(id) {
+            const name = document.getElementById('editCustomerName').value;
+            if (!name) {
+                alert('고객명을 입력해주세요.');
+                return;
+            }
+
+            const customers = JSON.parse(localStorage.getItem(getAdminKey('customers')) || '[]');
+            const customerIndex = customers.findIndex(c => c.id === id);
+            
+            if (customerIndex === -1) return;
+
+            customers[customerIndex] = {
+                id: id,
+                name: name,
+                phone: document.getElementById('editCustomerPhone').value,
+                customerNumber: document.getElementById('editCustomerNumber').value
+            };
+
+            localStorage.setItem(getAdminKey('customers'), JSON.stringify(customers));
+            alert('고객 정보가 수정되었습니다.');
+            manageCustomers();
+        }
+
+        function deleteCustomer(id) {
+            if (confirm('정말 삭제하시겠습니까?')) {
+                const customers = JSON.parse(localStorage.getItem(getAdminKey('customers')) || '[]');
+                const filteredCustomers = customers.filter(c => c.id !== id);
+                localStorage.setItem(getAdminKey('customers'), JSON.stringify(filteredCustomers));
+                alert('고객이 삭제되었습니다.');
+                manageCustomers();
+            }
+        }
+
+        // 화폐 단위 저장
+        function saveCurrency() {
+            const symbol = document.getElementById('currencySymbol').value;
+            const name = document.getElementById('currencyName').value;
+
+            if (!name) {
+                alert('화폐 이름을 입력해주세요.');
+                return;
+            }
+
+            const currency = { symbol, name };
+            localStorage.setItem(getAdminKey('currency'), JSON.stringify(currency));
+            
+            alert('화폐 단위가 저장되었습니다.');
+            updateCurrencyDisplay();
+            closeManagementModal();
+        }
+
+        // 입금방식 관리 함수들
+        function addNewPaymentMethod() {
+            const content = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">입금방식명:</label>
+                        <input type="text" id="newPaymentMethodName" class="w-full border rounded px-3 py-2" placeholder="입금방식명을 입력하세요">
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="saveNewPaymentMethod()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">저장</button>
+                        <button onclick="managePaymentMethods()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '새 입금방식 추가';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function saveNewPaymentMethod() {
+            const name = document.getElementById('newPaymentMethodName').value;
+
+            if (!name) {
+                alert('입금방식명을 입력해주세요.');
+                return;
+            }
+
+            const paymentMethods = JSON.parse(localStorage.getItem(getAdminKey('paymentMethods')) || '[]');
+            const newId = Math.max(...paymentMethods.map(p => p.id), 0) + 1;
+
+            paymentMethods.push({
+                id: newId,
+                name: name
+            });
+
+            localStorage.setItem(getAdminKey('paymentMethods'), JSON.stringify(paymentMethods));
+            alert('입금방식이 추가되었습니다.');
+            managePaymentMethods();
+        }
+
+        function editPaymentMethod(id) {
+            const paymentMethods = JSON.parse(localStorage.getItem(getAdminKey('paymentMethods')) || '[]');
+            const method = paymentMethods.find(p => p.id === id);
+            
+            if (!method) return;
+
+            const content = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">입금방식명:</label>
+                        <input type="text" id="editPaymentMethodName" value="${method.name}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="updatePaymentMethod(${id})" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">수정</button>
+                        <button onclick="managePaymentMethods()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '입금방식 수정';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function updatePaymentMethod(id) {
+            const name = document.getElementById('editPaymentMethodName').value;
+            if (!name) {
+                alert('입금방식명을 입력해주세요.');
+                return;
+            }
+
+            const paymentMethods = JSON.parse(localStorage.getItem(getAdminKey('paymentMethods')) || '[]');
+            const methodIndex = paymentMethods.findIndex(p => p.id === id);
+            
+            if (methodIndex === -1) return;
+
+            paymentMethods[methodIndex] = {
+                id: id,
+                name: name
+            };
+
+            localStorage.setItem(getAdminKey('paymentMethods'), JSON.stringify(paymentMethods));
+            alert('입금방식이 수정되었습니다.');
+            managePaymentMethods();
+        }
+
+        function deletePaymentMethod(id) {
+            if (confirm('정말 삭제하시겠습니까?')) {
+                const paymentMethods = JSON.parse(localStorage.getItem(getAdminKey('paymentMethods')) || '[]');
+                const filteredMethods = paymentMethods.filter(p => p.id !== id);
+                localStorage.setItem(getAdminKey('paymentMethods'), JSON.stringify(filteredMethods));
+                alert('입금방식이 삭제되었습니다.');
+                managePaymentMethods();
+            }
+        }
+
+        // Guarantee 관리 함수들
+        function addNewGuarantee() {
+            const staff = JSON.parse(localStorage.getItem(getAdminKey('staff')) || '[]');
+            const activeStaff = staff.filter(s => s.status !== '퇴사');
+            
+            let staffOptions = '';
+            activeStaff.forEach(s => {
+                staffOptions += `<option value="${s.name}">${s.name}</option>`;
+            });
+
+            const content = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">날짜:</label>
+                        <input type="date" id="newGuaranteeDate" value="${new Date().toISOString().split('T')[0]}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">직원명:</label>
+                        <select id="newGuaranteeStaff" class="w-full border rounded px-3 py-2">
+                            <option value="">직원을 선택하세요</option>
+                            ${staffOptions}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">금액:</label>
+                        <input type="number" id="newGuaranteeAmount" class="w-full border rounded px-3 py-2" placeholder="금액을 입력하세요">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">메모:</label>
+                        <textarea id="newGuaranteeMemo" class="w-full border rounded px-3 py-2" rows="3" placeholder="메모를 입력하세요 (선택사항)"></textarea>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="saveNewGuarantee()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">저장</button>
+                        <button onclick="manageGuarantee()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '새 Guarantee 추가';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function saveNewGuarantee() {
+            const date = document.getElementById('newGuaranteeDate').value;
+            const staffName = document.getElementById('newGuaranteeStaff').value;
+            const amount = parseInt(document.getElementById('newGuaranteeAmount').value);
+            const memo = document.getElementById('newGuaranteeMemo').value;
+
+            if (!date || !staffName || !amount) {
+                alert('날짜, 직원명, 금액을 모두 입력해주세요.');
+                return;
+            }
+
+            const guarantees = JSON.parse(localStorage.getItem(getAdminKey('guarantees')) || '[]');
+            const newId = Math.max(...guarantees.map(g => g.id), 0) + 1;
+
+            guarantees.push({
+                id: newId,
+                date: date,
+                staffName: staffName,
+                amount: amount,
+                memo: memo
+            });
+
+            localStorage.setItem(getAdminKey('guarantees'), JSON.stringify(guarantees));
+            alert('Guarantee가 추가되었습니다.');
+            manageGuarantee();
+        }
+
+        function editGuarantee(id) {
+            const guarantees = JSON.parse(localStorage.getItem(getAdminKey('guarantees')) || '[]');
+            const guarantee = guarantees.find(g => g.id === id);
+            
+            if (!guarantee) return;
+
+            const staff = JSON.parse(localStorage.getItem(getAdminKey('staff')) || '[]');
+            const activeStaff = staff.filter(s => s.status !== '퇴사');
+            
+            let staffOptions = '';
+            activeStaff.forEach(s => {
+                const selected = s.name === guarantee.staffName ? 'selected' : '';
+                staffOptions += `<option value="${s.name}" ${selected}>${s.name}</option>`;
+            });
+
+            const content = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">날짜:</label>
+                        <input type="date" id="editGuaranteeDate" value="${guarantee.date}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">직원명:</label>
+                        <select id="editGuaranteeStaff" class="w-full border rounded px-3 py-2">
+                            ${staffOptions}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">금액:</label>
+                        <input type="number" id="editGuaranteeAmount" value="${guarantee.amount}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">메모:</label>
+                        <textarea id="editGuaranteeMemo" class="w-full border rounded px-3 py-2" rows="3">${guarantee.memo || ''}</textarea>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="updateGuarantee(${id})" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">수정</button>
+                        <button onclick="manageGuarantee()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = 'Guarantee 수정';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function updateGuarantee(id) {
+            const date = document.getElementById('editGuaranteeDate').value;
+            const staffName = document.getElementById('editGuaranteeStaff').value;
+            const amount = parseInt(document.getElementById('editGuaranteeAmount').value);
+            const memo = document.getElementById('editGuaranteeMemo').value;
+
+            if (!date || !staffName || !amount) {
+                alert('날짜, 직원명, 금액을 모두 입력해주세요.');
+                return;
+            }
+
+            const guarantees = JSON.parse(localStorage.getItem(getAdminKey('guarantees')) || '[]');
+            const guaranteeIndex = guarantees.findIndex(g => g.id === id);
+            
+            if (guaranteeIndex === -1) return;
+
+            guarantees[guaranteeIndex] = {
+                id: id,
+                date: date,
+                staffName: staffName,
+                amount: amount,
+                memo: memo
+            };
+
+            localStorage.setItem(getAdminKey('guarantees'), JSON.stringify(guarantees));
+            alert('Guarantee가 수정되었습니다.');
+            manageGuarantee();
+        }
+
+        function deleteGuarantee(id) {
+            if (confirm('정말 삭제하시겠습니까?')) {
+                const guarantees = JSON.parse(localStorage.getItem(getAdminKey('guarantees')) || '[]');
+                const filteredGuarantees = guarantees.filter(g => g.id !== id);
+                localStorage.setItem(getAdminKey('guarantees'), JSON.stringify(filteredGuarantees));
+                alert('Guarantee가 삭제되었습니다.');
+                manageGuarantee();
+            }
+        }
+
+        // 관리자 관리 함수들 (최고 관리자 전용)
+        function addNewAdmin() {
+            const today = new Date().toISOString().split('T')[0];
+            const oneYearLater = new Date();
+            oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
+            const defaultEndDate = oneYearLater.toISOString().split('T')[0];
+
+            const content = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">아이디:</label>
+                        <input type="text" id="newAdminUsername" class="w-full border rounded px-3 py-2" placeholder="아이디를 입력하세요">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">비밀번호:</label>
+                        <input type="password" id="newAdminPassword" class="w-full border rounded px-3 py-2" placeholder="비밀번호를 입력하세요">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">타입:</label>
+                        <select id="newAdminType" class="w-full border rounded px-3 py-2">
+                            <option value="normal">일반관리자</option>
+                            <option value="super">최고관리자</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">상점명:</label>
+                        <input type="text" id="newAdminShopName" class="w-full border rounded px-3 py-2" placeholder="상점명을 입력하세요">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">전화번호:</label>
+                        <input type="text" id="newAdminPhone" class="w-full border rounded px-3 py-2" placeholder="전화번호를 입력하세요">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">유효기간 시작일:</label>
+                            <input type="date" id="newAdminStartDate" value="${today}" class="w-full border rounded px-3 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">유효기간 종료일:</label>
+                            <input type="date" id="newAdminEndDate" value="${defaultEndDate}" class="w-full border rounded px-3 py-2">
+                        </div>
+                    </div>
+                    <div class="bg-blue-50 border border-blue-200 rounded p-3">
+                        <div class="text-sm text-blue-800">
+                            <strong>참고:</strong> 유효기간이 만료된 관리자는 로그인할 수 없습니다.<br>
+                            최고관리자는 유효기간 제한이 없습니다.
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="saveNewAdmin()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">저장</button>
+                        <button onclick="manageAdmins()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '새 관리자 추가';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function saveNewAdmin() {
+            const username = document.getElementById('newAdminUsername').value;
+            const password = document.getElementById('newAdminPassword').value;
+            const type = document.getElementById('newAdminType').value;
+            const shopName = document.getElementById('newAdminShopName').value;
+            const phone = document.getElementById('newAdminPhone').value;
+            const startDate = document.getElementById('newAdminStartDate').value;
+            const endDate = document.getElementById('newAdminEndDate').value;
+
+            if (!username || !password) {
+                alert('아이디와 비밀번호를 입력해주세요.');
+                return;
+            }
+
+            if (!startDate || !endDate) {
+                alert('유효기간을 입력해주세요.');
+                return;
+            }
+
+            if (new Date(startDate) >= new Date(endDate)) {
+                alert('종료일은 시작일보다 늦어야 합니다.');
+                return;
+            }
+
+            const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
+            
+            // 중복 아이디 체크
+            if (admins.some(a => a.username === username)) {
+                alert('이미 존재하는 아이디입니다.');
+                return;
+            }
+
+            const newId = Math.max(...admins.map(a => a.id), 0) + 1;
+
+            admins.push({
+                id: newId,
+                username: username,
+                password: password,
+                type: type,
+                shopName: shopName,
+                phone: phone,
+                validFrom: startDate,
+                validUntil: endDate,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            });
+
+            localStorage.setItem('globalAdmins', JSON.stringify(admins));
+            alert('관리자가 추가되었습니다.');
+            manageAdmins();
+        }
+
+        function editAdmin(id) {
+            const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
+            const admin = admins.find(a => a.id === id);
+            
+            if (!admin) return;
+
+            // 기존 관리자의 유효기간이 없는 경우 기본값 설정
+            const defaultStartDate = admin.validFrom || new Date().toISOString().split('T')[0];
+            const defaultEndDate = admin.validUntil || (() => {
+                const oneYearLater = new Date();
+                oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
+                return oneYearLater.toISOString().split('T')[0];
+            })();
+
+            const content = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">아이디:</label>
+                        <input type="text" id="editAdminUsername" value="${admin.username}" class="w-full border rounded px-3 py-2" ${id === 1 ? 'readonly' : ''}>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">비밀번호:</label>
+                        <input type="password" id="editAdminPassword" value="${admin.password}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">타입:</label>
+                        <select id="editAdminType" class="w-full border rounded px-3 py-2" ${id === 1 ? 'disabled' : ''} onchange="toggleValidityFields()">
+                            <option value="normal" ${admin.type === 'normal' ? 'selected' : ''}>일반관리자</option>
+                            <option value="super" ${admin.type === 'super' ? 'selected' : ''}>최고관리자</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">상점명:</label>
+                        <input type="text" id="editAdminShopName" value="${admin.shopName || ''}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">전화번호:</label>
+                        <input type="text" id="editAdminPhone" value="${admin.phone || ''}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div id="validityFields" class="grid grid-cols-2 gap-4" style="display: ${admin.type === 'super' ? 'none' : 'grid'}">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">유효기간 시작일:</label>
+                            <input type="date" id="editAdminStartDate" value="${defaultStartDate}" class="w-full border rounded px-3 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">유효기간 종료일:</label>
+                            <input type="date" id="editAdminEndDate" value="${defaultEndDate}" class="w-full border rounded px-3 py-2">
+                        </div>
+                    </div>
+                    <div class="bg-blue-50 border border-blue-200 rounded p-3">
+                        <div class="text-sm text-blue-800">
+                            <strong>참고:</strong> 최고관리자는 유효기간 제한이 없습니다.<br>
+                            일반관리자는 유효기간이 만료되면 로그인할 수 없습니다.
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="updateAdmin(${id})" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">수정</button>
+                        <button onclick="manageAdmins()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '관리자 수정';
+            document.getElementById('managementContent').innerHTML = content;
+            
+            // 유효기간 필드 토글 함수를 전역으로 추가
+            window.toggleValidityFields = function() {
+                const adminType = document.getElementById('editAdminType').value;
+                const validityFields = document.getElementById('validityFields');
+                if (validityFields) {
+                    validityFields.style.display = adminType === 'super' ? 'none' : 'grid';
+                }
+            };
+        }
+
+        function updateAdmin(id) {
+            const username = document.getElementById('editAdminUsername').value;
+            const password = document.getElementById('editAdminPassword').value;
+            const type = document.getElementById('editAdminType').value;
+            const shopName = document.getElementById('editAdminShopName').value;
+            const phone = document.getElementById('editAdminPhone').value;
+
+            if (!username || !password) {
+                alert('아이디와 비밀번호를 입력해주세요.');
+                return;
+            }
+
+            let startDate = null;
+            let endDate = null;
+
+            // 일반관리자인 경우 유효기간 검증
+            if (type === 'normal') {
+                startDate = document.getElementById('editAdminStartDate').value;
+                endDate = document.getElementById('editAdminEndDate').value;
+
+                if (!startDate || !endDate) {
+                    alert('일반관리자는 유효기간을 입력해주세요.');
+                    return;
+                }
+
+                if (new Date(startDate) >= new Date(endDate)) {
+                    alert('종료일은 시작일보다 늦어야 합니다.');
+                    return;
+                }
+            }
+
+            const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
+            const adminIndex = admins.findIndex(a => a.id === id);
+            
+            if (adminIndex === -1) return;
+
+            // 기존 관리자 정보 유지하면서 업데이트
+            const existingAdmin = admins[adminIndex];
+            
+            admins[adminIndex] = {
+                ...existingAdmin,
+                username: username,
+                password: password,
+                type: type,
+                shopName: shopName,
+                phone: phone,
+                validFrom: type === 'super' ? null : startDate,
+                validUntil: type === 'super' ? null : endDate,
+                updatedAt: new Date().toISOString()
+            };
+
+            localStorage.setItem('globalAdmins', JSON.stringify(admins));
+            alert('관리자 정보가 수정되었습니다.');
+            manageAdmins();
+        }
+
+        function deleteAdmin(id) {
+            if (id === 1) {
+                alert('기본 관리자는 삭제할 수 없습니다.');
+                return;
+            }
+
+            if (confirm('정말 삭제하시겠습니까?')) {
+                const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
+                const filteredAdmins = admins.filter(a => a.id !== id);
+                localStorage.setItem('globalAdmins', JSON.stringify(filteredAdmins));
+                alert('관리자가 삭제되었습니다.');
+                manageAdmins();
+            }
+        }
+
+        // 앱 초기화
+        initializeApp();
+        updateTranslations();
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'998ccaa3d1a664f5',t:'MTc2MjE4MjU2MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
