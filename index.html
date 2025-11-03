@@ -3023,24 +3023,103 @@
                 return;
             }
             
-            // CSV 형태로 데이터 생성
-            let csvContent = '\uFEFF'; // UTF-8 BOM
-            csvContent += '날짜,직원명,메뉴,시간,가격,커미션,방번호,고객명\n';
+            showExportDialog(filteredReservations, startDate, endDate, 'statistics');
+        }
+
+        function showExportDialog(data, startDate, endDate, exportType) {
+            const defaultFileName = exportType === 'statistics' ? 
+                `통계_${startDate}_${endDate}` : 
+                `전체데이터_${currentAdmin.username}_${new Date().toISOString().split('T')[0]}`;
+                
+            const content = `
+                <div class="space-y-4">
+                    <div class="text-center">
+                        <h3 class="text-lg font-bold mb-4">엑셀 내보내기</h3>
+                        <p class="text-gray-600 mb-4">데이터를 CSV 파일로 내보냅니다.</p>
+                    </div>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded p-3">
+                        <div class="text-sm text-blue-800">
+                            <div><strong>데이터 개수:</strong> ${data.length}개</div>
+                            <div><strong>기간:</strong> ${startDate}${endDate !== startDate ? ` ~ ${endDate}` : ''}</div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">파일명:</label>
+                        <input type="text" id="exportFileName" 
+                               value="${defaultFileName}" 
+                               class="w-full border rounded px-3 py-2" 
+                               placeholder="내보낼 파일명을 입력하세요">
+                        <div class="text-xs text-gray-500 mt-1">* .csv 확장자는 자동으로 추가됩니다</div>
+                    </div>
+                    
+                    <div class="bg-yellow-50 border border-yellow-200 rounded p-3">
+                        <div class="text-sm text-yellow-800">
+                            <strong>참고:</strong> 브라우저 보안상 저장 경로는 기본 다운로드 폴더로 설정됩니다.<br>
+                            다운로드 후 원하는 위치로 파일을 이동하실 수 있습니다.
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-2 justify-center">
+                        <button onclick="executeExport('${exportType}')" class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600">내보내기 실행</button>
+                        <button onclick="closeManagementModal()" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
             
-            filteredReservations.forEach(r => {
-                csvContent += `${r.date},${r.staffName},${r.menuName},${r.duration}분,${r.price},${r.commission},${r.roomNumber || ''},${r.customerName || ''}\n`;
-            });
+            document.getElementById('managementTitle').textContent = '엑셀 내보내기';
+            document.getElementById('managementContent').innerHTML = content;
+            document.getElementById('managementModal').style.display = 'block';
             
-            // 파일 다운로드
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', `통계_${startDate}_${endDate}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            // 전역 변수에 데이터 저장 (executeExport에서 사용)
+            window.exportData = { data, startDate, endDate };
+        }
+
+        function executeExport(exportType) {
+            const fileName = document.getElementById('exportFileName').value.trim();
+            if (!fileName) {
+                alert('파일명을 입력해주세요.');
+                return;
+            }
+
+            const { data, startDate, endDate } = window.exportData;
+            
+            try {
+                // CSV 형태로 데이터 생성
+                let csvContent = '\uFEFF'; // UTF-8 BOM
+                
+                if (exportType === 'statistics') {
+                    csvContent += '날짜,직원명,메뉴,시간,가격,커미션,방번호,고객명\n';
+                    data.forEach(r => {
+                        csvContent += `${r.date},${r.staffName},${r.menuName},${r.duration}분,${r.price},${r.commission},${r.roomNumber || ''},${r.customerName || ''}\n`;
+                    });
+                } else {
+                    csvContent += '날짜,직원명,메뉴,시간(분),시작시간,끝시간,가격,커미션,방번호,고객명,입금상태\n';
+                    data.forEach(r => {
+                        const endTime = calculateEndTime(r.startTime, r.duration);
+                        const paymentStatus = r.paid ? '입금완료' : '미입금';
+                        csvContent += `${r.date},${r.staffName},${r.menuName},${r.duration},${r.startTime || ''},${r.startTime ? endTime : ''},${r.price},${r.commission},${r.roomNumber || ''},${r.customerName || ''},${paymentStatus}\n`;
+                    });
+                }
+                
+                // 파일 다운로드
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', fileName.endsWith('.csv') ? fileName : `${fileName}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                
+                alert(`내보내기가 완료되었습니다.\n파일명: ${link.download}\n위치: 기본 다운로드 폴더`);
+                closeManagementModal();
+            } catch (error) {
+                alert('내보내기 중 오류가 발생했습니다: ' + error.message);
+            }
         }
 
         // 시작 날짜 입력시 자동으로 끝 날짜 설정
@@ -3068,13 +3147,49 @@
 
         // 백업/복원 관련 함수들
         function showLocalBackupDialog() {
-            if (confirm('현재 데이터를 로컬 파일로 백업하시겠습니까?')) {
-                performLocalBackup();
-            }
+            const content = `
+                <div class="space-y-4">
+                    <div class="text-center">
+                        <h3 class="text-lg font-bold mb-4">로컬 백업</h3>
+                        <p class="text-gray-600 mb-4">현재 데이터를 JSON 파일로 백업합니다.</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">파일명:</label>
+                        <input type="text" id="backupFileName" 
+                               value="massage_backup_${currentAdmin.username}_${new Date().toISOString().split('T')[0]}" 
+                               class="w-full border rounded px-3 py-2" 
+                               placeholder="백업 파일명을 입력하세요">
+                        <div class="text-xs text-gray-500 mt-1">* .json 확장자는 자동으로 추가됩니다</div>
+                    </div>
+                    
+                    <div class="bg-yellow-50 border border-yellow-200 rounded p-3">
+                        <div class="text-sm text-yellow-800">
+                            <strong>참고:</strong> 브라우저 보안상 저장 경로는 기본 다운로드 폴더로 설정됩니다.<br>
+                            다운로드 후 원하는 위치로 파일을 이동하실 수 있습니다.
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-2 justify-center">
+                        <button onclick="performLocalBackup()" class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600">백업 실행</button>
+                        <button onclick="closeManagementModal()" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '로컬 백업';
+            document.getElementById('managementContent').innerHTML = content;
+            document.getElementById('managementModal').style.display = 'block';
         }
 
         function performLocalBackup() {
             try {
+                const fileName = document.getElementById('backupFileName').value.trim();
+                if (!fileName) {
+                    alert('파일명을 입력해주세요.');
+                    return;
+                }
+
                 const backupData = {
                     timestamp: new Date().toISOString(),
                     adminUsername: currentAdmin.username,
@@ -3105,26 +3220,94 @@
                 
                 const link = document.createElement('a');
                 link.href = url;
-                link.download = `massage_backup_${currentAdmin.username}_${new Date().toISOString().split('T')[0]}.json`;
+                link.download = fileName.endsWith('.json') ? fileName : `${fileName}.json`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
                 URL.revokeObjectURL(url);
 
-                alert('백업이 완료되었습니다.');
+                alert(`백업이 완료되었습니다.\n파일명: ${link.download}\n위치: 기본 다운로드 폴더`);
+                closeManagementModal();
             } catch (error) {
                 alert('백업 중 오류가 발생했습니다: ' + error.message);
             }
         }
 
         function showLocalRestoreDialog() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.json';
-            input.onchange = function(event) {
-                restoreData(event);
-            };
-            input.click();
+            const content = `
+                <div class="space-y-4">
+                    <div class="text-center">
+                        <h3 class="text-lg font-bold mb-4">로컬 복원</h3>
+                        <p class="text-gray-600 mb-4">백업 파일을 선택하여 데이터를 복원합니다.</p>
+                    </div>
+                    
+                    <div class="bg-red-50 border border-red-200 rounded p-3">
+                        <div class="text-sm text-red-800">
+                            <strong>⚠️ 주의:</strong> 현재 데이터가 모두 삭제되고 백업 데이터로 대체됩니다.<br>
+                            복원 전에 현재 데이터를 백업하는 것을 권장합니다.
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">백업 파일 선택:</label>
+                        <input type="file" id="restoreFileInput" accept=".json" 
+                               class="w-full border rounded px-3 py-2 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                        <div class="text-xs text-gray-500 mt-1">* JSON 형식의 백업 파일만 선택 가능합니다</div>
+                    </div>
+                    
+                    <div id="fileInfo" class="hidden bg-blue-50 border border-blue-200 rounded p-3">
+                        <div class="text-sm text-blue-800">
+                            <div><strong>파일명:</strong> <span id="selectedFileName"></span></div>
+                            <div><strong>파일 크기:</strong> <span id="selectedFileSize"></span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-2 justify-center">
+                        <button onclick="executeRestore()" class="bg-orange-500 text-white px-6 py-2 rounded hover:bg-orange-600">복원 실행</button>
+                        <button onclick="closeManagementModal()" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '로컬 복원';
+            document.getElementById('managementContent').innerHTML = content;
+            document.getElementById('managementModal').style.display = 'block';
+            
+            // 파일 선택 이벤트 리스너 추가
+            document.getElementById('restoreFileInput').addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    document.getElementById('selectedFileName').textContent = file.name;
+                    document.getElementById('selectedFileSize').textContent = formatFileSize(file.size);
+                    document.getElementById('fileInfo').classList.remove('hidden');
+                } else {
+                    document.getElementById('fileInfo').classList.add('hidden');
+                }
+            });
+        }
+
+        function executeRestore() {
+            const fileInput = document.getElementById('restoreFileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('복원할 파일을 선택해주세요.');
+                return;
+            }
+
+            if (!confirm('현재 데이터가 모두 삭제되고 백업 데이터로 복원됩니다. 계속하시겠습니까?')) {
+                return;
+            }
+
+            restoreData({ target: { files: [file] } });
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
         function restoreData(event) {
@@ -3207,39 +3390,18 @@
         function exportAllDataExcel() {
             try {
                 const reservations = JSON.parse(localStorage.getItem(getAdminKey('reservations')) || '[]');
-                const staff = JSON.parse(localStorage.getItem(getAdminKey('staff')) || '[]');
-                const menus = JSON.parse(localStorage.getItem(getAdminKey('menus')) || '[]');
-                const rooms = JSON.parse(localStorage.getItem(getAdminKey('rooms')) || '[]');
-                const customers = JSON.parse(localStorage.getItem(getAdminKey('customers')) || '[]');
                 
                 if (reservations.length === 0) {
                     alert('내보낼 데이터가 없습니다.');
                     return;
                 }
                 
-                // CSV 형태로 데이터 생성
-                let csvContent = '\uFEFF'; // UTF-8 BOM
-                csvContent += '날짜,직원명,메뉴,시간(분),시작시간,끝시간,가격,커미션,방번호,고객명,입금상태\n';
+                // 날짜 범위 계산
+                const dates = reservations.map(r => r.date).sort();
+                const startDate = dates[0];
+                const endDate = dates[dates.length - 1];
                 
-                reservations.forEach(r => {
-                    const endTime = calculateEndTime(r.startTime, r.duration);
-                    const paymentStatus = r.paid ? '입금완료' : '미입금';
-                    csvContent += `${r.date},${r.staffName},${r.menuName},${r.duration},${r.startTime || ''},${r.startTime ? endTime : ''},${r.price},${r.commission},${r.roomNumber || ''},${r.customerName || ''},${paymentStatus}\n`;
-                });
-                
-                // 파일 다운로드
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement('a');
-                const url = URL.createObjectURL(blob);
-                link.setAttribute('href', url);
-                link.setAttribute('download', `전체데이터_${currentAdmin.username}_${new Date().toISOString().split('T')[0]}.csv`);
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-                
-                alert('전체 데이터 내보내기가 완료되었습니다.');
+                showExportDialog(reservations, startDate, endDate, 'allData');
             } catch (error) {
                 alert('데이터 내보내기 중 오류가 발생했습니다: ' + error.message);
             }
@@ -4310,5 +4472,5 @@
         initializeApp();
         updateTranslations();
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99893970d3f145c0',t:'MTc2MjE0NTE1MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9989526df13e4b70',t:'MTc2MjE0NjE3My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
