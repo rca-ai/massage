@@ -3194,13 +3194,25 @@
                     
                     <div class="bg-yellow-50 border border-yellow-200 rounded p-3">
                         <div class="text-sm text-yellow-800">
-                            <strong>참고:</strong> 브라우저 보안상 저장 경로는 기본 다운로드 폴더로 설정됩니다.<br>
-                            다운로드 후 원하는 위치로 파일을 이동하실 수 있습니다.
+                            <strong>모바일 앱 사용 시:</strong><br>
+                            • 백업 파일은 기본적으로 다운로드 폴더에 저장됩니다<br>
+                            • 일부 앱에서는 파일 관리자를 통해 저장 위치를 변경할 수 있습니다<br>
+                            • 백업 완료 후 파일 관리자에서 원하는 위치로 이동 가능합니다
+                        </div>
+                    </div>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded p-3">
+                        <div class="text-sm text-blue-800">
+                            <strong>대안 방법:</strong><br>
+                            • 백업 데이터를 클립보드에 복사하여 메모장 등에 저장<br>
+                            • 이메일로 백업 데이터 전송<br>
+                            • 클라우드 저장소 활용
                         </div>
                     </div>
                     
                     <div class="flex gap-2 justify-center">
-                        <button onclick="performLocalBackup()" class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600">백업 실행</button>
+                        <button onclick="performLocalBackup()" class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600">파일 다운로드</button>
+                        <button onclick="performBackupToClipboard()" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">클립보드 복사</button>
                         <button onclick="closeManagementModal()" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">취소</button>
                     </div>
                 </div>
@@ -3219,46 +3231,160 @@
                     return;
                 }
 
-                const backupData = {
-                    timestamp: new Date().toISOString(),
-                    adminUsername: currentAdmin.username,
-                    data: {
-                        menus: localStorage.getItem(getAdminKey('menus')),
-                        staff: localStorage.getItem(getAdminKey('staff')),
-                        rooms: localStorage.getItem(getAdminKey('rooms')),
-                        customers: localStorage.getItem(getAdminKey('customers')),
-                        paymentMethods: localStorage.getItem(getAdminKey('paymentMethods')),
-                        reservations: localStorage.getItem(getAdminKey('reservations')),
-                        currency: localStorage.getItem(getAdminKey('currency')),
-                        guarantees: localStorage.getItem(getAdminKey('guarantees')),
-                        staffOrders: {}
-                    }
-                };
-
-                // 모든 날짜별 순번 데이터 백업
-                for (let key in localStorage) {
-                    if (key.startsWith(`${currentAdmin.username}_staffOrder_`)) {
-                        const date = key.replace(`${currentAdmin.username}_staffOrder_`, '');
-                        backupData.data.staffOrders[date] = localStorage.getItem(key);
-                    }
-                }
-
+                const backupData = createBackupData();
                 const jsonString = JSON.stringify(backupData, null, 2);
-                const blob = new Blob([jsonString], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
                 
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = fileName.endsWith('.json') ? fileName : `${fileName}.json`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-
-                alert(`백업이 완료되었습니다.\n파일명: ${link.download}\n위치: 기본 다운로드 폴더`);
-                closeManagementModal();
+                // 모바일 환경 감지
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                
+                if (isMobile) {
+                    // 모바일에서는 더 안전한 방법 사용
+                    try {
+                        const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' });
+                        
+                        // Web Share API 지원 확인
+                        if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], fileName + '.json')] })) {
+                            const file = new File([blob], fileName + '.json', { type: 'application/json' });
+                            navigator.share({
+                                files: [file],
+                                title: '마사지샵 백업 파일',
+                                text: '백업 데이터를 저장하세요'
+                            }).then(() => {
+                                alert('백업 파일 공유가 완료되었습니다.');
+                                closeManagementModal();
+                            }).catch(() => {
+                                // 공유 실패시 기본 다운로드 방식 사용
+                                downloadBackupFile(blob, fileName);
+                            });
+                        } else {
+                            // Web Share API 미지원시 기본 다운로드
+                            downloadBackupFile(blob, fileName);
+                        }
+                    } catch (error) {
+                        // 모바일에서 오류 발생시 클립보드 복사 제안
+                        if (confirm('파일 다운로드에 실패했습니다. 클립보드에 백업 데이터를 복사하시겠습니까?')) {
+                            performBackupToClipboard();
+                        }
+                    }
+                } else {
+                    // 데스크톱에서는 기본 다운로드 방식
+                    const blob = new Blob([jsonString], { type: 'application/json' });
+                    downloadBackupFile(blob, fileName);
+                }
             } catch (error) {
                 alert('백업 중 오류가 발생했습니다: ' + error.message);
+            }
+        }
+
+        function downloadBackupFile(blob, fileName) {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = fileName.endsWith('.json') ? fileName : `${fileName}.json`;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            alert(`백업이 완료되었습니다.\n파일명: ${link.download}\n위치: 다운로드 폴더`);
+            closeManagementModal();
+        }
+
+        function createBackupData() {
+            const backupData = {
+                timestamp: new Date().toISOString(),
+                adminUsername: currentAdmin.username,
+                data: {
+                    menus: localStorage.getItem(getAdminKey('menus')),
+                    staff: localStorage.getItem(getAdminKey('staff')),
+                    rooms: localStorage.getItem(getAdminKey('rooms')),
+                    customers: localStorage.getItem(getAdminKey('customers')),
+                    paymentMethods: localStorage.getItem(getAdminKey('paymentMethods')),
+                    reservations: localStorage.getItem(getAdminKey('reservations')),
+                    currency: localStorage.getItem(getAdminKey('currency')),
+                    guarantees: localStorage.getItem(getAdminKey('guarantees')),
+                    staffOrders: {}
+                }
+            };
+
+            // 모든 날짜별 순번 데이터 백업
+            for (let key in localStorage) {
+                if (key.startsWith(`${currentAdmin.username}_staffOrder_`)) {
+                    const date = key.replace(`${currentAdmin.username}_staffOrder_`, '');
+                    backupData.data.staffOrders[date] = localStorage.getItem(key);
+                }
+            }
+
+            return backupData;
+        }
+
+        function performBackupToClipboard() {
+            try {
+                const backupData = createBackupData();
+                const jsonString = JSON.stringify(backupData, null, 2);
+                
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(jsonString).then(() => {
+                        alert('백업 데이터가 클립보드에 복사되었습니다.\n메모장이나 텍스트 에디터에 붙여넣기하여 .json 파일로 저장하세요.');
+                        closeManagementModal();
+                    }).catch(() => {
+                        // 클립보드 API 실패시 대안 방법
+                        showBackupDataModal(jsonString);
+                    });
+                } else {
+                    // 클립보드 API 미지원시 대안 방법
+                    showBackupDataModal(jsonString);
+                }
+            } catch (error) {
+                alert('클립보드 복사 중 오류가 발생했습니다: ' + error.message);
+            }
+        }
+
+        function showBackupDataModal(jsonString) {
+            const content = `
+                <div class="space-y-4">
+                    <div class="text-center">
+                        <h3 class="text-lg font-bold mb-4">백업 데이터</h3>
+                        <p class="text-gray-600 mb-4">아래 데이터를 복사하여 .json 파일로 저장하세요</p>
+                    </div>
+                    
+                    <div>
+                        <textarea id="backupDataText" class="w-full h-64 border rounded px-3 py-2 text-xs font-mono" readonly>${jsonString}</textarea>
+                    </div>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded p-3">
+                        <div class="text-sm text-blue-800">
+                            <strong>저장 방법:</strong><br>
+                            1. 위 텍스트를 모두 선택하여 복사<br>
+                            2. 메모장이나 텍스트 에디터에 붙여넣기<br>
+                            3. 파일명.json으로 저장
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-2 justify-center">
+                        <button onclick="selectAllBackupData()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">전체 선택</button>
+                        <button onclick="closeManagementModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">닫기</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '백업 데이터 복사';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function selectAllBackupData() {
+            const textarea = document.getElementById('backupDataText');
+            if (textarea) {
+                textarea.select();
+                textarea.setSelectionRange(0, 99999); // 모바일 지원
+                
+                try {
+                    document.execCommand('copy');
+                    alert('백업 데이터가 클립보드에 복사되었습니다.');
+                } catch (err) {
+                    alert('복사에 실패했습니다. 수동으로 텍스트를 선택하여 복사해주세요.');
+                }
             }
         }
 
@@ -3279,7 +3405,7 @@
                     
                     <div>
                         <label class="block text-sm font-medium mb-2">백업 파일 선택:</label>
-                        <input type="file" id="restoreFileInput" accept=".json"
+                        <input type="file" id="restoreFileInput" accept=".json,application/json,text/json"
                                class="w-full border rounded px-3 py-2 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
                         <div class="text-xs text-gray-500 mt-1">* JSON 형식의 백업 파일만 선택 가능합니다</div>
                     </div>
@@ -3288,6 +3414,15 @@
                         <div class="text-sm text-blue-800">
                             <div><strong>파일명:</strong> <span id="selectedFileName"></span></div>
                             <div><strong>파일 크기:</strong> <span id="selectedFileSize"></span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-yellow-50 border border-yellow-200 rounded p-3">
+                        <div class="text-sm text-yellow-800">
+                            <strong>모바일 앱 사용 시:</strong><br>
+                            • 파일 선택 시 문서/파일 관리자가 열리지 않으면 '파일' 또는 '내 파일' 앱을 먼저 실행해주세요<br>
+                            • JSON 파일이 다운로드 폴더에 있는지 확인해주세요<br>
+                            • 카메라가 열리면 뒤로가기 후 다시 시도해주세요
                         </div>
                     </div>
                     
@@ -3303,16 +3438,21 @@
             document.getElementById('managementModal').style.display = 'block';
             
             // 파일 선택 이벤트 리스너 추가
-            document.getElementById('restoreFileInput').addEventListener('change', function(event) {
-                const file = event.target.files[0];
-                if (file) {
-                    document.getElementById('selectedFileName').textContent = file.name;
-                    document.getElementById('selectedFileSize').textContent = formatFileSize(file.size);
-                    document.getElementById('fileInfo').classList.remove('hidden');
-                } else {
-                    document.getElementById('fileInfo').classList.add('hidden');
+            setTimeout(() => {
+                const fileInput = document.getElementById('restoreFileInput');
+                if (fileInput) {
+                    fileInput.addEventListener('change', function(event) {
+                        const file = event.target.files[0];
+                        if (file) {
+                            document.getElementById('selectedFileName').textContent = file.name;
+                            document.getElementById('selectedFileSize').textContent = formatFileSize(file.size);
+                            document.getElementById('fileInfo').classList.remove('hidden');
+                        } else {
+                            document.getElementById('fileInfo').classList.add('hidden');
+                        }
+                    });
                 }
-            });
+            }, 100);
         }
 
         function executeRestore() {
@@ -3320,7 +3460,10 @@
             const file = fileInput.files[0];
             
             if (!file) {
-                alert('복원할 파일을 선택해주세요.');
+                // 파일이 선택되지 않은 경우 텍스트 입력 방식 제안
+                if (confirm('파일이 선택되지 않았습니다. 텍스트로 백업 데이터를 입력하시겠습니까?')) {
+                    showTextRestoreModal();
+                }
                 return;
             }
 
@@ -3329,6 +3472,107 @@
             }
 
             restoreData({ target: { files: [file] } });
+        }
+
+        function showTextRestoreModal() {
+            const content = `
+                <div class="space-y-4">
+                    <div class="text-center">
+                        <h3 class="text-lg font-bold mb-4">텍스트로 복원</h3>
+                        <p class="text-gray-600 mb-4">백업 데이터를 텍스트로 붙여넣어 복원합니다</p>
+                    </div>
+                    
+                    <div class="bg-red-50 border border-red-200 rounded p-3">
+                        <div class="text-sm text-red-800">
+                            <strong>⚠️ 주의:</strong> 현재 데이터가 모두 삭제되고 백업 데이터로 대체됩니다.
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">백업 데이터 (JSON 형식):</label>
+                        <textarea id="restoreDataText" class="w-full h-64 border rounded px-3 py-2 text-xs font-mono" 
+                                  placeholder="백업 데이터를 여기에 붙여넣으세요..."></textarea>
+                    </div>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded p-3">
+                        <div class="text-sm text-blue-800">
+                            <strong>사용 방법:</strong><br>
+                            1. 백업 시 복사한 JSON 데이터를 위 텍스트 영역에 붙여넣기<br>
+                            2. 데이터가 올바른 JSON 형식인지 확인<br>
+                            3. '복원 실행' 버튼 클릭
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-2 justify-center">
+                        <button onclick="executeTextRestore()" class="bg-orange-500 text-white px-6 py-2 rounded hover:bg-orange-600">복원 실행</button>
+                        <button onclick="showLocalRestoreDialog()" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">파일 선택으로 돌아가기</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '텍스트로 복원';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function executeTextRestore() {
+            const textData = document.getElementById('restoreDataText').value.trim();
+            
+            if (!textData) {
+                alert('백업 데이터를 입력해주세요.');
+                return;
+            }
+
+            if (!confirm('현재 데이터가 모두 삭제되고 백업 데이터로 복원됩니다. 계속하시겠습니까?')) {
+                return;
+            }
+
+            try {
+                const backupData = JSON.parse(textData);
+                
+                if (!backupData.data || !backupData.adminUsername) {
+                    alert('올바르지 않은 백업 데이터입니다.');
+                    return;
+                }
+
+                if (backupData.adminUsername !== currentAdmin.username) {
+                    if (!confirm(`이 백업은 다른 관리자(${backupData.adminUsername})의 데이터입니다. 계속하시겠습니까?`)) {
+                        return;
+                    }
+                }
+
+                // 기존 데이터 삭제
+                const keysToRemove = [];
+                for (let key in localStorage) {
+                    if (key.startsWith(currentAdmin.username + '_')) {
+                        keysToRemove.push(key);
+                    }
+                }
+                keysToRemove.forEach(key => localStorage.removeItem(key));
+
+                // 백업 데이터 복원
+                if (backupData.data.menus) localStorage.setItem(getAdminKey('menus'), backupData.data.menus);
+                if (backupData.data.staff) localStorage.setItem(getAdminKey('staff'), backupData.data.staff);
+                if (backupData.data.rooms) localStorage.setItem(getAdminKey('rooms'), backupData.data.rooms);
+                if (backupData.data.customers) localStorage.setItem(getAdminKey('customers'), backupData.data.customers);
+                if (backupData.data.paymentMethods) localStorage.setItem(getAdminKey('paymentMethods'), backupData.data.paymentMethods);
+                if (backupData.data.reservations) localStorage.setItem(getAdminKey('reservations'), backupData.data.reservations);
+                if (backupData.data.currency) localStorage.setItem(getAdminKey('currency'), backupData.data.currency);
+                if (backupData.data.guarantees) localStorage.setItem(getAdminKey('guarantees'), backupData.data.guarantees);
+
+                // 순번 데이터 복원
+                if (backupData.data.staffOrders) {
+                    for (let date in backupData.data.staffOrders) {
+                        localStorage.setItem(getDailyStaffOrderKey(date), backupData.data.staffOrders[date]);
+                    }
+                }
+
+                alert(`텍스트 복원이 완료되었습니다!\n백업 날짜: ${new Date(backupData.timestamp).toLocaleString()}`);
+                
+                // 화면 새로고침
+                location.reload();
+            } catch (error) {
+                alert('복원 중 오류가 발생했습니다. JSON 형식이 올바른지 확인해주세요.\n오류: ' + error.message);
+            }
         }
 
         function formatFileSize(bytes) {
@@ -4746,5 +4990,5 @@
         initializeApp();
         updateTranslations();
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'998a9a3405da4ba6',t:'MTc2MjE1OTU5OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'998b3e7d4203a9f9',t:'MTc2MjE2NjMzMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
