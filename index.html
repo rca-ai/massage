@@ -1050,11 +1050,75 @@
         // 전역 데이터 초기화 (관리자 계정만)
         function initializeGlobalData() {
             if (!localStorage.getItem('globalAdmins')) {
+                const oneYearLater = new Date();
+                oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
+                const defaultEndDate = oneYearLater.toISOString().split('T')[0];
+                const today = new Date().toISOString().split('T')[0];
+
                 localStorage.setItem('globalAdmins', JSON.stringify([
-                    {id: 1, username: 'admin', password: '12345678', type: 'super', shopName: '', phone: ''},
-                    {id: 2, username: 'shop1', password: '12345678', type: 'normal', shopName: '힐링 마사지', phone: '02-1234-5678'},
-                    {id: 3, username: 'Test', password: '1111', type: 'normal', shopName: '테스트 마사지', phone: '02-0000-0000'}
+                    {
+                        id: 1, 
+                        username: 'admin', 
+                        password: '12345678', 
+                        type: 'super', 
+                        shopName: '', 
+                        phone: '',
+                        validFrom: null,
+                        validUntil: null,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    },
+                    {
+                        id: 2, 
+                        username: 'shop1', 
+                        password: '12345678', 
+                        type: 'normal', 
+                        shopName: '힐링 마사지', 
+                        phone: '02-1234-5678',
+                        validFrom: today,
+                        validUntil: defaultEndDate,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    },
+                    {
+                        id: 3, 
+                        username: 'Test', 
+                        password: '1111', 
+                        type: 'normal', 
+                        shopName: '테스트 마사지', 
+                        phone: '02-0000-0000',
+                        validFrom: today,
+                        validUntil: defaultEndDate,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    }
                 ]));
+            } else {
+                // 기존 관리자 데이터에 유효기간 필드가 없는 경우 추가
+                const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
+                let needsUpdate = false;
+                
+                admins.forEach(admin => {
+                    if (!admin.hasOwnProperty('validFrom') || !admin.hasOwnProperty('validUntil')) {
+                        needsUpdate = true;
+                        if (admin.type === 'super') {
+                            admin.validFrom = null;
+                            admin.validUntil = null;
+                        } else {
+                            const today = new Date().toISOString().split('T')[0];
+                            const oneYearLater = new Date();
+                            oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
+                            admin.validFrom = today;
+                            admin.validUntil = oneYearLater.toISOString().split('T')[0];
+                        }
+                        admin.createdAt = admin.createdAt || new Date().toISOString();
+                        admin.updatedAt = new Date().toISOString();
+                    }
+                });
+                
+                if (needsUpdate) {
+                    localStorage.setItem('globalAdmins', JSON.stringify(admins));
+                }
             }
 
             if (!localStorage.getItem('globalCurrency')) {
@@ -1168,6 +1232,32 @@
             const admin = admins.find(a => a.username === username && a.password === password);
             
             if (admin) {
+                // 유효기간 검사 (최고관리자는 제외)
+                if (admin.type !== 'super' && admin.validUntil) {
+                    const today = new Date().toISOString().split('T')[0];
+                    const validFrom = admin.validFrom || '1900-01-01';
+                    const validUntil = admin.validUntil;
+                    
+                    if (today < validFrom) {
+                        alert('아직 사용 가능한 기간이 아닙니다.\n사용 가능 기간: ' + validFrom + ' ~ ' + validUntil);
+                        return;
+                    }
+                    
+                    if (today > validUntil) {
+                        alert('사용 기간이 만료되었습니다.\n관리자에게 문의하세요.\n만료일: ' + validUntil);
+                        return;
+                    }
+                    
+                    // 만료 7일 전 경고
+                    const warningDate = new Date(validUntil);
+                    warningDate.setDate(warningDate.getDate() - 7);
+                    const warningDateStr = warningDate.toISOString().split('T')[0];
+                    
+                    if (today >= warningDateStr) {
+                        const remainingDays = Math.ceil((new Date(validUntil) - new Date(today)) / (1000 * 60 * 60 * 24));
+                        alert(`⚠️ 사용 기간 만료 알림\n\n${remainingDays}일 후 사용 기간이 만료됩니다.\n만료일: ${validUntil}\n\n관리자에게 연장을 요청하세요.`);
+                    }
+                }
                 currentAdmin = admin;
                 localStorage.setItem('currentAdmin', JSON.stringify(admin));
                 initializeAdminData();
@@ -2452,6 +2542,7 @@
                                 <th class="border border-gray-300 p-2">타입</th>
                                 <th class="border border-gray-300 p-2">상점명</th>
                                 <th class="border border-gray-300 p-2">전화번호</th>
+                                <th class="border border-gray-300 p-2">유효기간</th>
                                 <th class="border border-gray-300 p-2">작업</th>
                             </tr>
                         </thead>
@@ -2459,12 +2550,20 @@
             `;
             
             admins.forEach(admin => {
+                const today = new Date().toISOString().split('T')[0];
+                const isExpired = admin.validUntil && admin.validUntil < today && admin.type !== 'super';
+                const validityStatus = admin.type === 'super' ? '무제한' : 
+                    (isExpired ? '만료됨' : `${admin.validFrom || '-'} ~ ${admin.validUntil || '-'}`);
+                
+                const rowClass = isExpired ? 'bg-red-50' : '';
+                
                 content += `
-                    <tr>
+                    <tr class="${rowClass}">
                         <td class="border border-gray-300 p-2">${admin.username}</td>
                         <td class="border border-gray-300 p-2">${admin.type === 'super' ? '최고관리자' : '일반관리자'}</td>
                         <td class="border border-gray-300 p-2">${admin.shopName || '-'}</td>
                         <td class="border border-gray-300 p-2">${admin.phone || '-'}</td>
+                        <td class="border border-gray-300 p-2 ${isExpired ? 'text-red-600 font-bold' : ''}">${validityStatus}</td>
                         <td class="border border-gray-300 p-2">
                             <button onclick="editAdmin(${admin.id})" class="bg-blue-500 text-white px-2 py-1 rounded text-sm mr-1">수정</button>
                             ${admin.id !== 1 ? `<button onclick="deleteAdmin(${admin.id})" class="bg-red-500 text-white px-2 py-1 rounded text-sm">삭제</button>` : ''}
@@ -4826,6 +4925,11 @@
 
         // 관리자 관리 함수들 (최고 관리자 전용)
         function addNewAdmin() {
+            const today = new Date().toISOString().split('T')[0];
+            const oneYearLater = new Date();
+            oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
+            const defaultEndDate = oneYearLater.toISOString().split('T')[0];
+
             const content = `
                 <div class="space-y-4">
                     <div>
@@ -4851,6 +4955,22 @@
                         <label class="block text-sm font-medium mb-2">전화번호:</label>
                         <input type="text" id="newAdminPhone" class="w-full border rounded px-3 py-2" placeholder="전화번호를 입력하세요">
                     </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">유효기간 시작일:</label>
+                            <input type="date" id="newAdminStartDate" value="${today}" class="w-full border rounded px-3 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">유효기간 종료일:</label>
+                            <input type="date" id="newAdminEndDate" value="${defaultEndDate}" class="w-full border rounded px-3 py-2">
+                        </div>
+                    </div>
+                    <div class="bg-blue-50 border border-blue-200 rounded p-3">
+                        <div class="text-sm text-blue-800">
+                            <strong>참고:</strong> 유효기간이 만료된 관리자는 로그인할 수 없습니다.<br>
+                            최고관리자는 유효기간 제한이 없습니다.
+                        </div>
+                    </div>
                     <div class="flex gap-2">
                         <button onclick="saveNewAdmin()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">저장</button>
                         <button onclick="manageAdmins()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
@@ -4868,9 +4988,21 @@
             const type = document.getElementById('newAdminType').value;
             const shopName = document.getElementById('newAdminShopName').value;
             const phone = document.getElementById('newAdminPhone').value;
+            const startDate = document.getElementById('newAdminStartDate').value;
+            const endDate = document.getElementById('newAdminEndDate').value;
 
             if (!username || !password) {
                 alert('아이디와 비밀번호를 입력해주세요.');
+                return;
+            }
+
+            if (!startDate || !endDate) {
+                alert('유효기간을 입력해주세요.');
+                return;
+            }
+
+            if (new Date(startDate) >= new Date(endDate)) {
+                alert('종료일은 시작일보다 늦어야 합니다.');
                 return;
             }
 
@@ -4890,7 +5022,11 @@
                 password: password,
                 type: type,
                 shopName: shopName,
-                phone: phone
+                phone: phone,
+                validFrom: startDate,
+                validUntil: endDate,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
             });
 
             localStorage.setItem('globalAdmins', JSON.stringify(admins));
@@ -4904,6 +5040,14 @@
             
             if (!admin) return;
 
+            // 기존 관리자의 유효기간이 없는 경우 기본값 설정
+            const defaultStartDate = admin.validFrom || new Date().toISOString().split('T')[0];
+            const defaultEndDate = admin.validUntil || (() => {
+                const oneYearLater = new Date();
+                oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
+                return oneYearLater.toISOString().split('T')[0];
+            })();
+
             const content = `
                 <div class="space-y-4">
                     <div>
@@ -4916,7 +5060,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2">타입:</label>
-                        <select id="editAdminType" class="w-full border rounded px-3 py-2" ${id === 1 ? 'disabled' : ''}>
+                        <select id="editAdminType" class="w-full border rounded px-3 py-2" ${id === 1 ? 'disabled' : ''} onchange="toggleValidityFields()">
                             <option value="normal" ${admin.type === 'normal' ? 'selected' : ''}>일반관리자</option>
                             <option value="super" ${admin.type === 'super' ? 'selected' : ''}>최고관리자</option>
                         </select>
@@ -4929,66 +5073,34 @@
                         <label class="block text-sm font-medium mb-2">전화번호:</label>
                         <input type="text" id="editAdminPhone" value="${admin.phone || ''}" class="w-full border rounded px-3 py-2">
                     </div>
+                    <div id="validityFields" class="grid grid-cols-2 gap-4" style="display: ${admin.type === 'super' ? 'none' : 'grid'}">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">유효기간 시작일:</label>
+                            <input type="date" id="editAdminStartDate" value="${defaultStartDate}" class="w-full border rounded px-3 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">유효기간 종료일:</label>
+                            <input type="date" id="editAdminEndDate" value="${defaultEndDate}" class="w-full border rounded px-3 py-2">
+                        </div>
+                    </div>
+                    <div class="bg-blue-50 border border-blue-200 rounded p-3">
+                        <div class="text-sm text-blue-800">
+                            <strong>참고:</strong> 최고관리자는 유효기간 제한이 없습니다.<br>
+                            일반관리자는 유효기간이 만료되면 로그인할 수 없습니다.
+                        </div>
+                    </div>
                     <div class="flex gap-2">
                         <button onclick="updateAdmin(${id})" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">수정</button>
                         <button onclick="manageAdmins()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
                     </div>
                 </div>
-            `;
-            
-            document.getElementById('managementTitle').textContent = '관리자 수정';
-            document.getElementById('managementContent').innerHTML = content;
-        }
-
-        function updateAdmin(id) {
-            const username = document.getElementById('editAdminUsername').value;
-            const password = document.getElementById('editAdminPassword').value;
-            const type = document.getElementById('editAdminType').value;
-            const shopName = document.getElementById('editAdminShopName').value;
-            const phone = document.getElementById('editAdminPhone').value;
-
-            if (!username || !password) {
-                alert('아이디와 비밀번호를 입력해주세요.');
-                return;
-            }
-
-            const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
-            const adminIndex = admins.findIndex(a => a.id === id);
-            
-            if (adminIndex === -1) return;
-
-            admins[adminIndex] = {
-                id: id,
-                username: username,
-                password: password,
-                type: type,
-                shopName: shopName,
-                phone: phone
-            };
-
-            localStorage.setItem('globalAdmins', JSON.stringify(admins));
-            alert('관리자 정보가 수정되었습니다.');
-            manageAdmins();
-        }
-
-        function deleteAdmin(id) {
-            if (id === 1) {
-                alert('기본 관리자는 삭제할 수 없습니다.');
-                return;
-            }
-
-            if (confirm('정말 삭제하시겠습니까?')) {
-                const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
-                const filteredAdmins = admins.filter(a => a.id !== id);
-                localStorage.setItem('globalAdmins', JSON.stringify(filteredAdmins));
-                alert('관리자가 삭제되었습니다.');
-                manageAdmins();
-            }
-        }
-
-        // 앱 초기화
-        initializeApp();
-        updateTranslations();
-    </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'998b3e7d4203a9f9',t:'MTc2MjE2NjMzMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+                
+                <script>
+                    function toggleValidityFields() {
+                        const adminType = document.getElementById('editAdminType').value;
+                        const validityFields = document.getElementById('validityFields');
+                        validityFields.style.display = adminType === 'super' ? 'none' : 'grid';
+                    }
+                </script> `; document.getElementById('managementTitle').textContent = '관리자 수정'; document.getElementById('managementContent').innerHTML = content; } function updateAdmin(id) { const username = document.getElementById('editAdminUsername').value; const password = document.getElementById('editAdminPassword').value; const type = document.getElementById('editAdminType').value; const shopName = document.getElementById('editAdminShopName').value; const phone = document.getElementById('editAdminPhone').value; if (!username || !password) { alert('아이디와 비밀번호를 입력해주세요.'); return; } let startDate = null; let endDate = null; // 일반관리자인 경우 유효기간 검증 if (type === 'normal') { startDate = document.getElementById('editAdminStartDate').value; endDate = document.getElementById('editAdminEndDate').value; if (!startDate || !endDate) { alert('일반관리자는 유효기간을 입력해주세요.'); return; } if (new Date(startDate) &gt;= new Date(endDate)) { alert('종료일은 시작일보다 늦어야 합니다.'); return; } } const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]'); const adminIndex = admins.findIndex(a =&gt; a.id === id); if (adminIndex === -1) return; // 기존 관리자 정보 유지하면서 업데이트 const existingAdmin = admins[adminIndex]; admins[adminIndex] = { ...existingAdmin, username: username, password: password, type: type, shopName: shopName, phone: phone, validFrom: type === 'super' ? null : startDate, validUntil: type === 'super' ? null : endDate, updatedAt: new Date().toISOString() }; localStorage.setItem('globalAdmins', JSON.stringify(admins)); alert('관리자 정보가 수정되었습니다.'); manageAdmins(); } function deleteAdmin(id) { if (id === 1) { alert('기본 관리자는 삭제할 수 없습니다.'); return; } if (confirm('정말 삭제하시겠습니까?')) { const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]'); const filteredAdmins = admins.filter(a =&gt; a.id !== id); localStorage.setItem('globalAdmins', JSON.stringify(filteredAdmins)); alert('관리자가 삭제되었습니다.'); manageAdmins(); } } // 앱 초기화 initializeApp(); updateTranslations(); 
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'998cbb20457f10e2',t:'MTc2MjE4MTkyMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
