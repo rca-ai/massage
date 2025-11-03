@@ -1006,44 +1006,86 @@
 
         // 초기화
         function initializeApp() {
-            initializeGlobalData();
-            updateCurrentTime();
-            setInterval(updateCurrentTime, 1000);
-            document.getElementById('currentDate').value = new Date().toISOString().split('T')[0];
-            
-            // 저장된 폰트 설정 복원
-            const savedFont = localStorage.getItem('selectedFont');
-            const savedFontSize = localStorage.getItem('selectedFontSize');
-            if (savedFont) {
-                currentFont = savedFont;
-                selectedFontFamily = savedFont;
-            }
-            if (savedFontSize) {
-                currentFontSize = savedFontSize;
-                selectedFontSize = savedFontSize;
-            }
-            applyFontSettings();
-            
-            // 새로고침시 로그인 상태 복원
-            const savedAdmin = localStorage.getItem('currentAdmin');
-            if (savedAdmin) {
-                currentAdmin = JSON.parse(savedAdmin);
-                initializeAdminData();
-                document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('mainScreen').style.display = 'block';
+            try {
+                initializeGlobalData();
+                updateCurrentTime();
+                setInterval(updateCurrentTime, 1000);
                 
-                // 상점명 설정
-                const shopNameElement = document.getElementById('shopName');
-                if (currentAdmin.type === 'super') {
-                    shopNameElement.textContent = '최고 관리자 화면';
-                    document.getElementById('superAdminButtons').style.display = 'block';
-                } else {
-                    shopNameElement.textContent = currentAdmin.shopName;
-                    document.getElementById('superAdminButtons').style.display = 'none';
+                const currentDateElement = document.getElementById('currentDate');
+                if (currentDateElement) {
+                    currentDateElement.value = new Date().toISOString().split('T')[0];
                 }
                 
-                loadReservationData();
-                showDashboard();
+                // 저장된 폰트 설정 복원
+                try {
+                    const savedFont = localStorage.getItem('selectedFont');
+                    const savedFontSize = localStorage.getItem('selectedFontSize');
+                    if (savedFont) {
+                        currentFont = savedFont;
+                        selectedFontFamily = savedFont;
+                    }
+                    if (savedFontSize) {
+                        currentFontSize = savedFontSize;
+                        selectedFontSize = savedFontSize;
+                    }
+                    applyFontSettings();
+                } catch (fontError) {
+                    console.log('폰트 설정 복원 오류:', fontError);
+                }
+                
+                // 새로고침시 로그인 상태 복원
+                try {
+                    const savedAdmin = localStorage.getItem('currentAdmin');
+                    if (savedAdmin) {
+                        currentAdmin = JSON.parse(savedAdmin);
+                        
+                        // 관리자 데이터 유효성 검사
+                        if (currentAdmin && currentAdmin.username) {
+                            initializeAdminData();
+                            document.getElementById('loginScreen').style.display = 'none';
+                            document.getElementById('mainScreen').style.display = 'block';
+                            
+                            // 상점명 설정
+                            const shopNameElement = document.getElementById('shopName');
+                            if (shopNameElement) {
+                                if (currentAdmin.type === 'super') {
+                                    shopNameElement.textContent = '최고 관리자 화면';
+                                    const superAdminButtons = document.getElementById('superAdminButtons');
+                                    if (superAdminButtons) {
+                                        superAdminButtons.style.display = 'block';
+                                    }
+                                } else {
+                                    shopNameElement.textContent = currentAdmin.shopName || '관리자 화면';
+                                    const superAdminButtons = document.getElementById('superAdminButtons');
+                                    if (superAdminButtons) {
+                                        superAdminButtons.style.display = 'none';
+                                    }
+                                }
+                            }
+                            
+                            loadReservationData();
+                            showDashboard();
+                        } else {
+                            // 잘못된 관리자 데이터인 경우 로그아웃
+                            localStorage.removeItem('currentAdmin');
+                            currentAdmin = null;
+                        }
+                    }
+                } catch (adminError) {
+                    console.log('관리자 상태 복원 오류:', adminError);
+                    // 오류 발생시 로그아웃 상태로 초기화
+                    localStorage.removeItem('currentAdmin');
+                    currentAdmin = null;
+                }
+            } catch (error) {
+                console.error('앱 초기화 중 오류:', error);
+                // 기본 상태로 초기화
+                try {
+                    initializeGlobalData();
+                    updateCurrentTime();
+                } catch (fallbackError) {
+                    console.error('기본 초기화도 실패:', fallbackError);
+                }
             }
         }
 
@@ -1220,64 +1262,95 @@
 
         // 로그인 처리
         function processLogin() {
-            const username = document.getElementById('loginUsername').value;
-            const password = document.getElementById('loginPassword').value;
-            
-            if (!username || !password) {
-                alert('아이디와 비밀번호를 입력해주세요.');
-                return;
-            }
+            try {
+                const username = document.getElementById('loginUsername').value;
+                const password = document.getElementById('loginPassword').value;
+                
+                if (!username || !password) {
+                    alert('아이디와 비밀번호를 입력해주세요.');
+                    return;
+                }
 
-            const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
-            const admin = admins.find(a => a.username === username && a.password === password);
-            
-            if (admin) {
-                // 유효기간 검사 (최고관리자는 제외)
-                if (admin.type !== 'super' && admin.validUntil) {
-                    const today = new Date().toISOString().split('T')[0];
-                    const validFrom = admin.validFrom || '1900-01-01';
-                    const validUntil = admin.validUntil;
-                    
-                    if (today < validFrom) {
-                        alert('아직 사용 가능한 기간이 아닙니다.\n사용 가능 기간: ' + validFrom + ' ~ ' + validUntil);
-                        return;
-                    }
-                    
-                    if (today > validUntil) {
-                        alert('사용 기간이 만료되었습니다.\n관리자에게 문의하세요.\n만료일: ' + validUntil);
-                        return;
-                    }
-                    
-                    // 만료 7일 전 경고
-                    const warningDate = new Date(validUntil);
-                    warningDate.setDate(warningDate.getDate() - 7);
-                    const warningDateStr = warningDate.toISOString().split('T')[0];
-                    
-                    if (today >= warningDateStr) {
-                        const remainingDays = Math.ceil((new Date(validUntil) - new Date(today)) / (1000 * 60 * 60 * 24));
-                        alert(`⚠️ 사용 기간 만료 알림\n\n${remainingDays}일 후 사용 기간이 만료됩니다.\n만료일: ${validUntil}\n\n관리자에게 연장을 요청하세요.`);
-                    }
-                }
-                currentAdmin = admin;
-                localStorage.setItem('currentAdmin', JSON.stringify(admin));
-                initializeAdminData();
-                document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('mainScreen').style.display = 'block';
+                const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
+                const admin = admins.find(a => a.username === username && a.password === password);
                 
-                // 상점명 설정
-                const shopNameElement = document.getElementById('shopName');
-                if (admin.type === 'super') {
-                    shopNameElement.textContent = '최고 관리자 화면';
-                    document.getElementById('superAdminButtons').style.display = 'block';
+                if (admin) {
+                    // 유효기간 검사 (최고관리자는 제외)
+                    if (admin.type !== 'super' && admin.validUntil) {
+                        const today = new Date().toISOString().split('T')[0];
+                        const validFrom = admin.validFrom || '1900-01-01';
+                        const validUntil = admin.validUntil;
+                        
+                        if (today < validFrom) {
+                            alert('아직 사용 가능한 기간이 아닙니다.\n사용 가능 기간: ' + validFrom + ' ~ ' + validUntil);
+                            return;
+                        }
+                        
+                        if (today > validUntil) {
+                            alert('사용 기간이 만료되었습니다.\n관리자에게 문의하세요.\n만료일: ' + validUntil);
+                            return;
+                        }
+                        
+                        // 만료 7일 전 경고
+                        try {
+                            const warningDate = new Date(validUntil);
+                            warningDate.setDate(warningDate.getDate() - 7);
+                            const warningDateStr = warningDate.toISOString().split('T')[0];
+                            
+                            if (today >= warningDateStr) {
+                                const remainingDays = Math.ceil((new Date(validUntil) - new Date(today)) / (1000 * 60 * 60 * 24));
+                                alert(`⚠️ 사용 기간 만료 알림\n\n${remainingDays}일 후 사용 기간이 만료됩니다.\n만료일: ${validUntil}\n\n관리자에게 연장을 요청하세요.`);
+                            }
+                        } catch (dateError) {
+                            console.log('날짜 계산 오류:', dateError);
+                        }
+                    }
+                    
+                    currentAdmin = admin;
+                    localStorage.setItem('currentAdmin', JSON.stringify(admin));
+                    
+                    try {
+                        initializeAdminData();
+                    } catch (initError) {
+                        console.log('관리자 데이터 초기화 오류:', initError);
+                        // 기본 데이터로 재시도
+                        initializeGlobalData();
+                        initializeAdminData();
+                    }
+                    
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('mainScreen').style.display = 'block';
+                    
+                    // 상점명 설정
+                    const shopNameElement = document.getElementById('shopName');
+                    if (admin.type === 'super') {
+                        shopNameElement.textContent = '최고 관리자 화면';
+                        const superAdminButtons = document.getElementById('superAdminButtons');
+                        if (superAdminButtons) {
+                            superAdminButtons.style.display = 'block';
+                        }
+                    } else {
+                        shopNameElement.textContent = admin.shopName || '관리자 화면';
+                        const superAdminButtons = document.getElementById('superAdminButtons');
+                        if (superAdminButtons) {
+                            superAdminButtons.style.display = 'none';
+                        }
+                    }
+                    
+                    try {
+                        loadReservationData();
+                        showDashboard();
+                    } catch (loadError) {
+                        console.log('데이터 로드 오류:', loadError);
+                        // 기본 화면만 표시
+                        showDashboard();
+                    }
                 } else {
-                    shopNameElement.textContent = admin.shopName;
-                    document.getElementById('superAdminButtons').style.display = 'none';
+                    alert('아이디 또는 비밀번호가 잘못되었습니다.');
                 }
-                
-                loadReservationData();
-                showDashboard();
-            } else {
-                alert('아이디 또는 비밀번호가 잘못되었습니다.');
+            } catch (error) {
+                console.error('로그인 처리 중 오류:', error);
+                alert('로그인 처리 중 오류가 발생했습니다. 페이지를 새로고침 후 다시 시도해주세요.');
             }
         }
 
@@ -2297,28 +2370,44 @@
         }
 
         function applyFontSettings() {
-            currentFont = selectedFontFamily;
-            currentFontSize = selectedFontSize;
-            
-            // 로컬 스토리지에 저장
-            localStorage.setItem('selectedFont', selectedFontFamily);
-            localStorage.setItem('selectedFontSize', selectedFontSize);
-            
-            const fontFamily = getFontFamilyCSS(selectedFontFamily);
-            const fontSize = getFontSizeCSS(selectedFontSize);
-            
-            // body에 기본 폰트 설정
-            document.body.style.fontFamily = fontFamily;
-            document.body.style.fontSize = fontSize;
-            
-            // 모든 요소에 폰트 적용
-            const allElements = document.querySelectorAll('*');
-            allElements.forEach(element => {
-                element.style.fontFamily = fontFamily;
-                element.style.fontSize = fontSize;
-            });
-            
-            closeFontModal();
+            try {
+                currentFont = selectedFontFamily;
+                currentFontSize = selectedFontSize;
+                
+                // 로컬 스토리지에 저장
+                localStorage.setItem('selectedFont', selectedFontFamily);
+                localStorage.setItem('selectedFontSize', selectedFontSize);
+                
+                const fontFamily = getFontFamilyCSS(selectedFontFamily);
+                const fontSize = getFontSizeCSS(selectedFontSize);
+                
+                // body에 기본 폰트 설정
+                if (document.body) {
+                    document.body.style.fontFamily = fontFamily;
+                    document.body.style.fontSize = fontSize;
+                }
+                
+                // 모든 요소에 폰트 적용
+                try {
+                    const allElements = document.querySelectorAll('*');
+                    allElements.forEach(element => {
+                        if (element && element.style) {
+                            element.style.fontFamily = fontFamily;
+                            element.style.fontSize = fontSize;
+                        }
+                    });
+                } catch (elementError) {
+                    console.log('요소별 폰트 적용 오류:', elementError);
+                }
+                
+                // 폰트 모달이 열려있는 경우에만 닫기
+                const fontModal = document.getElementById('fontModal');
+                if (fontModal && fontModal.style.display === 'block') {
+                    closeFontModal();
+                }
+            } catch (error) {
+                console.error('폰트 설정 적용 중 오류:', error);
+            }
         }
 
         // 언어 모달 관련 함수들
@@ -5094,13 +5183,95 @@
                         <button onclick="manageAdmins()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
                     </div>
                 </div>
-                
-                <script>
-                    function toggleValidityFields() {
-                        const adminType = document.getElementById('editAdminType').value;
-                        const validityFields = document.getElementById('validityFields');
-                        validityFields.style.display = adminType === 'super' ? 'none' : 'grid';
-                    }
-                </script> `; document.getElementById('managementTitle').textContent = '관리자 수정'; document.getElementById('managementContent').innerHTML = content; } function updateAdmin(id) { const username = document.getElementById('editAdminUsername').value; const password = document.getElementById('editAdminPassword').value; const type = document.getElementById('editAdminType').value; const shopName = document.getElementById('editAdminShopName').value; const phone = document.getElementById('editAdminPhone').value; if (!username || !password) { alert('아이디와 비밀번호를 입력해주세요.'); return; } let startDate = null; let endDate = null; // 일반관리자인 경우 유효기간 검증 if (type === 'normal') { startDate = document.getElementById('editAdminStartDate').value; endDate = document.getElementById('editAdminEndDate').value; if (!startDate || !endDate) { alert('일반관리자는 유효기간을 입력해주세요.'); return; } if (new Date(startDate) &gt;= new Date(endDate)) { alert('종료일은 시작일보다 늦어야 합니다.'); return; } } const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]'); const adminIndex = admins.findIndex(a =&gt; a.id === id); if (adminIndex === -1) return; // 기존 관리자 정보 유지하면서 업데이트 const existingAdmin = admins[adminIndex]; admins[adminIndex] = { ...existingAdmin, username: username, password: password, type: type, shopName: shopName, phone: phone, validFrom: type === 'super' ? null : startDate, validUntil: type === 'super' ? null : endDate, updatedAt: new Date().toISOString() }; localStorage.setItem('globalAdmins', JSON.stringify(admins)); alert('관리자 정보가 수정되었습니다.'); manageAdmins(); } function deleteAdmin(id) { if (id === 1) { alert('기본 관리자는 삭제할 수 없습니다.'); return; } if (confirm('정말 삭제하시겠습니까?')) { const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]'); const filteredAdmins = admins.filter(a =&gt; a.id !== id); localStorage.setItem('globalAdmins', JSON.stringify(filteredAdmins)); alert('관리자가 삭제되었습니다.'); manageAdmins(); } } // 앱 초기화 initializeApp(); updateTranslations(); 
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'998cbb20457f10e2',t:'MTc2MjE4MTkyMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '관리자 수정';
+            document.getElementById('managementContent').innerHTML = content;
+            
+            // 유효기간 필드 토글 함수를 전역으로 추가
+            window.toggleValidityFields = function() {
+                const adminType = document.getElementById('editAdminType').value;
+                const validityFields = document.getElementById('validityFields');
+                if (validityFields) {
+                    validityFields.style.display = adminType === 'super' ? 'none' : 'grid';
+                }
+            };
+        }
+
+        function updateAdmin(id) {
+            const username = document.getElementById('editAdminUsername').value;
+            const password = document.getElementById('editAdminPassword').value;
+            const type = document.getElementById('editAdminType').value;
+            const shopName = document.getElementById('editAdminShopName').value;
+            const phone = document.getElementById('editAdminPhone').value;
+
+            if (!username || !password) {
+                alert('아이디와 비밀번호를 입력해주세요.');
+                return;
+            }
+
+            let startDate = null;
+            let endDate = null;
+
+            // 일반관리자인 경우 유효기간 검증
+            if (type === 'normal') {
+                startDate = document.getElementById('editAdminStartDate').value;
+                endDate = document.getElementById('editAdminEndDate').value;
+
+                if (!startDate || !endDate) {
+                    alert('일반관리자는 유효기간을 입력해주세요.');
+                    return;
+                }
+
+                if (new Date(startDate) >= new Date(endDate)) {
+                    alert('종료일은 시작일보다 늦어야 합니다.');
+                    return;
+                }
+            }
+
+            const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
+            const adminIndex = admins.findIndex(a => a.id === id);
+            
+            if (adminIndex === -1) return;
+
+            // 기존 관리자 정보 유지하면서 업데이트
+            const existingAdmin = admins[adminIndex];
+            
+            admins[adminIndex] = {
+                ...existingAdmin,
+                username: username,
+                password: password,
+                type: type,
+                shopName: shopName,
+                phone: phone,
+                validFrom: type === 'super' ? null : startDate,
+                validUntil: type === 'super' ? null : endDate,
+                updatedAt: new Date().toISOString()
+            };
+
+            localStorage.setItem('globalAdmins', JSON.stringify(admins));
+            alert('관리자 정보가 수정되었습니다.');
+            manageAdmins();
+        }
+
+        function deleteAdmin(id) {
+            if (id === 1) {
+                alert('기본 관리자는 삭제할 수 없습니다.');
+                return;
+            }
+
+            if (confirm('정말 삭제하시겠습니까?')) {
+                const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
+                const filteredAdmins = admins.filter(a => a.id !== id);
+                localStorage.setItem('globalAdmins', JSON.stringify(filteredAdmins));
+                alert('관리자가 삭제되었습니다.');
+                manageAdmins();
+            }
+        }
+
+        // 앱 초기화
+        initializeApp();
+        updateTranslations();
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'998ccaa3d1a664f5',t:'MTc2MjE4MjU2MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
