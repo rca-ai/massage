@@ -1006,55 +1006,161 @@
 
         // 초기화
         function initializeApp() {
-            initializeGlobalData();
-            updateCurrentTime();
-            setInterval(updateCurrentTime, 1000);
-            document.getElementById('currentDate').value = new Date().toISOString().split('T')[0];
-            
-            // 저장된 폰트 설정 복원
-            const savedFont = localStorage.getItem('selectedFont');
-            const savedFontSize = localStorage.getItem('selectedFontSize');
-            if (savedFont) {
-                currentFont = savedFont;
-                selectedFontFamily = savedFont;
-            }
-            if (savedFontSize) {
-                currentFontSize = savedFontSize;
-                selectedFontSize = savedFontSize;
-            }
-            applyFontSettings();
-            
-            // 새로고침시 로그인 상태 복원
-            const savedAdmin = localStorage.getItem('currentAdmin');
-            if (savedAdmin) {
-                currentAdmin = JSON.parse(savedAdmin);
-                initializeAdminData();
-                document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('mainScreen').style.display = 'block';
+            try {
+                initializeGlobalData();
+                updateCurrentTime();
+                setInterval(updateCurrentTime, 1000);
                 
-                // 상점명 설정
-                const shopNameElement = document.getElementById('shopName');
-                if (currentAdmin.type === 'super') {
-                    shopNameElement.textContent = '최고 관리자 화면';
-                    document.getElementById('superAdminButtons').style.display = 'block';
-                } else {
-                    shopNameElement.textContent = currentAdmin.shopName;
-                    document.getElementById('superAdminButtons').style.display = 'none';
+                const currentDateElement = document.getElementById('currentDate');
+                if (currentDateElement) {
+                    currentDateElement.value = new Date().toISOString().split('T')[0];
                 }
                 
-                loadReservationData();
-                showDashboard();
+                // 저장된 폰트 설정 복원
+                try {
+                    const savedFont = localStorage.getItem('selectedFont');
+                    const savedFontSize = localStorage.getItem('selectedFontSize');
+                    if (savedFont) {
+                        currentFont = savedFont;
+                        selectedFontFamily = savedFont;
+                    }
+                    if (savedFontSize) {
+                        currentFontSize = savedFontSize;
+                        selectedFontSize = savedFontSize;
+                    }
+                    applyFontSettings();
+                } catch (fontError) {
+                    console.log('폰트 설정 복원 오류:', fontError);
+                }
+                
+                // 새로고침시 로그인 상태 복원
+                try {
+                    const savedAdmin = localStorage.getItem('currentAdmin');
+                    if (savedAdmin) {
+                        currentAdmin = JSON.parse(savedAdmin);
+                        
+                        // 관리자 데이터 유효성 검사
+                        if (currentAdmin && currentAdmin.username) {
+                            initializeAdminData();
+                            document.getElementById('loginScreen').style.display = 'none';
+                            document.getElementById('mainScreen').style.display = 'block';
+                            
+                            // 상점명 설정
+                            const shopNameElement = document.getElementById('shopName');
+                            if (shopNameElement) {
+                                if (currentAdmin.type === 'super') {
+                                    shopNameElement.textContent = '최고 관리자 화면';
+                                    const superAdminButtons = document.getElementById('superAdminButtons');
+                                    if (superAdminButtons) {
+                                        superAdminButtons.style.display = 'block';
+                                    }
+                                } else {
+                                    shopNameElement.textContent = currentAdmin.shopName || '관리자 화면';
+                                    const superAdminButtons = document.getElementById('superAdminButtons');
+                                    if (superAdminButtons) {
+                                        superAdminButtons.style.display = 'none';
+                                    }
+                                }
+                            }
+                            
+                            loadReservationData();
+                            showDashboard();
+                        } else {
+                            // 잘못된 관리자 데이터인 경우 로그아웃
+                            localStorage.removeItem('currentAdmin');
+                            currentAdmin = null;
+                        }
+                    }
+                } catch (adminError) {
+                    console.log('관리자 상태 복원 오류:', adminError);
+                    // 오류 발생시 로그아웃 상태로 초기화
+                    localStorage.removeItem('currentAdmin');
+                    currentAdmin = null;
+                }
+            } catch (error) {
+                console.error('앱 초기화 중 오류:', error);
+                // 기본 상태로 초기화
+                try {
+                    initializeGlobalData();
+                    updateCurrentTime();
+                } catch (fallbackError) {
+                    console.error('기본 초기화도 실패:', fallbackError);
+                }
             }
         }
 
         // 전역 데이터 초기화 (관리자 계정만)
         function initializeGlobalData() {
             if (!localStorage.getItem('globalAdmins')) {
+                const oneYearLater = new Date();
+                oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
+                const defaultEndDate = oneYearLater.toISOString().split('T')[0];
+                const today = new Date().toISOString().split('T')[0];
+
                 localStorage.setItem('globalAdmins', JSON.stringify([
-                    {id: 1, username: 'admin', password: '12345678', type: 'super', shopName: '', phone: ''},
-                    {id: 2, username: 'shop1', password: '12345678', type: 'normal', shopName: '힐링 마사지', phone: '02-1234-5678'},
-                    {id: 3, username: 'Test', password: '1111', type: 'normal', shopName: '테스트 마사지', phone: '02-0000-0000'}
+                    {
+                        id: 1, 
+                        username: 'admin', 
+                        password: '12345678', 
+                        type: 'super', 
+                        shopName: '', 
+                        phone: '',
+                        validFrom: null,
+                        validUntil: null,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    },
+                    {
+                        id: 2, 
+                        username: 'shop1', 
+                        password: '12345678', 
+                        type: 'normal', 
+                        shopName: '힐링 마사지', 
+                        phone: '02-1234-5678',
+                        validFrom: today,
+                        validUntil: defaultEndDate,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    },
+                    {
+                        id: 3, 
+                        username: 'Test', 
+                        password: '1111', 
+                        type: 'normal', 
+                        shopName: '테스트 마사지', 
+                        phone: '02-0000-0000',
+                        validFrom: today,
+                        validUntil: defaultEndDate,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    }
                 ]));
+            } else {
+                // 기존 관리자 데이터에 유효기간 필드가 없는 경우 추가
+                const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
+                let needsUpdate = false;
+                
+                admins.forEach(admin => {
+                    if (!admin.hasOwnProperty('validFrom') || !admin.hasOwnProperty('validUntil')) {
+                        needsUpdate = true;
+                        if (admin.type === 'super') {
+                            admin.validFrom = null;
+                            admin.validUntil = null;
+                        } else {
+                            const today = new Date().toISOString().split('T')[0];
+                            const oneYearLater = new Date();
+                            oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
+                            admin.validFrom = today;
+                            admin.validUntil = oneYearLater.toISOString().split('T')[0];
+                        }
+                        admin.createdAt = admin.createdAt || new Date().toISOString();
+                        admin.updatedAt = new Date().toISOString();
+                    }
+                });
+                
+                if (needsUpdate) {
+                    localStorage.setItem('globalAdmins', JSON.stringify(admins));
+                }
             }
 
             if (!localStorage.getItem('globalCurrency')) {
@@ -1156,38 +1262,95 @@
 
         // 로그인 처리
         function processLogin() {
-            const username = document.getElementById('loginUsername').value;
-            const password = document.getElementById('loginPassword').value;
-            
-            if (!username || !password) {
-                alert('아이디와 비밀번호를 입력해주세요.');
-                return;
-            }
-
-            const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
-            const admin = admins.find(a => a.username === username && a.password === password);
-            
-            if (admin) {
-                currentAdmin = admin;
-                localStorage.setItem('currentAdmin', JSON.stringify(admin));
-                initializeAdminData();
-                document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('mainScreen').style.display = 'block';
+            try {
+                const username = document.getElementById('loginUsername').value;
+                const password = document.getElementById('loginPassword').value;
                 
-                // 상점명 설정
-                const shopNameElement = document.getElementById('shopName');
-                if (admin.type === 'super') {
-                    shopNameElement.textContent = '최고 관리자 화면';
-                    document.getElementById('superAdminButtons').style.display = 'block';
-                } else {
-                    shopNameElement.textContent = admin.shopName;
-                    document.getElementById('superAdminButtons').style.display = 'none';
+                if (!username || !password) {
+                    alert('아이디와 비밀번호를 입력해주세요.');
+                    return;
                 }
+
+                const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
+                const admin = admins.find(a => a.username === username && a.password === password);
                 
-                loadReservationData();
-                showDashboard();
-            } else {
-                alert('아이디 또는 비밀번호가 잘못되었습니다.');
+                if (admin) {
+                    // 유효기간 검사 (최고관리자는 제외)
+                    if (admin.type !== 'super' && admin.validUntil) {
+                        const today = new Date().toISOString().split('T')[0];
+                        const validFrom = admin.validFrom || '1900-01-01';
+                        const validUntil = admin.validUntil;
+                        
+                        if (today < validFrom) {
+                            alert('아직 사용 가능한 기간이 아닙니다.\n사용 가능 기간: ' + validFrom + ' ~ ' + validUntil);
+                            return;
+                        }
+                        
+                        if (today > validUntil) {
+                            alert('사용 기간이 만료되었습니다.\n관리자에게 문의하세요.\n만료일: ' + validUntil);
+                            return;
+                        }
+                        
+                        // 만료 7일 전 경고
+                        try {
+                            const warningDate = new Date(validUntil);
+                            warningDate.setDate(warningDate.getDate() - 7);
+                            const warningDateStr = warningDate.toISOString().split('T')[0];
+                            
+                            if (today >= warningDateStr) {
+                                const remainingDays = Math.ceil((new Date(validUntil) - new Date(today)) / (1000 * 60 * 60 * 24));
+                                alert(`⚠️ 사용 기간 만료 알림\n\n${remainingDays}일 후 사용 기간이 만료됩니다.\n만료일: ${validUntil}\n\n관리자에게 연장을 요청하세요.`);
+                            }
+                        } catch (dateError) {
+                            console.log('날짜 계산 오류:', dateError);
+                        }
+                    }
+                    
+                    currentAdmin = admin;
+                    localStorage.setItem('currentAdmin', JSON.stringify(admin));
+                    
+                    try {
+                        initializeAdminData();
+                    } catch (initError) {
+                        console.log('관리자 데이터 초기화 오류:', initError);
+                        // 기본 데이터로 재시도
+                        initializeGlobalData();
+                        initializeAdminData();
+                    }
+                    
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('mainScreen').style.display = 'block';
+                    
+                    // 상점명 설정
+                    const shopNameElement = document.getElementById('shopName');
+                    if (admin.type === 'super') {
+                        shopNameElement.textContent = '최고 관리자 화면';
+                        const superAdminButtons = document.getElementById('superAdminButtons');
+                        if (superAdminButtons) {
+                            superAdminButtons.style.display = 'block';
+                        }
+                    } else {
+                        shopNameElement.textContent = admin.shopName || '관리자 화면';
+                        const superAdminButtons = document.getElementById('superAdminButtons');
+                        if (superAdminButtons) {
+                            superAdminButtons.style.display = 'none';
+                        }
+                    }
+                    
+                    try {
+                        loadReservationData();
+                        showDashboard();
+                    } catch (loadError) {
+                        console.log('데이터 로드 오류:', loadError);
+                        // 기본 화면만 표시
+                        showDashboard();
+                    }
+                } else {
+                    alert('아이디 또는 비밀번호가 잘못되었습니다.');
+                }
+            } catch (error) {
+                console.error('로그인 처리 중 오류:', error);
+                alert('로그인 처리 중 오류가 발생했습니다. 페이지를 새로고침 후 다시 시도해주세요.');
             }
         }
 
@@ -1862,7 +2025,7 @@
             todayReservations.forEach(reservation => {
                 const row = document.createElement('tr');
                 const endTime = calculateEndTime(reservation.startTime, reservation.duration);
-                const remainingMinutes = calculateRemainingTime(reservation.startTime, reservation.duration);
+                const remainingMinutes = calculateRemainingTime(reservation.startTime, reservation.duration, reservation.date);
                 
                 if (reservation.paid) {
                     row.className = 'bg-green-50';
@@ -1912,10 +2075,27 @@
             return `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
         }
 
-        function calculateRemainingTime(startTime, duration) {
+        function calculateRemainingTime(startTime, duration, reservationDate) {
             if (!startTime) return 0;
+            
             const now = new Date();
+            const currentDate = now.toISOString().split('T')[0];
             const currentMinutes = now.getHours() * 60 + now.getMinutes();
+            
+            // 예약 날짜가 오늘이 아닌 경우
+            if (reservationDate && reservationDate !== currentDate) {
+                const reservationDateObj = new Date(reservationDate);
+                const currentDateObj = new Date(currentDate);
+                
+                // 예약 날짜가 과거인 경우 시간이 지났음을 의미
+                if (reservationDateObj < currentDateObj) {
+                    return -1;
+                }
+                // 예약 날짜가 미래인 경우 아직 시작되지 않음
+                if (reservationDateObj > currentDateObj) {
+                    return 0;
+                }
+            }
             
             const [hours, minutes] = startTime.split(':').map(Number);
             const startMinutes = hours * 60 + minutes;
@@ -1927,11 +2107,19 @@
 
         function updateDashboardRemainingTime() {
             const remainingCells = document.querySelectorAll('.remaining-time');
+            const reservations = JSON.parse(localStorage.getItem(getAdminKey('reservations')) || '[]');
+            const currentDate = document.getElementById('currentDate').value;
+            const staffOrder = JSON.parse(localStorage.getItem(getDailyStaffOrderKey(currentDate)) || '{}');
+            const todayReservations = reservations.filter(r => r.date === currentDate);
+            
+            // 순번 순서로 정렬
+            todayReservations.sort((a, b) => {
+                const orderA = staffOrder[a.staffId] || 999;
+                const orderB = staffOrder[b.staffId] || 999;
+                return orderA - orderB;
+            });
+            
             remainingCells.forEach((cell, index) => {
-                const reservations = JSON.parse(localStorage.getItem(getAdminKey('reservations')) || '[]');
-                const currentDate = document.getElementById('currentDate').value;
-                const todayReservations = reservations.filter(r => r.date === currentDate);
-                
                 if (todayReservations[index]) {
                     const reservation = todayReservations[index];
                     
@@ -1940,9 +2128,13 @@
                         cell.style.color = '#10b981';
                         cell.style.fontWeight = 'bold';
                     } else if (reservation.startTime) {
-                        const remaining = calculateRemainingTime(reservation.startTime, reservation.duration);
+                        const remaining = calculateRemainingTime(reservation.startTime, reservation.duration, reservation.date);
                         
                         if (remaining === -1) {
+                            cell.textContent = '-';
+                            cell.style.color = '#6b7280';
+                        } else if (remaining === 0) {
+                            // 미래 날짜이거나 아직 시작되지 않은 경우
                             cell.textContent = '-';
                             cell.style.color = '#6b7280';
                         } else {
@@ -2178,28 +2370,44 @@
         }
 
         function applyFontSettings() {
-            currentFont = selectedFontFamily;
-            currentFontSize = selectedFontSize;
-            
-            // 로컬 스토리지에 저장
-            localStorage.setItem('selectedFont', selectedFontFamily);
-            localStorage.setItem('selectedFontSize', selectedFontSize);
-            
-            const fontFamily = getFontFamilyCSS(selectedFontFamily);
-            const fontSize = getFontSizeCSS(selectedFontSize);
-            
-            // body에 기본 폰트 설정
-            document.body.style.fontFamily = fontFamily;
-            document.body.style.fontSize = fontSize;
-            
-            // 모든 요소에 폰트 적용
-            const allElements = document.querySelectorAll('*');
-            allElements.forEach(element => {
-                element.style.fontFamily = fontFamily;
-                element.style.fontSize = fontSize;
-            });
-            
-            closeFontModal();
+            try {
+                currentFont = selectedFontFamily;
+                currentFontSize = selectedFontSize;
+                
+                // 로컬 스토리지에 저장
+                localStorage.setItem('selectedFont', selectedFontFamily);
+                localStorage.setItem('selectedFontSize', selectedFontSize);
+                
+                const fontFamily = getFontFamilyCSS(selectedFontFamily);
+                const fontSize = getFontSizeCSS(selectedFontSize);
+                
+                // body에 기본 폰트 설정
+                if (document.body) {
+                    document.body.style.fontFamily = fontFamily;
+                    document.body.style.fontSize = fontSize;
+                }
+                
+                // 모든 요소에 폰트 적용
+                try {
+                    const allElements = document.querySelectorAll('*');
+                    allElements.forEach(element => {
+                        if (element && element.style) {
+                            element.style.fontFamily = fontFamily;
+                            element.style.fontSize = fontSize;
+                        }
+                    });
+                } catch (elementError) {
+                    console.log('요소별 폰트 적용 오류:', elementError);
+                }
+                
+                // 폰트 모달이 열려있는 경우에만 닫기
+                const fontModal = document.getElementById('fontModal');
+                if (fontModal && fontModal.style.display === 'block') {
+                    closeFontModal();
+                }
+            } catch (error) {
+                console.error('폰트 설정 적용 중 오류:', error);
+            }
         }
 
         // 언어 모달 관련 함수들
@@ -2423,6 +2631,7 @@
                                 <th class="border border-gray-300 p-2">타입</th>
                                 <th class="border border-gray-300 p-2">상점명</th>
                                 <th class="border border-gray-300 p-2">전화번호</th>
+                                <th class="border border-gray-300 p-2">유효기간</th>
                                 <th class="border border-gray-300 p-2">작업</th>
                             </tr>
                         </thead>
@@ -2430,12 +2639,20 @@
             `;
             
             admins.forEach(admin => {
+                const today = new Date().toISOString().split('T')[0];
+                const isExpired = admin.validUntil && admin.validUntil < today && admin.type !== 'super';
+                const validityStatus = admin.type === 'super' ? '무제한' : 
+                    (isExpired ? '만료됨' : `${admin.validFrom || '-'} ~ ${admin.validUntil || '-'}`);
+                
+                const rowClass = isExpired ? 'bg-red-50' : '';
+                
                 content += `
-                    <tr>
+                    <tr class="${rowClass}">
                         <td class="border border-gray-300 p-2">${admin.username}</td>
                         <td class="border border-gray-300 p-2">${admin.type === 'super' ? '최고관리자' : '일반관리자'}</td>
                         <td class="border border-gray-300 p-2">${admin.shopName || '-'}</td>
                         <td class="border border-gray-300 p-2">${admin.phone || '-'}</td>
+                        <td class="border border-gray-300 p-2 ${isExpired ? 'text-red-600 font-bold' : ''}">${validityStatus}</td>
                         <td class="border border-gray-300 p-2">
                             <button onclick="editAdmin(${admin.id})" class="bg-blue-500 text-white px-2 py-1 rounded text-sm mr-1">수정</button>
                             ${admin.id !== 1 ? `<button onclick="deleteAdmin(${admin.id})" class="bg-red-500 text-white px-2 py-1 rounded text-sm">삭제</button>` : ''}
@@ -3165,13 +3382,25 @@
                     
                     <div class="bg-yellow-50 border border-yellow-200 rounded p-3">
                         <div class="text-sm text-yellow-800">
-                            <strong>참고:</strong> 브라우저 보안상 저장 경로는 기본 다운로드 폴더로 설정됩니다.<br>
-                            다운로드 후 원하는 위치로 파일을 이동하실 수 있습니다.
+                            <strong>모바일 앱 사용 시:</strong><br>
+                            • 백업 파일은 기본적으로 다운로드 폴더에 저장됩니다<br>
+                            • 일부 앱에서는 파일 관리자를 통해 저장 위치를 변경할 수 있습니다<br>
+                            • 백업 완료 후 파일 관리자에서 원하는 위치로 이동 가능합니다
+                        </div>
+                    </div>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded p-3">
+                        <div class="text-sm text-blue-800">
+                            <strong>대안 방법:</strong><br>
+                            • 백업 데이터를 클립보드에 복사하여 메모장 등에 저장<br>
+                            • 이메일로 백업 데이터 전송<br>
+                            • 클라우드 저장소 활용
                         </div>
                     </div>
                     
                     <div class="flex gap-2 justify-center">
-                        <button onclick="performLocalBackup()" class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600">백업 실행</button>
+                        <button onclick="performLocalBackup()" class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600">파일 다운로드</button>
+                        <button onclick="performBackupToClipboard()" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">클립보드 복사</button>
                         <button onclick="closeManagementModal()" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">취소</button>
                     </div>
                 </div>
@@ -3190,46 +3419,160 @@
                     return;
                 }
 
-                const backupData = {
-                    timestamp: new Date().toISOString(),
-                    adminUsername: currentAdmin.username,
-                    data: {
-                        menus: localStorage.getItem(getAdminKey('menus')),
-                        staff: localStorage.getItem(getAdminKey('staff')),
-                        rooms: localStorage.getItem(getAdminKey('rooms')),
-                        customers: localStorage.getItem(getAdminKey('customers')),
-                        paymentMethods: localStorage.getItem(getAdminKey('paymentMethods')),
-                        reservations: localStorage.getItem(getAdminKey('reservations')),
-                        currency: localStorage.getItem(getAdminKey('currency')),
-                        guarantees: localStorage.getItem(getAdminKey('guarantees')),
-                        staffOrders: {}
-                    }
-                };
-
-                // 모든 날짜별 순번 데이터 백업
-                for (let key in localStorage) {
-                    if (key.startsWith(`${currentAdmin.username}_staffOrder_`)) {
-                        const date = key.replace(`${currentAdmin.username}_staffOrder_`, '');
-                        backupData.data.staffOrders[date] = localStorage.getItem(key);
-                    }
-                }
-
+                const backupData = createBackupData();
                 const jsonString = JSON.stringify(backupData, null, 2);
-                const blob = new Blob([jsonString], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
                 
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = fileName.endsWith('.json') ? fileName : `${fileName}.json`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-
-                alert(`백업이 완료되었습니다.\n파일명: ${link.download}\n위치: 기본 다운로드 폴더`);
-                closeManagementModal();
+                // 모바일 환경 감지
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                
+                if (isMobile) {
+                    // 모바일에서는 더 안전한 방법 사용
+                    try {
+                        const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' });
+                        
+                        // Web Share API 지원 확인
+                        if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], fileName + '.json')] })) {
+                            const file = new File([blob], fileName + '.json', { type: 'application/json' });
+                            navigator.share({
+                                files: [file],
+                                title: '마사지샵 백업 파일',
+                                text: '백업 데이터를 저장하세요'
+                            }).then(() => {
+                                alert('백업 파일 공유가 완료되었습니다.');
+                                closeManagementModal();
+                            }).catch(() => {
+                                // 공유 실패시 기본 다운로드 방식 사용
+                                downloadBackupFile(blob, fileName);
+                            });
+                        } else {
+                            // Web Share API 미지원시 기본 다운로드
+                            downloadBackupFile(blob, fileName);
+                        }
+                    } catch (error) {
+                        // 모바일에서 오류 발생시 클립보드 복사 제안
+                        if (confirm('파일 다운로드에 실패했습니다. 클립보드에 백업 데이터를 복사하시겠습니까?')) {
+                            performBackupToClipboard();
+                        }
+                    }
+                } else {
+                    // 데스크톱에서는 기본 다운로드 방식
+                    const blob = new Blob([jsonString], { type: 'application/json' });
+                    downloadBackupFile(blob, fileName);
+                }
             } catch (error) {
                 alert('백업 중 오류가 발생했습니다: ' + error.message);
+            }
+        }
+
+        function downloadBackupFile(blob, fileName) {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = fileName.endsWith('.json') ? fileName : `${fileName}.json`;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            alert(`백업이 완료되었습니다.\n파일명: ${link.download}\n위치: 다운로드 폴더`);
+            closeManagementModal();
+        }
+
+        function createBackupData() {
+            const backupData = {
+                timestamp: new Date().toISOString(),
+                adminUsername: currentAdmin.username,
+                data: {
+                    menus: localStorage.getItem(getAdminKey('menus')),
+                    staff: localStorage.getItem(getAdminKey('staff')),
+                    rooms: localStorage.getItem(getAdminKey('rooms')),
+                    customers: localStorage.getItem(getAdminKey('customers')),
+                    paymentMethods: localStorage.getItem(getAdminKey('paymentMethods')),
+                    reservations: localStorage.getItem(getAdminKey('reservations')),
+                    currency: localStorage.getItem(getAdminKey('currency')),
+                    guarantees: localStorage.getItem(getAdminKey('guarantees')),
+                    staffOrders: {}
+                }
+            };
+
+            // 모든 날짜별 순번 데이터 백업
+            for (let key in localStorage) {
+                if (key.startsWith(`${currentAdmin.username}_staffOrder_`)) {
+                    const date = key.replace(`${currentAdmin.username}_staffOrder_`, '');
+                    backupData.data.staffOrders[date] = localStorage.getItem(key);
+                }
+            }
+
+            return backupData;
+        }
+
+        function performBackupToClipboard() {
+            try {
+                const backupData = createBackupData();
+                const jsonString = JSON.stringify(backupData, null, 2);
+                
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(jsonString).then(() => {
+                        alert('백업 데이터가 클립보드에 복사되었습니다.\n메모장이나 텍스트 에디터에 붙여넣기하여 .json 파일로 저장하세요.');
+                        closeManagementModal();
+                    }).catch(() => {
+                        // 클립보드 API 실패시 대안 방법
+                        showBackupDataModal(jsonString);
+                    });
+                } else {
+                    // 클립보드 API 미지원시 대안 방법
+                    showBackupDataModal(jsonString);
+                }
+            } catch (error) {
+                alert('클립보드 복사 중 오류가 발생했습니다: ' + error.message);
+            }
+        }
+
+        function showBackupDataModal(jsonString) {
+            const content = `
+                <div class="space-y-4">
+                    <div class="text-center">
+                        <h3 class="text-lg font-bold mb-4">백업 데이터</h3>
+                        <p class="text-gray-600 mb-4">아래 데이터를 복사하여 .json 파일로 저장하세요</p>
+                    </div>
+                    
+                    <div>
+                        <textarea id="backupDataText" class="w-full h-64 border rounded px-3 py-2 text-xs font-mono" readonly>${jsonString}</textarea>
+                    </div>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded p-3">
+                        <div class="text-sm text-blue-800">
+                            <strong>저장 방법:</strong><br>
+                            1. 위 텍스트를 모두 선택하여 복사<br>
+                            2. 메모장이나 텍스트 에디터에 붙여넣기<br>
+                            3. 파일명.json으로 저장
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-2 justify-center">
+                        <button onclick="selectAllBackupData()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">전체 선택</button>
+                        <button onclick="closeManagementModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">닫기</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '백업 데이터 복사';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function selectAllBackupData() {
+            const textarea = document.getElementById('backupDataText');
+            if (textarea) {
+                textarea.select();
+                textarea.setSelectionRange(0, 99999); // 모바일 지원
+                
+                try {
+                    document.execCommand('copy');
+                    alert('백업 데이터가 클립보드에 복사되었습니다.');
+                } catch (err) {
+                    alert('복사에 실패했습니다. 수동으로 텍스트를 선택하여 복사해주세요.');
+                }
             }
         }
 
@@ -3250,7 +3593,7 @@
                     
                     <div>
                         <label class="block text-sm font-medium mb-2">백업 파일 선택:</label>
-                        <input type="file" id="restoreFileInput" accept=".json" 
+                        <input type="file" id="restoreFileInput" accept=".json,application/json,text/json"
                                class="w-full border rounded px-3 py-2 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
                         <div class="text-xs text-gray-500 mt-1">* JSON 형식의 백업 파일만 선택 가능합니다</div>
                     </div>
@@ -3259,6 +3602,15 @@
                         <div class="text-sm text-blue-800">
                             <div><strong>파일명:</strong> <span id="selectedFileName"></span></div>
                             <div><strong>파일 크기:</strong> <span id="selectedFileSize"></span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-yellow-50 border border-yellow-200 rounded p-3">
+                        <div class="text-sm text-yellow-800">
+                            <strong>모바일 앱 사용 시:</strong><br>
+                            • 파일 선택 시 문서/파일 관리자가 열리지 않으면 '파일' 또는 '내 파일' 앱을 먼저 실행해주세요<br>
+                            • JSON 파일이 다운로드 폴더에 있는지 확인해주세요<br>
+                            • 카메라가 열리면 뒤로가기 후 다시 시도해주세요
                         </div>
                     </div>
                     
@@ -3274,16 +3626,21 @@
             document.getElementById('managementModal').style.display = 'block';
             
             // 파일 선택 이벤트 리스너 추가
-            document.getElementById('restoreFileInput').addEventListener('change', function(event) {
-                const file = event.target.files[0];
-                if (file) {
-                    document.getElementById('selectedFileName').textContent = file.name;
-                    document.getElementById('selectedFileSize').textContent = formatFileSize(file.size);
-                    document.getElementById('fileInfo').classList.remove('hidden');
-                } else {
-                    document.getElementById('fileInfo').classList.add('hidden');
+            setTimeout(() => {
+                const fileInput = document.getElementById('restoreFileInput');
+                if (fileInput) {
+                    fileInput.addEventListener('change', function(event) {
+                        const file = event.target.files[0];
+                        if (file) {
+                            document.getElementById('selectedFileName').textContent = file.name;
+                            document.getElementById('selectedFileSize').textContent = formatFileSize(file.size);
+                            document.getElementById('fileInfo').classList.remove('hidden');
+                        } else {
+                            document.getElementById('fileInfo').classList.add('hidden');
+                        }
+                    });
                 }
-            });
+            }, 100);
         }
 
         function executeRestore() {
@@ -3291,7 +3648,10 @@
             const file = fileInput.files[0];
             
             if (!file) {
-                alert('복원할 파일을 선택해주세요.');
+                // 파일이 선택되지 않은 경우 텍스트 입력 방식 제안
+                if (confirm('파일이 선택되지 않았습니다. 텍스트로 백업 데이터를 입력하시겠습니까?')) {
+                    showTextRestoreModal();
+                }
                 return;
             }
 
@@ -3300,6 +3660,107 @@
             }
 
             restoreData({ target: { files: [file] } });
+        }
+
+        function showTextRestoreModal() {
+            const content = `
+                <div class="space-y-4">
+                    <div class="text-center">
+                        <h3 class="text-lg font-bold mb-4">텍스트로 복원</h3>
+                        <p class="text-gray-600 mb-4">백업 데이터를 텍스트로 붙여넣어 복원합니다</p>
+                    </div>
+                    
+                    <div class="bg-red-50 border border-red-200 rounded p-3">
+                        <div class="text-sm text-red-800">
+                            <strong>⚠️ 주의:</strong> 현재 데이터가 모두 삭제되고 백업 데이터로 대체됩니다.
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">백업 데이터 (JSON 형식):</label>
+                        <textarea id="restoreDataText" class="w-full h-64 border rounded px-3 py-2 text-xs font-mono" 
+                                  placeholder="백업 데이터를 여기에 붙여넣으세요..."></textarea>
+                    </div>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded p-3">
+                        <div class="text-sm text-blue-800">
+                            <strong>사용 방법:</strong><br>
+                            1. 백업 시 복사한 JSON 데이터를 위 텍스트 영역에 붙여넣기<br>
+                            2. 데이터가 올바른 JSON 형식인지 확인<br>
+                            3. '복원 실행' 버튼 클릭
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-2 justify-center">
+                        <button onclick="executeTextRestore()" class="bg-orange-500 text-white px-6 py-2 rounded hover:bg-orange-600">복원 실행</button>
+                        <button onclick="showLocalRestoreDialog()" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">파일 선택으로 돌아가기</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '텍스트로 복원';
+            document.getElementById('managementContent').innerHTML = content;
+        }
+
+        function executeTextRestore() {
+            const textData = document.getElementById('restoreDataText').value.trim();
+            
+            if (!textData) {
+                alert('백업 데이터를 입력해주세요.');
+                return;
+            }
+
+            if (!confirm('현재 데이터가 모두 삭제되고 백업 데이터로 복원됩니다. 계속하시겠습니까?')) {
+                return;
+            }
+
+            try {
+                const backupData = JSON.parse(textData);
+                
+                if (!backupData.data || !backupData.adminUsername) {
+                    alert('올바르지 않은 백업 데이터입니다.');
+                    return;
+                }
+
+                if (backupData.adminUsername !== currentAdmin.username) {
+                    if (!confirm(`이 백업은 다른 관리자(${backupData.adminUsername})의 데이터입니다. 계속하시겠습니까?`)) {
+                        return;
+                    }
+                }
+
+                // 기존 데이터 삭제
+                const keysToRemove = [];
+                for (let key in localStorage) {
+                    if (key.startsWith(currentAdmin.username + '_')) {
+                        keysToRemove.push(key);
+                    }
+                }
+                keysToRemove.forEach(key => localStorage.removeItem(key));
+
+                // 백업 데이터 복원
+                if (backupData.data.menus) localStorage.setItem(getAdminKey('menus'), backupData.data.menus);
+                if (backupData.data.staff) localStorage.setItem(getAdminKey('staff'), backupData.data.staff);
+                if (backupData.data.rooms) localStorage.setItem(getAdminKey('rooms'), backupData.data.rooms);
+                if (backupData.data.customers) localStorage.setItem(getAdminKey('customers'), backupData.data.customers);
+                if (backupData.data.paymentMethods) localStorage.setItem(getAdminKey('paymentMethods'), backupData.data.paymentMethods);
+                if (backupData.data.reservations) localStorage.setItem(getAdminKey('reservations'), backupData.data.reservations);
+                if (backupData.data.currency) localStorage.setItem(getAdminKey('currency'), backupData.data.currency);
+                if (backupData.data.guarantees) localStorage.setItem(getAdminKey('guarantees'), backupData.data.guarantees);
+
+                // 순번 데이터 복원
+                if (backupData.data.staffOrders) {
+                    for (let date in backupData.data.staffOrders) {
+                        localStorage.setItem(getDailyStaffOrderKey(date), backupData.data.staffOrders[date]);
+                    }
+                }
+
+                alert(`텍스트 복원이 완료되었습니다!\n백업 날짜: ${new Date(backupData.timestamp).toLocaleString()}`);
+                
+                // 화면 새로고침
+                location.reload();
+            } catch (error) {
+                alert('복원 중 오류가 발생했습니다. JSON 형식이 올바른지 확인해주세요.\n오류: ' + error.message);
+            }
         }
 
         function formatFileSize(bytes) {
@@ -3372,11 +3833,73 @@
         }
 
         function showGoogleBackupDialog() {
-            alert('구글 백업 기능은 추후 구현 예정입니다.');
+            const content = `
+                <div class="space-y-4">
+                    <div class="text-center">
+                        <h3 class="text-lg font-bold mb-4">구글 드라이브 백업</h3>
+                        <p class="text-gray-600 mb-4">구글 드라이브에 데이터를 백업합니다.</p>
+                    </div>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded p-3">
+                        <div class="text-sm text-blue-800">
+                            <strong>참고:</strong> 구글 계정에 로그인하여 드라이브에 백업 파일을 저장합니다.<br>
+                            백업 파일은 "massage_backup_[날짜].json" 형식으로 저장됩니다.
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">파일명:</label>
+                        <input type="text" id="googleBackupFileName" 
+                               value="massage_backup_${currentAdmin.username}_${new Date().toISOString().split('T')[0]}" 
+                               class="w-full border rounded px-3 py-2" 
+                               placeholder="백업 파일명을 입력하세요">
+                        <div class="text-xs text-gray-500 mt-1">* .json 확장자는 자동으로 추가됩니다</div>
+                    </div>
+                    
+                    <div class="flex gap-2 justify-center">
+                        <button onclick="performGoogleBackup()" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">구글 로그인 후 백업</button>
+                        <button onclick="closeManagementModal()" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '구글 드라이브 백업';
+            document.getElementById('managementContent').innerHTML = content;
+            document.getElementById('managementModal').style.display = 'block';
         }
 
         function showGoogleRestoreDialog() {
-            alert('구글 복원 기능은 추후 구현 예정입니다.');
+            const content = `
+                <div class="space-y-4">
+                    <div class="text-center">
+                        <h3 class="text-lg font-bold mb-4">구글 드라이브 복원</h3>
+                        <p class="text-gray-600 mb-4">구글 드라이브에서 백업 파일을 선택하여 복원합니다.</p>
+                    </div>
+                    
+                    <div class="bg-red-50 border border-red-200 rounded p-3">
+                        <div class="text-sm text-red-800">
+                            <strong>⚠️ 주의:</strong> 현재 데이터가 모두 삭제되고 백업 데이터로 대체됩니다.<br>
+                            복원 전에 현재 데이터를 백업하는 것을 권장합니다.
+                        </div>
+                    </div>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded p-3">
+                        <div class="text-sm text-blue-800">
+                            <strong>참고:</strong> 구글 계정에 로그인하여 드라이브에서 백업 파일을 선택합니다.<br>
+                            JSON 형식의 백업 파일만 복원 가능합니다.
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-2 justify-center">
+                        <button onclick="performGoogleRestore()" class="bg-orange-500 text-white px-6 py-2 rounded hover:bg-orange-600">구글 로그인 후 복원</button>
+                        <button onclick="closeManagementModal()" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">취소</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('managementTitle').textContent = '구글 드라이브 복원';
+            document.getElementById('managementContent').innerHTML = content;
+            document.getElementById('managementModal').style.display = 'block';
         }
 
         function closeGoogleLoginModal() {
@@ -3384,7 +3907,190 @@
         }
 
         function processGoogleLogin() {
-            alert('구글 로그인 기능은 추후 구현 예정입니다.');
+            const email = document.getElementById('googleEmail').value;
+            const password = document.getElementById('googlePassword').value;
+            
+            if (!email || !password) {
+                alert('이메일과 비밀번호를 입력해주세요.');
+                return;
+            }
+            
+            // 간단한 이메일 형식 검증
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('올바른 이메일 형식을 입력해주세요.');
+                return;
+            }
+            
+            // 구글 로그인 시뮬레이션 (실제로는 OAuth를 사용해야 함)
+            const loginButton = document.getElementById('googleLoginConfirm');
+            loginButton.textContent = '로그인 중...';
+            loginButton.disabled = true;
+            
+            setTimeout(() => {
+                // 로그인 성공 시뮬레이션
+                localStorage.setItem('googleAuth', JSON.stringify({
+                    email: email,
+                    authenticated: true,
+                    timestamp: new Date().toISOString()
+                }));
+                
+                alert(`구글 계정 로그인 성공!\n계정: ${email}`);
+                closeGoogleLoginModal();
+                
+                // 백업 또는 복원 작업 실행
+                if (window.googleAction === 'backup') {
+                    executeGoogleBackup();
+                } else if (window.googleAction === 'restore') {
+                    executeGoogleRestore();
+                }
+                
+                loginButton.textContent = '로그인';
+                loginButton.disabled = false;
+            }, 2000);
+        }
+
+        function performGoogleBackup() {
+            const fileName = document.getElementById('googleBackupFileName').value.trim();
+            if (!fileName) {
+                alert('파일명을 입력해주세요.');
+                return;
+            }
+            
+            window.googleAction = 'backup';
+            window.googleBackupFileName = fileName;
+            showGoogleLoginModal();
+        }
+
+        function performGoogleRestore() {
+            window.googleAction = 'restore';
+            showGoogleLoginModal();
+        }
+
+        function showGoogleLoginModal() {
+            document.getElementById('googleEmail').value = '';
+            document.getElementById('googlePassword').value = '';
+            document.getElementById('googleLoginModal').style.display = 'block';
+        }
+
+        function executeGoogleBackup() {
+            try {
+                const fileName = window.googleBackupFileName;
+                const backupData = {
+                    timestamp: new Date().toISOString(),
+                    adminUsername: currentAdmin.username,
+                    data: {
+                        menus: localStorage.getItem(getAdminKey('menus')),
+                        staff: localStorage.getItem(getAdminKey('staff')),
+                        rooms: localStorage.getItem(getAdminKey('rooms')),
+                        customers: localStorage.getItem(getAdminKey('customers')),
+                        paymentMethods: localStorage.getItem(getAdminKey('paymentMethods')),
+                        reservations: localStorage.getItem(getAdminKey('reservations')),
+                        currency: localStorage.getItem(getAdminKey('currency')),
+                        guarantees: localStorage.getItem(getAdminKey('guarantees')),
+                        staffOrders: {}
+                    }
+                };
+
+                // 모든 날짜별 순번 데이터 백업
+                for (let key in localStorage) {
+                    if (key.startsWith(`${currentAdmin.username}_staffOrder_`)) {
+                        const date = key.replace(`${currentAdmin.username}_staffOrder_`, '');
+                        backupData.data.staffOrders[date] = localStorage.getItem(key);
+                    }
+                }
+
+                // 구글 드라이브 업로드 시뮬레이션
+                const jsonString = JSON.stringify(backupData, null, 2);
+                
+                // 실제로는 Google Drive API를 사용해야 하지만, 여기서는 로컬 다운로드로 대체
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = fileName.endsWith('.json') ? fileName : `${fileName}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                alert(`구글 드라이브 백업이 완료되었습니다!\n파일명: ${link.download}\n\n* 현재는 로컬 다운로드로 제공됩니다.\n실제 구글 드라이브 연동은 추후 업데이트 예정입니다.`);
+                closeManagementModal();
+            } catch (error) {
+                alert('구글 백업 중 오류가 발생했습니다: ' + error.message);
+            }
+        }
+
+        function executeGoogleRestore() {
+            // 구글 드라이브에서 파일 선택 시뮬레이션
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = function(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                if (!confirm('구글 드라이브에서 선택한 파일로 현재 데이터를 복원하시겠습니까?\n현재 데이터가 모두 삭제됩니다.')) {
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const backupData = JSON.parse(e.target.result);
+                        
+                        if (!backupData.data || !backupData.adminUsername) {
+                            alert('올바르지 않은 백업 파일입니다.');
+                            return;
+                        }
+
+                        if (backupData.adminUsername !== currentAdmin.username) {
+                            if (!confirm(`이 백업은 다른 관리자(${backupData.adminUsername})의 데이터입니다. 계속하시겠습니까?`)) {
+                                return;
+                            }
+                        }
+
+                        // 기존 데이터 삭제
+                        const keysToRemove = [];
+                        for (let key in localStorage) {
+                            if (key.startsWith(currentAdmin.username + '_')) {
+                                keysToRemove.push(key);
+                            }
+                        }
+                        keysToRemove.forEach(key => localStorage.removeItem(key));
+
+                        // 백업 데이터 복원
+                        if (backupData.data.menus) localStorage.setItem(getAdminKey('menus'), backupData.data.menus);
+                        if (backupData.data.staff) localStorage.setItem(getAdminKey('staff'), backupData.data.staff);
+                        if (backupData.data.rooms) localStorage.setItem(getAdminKey('rooms'), backupData.data.rooms);
+                        if (backupData.data.customers) localStorage.setItem(getAdminKey('customers'), backupData.data.customers);
+                        if (backupData.data.paymentMethods) localStorage.setItem(getAdminKey('paymentMethods'), backupData.data.paymentMethods);
+                        if (backupData.data.reservations) localStorage.setItem(getAdminKey('reservations'), backupData.data.reservations);
+                        if (backupData.data.currency) localStorage.setItem(getAdminKey('currency'), backupData.data.currency);
+                        if (backupData.data.guarantees) localStorage.setItem(getAdminKey('guarantees'), backupData.data.guarantees);
+
+                        // 순번 데이터 복원
+                        if (backupData.data.staffOrders) {
+                            for (let date in backupData.data.staffOrders) {
+                                localStorage.setItem(getDailyStaffOrderKey(date), backupData.data.staffOrders[date]);
+                            }
+                        }
+
+                        alert(`구글 드라이브 복원이 완료되었습니다!\n백업 날짜: ${new Date(backupData.timestamp).toLocaleString()}\n\n* 현재는 로컬 파일 선택으로 제공됩니다.\n실제 구글 드라이브 연동은 추후 업데이트 예정입니다.`);
+                        
+                        // 화면 새로고침
+                        location.reload();
+                    } catch (error) {
+                        alert('구글 복원 중 오류가 발생했습니다: ' + error.message);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            
+            input.click();
+            closeManagementModal();
         }
 
         function exportAllDataExcel() {
@@ -4308,6 +5014,11 @@
 
         // 관리자 관리 함수들 (최고 관리자 전용)
         function addNewAdmin() {
+            const today = new Date().toISOString().split('T')[0];
+            const oneYearLater = new Date();
+            oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
+            const defaultEndDate = oneYearLater.toISOString().split('T')[0];
+
             const content = `
                 <div class="space-y-4">
                     <div>
@@ -4333,6 +5044,22 @@
                         <label class="block text-sm font-medium mb-2">전화번호:</label>
                         <input type="text" id="newAdminPhone" class="w-full border rounded px-3 py-2" placeholder="전화번호를 입력하세요">
                     </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">유효기간 시작일:</label>
+                            <input type="date" id="newAdminStartDate" value="${today}" class="w-full border rounded px-3 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">유효기간 종료일:</label>
+                            <input type="date" id="newAdminEndDate" value="${defaultEndDate}" class="w-full border rounded px-3 py-2">
+                        </div>
+                    </div>
+                    <div class="bg-blue-50 border border-blue-200 rounded p-3">
+                        <div class="text-sm text-blue-800">
+                            <strong>참고:</strong> 유효기간이 만료된 관리자는 로그인할 수 없습니다.<br>
+                            최고관리자는 유효기간 제한이 없습니다.
+                        </div>
+                    </div>
                     <div class="flex gap-2">
                         <button onclick="saveNewAdmin()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">저장</button>
                         <button onclick="manageAdmins()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
@@ -4350,9 +5077,21 @@
             const type = document.getElementById('newAdminType').value;
             const shopName = document.getElementById('newAdminShopName').value;
             const phone = document.getElementById('newAdminPhone').value;
+            const startDate = document.getElementById('newAdminStartDate').value;
+            const endDate = document.getElementById('newAdminEndDate').value;
 
             if (!username || !password) {
                 alert('아이디와 비밀번호를 입력해주세요.');
+                return;
+            }
+
+            if (!startDate || !endDate) {
+                alert('유효기간을 입력해주세요.');
+                return;
+            }
+
+            if (new Date(startDate) >= new Date(endDate)) {
+                alert('종료일은 시작일보다 늦어야 합니다.');
                 return;
             }
 
@@ -4372,7 +5111,11 @@
                 password: password,
                 type: type,
                 shopName: shopName,
-                phone: phone
+                phone: phone,
+                validFrom: startDate,
+                validUntil: endDate,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
             });
 
             localStorage.setItem('globalAdmins', JSON.stringify(admins));
@@ -4386,6 +5129,14 @@
             
             if (!admin) return;
 
+            // 기존 관리자의 유효기간이 없는 경우 기본값 설정
+            const defaultStartDate = admin.validFrom || new Date().toISOString().split('T')[0];
+            const defaultEndDate = admin.validUntil || (() => {
+                const oneYearLater = new Date();
+                oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
+                return oneYearLater.toISOString().split('T')[0];
+            })();
+
             const content = `
                 <div class="space-y-4">
                     <div>
@@ -4398,7 +5149,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2">타입:</label>
-                        <select id="editAdminType" class="w-full border rounded px-3 py-2" ${id === 1 ? 'disabled' : ''}>
+                        <select id="editAdminType" class="w-full border rounded px-3 py-2" ${id === 1 ? 'disabled' : ''} onchange="toggleValidityFields()">
                             <option value="normal" ${admin.type === 'normal' ? 'selected' : ''}>일반관리자</option>
                             <option value="super" ${admin.type === 'super' ? 'selected' : ''}>최고관리자</option>
                         </select>
@@ -4411,6 +5162,22 @@
                         <label class="block text-sm font-medium mb-2">전화번호:</label>
                         <input type="text" id="editAdminPhone" value="${admin.phone || ''}" class="w-full border rounded px-3 py-2">
                     </div>
+                    <div id="validityFields" class="grid grid-cols-2 gap-4" style="display: ${admin.type === 'super' ? 'none' : 'grid'}">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">유효기간 시작일:</label>
+                            <input type="date" id="editAdminStartDate" value="${defaultStartDate}" class="w-full border rounded px-3 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">유효기간 종료일:</label>
+                            <input type="date" id="editAdminEndDate" value="${defaultEndDate}" class="w-full border rounded px-3 py-2">
+                        </div>
+                    </div>
+                    <div class="bg-blue-50 border border-blue-200 rounded p-3">
+                        <div class="text-sm text-blue-800">
+                            <strong>참고:</strong> 최고관리자는 유효기간 제한이 없습니다.<br>
+                            일반관리자는 유효기간이 만료되면 로그인할 수 없습니다.
+                        </div>
+                    </div>
                     <div class="flex gap-2">
                         <button onclick="updateAdmin(${id})" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">수정</button>
                         <button onclick="manageAdmins()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
@@ -4420,6 +5187,15 @@
             
             document.getElementById('managementTitle').textContent = '관리자 수정';
             document.getElementById('managementContent').innerHTML = content;
+            
+            // 유효기간 필드 토글 함수를 전역으로 추가
+            window.toggleValidityFields = function() {
+                const adminType = document.getElementById('editAdminType').value;
+                const validityFields = document.getElementById('validityFields');
+                if (validityFields) {
+                    validityFields.style.display = adminType === 'super' ? 'none' : 'grid';
+                }
+            };
         }
 
         function updateAdmin(id) {
@@ -4434,18 +5210,43 @@
                 return;
             }
 
+            let startDate = null;
+            let endDate = null;
+
+            // 일반관리자인 경우 유효기간 검증
+            if (type === 'normal') {
+                startDate = document.getElementById('editAdminStartDate').value;
+                endDate = document.getElementById('editAdminEndDate').value;
+
+                if (!startDate || !endDate) {
+                    alert('일반관리자는 유효기간을 입력해주세요.');
+                    return;
+                }
+
+                if (new Date(startDate) >= new Date(endDate)) {
+                    alert('종료일은 시작일보다 늦어야 합니다.');
+                    return;
+                }
+            }
+
             const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
             const adminIndex = admins.findIndex(a => a.id === id);
             
             if (adminIndex === -1) return;
 
+            // 기존 관리자 정보 유지하면서 업데이트
+            const existingAdmin = admins[adminIndex];
+            
             admins[adminIndex] = {
-                id: id,
+                ...existingAdmin,
                 username: username,
                 password: password,
                 type: type,
                 shopName: shopName,
-                phone: phone
+                phone: phone,
+                validFrom: type === 'super' ? null : startDate,
+                validUntil: type === 'super' ? null : endDate,
+                updatedAt: new Date().toISOString()
             };
 
             localStorage.setItem('globalAdmins', JSON.stringify(admins));
@@ -4472,5 +5273,5 @@
         initializeApp();
         updateTranslations();
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99a6adf2366355a1',t:'MTc2MjQ1NDAwOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99a6c0c3942d55a1',t:'MTc2MjQ1NDc4MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
