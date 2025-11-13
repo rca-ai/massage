@@ -605,7 +605,22 @@
                     const savedAdmin = localStorage.getItem('currentAdmin');
                     
                     // Supabase Auth 세션 확인
-                    const { data: { session } } = await supabaseClient.auth.getSession();
+const
+ getSessionResp = 
+await
+ supabaseClient.auth.getSession();
+if
+ (getSessionResp.error) {
+  
+console
+.error(
+'getSession error'
+, getSessionResp.error);
+} 
+const
+ session = getSessionResp?.data?.session || 
+null
+;
 
                     if (session) {
                         // Supabase 세션이 유효하면 localStorage의 admin 정보 업데이트
@@ -706,11 +721,18 @@
                     password: password,
                 });
 
-                if (error) {
-                    console.error('Login Error:', error.message);
-                    alert('로그인에 실패했습니다. (아이디 또는 비밀번호를 확인해주세요.)');
-                    return;
-                }
+const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+if (error) {
+  console.error('Login Error:', error);
+  alert('로그인에 실패했습니다. 콘솔 로그 확인');
+  return;
+}
+const user = data?.user || data?.session?.user;
+if (!user) {
+  console.error('Login response missing user/session:', data);
+  alert('로그인 응답에 사용자 정보가 없습니다. 콘솔 확인');
+  return;
+}
 
                 if (data.user) {
                     // 2. 로그인 성공 시 처리
@@ -1927,8 +1949,79 @@
         }
 
         // 앱 초기화
-        initializeApp();
-        updateTranslations();
+// 기존: initializeApp();
+
+// 변경: supabase가 로드되고 DOM이 준비되면 초기화
+
+window
+.addEventListener(
+'DOMContentLoaded'
+, 
+async
+ () => {
+  
+// supabase 라이브러리 로드 확인
+
+  
+if
+ (!
+window
+.supabase || !
+window
+.supabase.createClient) {
+    
+console
+.error(
+'Supabase SDK not loaded or wrong path. Check CDN script URL.'
+);
+    alert(
+'Supabase 라이브러리 로드에 실패했습니다. 콘솔을 확인하세요.'
+);
+    
+return
+;
+  }
+  
+// 이미 선언한 SUPABASE_URL, SUPABASE_ANON_KEY, supabaseClient 생성은 그대로 둔다면
+
+  
+// (혹시 생성 코드가 DOMContentLoaded 이전에 실행되었다면 다시 안전하게 생성)
+
+  
+try
+ {
+    
+if
+ (!supabaseClient || !supabaseClient.auth) {
+      
+window
+.supabaseClient = 
+window
+.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+  } 
+catch
+ (e) {
+    
+console
+.error(
+'Supabase client creation failed:'
+, e);
+    alert(
+'Supabase 클라이언트 생성 실패. 콘솔을 확인하세요.'
+);
+    
+return
+;
+  }
+  
+// 이제 앱 초기화 호출
+
+  
+await
+ initializeApp();
+  updateTranslations();
+});
     </script>
  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'998ccaa3d1a664f5',t:'MTc2MjE4MjU2MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
