@@ -7,7 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://font.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&amp;family=Noto+Sans+Thai:wght@300;400;500;700&amp;family=Noto+Sans+Vietnamese:wght@300;400;500;700&amp;family=Roboto:wght@300;400;500;700&amp;family=Nanum+Gothic:wght@400;700;800&amp;display=swap" rel="stylesheet">
   <style>
         body {
@@ -447,7 +447,97 @@ async function saveNewReservation(reservationData) {
 }
 
 // -------------------------------------------------------------------------
-        // 전역 변수
+// [위치 1]: 기존 JavaScript <script> 태그의 가장 상단 (약 2182줄 근처)에 붙여넣으세요.
+// -------------------------------------------------------------------------
+// =========================================================================
+// 1. Supabase 클라이언트 초기화 및 연결 함수
+// =========================================================================
+const SUPABASE_URL = 'https://nzlqloymzuvsysbhczdz.supabase.co'; 
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im56bHFsb3ltenV2c3lzYmhjemR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI5NjIxODQsImV4cCI6MjA3ODUzODE4NH0.X5-7pB7f4gtPI_wMCtS_J-kksPVmGMKYGxFCi2Edp_Q';
+
+// Supabase 클라이언트 생성
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+console.log('Supabase Client Initialized!');
+
+
+// =========================================================================
+// 2. 데이터 조회 로직 (기존 localStorage.getItem 대체 함수들)
+// =========================================================================
+
+/**
+ * 메뉴 데이터 로드 함수 (menus 테이블 조회)
+ * @returns {Array} 메뉴 목록
+ */
+async function getMenusData() {
+    const { data: menus, error } = await supabase
+        .from('menus')
+        .select('id, name, duration_minutes, price_regular, price_member, commission_rate_staff')
+        .order('id', { ascending: true }); 
+
+    if (error) {
+        console.error('Error fetching menus data:', error.message);
+        return [];
+    }
+    return menus;
+}
+
+/**
+ * 직원 데이터 로드 함수 (staff 테이블 조회)
+ * @returns {Array} 직원 목록
+ */
+async function getStaffData() {
+    const { data: staff, error } = await supabase
+        .from('staff')
+        .select('*')
+        .order('name', { ascending: true }); 
+
+    if (error) {
+        console.error('Error fetching staff data:', error.message);
+        return [];
+    }
+    return staff;
+}
+
+
+// =========================================================================
+// 3. 예약 저장 로직 (기존 localStorage.setItem 대체)
+// =========================================================================
+
+/**
+ * 새로운 예약/작업을 reservations 테이블에 저장합니다.
+ * @param {Object} reservationData - 예약에 필요한 데이터 객체
+ * @returns {Object|null} - 저장된 데이터 객체 또는 null
+ */
+async function saveNewReservation(reservationData) {
+    const newReservation = {
+        start_time: reservationData.start,
+        end_time: reservationData.end || null, 
+        staff_id: parseInt(reservationData.staffId), 
+        menu_id: parseInt(reservationData.menuId), 
+        room_id: parseInt(reservationData.roomId) || null,
+        customer_name: reservationData.customerName || null,
+        total_price: reservationData.price,
+        commission: reservationData.commission,
+        status: reservationData.status || 'running' 
+    };
+
+    const { data, error } = await supabase
+        .from('reservations')
+        .insert([newReservation])
+        .select(); 
+
+    if (error) {
+        console.error('Error saving new reservation:', error.message);
+        alert('예약 저장에 실패했습니다. 오류: ' + error.message);
+        return null;
+    }
+    
+    console.log('Reservation successfully saved:', data[0]);
+    return data[0]; 
+}
+// -------------------------------------------------------------------------
+   
+   // 전역 변수
         let currentLanguage = 'ko';
 // ... (이 밑으로 기존의 나머지 JavaScript 코드가 이어집니다.)
 // ... (나머지 코드 생략)
@@ -1162,79 +1252,22 @@ async function saveNewReservation(reservationData) {
         }
 
         // 전역 데이터 초기화 (관리자 계정만)
-        function initializeGlobalData() {
-            if (!localStorage.getItem('globalAdmins')) {
-                const oneYearLater = new Date();
-                oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
-                const defaultEndDate = oneYearLater.toISOString().split('T')[0];
-                const today = new Date().toISOString().split('T')[0];
+function initializeGlobalData() {
+    // ❌❌❌ [중요] Supabase로 데이터 관리가 이전되었으므로, 
+    // 기존 localStorage 초기화 코드는 모두 비활성화합니다. ❌❌❌
+    /*
+    if (!localStorage.getItem('globalAdmins')) {
+        // ... (내부의 모든 localStorage.setItem 코드 주석 처리) ...
+    } else {
+        // ... (기존 관리자 데이터 업데이트 로직도 주석 처리) ...
+    }
 
-                localStorage.setItem('globalAdmins', JSON.stringify([
-                    {
-                        id: 1, 
-                        username: 'admin', 
-                        password: '12345678', 
-                        type: 'super', 
-                        shopName: '', 
-                        phone: '',
-                        validFrom: null,
-                        validUntil: null,
-                        createdAt: new Date().toISOString(),
-                        updatedAt: new Date().toISOString()
-                    },
-                    {
-                        id: 2, 
-                        username: 'shop1', 
-                        password: '12345678', 
-                        type: 'normal', 
-                        shopName: '힐링 마사지', 
-                        phone: '02-1234-5678',
-                        validFrom: today,
-                        validUntil: defaultEndDate,
-                        createdAt: new Date().toISOString(),
-                        updatedAt: new Date().toISOString()
-                    },
-                    {
-                        id: 3, 
-                        username: 'Test', 
-                        password: '1111', 
-                        type: 'normal', 
-                        shopName: '테스트 마사지', 
-                        phone: '02-0000-0000',
-                        validFrom: today,
-                        validUntil: defaultEndDate,
-                        createdAt: new Date().toISOString(),
-                        updatedAt: new Date().toISOString()
-                    }
-                ]));
-            } else {
-                // 기존 관리자 데이터에 유효기간 필드가 없는 경우 추가
-                const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
-                let needsUpdate = false;
-                
-                admins.forEach(admin => {
-                    if (!admin.hasOwnProperty('validFrom') || !admin.hasOwnProperty('validUntil')) {
-                        needsUpdate = true;
-                        if (admin.type === 'super') {
-                            admin.validFrom = null;
-                            admin.validUntil = null;
-                        } else {
-                            const today = new Date().toISOString().split('T')[0];
-                            const oneYearLater = new Date();
-                            oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
-                            admin.validFrom = today;
-                            admin.validUntil = oneYearLater.toISOString().split('T')[0];
-                        }
-                        admin.createdAt = admin.createdAt || new Date().toISOString();
-                        admin.updatedAt = new Date().toISOString();
-                    }
-                });
-                
-                if (needsUpdate) {
-                    localStorage.setItem('globalAdmins', JSON.stringify(admins));
-                }
-            }
-
+    if (!localStorage.getItem('globalCurrency')) {
+        // ... (currency 초기화 로직도 주석 처리) ...
+    }
+    */
+    // ❌❌❌ initializeGlobalData 함수 내부 끝 ❌❌❌
+}
             if (!localStorage.getItem('globalCurrency')) {
                 localStorage.setItem('globalCurrency', JSON.stringify({
                     symbol: '',
@@ -1254,178 +1287,81 @@ async function saveNewReservation(reservationData) {
         }
 
         // 관리자별 데이터 초기화
-        function initializeAdminData() {
-            const adminPrefix = currentAdmin.username;
+function initializeAdminData() {
+    const adminPrefix = currentAdmin.username;
+    
+    // ❌❌❌ [중요] Supabase로 데이터 관리가 이전되었으므로, 
+    // 기존 localStorage 초기화 코드는 모두 비활성화합니다. ❌❌❌
+    /*
+    // 기본 데이터 설정
+    if (!localStorage.getItem(getAdminKey('menus'))) {
+        // ... (menus 초기화 로직 주석 처리) ...
+    }
 
-            // 기본 데이터 설정
-            if (!localStorage.getItem(getAdminKey('menus'))) {
-                localStorage.setItem(getAdminKey('menus'), JSON.stringify([
-                    {
-                        id: 1, 
-                        name: '타이 마사지',
-                        prices: {
-                            30: {price: 30000, commission: 15000},
-                            60: {price: 50000, commission: 25000},
-                            90: {price: 70000, commission: 35000},
-                            120: {price: 90000, commission: 45000}
-                        }
-                    },
-                    {
-                        id: 2, 
-                        name: '오일 마사지',
-                        prices: {
-                            60: {price: 80000, commission: 40000},
-                            90: {price: 110000, commission: 55000},
-                            120: {price: 140000, commission: 70000}
-                        }
-                    }
-                ]));
-            }
-
-            if (!localStorage.getItem(getAdminKey('staff'))) {
-                localStorage.setItem(getAdminKey('staff'), JSON.stringify([
-                    {id: 1, name: '김미영', phone: '010-1234-5678', bank: '국민은행', account: '123-456-789', status: '정직원'},
-                    {id: 2, name: '이수진', phone: '010-9876-5432', bank: '신한은행', account: '987-654-321', status: '정직원'}
-                ]));
-            }
-
-            if (!localStorage.getItem(getAdminKey('staffOrder'))) {
-                localStorage.setItem(getAdminKey('staffOrder'), JSON.stringify({}));
-            }
-
-            if (!localStorage.getItem(getAdminKey('rooms'))) {
-                localStorage.setItem(getAdminKey('rooms'), JSON.stringify([
-                    {id: 1, roomNumber: '101', capacity: 1},
-                    {id: 2, roomNumber: '102', capacity: 2},
-                    {id: 3, roomNumber: '103', capacity: 1}
-                ]));
-            }
-
-            if (!localStorage.getItem(getAdminKey('customers'))) {
-                localStorage.setItem(getAdminKey('customers'), JSON.stringify([
-                    {id: 1, name: '홍길동', phone: '010-1111-2222', customerNumber: '100001'},
-                    {id: 2, name: '김철수', phone: '010-3333-4444', customerNumber: '100002'}
-                ]));
-            }
-
-            if (!localStorage.getItem(getAdminKey('paymentMethods'))) {
-                localStorage.setItem(getAdminKey('paymentMethods'), JSON.stringify([
-                    {id: 1, name: '현금'},
-                    {id: 2, name: 'QR'},
-                    {id: 3, name: '쿠폰'},
-                    {id: 4, name: 'QR TIP'},
-                    {id: 5, name: '기타'}
-                ]));
-            }
-
-            if (!localStorage.getItem(getAdminKey('reservations'))) {
-                localStorage.setItem(getAdminKey('reservations'), JSON.stringify([]));
-            }
-
-            if (!localStorage.getItem(getAdminKey('currency'))) {
-                const globalCurrency = JSON.parse(localStorage.getItem('globalCurrency'));
-                localStorage.setItem(getAdminKey('currency'), JSON.stringify(globalCurrency));
-            }
-
-            if (!localStorage.getItem(getAdminKey('guarantees'))) {
-                localStorage.setItem(getAdminKey('guarantees'), JSON.stringify([]));
-            }
-        }
-
+    if (!localStorage.getItem(getAdminKey('staff'))) {
+        // ... (staff 초기화 로직 주석 처리) ...
+    }
+    // ... (나머지 staffOrder, rooms, customers, paymentMethods, reservations 등 
+    // 모든 localStorage.setItem 로직을 주석 처리) ...
+    */
+    // ❌❌❌ initializeAdminData 함수 내부 끝 ❌❌❌
+}
+   
         // 로그인 처리
-        function processLogin() {
-            try {
-                const username = document.getElementById('loginUsername').value;
-                const password = document.getElementById('loginPassword').value;
-                
-                if (!username || !password) {
-                    alert('아이디와 비밀번호를 입력해주세요.');
-                    return;
-                }
+// [위치 3]: processLogin() 함수 전체를 아래 코드로 교체하십시오. (약 2454줄 근처)
 
-                const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
-                const admin = admins.find(a => a.username === username && a.password === password);
-                
-                if (admin) {
-                    // 유효기간 검사 (최고관리자는 제외)
-                    if (admin.type !== 'super' && admin.validUntil) {
-                        const today = new Date().toISOString().split('T')[0];
-                        const validFrom = admin.validFrom || '1900-01-01';
-                        const validUntil = admin.validUntil;
-                        
-                        if (today < validFrom) {
-                            alert('아직 사용 가능한 기간이 아닙니다.\n사용 가능 기간: ' + validFrom + ' ~ ' + validUntil);
-                            return;
-                        }
-                        
-                        if (today > validUntil) {
-                            alert('사용 기간이 만료되었습니다.\n관리자에게 문의하세요.\n만료일: ' + validUntil);
-                            return;
-                        }
-                        
-                        // 만료 7일 전 경고
-                        try {
-                            const warningDate = new Date(validUntil);
-                            warningDate.setDate(warningDate.getDate() - 7);
-                            const warningDateStr = warningDate.toISOString().split('T')[0];
-                            
-                            if (today >= warningDateStr) {
-                                const remainingDays = Math.ceil((new Date(validUntil) - new Date(today)) / (1000 * 60 * 60 * 24));
-                                alert(`⚠️ 사용 기간 만료 알림\n\n${remainingDays}일 후 사용 기간이 만료됩니다.\n만료일: ${validUntil}\n\n관리자에게 연장을 요청하세요.`);
-                            }
-                        } catch (dateError) {
-                            console.log('날짜 계산 오류:', dateError);
-                        }
-                    }
-                    
-                    currentAdmin = admin;
-                    localStorage.setItem('currentAdmin', JSON.stringify(admin));
-                    
-                    try {
-                        initializeAdminData();
-                    } catch (initError) {
-                        console.log('관리자 데이터 초기화 오류:', initError);
-                        // 기본 데이터로 재시도
-                        initializeGlobalData();
-                        initializeAdminData();
-                    }
-                    
-                    document.getElementById('loginScreen').style.display = 'none';
-                    document.getElementById('mainScreen').style.display = 'block';
-                    
-                    // 상점명 설정
-                    const shopNameElement = document.getElementById('shopName');
-                    if (admin.type === 'super') {
-                        shopNameElement.textContent = '최고 관리자 화면';
-                        const superAdminButtons = document.getElementById('superAdminButtons');
-                        if (superAdminButtons) {
-                            superAdminButtons.style.display = 'block';
-                        }
-                    } else {
-                        shopNameElement.textContent = admin.shopName || '관리자 화면';
-                        const superAdminButtons = document.getElementById('superAdminButtons');
-                        if (superAdminButtons) {
-                            superAdminButtons.style.display = 'none';
-                        }
-                    }
-                    
-                    try {
-                        loadReservationData();
-                        showDashboard();
-                    } catch (loadError) {
-                        console.log('데이터 로드 오류:', loadError);
-                        // 기본 화면만 표시
-                        showDashboard();
-                    }
-                } else {
-                    alert('아이디 또는 비밀번호가 잘못되었습니다.');
-                }
-            } catch (error) {
-                console.error('로그인 처리 중 오류:', error);
-                alert('로그인 처리 중 오류가 발생했습니다. 페이지를 새로고침 후 다시 시도해주세요.');
-            }
+async function processLogin() {
+    try {
+        const email = document.getElementById('loginUsername').value; // Supabase는 이메일을 ID로 사용
+        const password = document.getElementById('loginPassword').value;
+
+        if (!email || !password) {
+            alert('아이디와 비밀번호를 입력해주세요.');
+            return;
+        }
+        
+        // 1. Supabase Auth를 사용하여 로그인 시도
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: email, 
+            password: password,
+        });
+
+        if (error) {
+            console.error('Login Error:', error.message);
+            alert('로그인에 실패했습니다. (아이디 또는 비밀번호를 확인해주세요.)');
+            return;
         }
 
+        if (data.user) {
+            // 2. 로그인 성공 시 처리
+            
+            // **[임시]** 현재는 로그인이 성공하면 기본 관리자 권한으로 간주
+            currentAdmin = { 
+                username: data.user.email, // Supabase 이메일을 ID로 사용
+                type: 'normal', 
+                shopName: 'Supabase 관리자 화면' // 임시 상점명
+            };
+            localStorage.setItem('currentAdmin', JSON.stringify(currentAdmin));
+
+            // 3. 메인 화면 로드
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainScreen').style.display = 'block';
+            
+            // 상점명 설정
+            const shopNameElement = document.getElementById('shopName');
+            shopNameElement.textContent = currentAdmin.shopName;
+            
+            // ⚠️ [다음 단계 필수 작업]: 아래 함수들 내부의 localStorage 로직을 모두 바꿔야 합니다.
+            loadReservationData();
+            showDashboard();
+        } else {
+            alert('로그인에 실패했습니다. (알 수 없는 오류)');
+        }
+    } catch (error) {
+        console.error('로그인 처리 중 치명적인 오류:', error);
+        alert('로그인 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+    }
+}
         // 로그아웃
         function logout() {
             if (confirm('로그아웃 하시겠습니까?')) {
