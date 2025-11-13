@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>마사지샵 관리 시스템</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&amp;family=Noto+Sans+Thai:wght@300;400;500;700&amp;family=Noto+Sans+Vietnamese:wght@300;400;500;700&amp;family=Roboto:wght@300;400;500;700&amp;family=Nanum+Gothic:wght@400;700;800&amp;display=swap" rel="stylesheet">
@@ -100,14 +101,12 @@
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
   <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
  </head>
- <body class="bg-gray-100 min-h-full"><!-- 로그인 화면 -->
-  <div id="loginScreen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
+ <body class="bg-gray-100 min-h-full"><div id="loginScreen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
    <div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-md">
     <div class="text-center mb-8">
      <h1 class="text-3xl font-bold text-gray-800 mb-2" data-translate="title">마사지샵 관리 시스템</h1>
      <div class="w-20 h-1 bg-blue-500 mx-auto"></div>
-    </div><!-- 언어 선택 -->
-    <div class="mb-6"><label class="block text-sm font-medium text-gray-700 mb-2">언어 선택 / Language / ภาษา / Ngôn ngữ</label>
+    </div><div class="mb-6"><label class="block text-sm font-medium text-gray-700 mb-2">언어 선택 / Language / ภาษา / Ngôn ngữ</label>
      <div class="grid grid-cols-4 gap-2"><button onclick="setLanguage('ko')" class="bg-blue-500 text-white py-2 px-3 rounded text-sm hover:bg-blue-600" id="langKo">한국어</button> <button onclick="setLanguage('en')" class="bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm hover:bg-gray-400" id="langEn">English</button> <button onclick="setLanguage('th')" class="bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm hover:bg-gray-400" id="langTh">ไทย</button> <button onclick="setLanguage('vi')" class="bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm hover:bg-gray-400" id="langVi">Tiếng Việt</button>
      </div>
     </div>
@@ -118,9 +117,7 @@
      </div><button onclick="processLogin()" class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200" data-translate="login">로그인</button>
     </div>
    </div>
-  </div><!-- 메인 화면 -->
-  <div id="mainScreen" class="container mx-auto p-6" style="display: none;"><!-- 헤더 -->
-   <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+  </div><div id="mainScreen" class="container mx-auto p-6" style="display: none;"><div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
      <div>
       <h1 class="text-3xl font-bold text-gray-800" data-translate="title">마사지 관리 프로그램</h1>
@@ -138,10 +135,8 @@
       <div id="currentTime" class="text-xl font-bold text-blue-600"></div>
      </div>
     </div>
-   </div><!-- 메뉴 버튼들 -->
-   <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6"><button onclick="showDashboard()" class="bg-blue-500 text-white py-4 px-6 rounded-lg text-lg hover:bg-blue-600" data-translate="dashboard">현황판</button> <button onclick="showOrder()" class="bg-indigo-500 text-white py-4 px-6 rounded-lg text-lg hover:bg-indigo-600" data-translate="order">순번</button> <button onclick="showReservation()" class="bg-green-500 text-white py-4 px-6 rounded-lg text-lg hover:bg-green-600" data-translate="reservation">예약</button> <button onclick="showStatistics()" class="bg-purple-500 text-white py-4 px-6 rounded-lg text-lg hover:bg-purple-600" data-translate="statistics">통계</button> <button onclick="showDBManagement()" class="bg-orange-500 text-white py-4 px-6 rounded-lg text-lg hover:bg-orange-600" data-translate="dbManagement">DB 관리</button>
-   </div><!-- 순번 섹션 -->
-   <div id="orderSection" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
+   </div><div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6"><button onclick="showDashboard()" class="bg-blue-500 text-white py-4 px-6 rounded-lg text-lg hover:bg-blue-600" data-translate="dashboard">현황판</button> <button onclick="showOrder()" class="bg-indigo-500 text-white py-4 px-6 rounded-lg text-lg hover:bg-indigo-600" data-translate="order">순번</button> <button onclick="showReservation()" class="bg-green-500 text-white py-4 px-6 rounded-lg text-lg hover:bg-green-600" data-translate="reservation">예약</button> <button onclick="showStatistics()" class="bg-purple-500 text-white py-4 px-6 rounded-lg text-lg hover:bg-purple-600" data-translate="statistics">통계</button> <button onclick="showDBManagement()" class="bg-orange-500 text-white py-4 px-6 rounded-lg text-lg hover:bg-orange-600" data-translate="dbManagement">DB 관리</button>
+   </div><div id="orderSection" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
     <h2 class="text-2xl font-bold mb-4" data-translate="orderManagement">순번 관리</h2>
     <div class="mb-4"><button onclick="saveStaffOrder()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" data-translate="saveOrder">순번 저장</button>
     </div>
@@ -161,8 +156,7 @@
     <div class="mt-4 text-sm text-gray-600" data-translate="orderZeroVacationNote">
      * 순번 0은 휴가로 처리됩니다.
     </div>
-   </div><!-- 현황판 -->
-   <div id="dashboardSection" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
+   </div><div id="dashboardSection" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
     <h2 class="text-2xl font-bold mb-4" data-translate="dashboard">현황판</h2>
     <div class="overflow-x-auto">
      <table class="w-full border-collapse border border-gray-300">
@@ -184,10 +178,8 @@
       </tbody>
      </table>
     </div>
-   </div><!-- 예약 섹션 -->
-   <div id="reservationSection" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
-    <h2 class="text-2xl font-bold mb-4" data-translate="reservation">예약</h2><!-- 직원 선택 (필수) -->
-    <div class="mb-6"><label class="block text-sm font-medium mb-2 required-label" data-translate="selectStaff">직원 선택</label>
+   </div><div id="reservationSection" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
+    <h2 class="text-2xl font-bold mb-4" data-translate="reservation">예약</h2><div class="mb-6"><label class="block text-sm font-medium mb-2 required-label" data-translate="selectStaff">직원 선택</label>
      <div id="staffSelectionContainer">
       <div id="staffSelection" class="selection-grid"></div>
       <div id="selectedStaffInfo" class="selected-staff-info" style="display: none;">
@@ -199,12 +191,10 @@
        </div>
       </div>
      </div>
-    </div><!-- 메뉴 목록 -->
-    <div id="menuListContainer" style="display: none;">
+    </div><div id="menuListContainer" style="display: none;">
      <div class="flex justify-between items-center mb-4"><label class="block text-sm font-medium required-label">메뉴 목록</label> <button onclick="addMenuRow()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 flex items-center gap-2"> <span class="text-lg">+</span> 메뉴 추가 </button>
      </div>
-     <div id="menuRows"></div><!-- 총 가격 정보 -->
-     <div class="mt-6 p-4 bg-gray-100 rounded">
+     <div id="menuRows"></div><div class="mt-6 p-4 bg-gray-100 rounded">
       <div class="grid grid-cols-2 gap-4">
        <div>
         <strong data-translate="totalPrice">총 가격:</strong> <span id="totalPrice">0</span><span id="totalPriceCurrency"></span>
@@ -213,42 +203,33 @@
         <strong data-translate="totalCommission">총 커미션:</strong> <span id="totalCommission">0</span><span id="totalCommissionCurrency"></span>
        </div>
       </div>
-     </div><!-- 추가 옵션들 -->
-     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+     </div><div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
       <div><label class="block text-sm font-medium mb-2" data-translate="startTime">시작 시간 (선택사항)</label> <input type="time" id="reservationStartTime" class="w-full border rounded px-3 py-2" onchange="updateAllMenuTimes()">
       </div>
       <div><label class="block text-sm font-medium mb-2" data-translate="roomNumber">방번호 (선택사항)</label> <select id="reservationRoom" class="w-full border rounded px-3 py-2"> <option value="" data-translate="selectRoom">방 선택</option> </select>
       </div>
       <div><label class="block text-sm font-medium mb-2" data-translate="customerName">고객명 (선택사항)</label> <input type="text" id="reservationCustomer" class="w-full border rounded px-3 py-2" data-translate-placeholder="enterCustomerName">
       </div>
-     </div><!-- 메뉴별 시간 설정 -->
-     <div id="menuTimeSettings" class="mt-6" style="display: none;">
+     </div><div id="menuTimeSettings" class="mt-6" style="display: none;">
       <h4 class="font-bold mb-3">메뉴별 시간 설정</h4>
       <div id="menuTimeList" class="space-y-3">
       </div>
      </div><button onclick="addReservation()" class="mt-6 bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600" data-translate="addReservation">예약 추가</button>
     </div>
-   </div><!-- 통계 섹션 -->
-   <div id="statisticsSection" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
+   </div><div id="statisticsSection" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
     <h2 class="text-2xl font-bold mb-4" data-translate="statistics">통계</h2>
     <div class="mb-4 flex gap-4 flex-wrap"><button onclick="showDailyStats()" id="dailyStatsBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" data-translate="daily">일간</button> <button onclick="showWeeklyStats()" id="weeklyStatsBtn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400" data-translate="weekly">주간</button> <button onclick="showMonthlyStats()" id="monthlyStatsBtn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400" data-translate="monthly">월간</button> <button onclick="showMenuSales()" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600" data-translate="monthlyMenuSales">월간 메뉴 매출</button> <button onclick="showMonthlySalesChart()" class="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600" data-translate="monthlySalesChart">월간 매출 그래프</button> <button onclick="downloadExcel()" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700" data-translate="download">다운로드</button>
-    </div><!-- 날짜 선택 영역 -->
-    <div class="mb-6 p-4 bg-gray-50 rounded"><!-- 일간 선택 -->
-     <div id="dailyDateSelection" class="mb-4"><label class="block text-sm font-medium mb-2" data-translate="selectDate">날짜 선택</label> <input type="date" id="statsDate" class="border rounded px-3 py-2" onchange="updateStats()">
-     </div><!-- 주간/월간 선택 -->
-     <div id="rangeDateSelection" class="grid grid-cols-1 md:grid-cols-2 gap-4" style="display: none;">
+    </div><div class="mb-6 p-4 bg-gray-50 rounded"><div id="dailyDateSelection" class="mb-4"><label class="block text-sm font-medium mb-2" data-translate="selectDate">날짜 선택</label> <input type="date" id="statsDate" class="border rounded px-3 py-2" onchange="updateStats()">
+     </div><div id="rangeDateSelection" class="grid grid-cols-1 md:grid-cols-2 gap-4" style="display: none;">
       <div><label class="block text-sm font-medium mb-2" data-translate="startDate">시작 날짜</label> <input type="date" id="statsStartDate" class="w-full border rounded px-3 py-2" onchange="autoSetEndDate()">
       </div>
       <div><label class="block text-sm font-medium mb-2" data-translate="endDate">끝 날짜</label> <input type="date" id="statsEndDate" class="w-full border rounded px-3 py-2" onchange="updateStats()">
       </div>
-     </div><!-- 빠른 선택 버튼들 (주간/월간용) -->
-     <div id="quickDateSelection" class="mt-3 flex gap-2 flex-wrap" style="display: none;"><button onclick="setThisWeek()" class="bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm hover:bg-blue-200" data-translate="thisWeek">이번 주</button> <button onclick="setLastWeek()" class="bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm hover:bg-blue-200" data-translate="lastWeek">지난 주</button> <button onclick="setThisMonth()" class="bg-green-100 text-green-700 px-3 py-1 rounded text-sm hover:bg-green-200" data-translate="thisMonth">이번 달</button> <button onclick="setLastMonth()" class="bg-green-100 text-green-700 px-3 py-1 rounded text-sm hover:bg-green-200" data-translate="lastMonth">지난 달</button>
+     </div><div id="quickDateSelection" class="mt-3 flex gap-2 flex-wrap" style="display: none;"><button onclick="setThisWeek()" class="bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm hover:bg-blue-200" data-translate="thisWeek">이번 주</button> <button onclick="setLastWeek()" class="bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm hover:bg-blue-200" data-translate="lastWeek">지난 주</button> <button onclick="setThisMonth()" class="bg-green-100 text-green-700 px-3 py-1 rounded text-sm hover:bg-green-200" data-translate="thisMonth">이번 달</button> <button onclick="setLastMonth()" class="bg-green-100 text-green-700 px-3 py-1 rounded text-sm hover:bg-green-200" data-translate="lastMonth">지난 달</button>
      </div>
-    </div><!-- 차트 영역 -->
-    <div id="chartContainer" class="mb-6" style="display: none;">
+    </div><div id="chartContainer" class="mb-6" style="display: none;">
      <canvas id="statsChart" width="800" height="400"></canvas>
-    </div><!-- 직원별 통계 -->
-    <div class="mb-6">
+    </div><div class="mb-6">
      <h3 class="text-lg font-bold mb-2" data-translate="staffStatisticsTitle">직원별 통계</h3>
      <div class="overflow-x-auto">
       <table class="w-full border-collapse border border-gray-300">
@@ -263,8 +244,7 @@
        </tbody>
       </table>
      </div>
-    </div><!-- 입금방식별 통계 -->
-    <div class="mb-6">
+    </div><div class="mb-6">
      <h3 class="text-lg font-bold mb-2" data-translate="paymentMethodStatisticsTitle">입금방식별 통계</h3>
      <div class="overflow-x-auto">
       <table class="w-full border-collapse border border-gray-300">
@@ -292,10 +272,8 @@
       </div>
      </div>
     </div>
-   </div><!-- DB 관리 섹션 -->
-   <div id="dbManagementSection" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
-    <h2 class="text-2xl font-bold mb-4" data-translate="dbManagement">DB 관리</h2><!-- 데이터 백업/복원 -->
-    <div class="mb-6 p-4 bg-gray-100 rounded">
+   </div><div id="dbManagementSection" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
+    <h2 class="text-2xl font-bold mb-4" data-translate="dbManagement">DB 관리</h2><div class="mb-6 p-4 bg-gray-100 rounded">
      <h3 class="text-lg font-bold mb-2" data-translate="dataBackupRestoreTitle">데이터 백업 및 복원</h3>
      <div class="grid grid-cols-2 gap-4">
       <div>
@@ -317,8 +295,7 @@
      </div>
     </div>
    </div>
-  </div><!-- 입금 모달 -->
-  <div id="paymentModal" class="modal">
+  </div><div id="paymentModal" class="modal">
    <div class="modal-content">
     <h3 class="text-xl font-bold mb-4" data-translate="payment">입금 처리</h3>
     <div id="paymentMethods" class="space-y-4 mb-4">
@@ -330,31 +307,26 @@
     <div class="flex gap-2"><button onclick="processPayment()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600" data-translate="confirm">확인</button> <button onclick="closePaymentModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="cancel">취소</button>
     </div>
    </div>
-  </div><!-- 범용 관리 모달 -->
-  <div id="managementModal" class="modal">
+  </div><div id="managementModal" class="modal">
    <div class="modal-content">
     <h3 id="managementTitle" class="text-xl font-bold mb-4"></h3>
     <div id="managementContent"></div><button onclick="closeManagementModal()" class="mt-4 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="close">닫기</button>
    </div>
-  </div><!-- 언어 변경 모달 -->
-  <div id="languageModal" class="modal">
+  </div><div id="languageModal" class="modal">
    <div class="modal-content">
     <h3 class="text-xl font-bold mb-4">언어 선택 / Language / ภาษา / Ngôn ngữ</h3>
     <div class="grid grid-cols-2 gap-4"><button onclick="setLanguageAndClose('ko')" class="bg-blue-500 text-white py-3 px-4 rounded hover:bg-blue-600">한국어</button> <button onclick="setLanguageAndClose('en')" class="bg-blue-500 text-white py-3 px-4 rounded hover:bg-blue-600">English</button> <button onclick="setLanguageAndClose('th')" class="bg-blue-500 text-white py-3 px-4 rounded hover:bg-blue-600">ไทย</button> <button onclick="setLanguageAndClose('vi')" class="bg-blue-500 text-white py-3 px-4 rounded hover:bg-blue-600">Tiếng Việt</button>
     </div><button onclick="closeLanguageModal()" class="mt-4 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">닫기</button>
    </div>
-  </div><!-- 폰트 변경 모달 -->
-  <div id="fontModal" class="modal">
+  </div><div id="fontModal" class="modal">
    <div class="modal-content">
-    <h3 class="text-xl font-bold mb-4" data-translate="fontSelection">폰트 선택</h3><!-- 폰트 사이즈 선택 -->
-    <div class="mb-6 p-4 bg-gray-50 rounded">
+    <h3 class="text-xl font-bold mb-4" data-translate="fontSelection">폰트 선택</h3><div class="mb-6 p-4 bg-gray-50 rounded">
      <h4 class="font-bold mb-3" data-translate="fontSize">폰트 크기</h4>
      <div class="grid grid-cols-5 gap-2"><button onclick="setFontSize('small')" id="fontSizeSmall" class="bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm hover:bg-gray-400" data-translate="fontSizeSmall">작게</button> <button onclick="setFontSize('normal')" id="fontSizeNormal" class="bg-blue-500 text-white py-2 px-3 rounded text-sm hover:bg-blue-600" data-translate="fontSizeNormal">보통</button> <button onclick="setFontSize('large')" id="fontSizeLarge" class="bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm hover:bg-gray-400" data-translate="fontSizeLarge">크게</button> <button onclick="setFontSize('xlarge')" id="fontSizeXLarge" class="bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm hover:bg-gray-400" data-translate="fontSizeXLarge">매우 크게</button> <button onclick="setFontSize('xxlarge')" id="fontSizeXXLarge" class="bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm hover:bg-gray-400" data-translate="fontSizeXXLarge">최대</button>
      </div>
      <div class="mt-2 text-sm text-gray-600" data-translate="fontSizePreview"><span id="fontSizePreview">미리보기 텍스트 - Preview Text - ตัวอย่างข้อความ - Văn bản xem trước</span>
      </div>
-    </div><!-- 폰트 종류 선택 -->
-    <div class="mb-4">
+    </div><div class="mb-4">
      <h4 class="font-bold mb-3" data-translate="fontFamily">폰트 종류</h4>
      <div class="grid grid-cols-1 gap-3"><button onclick="setFontFamily('Arial')" id="fontFamilyArial" class="bg-blue-500 text-white py-3 px-4 rounded hover:bg-blue-600" style="font-family: Arial;">Arial (기본)</button> <button onclick="setFontFamily('Noto Sans KR')" id="fontFamilyNotoKR" class="bg-gray-300 text-gray-700 py-3 px-4 rounded hover:bg-gray-400" style="font-family: 'Noto Sans KR', sans-serif;">Noto Sans KR (한글 최적화)</button> <button onclick="setFontFamily('Malgun Gothic')" id="fontFamilyMalgun" class="bg-gray-300 text-gray-700 py-3 px-4 rounded hover:bg-gray-400" style="font-family: 'Malgun Gothic', sans-serif;">맑은 고딕</button> <button onclick="setFontFamily('Nanum Gothic')" id="fontFamilyNanum" class="bg-gray-300 text-gray-700 py-3 px-4 rounded hover:bg-gray-400" style="font-family: 'Nanum Gothic', sans-serif;">나눔고딕</button> <button onclick="setFontFamily('Roboto')" id="fontFamilyRoboto" class="bg-gray-300 text-gray-700 py-3 px-4 rounded hover:bg-gray-400" style="font-family: 'Roboto', sans-serif;">Roboto (영문 최적화)</button> <button onclick="setFontFamily('Noto Sans Thai')" id="fontFamilyThai" class="bg-gray-300 text-gray-700 py-3 px-4 rounded hover:bg-gray-400" style="font-family: 'Noto Sans Thai', sans-serif;">Noto Sans Thai (태국어)</button> <button onclick="setFontFamily('Noto Sans Vietnamese')" id="fontFamilyVietnamese" class="bg-gray-300 text-gray-700 py-3 px-4 rounded hover:bg-gray-400" style="font-family: 'Noto Sans Vietnamese', sans-serif;">Noto Sans Vietnamese (베트남어)</button>
      </div>
@@ -362,8 +334,7 @@
     <div class="flex gap-2"><button onclick="applyFontSettings()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600" data-translate="apply">적용</button> <button onclick="closeFontModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="close">닫기</button>
     </div>
    </div>
-  </div><!-- 구글 로그인 모달 -->
-  <div id="googleLoginModal" class="modal">
+  </div><div id="googleLoginModal" class="modal">
    <div class="modal-content">
     <h3 class="text-xl font-bold mb-4">구글 계정 로그인</h3>
     <div class="space-y-4">
@@ -380,8 +351,109 @@
    </div>
   </div>
   <script>
+// [위치 2]: 기존 JavaScript <script> 태그의 가장 상단에 붙여넣으세요.
+// =========================================================================
+// [수정 완료] 1. Supabase 클라이언트 초기화 
+// =========================================================================
+const SUPABASE_URL = 'https://nzlqloymzuvsysbhczdz.supabase.co'; 
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im56bHFsb3ltenV2c3lzYmhjemR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI5NjIxODQsImV4cCI6MjA3ODUzODE4NH0.X5-7pB7f4gtPI_wMCtS_J-kksPVmGMKYGxFCi2Edp_Q';
+
+// Supabase 클라이언트 생성
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+console.log('Supabase Client Initialized!');
+
+
+// =========================================================================
+// 2. 데이터 조회 로직 (기존 localStorage.getItem 대체)
+// =========================================================================
+
+/**
+ * 메뉴 데이터 로드 함수 (menus 테이블 조회)
+ * 기존 'menus' 관련 localStorage.getItem 코드를 대체합니다.
+ * @returns {Array} 메뉴 목록
+ */
+async function getMenusData() {
+    // 필요한 컬럼만 선택하여 부하를 줄임
+    const { data: menus, error } = await supabase
+        .from('menus')
+        .select('id, name, duration_minutes, price_regular, price_member, commission_rate_staff')
+        .order('id', { ascending: true }); 
+
+    if (error) {
+        console.error('Error fetching menus data:', error.message);
+        return [];
+    }
+    
+    // 이 데이터를 반환하더라도, 기존 JS 로직이 이 DB 구조를 처리하도록 대규모 수정이 필요합니다.
+    return menus;
+}
+
+/**
+ * 직원 데이터 로드 함수 (staff 테이블 조회)
+ * 기존 'staff' 관련 localStorage.getItem 코드를 대체합니다.
+ * @returns {Array} 직원 목록
+ */
+async function getStaffData() {
+    const { data: staff, error } = await supabase
+        .from('staff')
+        .select('*')
+        .order('name', { ascending: true }); 
+
+    if (error) {
+        console.error('Error fetching staff data:', error.message);
+        return [];
+    }
+    return staff;
+}
+
+
+// =========================================================================
+// 3. 예약 저장 로직 (기존 localStorage.setItem 대체)
+// =========================================================================
+
+/**
+ * 새로운 예약/작업을 reservations 테이블에 저장합니다.
+ * @param {Object} reservationData - 예약에 필요한 데이터 객체 (프론트엔드에서 수집된 정보)
+ * @returns {Object|null} - 저장된 데이터 객체 또는 null
+ */
+async function saveNewReservation(reservationData) {
+    // DB 컬럼 이름(snake_case)에 맞게 데이터 객체를 매핑하여 준비합니다.
+    const newReservation = {
+        start_time: reservationData.start,
+        end_time: reservationData.end || null, 
+        staff_id: parseInt(reservationData.staffId), 
+        menu_id: parseInt(reservationData.menuId), 
+        room_id: parseInt(reservationData.roomId) || null,
+        customer_name: reservationData.customerName || null,
+        total_price: reservationData.price,
+        commission: reservationData.commission,
+        // payment_method는 실제 입금 시 저장되므로, 초기 예약 시에는 상태만 저장
+        status: reservationData.status || 'running' 
+    };
+
+    const { data, error } = await supabase
+        .from('reservations')
+        .insert([newReservation])
+        .select(); 
+
+    if (error) {
+        console.error('Error saving new reservation:', error.message);
+        alert('예약 저장에 실패했습니다. 오류: ' + error.message);
+        return null;
+    }
+    
+    console.log('Reservation successfully saved:', data[0]);
+    return data[0]; 
+}
+
+// -------------------------------------------------------------------------
         // 전역 변수
         let currentLanguage = 'ko';
+// ... (이 밑으로 기존의 나머지 JavaScript 코드가 이어집니다.)
+// ... (나머지 코드 생략)
+// ...
+// ...
+// ...
         let currentFont = 'Arial';
         let currentFontSize = 'normal';
         let selectedFontFamily = 'Arial';
