@@ -353,18 +353,19 @@
   </div>
   <script>
         // =========================================================================
-        // 1. Supabase 클라이언트 초기화 및 연결 함수 (URL 오타 수정 완료)
+        // 1. Supabase 클라이언트 초기화 및 연결 함수 (수정 완료: 변수명 변경)
         // =========================================================================
-        const NEXT_PUBLIC_SUPABASE_URL = 'https://nzlqloymzuvsysbhczdz.supabase.co'; 
-        const NEXT_PUBLIC_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im56bHFsb3ltenV2c3lzYmhjemR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI5NjIxODQsImV4cCI6MjA3ODUzODE4NH0.X5-7pB7f4gtPI_wMCtS_J-kksPVmGMKYGxFCi2Edp_Q';
+        const SUPABASE_URL = 'https://nzlqloymzuvsysbhczdz.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im56bHFsb3ltenV2c3lzYmhjemR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI5NjIxODQsImV4cCI6MjA3ODUzODE4NH0.X5-7pB7f4gtPI_wMCtS_J-kksPVmGMKYGxFCi2Edp_Q';
 
-        // Supabase 클라이언트 생성
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // ⚠️ 'const supabase = ...' 대신 'var supabaseClient = ...'를 사용하여 
+        // 전역 'supabase' 객체와 충돌을 방지했습니다.
+        var supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         console.log('Supabase Client Initialized!');
 
 
         // =========================================================================
-        // 2. 데이터 조회 로직 (기존 localStorage.getItem 대체 함수들)
+        // 2. 데이터 조회 로직 (모든 'supabase' 호출을 'supabaseClient'로 변경)
         // =========================================================================
 
         /**
@@ -372,7 +373,7 @@
          * @returns {Array} 메뉴 목록
          */
         async function getMenusData() {
-            const { data: menus, error } = await supabase
+            const { data: menus, error } = await supabaseClient
                 .from('menus')
                 .select('id, name, prices') 
                 .order('id', { ascending: true }); 
@@ -389,7 +390,7 @@
          * @returns {Array} 직원 목록
          */
         async function getStaffData() {
-            const { data: staff, error } = await supabase
+            const { data: staff, error } = await supabaseClient
                 .from('staff')
                 .select('*')
                 .order('name', { ascending: true }); 
@@ -406,7 +407,7 @@
          * @returns {Array} 방 목록
          */
         async function getRoomsData() {
-            const { data: rooms, error } = await supabase
+            const { data: rooms, error } = await supabaseClient
                 .from('rooms')
                 .select('*')
                 .order('room_number', { ascending: true }); 
@@ -424,7 +425,7 @@
          * @returns {Array} 입금 방식 목록
          */
         async function getPaymentMethodsData() {
-            const { data: methods, error } = await supabase
+            const { data: methods, error } = await supabaseClient
                 .from('payment_methods')
                 .select('id, name')
                 .order('id', { ascending: true }); 
@@ -442,7 +443,7 @@
          * @returns {Array} 예약 목록
          */
         async function getReservationsData(date) {
-            const { data: reservations, error } = await supabase
+            const { data: reservations, error } = await supabaseClient
                 .from('reservations')
                 .select('*')
                 .eq('date', date); // 날짜 필터링
@@ -456,7 +457,7 @@
 
 
         // =========================================================================
-        // 3. 예약 저장 로직 (기존 localStorage.setItem 대체)
+        // 3. 예약 저장 로직 (supabaseClient 사용)
         // =========================================================================
 
         /**
@@ -483,7 +484,7 @@
                 // created_at 및 updated_at은 Supabase가 자동으로 처리
             }));
 
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('reservations')
                 .insert(transformedReservations)
                 .select(); 
@@ -499,7 +500,7 @@
         }
 
         // =========================================================================
-        // 4. 예약 삭제 로직
+        // 4. 예약 삭제 로직 (supabaseClient 사용)
         // =========================================================================
 
         /**
@@ -508,7 +509,7 @@
          * @returns {boolean} - 성공 여부
          */
         async function deleteReservationFromDB(id) {
-            const { error } = await supabase
+            const { error } = await supabaseClient
                 .from('reservations')
                 .delete()
                 .eq('id', id);
@@ -522,7 +523,7 @@
         }
         
         // =========================================================================
-        // 5. 예약 업데이트 로직
+        // 5. 예약 업데이트 로직 (supabaseClient 사용)
         // =========================================================================
         
         /**
@@ -532,7 +533,7 @@
          * @returns {Object|null} - 업데이트된 데이터 객체 또는 null
          */
         async function updateReservationInDB(id, updateData) {
-             const { data, error } = await supabase
+             const { data, error } = await supabaseClient
                 .from('reservations')
                 .update(updateData)
                 .eq('id', id)
@@ -548,7 +549,6 @@
 
         // =========================================================================
         // 6. 순번(Staff Order) 데이터 로드 및 저장
-        //    (DB 구조 변경 전까지는 localStorage 유지)
         // =========================================================================
 
         // 순번 키 생성 함수는 그대로 유지
@@ -556,11 +556,6 @@
             return `${currentAdmin.username}_staffOrder_${date}`;
         }
         
-        // 순번 로드 함수는 기존 로직을 사용 (DB 통합 시 변경 예정)
-        // function loadStaffOrder() { ... }
-        // function saveStaffOrder() { ... }
-
-
         // 전역 변수
         let currentLanguage = 'ko';
         let currentFont = 'Arial';
@@ -610,7 +605,7 @@
                     const savedAdmin = localStorage.getItem('currentAdmin');
                     
                     // Supabase Auth 세션 확인
-                    const { data: { session } } = await supabase.auth.getSession();
+                    const { data: { session } } = await supabaseClient.auth.getSession();
 
                     if (session) {
                         // Supabase 세션이 유효하면 localStorage의 admin 정보 업데이트
@@ -641,14 +636,14 @@
                                 }
                             }
                             
-                            // ⚠️ 비동기 함수 호출 시 await 사용 (로그인 시 오류 방지)
+                            // 비동기 함수 호출 시 await 사용 (로그인 시 오류 방지)
                             await loadReservationData();
                             await showDashboard();
                         } else {
                             // Supabase 세션은 있으나 local Admin 정보가 유효하지 않은 경우
                             localStorage.removeItem('currentAdmin');
                             currentAdmin = null;
-                            await supabase.auth.signOut(); // 세션도 삭제
+                            await supabaseClient.auth.signOut(); // 세션도 삭제
                         }
                     } else if (savedAdmin) {
                         // LocalStorage에 Admin 정보는 있지만 Supabase 세션이 없는 경우 -> 로그인 화면
@@ -661,7 +656,7 @@
                     localStorage.removeItem('currentAdmin');
                     currentAdmin = null;
                     try {
-                       await supabase.auth.signOut();
+                       await supabaseClient.auth.signOut();
                     } catch (e) {
                         console.error('Supabase signOut error:', e);
                     }
@@ -693,7 +688,7 @@
             // ❌ Supabase 인증 및 데이터베이스를 사용하므로, 이 함수는 사용하지 않습니다. ❌
         }
 
-        // 로그인 처리
+        // 로그인 처리 (supabaseClient 사용)
         async function processLogin() {
             try {
                 // Supabase는 email/password 기반 인증을 사용합니다.
@@ -706,7 +701,7 @@
                 }
                 
                 // 1. Supabase Auth를 사용하여 로그인 시도
-                const { data, error } = await supabase.auth.signInWithPassword({
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email: email, 
                     password: password,
                 });
@@ -737,24 +732,24 @@
                     const shopNameElement = document.getElementById('shopName');
                     shopNameElement.textContent = currentAdmin.shopName;
                     
-                    // ⚠️ 비동기 함수 호출 시 await 사용 (로그인 시 오류 방지)
+                    // 비동기 함수 호출 시 await 사용
                     await loadReservationData();
                     await showDashboard();
                 } else {
                     alert('로그인에 실패했습니다. (알 수 없는 오류)');
                 }
             } catch (error) {
-                // ⚠️ 치명적인 오류 메시지 발생 지점 (URL 오류나 초기 로드 함수 예외 시 발생)
+                // 치명적인 오류 메시지 발생 지점
                 console.error('로그인 처리 중 치명적인 오류:', error);
                 alert('로그인 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요. (URL 또는 네트워크 오류 가능성)');
             }
         }
 
-        // 로그아웃
+        // 로그아웃 (supabaseClient 사용)
         async function logout() {
             if (confirm('로그아웃 하시겠습니까?')) {
                 // Supabase 세션 종료
-                const { error } = await supabase.auth.signOut();
+                const { error } = await supabaseClient.auth.signOut();
                 if (error) {
                     console.error('Supabase Logout Error:', error);
                 }
