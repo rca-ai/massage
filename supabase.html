@@ -2,16 +2,10 @@
 <html lang="ko">
  <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">log
   <title>마사지샵 관리 시스템</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-const SUPABASE_URL = "https://lmjtjonlvpqcwdzisijd.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtanRqb25sdnBxY3dkemlzaWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMjY1NDksImV4cCI6MjA3ODcwMjU0OX0.HmfZaxAnaVEEHfLxnlUHxR-PAjrUnFMVWs839xJmKfw";
-const THUMBNAIL_EDGE_FUNCTION_URL = "https://lmjtjonlvpqcwdzisijd.functions.supabase.co/employee-thumbnail-generator";
-const STORAGE_BUCKET = "employee-photos-thumbs"; 
-</script>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -362,8 +356,10 @@ const STORAGE_BUCKET = "employee-photos-thumbs";
         // 1. Supabase 클라이언트 초기화 및 연결 함수
         // =========================================================================
         // [수정 완료]: 사용자님이 제공하신 정확한 키를 다시 적용했습니다.
-        const SUPABASE_URL = 'https://nzlqloymzuvsysbghczdz.supabase.co'; 
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im56bHFsb3ltenV2c3lzYmhjemR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI5NjIxODQsImV4cCI6MjA3ODUzODE4NH0.X5-7pB7f4gtPI_wMCtS_J-kksPVGGMKYGxFCi2Edp_Q';
+const SUPABASE_URL = "https://lmjtjonlvpqcwdzisijd.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtanRqb25sdnBxY3dkemlzaWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMjY1NDksImV4cCI6MjA3ODcwMjU0OX0.HmfZaxAnaVEEHfLxnlUHxR-PAjrUnFMVWs839xJmKfw";
+const THUMBNAIL_EDGE_FUNCTION_URL = "https://lmjtjonlvpqcwdzisijd.functions.supabase.co/employee-thumbnail-generator";
+const STORAGE_BUCKET = "employee-photos-thumbs"; 
 
         // Supabase 클라이언트 생성
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
