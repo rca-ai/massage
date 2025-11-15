@@ -360,12 +360,6 @@ const SUPABASE_URL = "https://lmjtjonlvpqcwdzisijd.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtanRqb25sdnBxY3dkemlzaWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMjY1NDksImV4cCI6MjA3ODcwMjU0OX0.HmfZaxAnaVEEHfLxnlUHxR-PAjrUnFMVWs839xJmKfw";
 const THUMBNAIL_EDGE_FUNCTION_URL = "https://lmjtjonlvpqcwdzisijd.functions.supabase.co/employee-thumbnail-generator";
 const STORAGE_BUCKET = "employee-photos-thumbs"; 
-
-        // Supabase 클라이언트 생성
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        console.log('Supabase Client Initialized!');
-
-
         // =========================================================================
         // 2. 데이터 조회 로직 (기존 localStorage.getItem 대체 함수들)
         // =========================================================================
