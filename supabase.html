@@ -391,8 +391,187 @@
   </div>
 
 // 안전한 Supabase 초기화 복사해서 기존 블록을 완전히 교체하세요
+
+<script>
+/*
+ 안전 초기화: Supabase UMD 번들(여러 번들형태 대응) 로드 대기 후 createClient 호출
+ - UMD 전역 네임 확인: window.supabase (권장), window.Supabase 또는 window.supabaseJs 등 변형을 허용
+ - CDN 로드 지연 대비 DOMContentLoaded 대기
+ - supabase 객체가 준비된 후에만 앱 로직(버튼 바인딩, 세션 체크)을 실행
+*/
+
+// 프로젝트 설정 (브라우저에서는 ANON 키만 사용)
 const SUPABASE_URL = 'https://lmjtjonlvpqcwdzisijd.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtanRqb25sdnBxY3dkemlzaWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMjY1NDksImV4cCI6MjA3ODcwMjU0OX0.HmfZaxAnaVEEHfLxnlUHxR-PAjrUnFMVWs839xJmKfw';
+
+let supabase = null;
+let supabaseReady = false;
+
+function findCreateClient() {
+  // UMD 번들 변형에 대응: 우선 window.supabase, window.Supabase, window.supabaseJs 확인
+  if (window.supabase && typeof window.supabase.createClient === 'function') return window.supabase.createClient;
+  if (window.Supabase && typeof window.Supabase.createClient === 'function') return window.Supabase.createClient;
+  if (window.supabaseJs && typeof window.supabaseJs.createClient === 'function') return window.supabaseJs.createClient;
+  return null;
+}
+
+function initSupabaseSafe() {
+  try {
+    const createClientFn = findCreateClient();
+    if (!createClientFn) {
+      console.warn('Supabase UMD not yet available as window.supabase / window.Supabase. Will retry.');
+      return false;
+    }
+    // create client
+    supabase = createClientFn(SUPABASE_URL, SUPABASE_ANON_KEY);
+    supabaseReady = true;
+    console.info('Supabase client initialized safely.');
+    return true;
+  } catch (err) {
+    console.error('Error initializing Supabase client:', err);
+    return false;
+  }
+}
+
+// 시도: 즉시, DOMContentLoaded, 그리고 주기적 재시도 (최대 몇 회)
+let initAttempts = 0;
+const maxAttempts = 8;
+function tryInitLoop() {
+  if (supabaseReady) return;
+  initAttempts++;
+  const ok = initSupabaseSafe();
+  if (ok) {
+    onSupabaseReady();
+    return;
+  }
+  if (initAttempts < maxAttempts) {
+    // exponential backoff-ish
+    const delay = 300 * Math.pow(2, initAttempts);
+    setTimeout(tryInitLoop, delay);
+  } else {
+    // 최종 실패 시 사용자 알림
+    alert('Supabase 초기화에 실패했습니다. 네트워크나 브라우저 확장(예: 광고 차단기)이 CDN을 차단하는지 확인하세요. 콘솔에서 자세한 오류를 확인하세요.');
+    console.error('Supabase init failed after retries.');
+  }
+}
+
+// DOMContentLoaded 되면 초기화 시도
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  tryInitLoop();
+} else {
+  window.addEventListener('DOMContentLoaded', tryInitLoop, { once: true });
+}
+
+// Supabase 준비 후 실행할 로직들(세션 체크, 버튼 바인딩 등)
+// 기존 앱 로직의 초기화 부분(on init)들을 이 함수 내부로 옮겨 호출하세요.
+function onSupabaseReady() {
+  // 바인딩: 로그인 버튼
+  const btnLogin = document.getElementById('btnLogin');
+  if (btnLogin) btnLogin.addEventListener('click', processLogin);
+
+  // 이미 페이지에 선언된 요소들(언어버튼 등) 초기화
+  setLanguage && setLanguage('ko');
+
+  // 세션 확인
+  (async function checkSession() {
+    try {
+      const { data } = await supabase.auth.getSession();
+      const session = data?.session;
+      if (session && session.user) {
+        onLoginChanged(session.user);
+      } else {
+        // show login
+        const loginScreen = document.getElementById('loginScreen');
+        const mainScreen = document.getElementById('mainScreen');
+        if (loginScreen) loginScreen.style.display = 'flex';
+        if (mainScreen) mainScreen.style.display = 'none';
+      }
+    } catch (err) {
+      console.error('세션 확인 오류', err);
+      const loginScreen = document.getElementById('loginScreen');
+      const mainScreen = document.getElementById('mainScreen');
+      if (loginScreen) loginScreen.style.display = 'flex';
+      if (mainScreen) mainScreen.style.display = 'none';
+    }
+  })();
+
+  // auth 상태 변화 리스너 연결 (선택)
+  try {
+    supabase.auth.onAuthStateChange((event, session) => {
+      console.info('Auth state changed:', event, session);
+      // 필요시 UI 업데이트
+    });
+  } catch (e) {
+    // ignore if not supported in this build
+  }
+}
+
+/* ------------------------------------------------------------
+ 아래는 기존에 파일에 있던 로그인/로그아웃/핸들러 함수들을
+ 그대로 사용하도록 유지합니다. (processLogin, onLoginChanged, logout 등)
+ 만약 원본에서 이미 정의되어 있으면 중복 정의를 피하세요.
+ 여기서는 만약 정의되지 않았다면 안전한 기본 구현을 제공합니다.
+-------------------------------------------------------------*/
+if (typeof processLogin === 'undefined') {
+  async function processLogin() {
+    const loginUsername = document.getElementById('loginUsername');
+    const loginPassword = document.getElementById('loginPassword');
+    const btnLogin = document.getElementById('btnLogin');
+    if (!supabase) { alert('Supabase 클라이언트가 준비되지 않았습니다. 잠시 후 다시 시도하세요.'); return; }
+    const email = loginUsername?.value?.trim();
+    const password = loginPassword?.value ?? '';
+    if (!email || !password) { alert('이메일과 비밀번호를 입력하세요.'); return; }
+    btnLogin && (btnLogin.disabled = true);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        alert('로그인 실패: ' + error.message);
+        console.error(error);
+        return;
+      }
+      const user = data?.user ?? (await supabase.auth.getUser()).data.user;
+      onLoginChanged && onLoginChanged(user);
+    } catch (err) {
+      console.error('로그인 예외', err);
+      alert('로그인 중 오류가 발생했습니다. 콘솔을 확인하세요.');
+    } finally {
+      btnLogin && (btnLogin.disabled = false);
+      if (btnLogin) btnLogin.innerText = '로그인';
+    }
+  }
+}
+
+if (typeof onLoginChanged === 'undefined') {
+  async function onLoginChanged(user) {
+    const loginScreen = document.getElementById('loginScreen');
+    const mainScreen = document.getElementById('mainScreen');
+    if (!user) {
+      if (loginScreen) loginScreen.style.display = 'flex';
+      if (mainScreen) mainScreen.style.display = 'none';
+      return;
+    }
+    if (loginScreen) loginScreen.style.display = 'none';
+    if (mainScreen) mainScreen.style.display = 'block';
+    const shopNameEl = document.getElementById('shopName');
+    if (shopNameEl) shopNameEl.innerText = user.email || user?.user_metadata?.full_name || 'My Massage Shop';
+    showDashboard && showDashboard();
+    console.log('User logged in:', user);
+  }
+}
+
+if (typeof logout === 'undefined') {
+  async function logout() {
+    if (!supabase) return;
+    try {
+      await supabase.auth.signOut();
+    } catch (e) { console.error(e); }
+    const loginScreen = document.getElementById('loginScreen');
+    const mainScreen = document.getElementById('mainScreen');
+    if (loginScreen) loginScreen.style.display = 'flex';
+    if (mainScreen) mainScreen.style.display = 'none';
+  }
+}
+</script>
 
 // Ensure the CDN script has loaded and create the client safely
 let supabase = null;
