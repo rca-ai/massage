@@ -5,6 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>마사지샵 관리 시스템</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.35.0/dist/supabase.min.js"></script>
+  <script>
+    // =========================================================================
+    // 1. Supabase 클라이언트 초기화 및 연결 함수
+    // =========================================================================
+    const SUPABASE_URL = "https://lmjtjonlvpqcwdzisijd.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtanRqb25sdnBxY3dkemlzaWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMjY1NDksImV4cCI6MjA3ODcwMjU0OX0.HmfZaxAnaVEEHfLxnlUHxR-PAjrUnFMVWs839xJmKfw";
+    const THUMBNAIL_EDGE_FUNCTION_URL = "https://lmjtjonlvpqcwdzisijd.functions.supabase.co/employee-thumbnail-generator";
+    const STORAGE_BUCKET = "employee-photos-thumbs";
+
+    // supabase-js v2 exposes `createClient` on global `supabase` when loaded from this CDN build
+    // If using module/bundler, import { createClient } from '@supabase/supabase-js'
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  </script>
+  
   <!-- 명시적 안정 버전 사용 권장: 필요 시 버전 변경 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.35.0/dist/supabase.min.js"></script>
   <style>
