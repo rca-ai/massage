@@ -7,14 +7,15 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.35.0/dist/supabase.min.js"></script>
   <style>
-    /* 간단한 모달 스타일 */
+    /* 모달 공통 */
     .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); align-items:center; justify-content:center; z-index:50; }
-    .modal .modal-content { background:#fff; padding:20px; border-radius:8px; width:90%; max-width:720px; }
+    .modal .modal-content { background:#fff; padding:20px; border-radius:8px; width:90%; max-width:720px; max-height:90vh; overflow:auto; }
     .required-label::after { content:" *"; color:#dc2626; }
-    /* 기타 */
     body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", "Helvetica Neue", Arial; }
     .selection-grid { display:flex; flex-wrap:wrap; gap:8px; }
     .selected-staff-info { border:1px solid #e5e7eb; padding:8px; border-radius:6px; }
+    /* 간단 반응형 수직 여백 */
+    .container { max-width:1200px; margin-left:auto; margin-right:auto; }
   </style>
 </head>
 <body class="bg-gray-50">
@@ -24,8 +25,9 @@
     <div class="text-center mb-8">
      <h1 class="text-3xl font-bold text-gray-800 mb-2" data-translate="title">마사지샵 관리 시스템</h1>
      <div class="w-20 h-1 bg-blue-500 mx-auto"></div>
-    </div><!-- 언어 선택 -->
-    <div class="mb-6"><label class="block text-sm font-medium text-gray-700 mb-2">언어 선택 / Language / ภาษา / Ngôn ngữ</label>
+    </div>
+    <div class="mb-6">
+     <label class="block text-sm font-medium text-gray-700 mb-2">언어 선택 / Language / ภาษา / Ngôn ngữ</label>
      <div class="grid grid-cols-4 gap-2">
       <button onclick="setLanguage('ko')" class="bg-blue-500 text-white py-2 px-3 rounded text-sm hover:bg-blue-600" id="langKo">한국어</button>
       <button onclick="setLanguage('en')" class="bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm hover:bg-gray-400" id="langEn">English</button>
@@ -36,11 +38,11 @@
     <div class="space-y-4">
      <div>
       <label class="block text-sm font-medium text-gray-700 mb-2" data-translate="username">아이디</label>
-      <input type="text" id="loginUsername" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" data-translate-placeholder="usernameInput">
+      <input type="text" id="loginUsername" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="you@example.com">
      </div>
      <div>
       <label class="block text-sm font-medium text-gray-700 mb-2" data-translate="password">비밀번호</label>
-      <input type="password" id="loginPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" data-translate-placeholder="passwordInput">
+      <input type="password" id="loginPassword" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="비밀번호">
      </div>
      <button id="btnLogin" class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200" data-translate="login">로그인</button>
 
@@ -58,7 +60,7 @@
     <div class="flex justify-between items-center mb-4">
      <div>
       <h1 class="text-3xl font-bold text-gray-800" data-translate="title">마사지 관리 프로그램</h1>
-      <p id="shopName" class="text-lg text-gray-600 mt-1"></p>
+      <p id="shopName" class="text-lg text-gray-600 mt-1">My Massage Shop</p>
      </div>
      <div class="flex gap-2">
       <button onclick="showLanguageModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="changeLanguage">언어 변경</button>
@@ -81,7 +83,7 @@
     </div>
    </div>
 
-   <!-- 메뉴 버튼들 -->
+   <!-- 메뉴 버튼 -->
    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
     <button onclick="showDashboard()" class="bg-blue-500 text-white py-4 px-6 rounded-lg text-lg hover:bg-blue-600" data-translate="dashboard">현황판</button>
     <button onclick="showOrder()" class="bg-indigo-500 text-white py-4 px-6 rounded-lg text-lg hover:bg-indigo-600" data-translate="order">순번</button>
@@ -135,7 +137,7 @@
     </div>
    </div>
 
-   <!-- 예약 섹션 -->
+   <!-- 예약 -->
    <div id="reservationSection" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
     <h2 class="text-2xl font-bold mb-4" data-translate="reservation">예약</h2>
     <div class="mb-6">
@@ -157,9 +159,7 @@
     <div id="menuListContainer" style="display: none;">
      <div class="flex justify-between items-center mb-4">
       <label class="block text-sm font-medium required-label">메뉴 목록</label>
-      <button onclick="addMenuRow()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 flex items-center gap-2">
-       <span class="text-lg">+</span> 메뉴 추가
-      </button>
+      <button onclick="addMenuRow()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 flex items-center gap-2"><span class="text-lg">+</span> 메뉴 추가</button>
      </div>
      <div id="menuRows"></div>
      <div class="mt-6 p-4 bg-gray-100 rounded">
@@ -170,12 +170,20 @@
      </div>
 
      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-      <div><label class="block text-sm font-medium mb-2" data-translate="startTime">시작 시간 (선택사항)</label>
-       <input type="time" id="reservationStartTime" class="w-full border rounded px-3 py-2" onchange="updateAllMenuTimes()"></div>
-      <div><label class="block text-sm font-medium mb-2" data-translate="roomNumber">방번호 (선택사항)</label>
-       <select id="reservationRoom" class="w-full border rounded px-3 py-2"><option value="" data-translate="selectRoom">방 선택</option></select></div>
-      <div><label class="block text-sm font-medium mb-2" data-translate="customerName">고객명 (선택사항)</label>
-       <input type="text" id="reservationCustomer" class="w-full border rounded px-3 py-2" data-translate-placeholder="enterCustomerName"></div>
+      <div>
+       <label class="block text-sm font-medium mb-2" data-translate="startTime">시작 시간 (선택사항)</label>
+       <input type="time" id="reservationStartTime" class="w-full border rounded px-3 py-2" onchange="updateAllMenuTimes()">
+      </div>
+      <div>
+       <label class="block text-sm font-medium mb-2" data-translate="roomNumber">방번호 (선택사항)</label>
+       <select id="reservationRoom" class="w-full border rounded px-3 py-2">
+        <option value="" data-translate="selectRoom">방 선택</option>
+       </select>
+      </div>
+      <div>
+       <label class="block text-sm font-medium mb-2" data-translate="customerName">고객명 (선택사항)</label>
+       <input type="text" id="reservationCustomer" class="w-full border rounded px-3 py-2" placeholder="홍길동">
+      </div>
      </div>
 
      <div id="menuTimeSettings" class="mt-6" style="display: none;">
@@ -187,7 +195,7 @@
     </div>
    </div>
 
-   <!-- 통계 섹션 -->
+   <!-- 통계 -->
    <div id="statisticsSection" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
     <h2 class="text-2xl font-bold mb-4" data-translate="statistics">통계</h2>
     <div class="mb-4 flex gap-4 flex-wrap">
@@ -204,12 +212,10 @@
       <label class="block text-sm font-medium mb-2" data-translate="selectDate">날짜 선택</label>
       <input type="date" id="statsDate" class="border rounded px-3 py-2" onchange="updateStats()">
      </div>
-
      <div id="rangeDateSelection" class="grid grid-cols-1 md:grid-cols-2 gap-4" style="display: none;">
       <div><label class="block text-sm font-medium mb-2" data-translate="startDate">시작 날짜</label><input type="date" id="statsStartDate" class="w-full border rounded px-3 py-2" onchange="autoSetEndDate()"></div>
       <div><label class="block text-sm font-medium mb-2" data-translate="endDate">끝 날짜</label><input type="date" id="statsEndDate" class="w-full border rounded px-3 py-2" onchange="updateStats()"></div>
      </div>
-
      <div id="quickDateSelection" class="mt-3 flex gap-2 flex-wrap" style="display: none;">
       <button onclick="setThisWeek()" class="bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm hover:bg-blue-200" data-translate="thisWeek">이번 주</button>
       <button onclick="setLastWeek()" class="bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm hover:bg-blue-200" data-translate="lastWeek">지난 주</button>
@@ -262,7 +268,7 @@
     </div>
    </div>
 
-   <!-- DB 관리 섹션 -->
+   <!-- DB 관리 -->
    <div id="dbManagementSection" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
     <h2 class="text-2xl font-bold mb-4" data-translate="dbManagement">DB 관리</h2>
     <div class="mb-6 p-4 bg-gray-100 rounded">
@@ -300,7 +306,7 @@
    </div>
   </div>
 
-  <!-- Payment Modal (간단 구현) -->
+  <!-- Payment Modal -->
   <div id="paymentModal" class="modal"><div class="modal-content">
     <h3 class="text-xl font-bold mb-4" data-translate="payment">입금 처리</h3>
     <div id="paymentMethods" class="space-y-4 mb-4"></div>
@@ -359,307 +365,253 @@
      <button onclick="closeFontModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="close">닫기</button>
     </div>
   </div></div>
-
+  
   <!-- Google Login Modal (UI only) -->
-  <div id="google
-  <script>
-    // =========================================================================
-    // 1. 설정: Supabase 및 상수
-    // =========================================================================
-    const SUPABASE_URL = "https://lmjtjonlvpqcwdzisijd.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtanRqb25sdnBxY3dkemlzaWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMjY1NDksImV4cCI6MjA3ODcwMjU0OX0.HmfZaxAnaVEEHfLxnlUHxR-PAjrUnFMVWs839xJmKfw";
-    const THUMBNAIL_EDGE_FUNCTION_URL = "https://lmjtjonlvpqcwdzisijd.functions.supabase.co/employee-thumbnail-generator";
-    const STORAGE_BUCKET = "employee-photos-thumbs";
-
-    // 관리자용: 실행 권장 SQL (복사해서 SQL Editor에서 실행)
-    const REQUIRED_SQL = `
--- 확장
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
-
--- employees
-CREATE TABLE IF NOT EXISTS employees (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  full_name text NOT NULL,
-  photo_url text,
-  thumbnail_url text,
-  is_active boolean DEFAULT true
-);
-
--- services
-CREATE TABLE IF NOT EXISTS services (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  name text NOT NULL,
-  duration_minutes int NOT NULL,
-  price numeric(10,2) NOT NULL,
-  commission numeric(10,2) NOT NULL
-);
-
--- day_orders
-CREATE TABLE IF NOT EXISTS day_orders (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  day date NOT NULL,
-  employee_id uuid REFERENCES employees(id),
-  position int NOT NULL
-);
-
--- bookings
-CREATE TABLE IF NOT EXISTS bookings (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  day date NOT NULL,
-  employee_id uuid REFERENCES employees(id),
-  start_at timestamptz NOT NULL,
-  end_at timestamptz NOT NULL,
-  items jsonb NOT NULL,
-  total_price numeric(10,2) NOT NULL,
-  total_commission numeric(10,2) NOT NULL,
-  created_by uuid
-);
-
--- employee_photos (optional)
-CREATE TABLE IF NOT EXISTS employee_photos (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  employee_id uuid REFERENCES employees(id),
-  original_url text,
-  thumbnail_url text,
-  uploaded_at timestamptz DEFAULT now()
-);
-`.trim();
-
-    // =========================================================================
-    // 2. DOMContentLoaded 안에서 초기화 (DOM 안전)
-    // =========================================================================
-    document.addEventListener('DOMContentLoaded', async () => {
-      // Supabase 클라이언트 초기화
-      const supabase = supabaseJs.createClient ? supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-      // DOM refs
-      const authArea = document.getElementById('auth-area');
-      const employeesList = document.getElementById('employees-list');
-      const dashboardArea = document.getElementById('dashboard-area');
-      const bookingRoot = document.getElementById('booking-root');
-      const statsArea = document.getElementById('stats-area');
-      const adminArea = document.getElementById('admin-area');
-      const initResult = document.getElementById('init-result');
-      const selectedDateInput = document.getElementById('selected-date');
-      const btnShowSql = document.getElementById('btn-show-sql');
-      const btnCreateSample = document.getElementById('btn-create-sample');
-
-      // 기본 날짜 설정
-      if (selectedDateInput) selectedDateInput.value = new Date().toISOString().slice(0,10);
-
-      // ----------------------
-      // Auth 렌더링 및 처리
-      // ----------------------
-      async function renderAuth() {
-        try {
-          const { data } = await supabase.auth.getUser();
-          const user = data?.user ?? null;
-          authArea.innerHTML = '';
-          if (!user) {
-            const form = document.createElement('div');
-            form.innerHTML = `
-              <input id="email" placeholder="이메일" class="p-1 border rounded" />
-              <input id="password" type="password" placeholder="비밀번호" class="p-1 border rounded" />
-              <button id="btn-login" class="badge">로그인</button>
-            `;
-            authArea.appendChild(form);
-            form.querySelector('#btn-login').addEventListener('click', async () => {
-              const email = form.querySelector('#email').value;
-              const password = form.querySelector('#password').value;
-              if (!email || !password) return alert('이메일과 비밀번호를 입력하세요');
-              const { error } = await supabase.auth.signInWithPassword({ email, password });
-              if (error) return alert('로그인 오류: ' + error.message);
-              await renderAuth();
-              await loadEmployees();
-              loadDayDashboard();
-            });
-          } else {
-            const div = document.createElement('div');
-            div.innerHTML = `<span>${user.email}</span> <button id="btn-logout" class="badge">로그아웃</button>`;
-            authArea.appendChild(div);
-            div.querySelector('#btn-logout').addEventListener('click', async () => {
-              await supabase.auth.signOut();
-              await renderAuth();
-            });
-            // 간단한 수퍼유저 판단: 이메일이 admin@ 로 시작하면 관리자 영역 노출
-            if (user.email && user.email.startsWith('admin@')) {
-              adminArea.style.display = 'block';
-            } else {
-              adminArea.style.display = 'none';
-            }
-          }
-        } catch (err) {
-          authArea.innerText = 'Auth 초기화 중 오류: ' + err.message;
-        }
-      }
-
-      // ----------------------
-      // Load employees
-      // ----------------------
-      async function loadEmployees() {
-        if (!employeesList) return;
-        employeesList.innerText = '로딩중...';
-        const { data, error } = await supabase.from('employees').select('*').order('full_name');
-        if (error) {
-          employeesList.innerText = '로딩 오류: ' + error.message;
-          return;
-        }
-        employeesList.innerHTML = '';
-        data.forEach(emp => {
-          const el = document.createElement('div');
-          el.className = 'employee-item';
-          el.innerHTML = `
-            <img class="thumb" src="${escapeHtml(emp.thumbnail_url || emp.photo_url || 'https://via.placeholder.com/48')}" alt="thumb" />
-            <div style="flex:1;">
-              <div><strong>${escapeHtml(emp.full_name)}</strong></div>
-              <div class="muted" style="font-size:12px;">${escapeHtml(emp.id)}</div>
-            </div>
-            <div>
-              <button class="select-emp badge" data-id="${emp.id}">선택</button>
-              <button class="upload-photo badge" data-id="${emp.id}">사진 업로드</button>
-            </div>
-          `;
-          employeesList.appendChild(el);
-        });
-        // events
-        document.querySelectorAll('.select-emp').forEach(btn => btn.addEventListener('click', (e) => openBookingForEmployee(e.currentTarget.dataset.id)));
-        document.querySelectorAll('.upload-photo').forEach(btn => btn.addEventListener('click', (e) => openPhotoUploader(e.currentTarget.dataset.id)));
-      }
-
-      // ----------------------
-      // Booking UI (간단 플레이스홀더)
-      // ----------------------
-      function openBookingForEmployee(employeeId) {
-        if (!bookingRoot) return;
-        bookingRoot.innerHTML = `<div>직원 선택: ${escapeHtml(employeeId)}<div style="margin-top:8px;"><button id="btn-create-booking" class="badge">샘플 예약 생성 (로컬 시뮬)</button></div></div>`;
-        const btn = document.getElementById('btn-create-booking');
-        if (btn) btn.addEventListener('click', () => alert('샘플 예약 생성은 서버/DB에서 처리하세요.'));
-      }
-
-      // Upload photo handler (간단 안내)
-      function openPhotoUploader(employeeId) {
-        alert('사진 업로드는 Storage 및 Edge Function을 통해 처리하세요. 직원 ID: ' + employeeId);
-      }
-
-      // ----------------------
-      // Dashboard / Stats placeholders
-      // ----------------------
-      async function loadDayDashboard() {
-        const sel = document.getElementById('selected-date');
-        const day = sel ? sel.value : new Date().toISOString().slice(0,10);
-        dashboardArea.innerText = `선택된 날짜: ${day} — 현황 로딩 중... (실제 쿼리 구현 필요)`;
-        // 실제 구현: supabase.from('bookings').select(...) 등으로 데이터 조회 후 렌더
-      }
-
-      document.getElementById('load-stats')?.addEventListener('click', async () => {
-        statsArea.innerText = '통계 로딩 중... (구현 필요)';
-      });
-
-      document.getElementById('btn-create-sample')?.addEventListener('click', () => {
-        if (!confirm('샘플 데이터 생성은 관리자 전용이며, SQL Editor에서 실행하시길 권장합니다. SQL을 복사하시겠습니까?')) return;
-        // 복사하여 관리자에게 제공하게 함
-        navigator.clipboard?.writeText(REQUIRED_SQL).then(() => {
-          initResult.innerText = '관리자용 SQL이 클립보드에 복사되었습니다. SQL Editor에 붙여넣어 실행하세요.';
-        }).catch(() => {
-          initResult.innerText = '클립보드 복사 실패 — 아래 버튼으로 SQL을 보세요.';
-        });
-      });
-
-      // 버튼: SQL 보기
-      btnShowSql?.addEventListener('click', () => {
-        const el = document.getElementById('sql-view');
-        el.textContent = REQUIRED_SQL;
-        el.style.display = el.style.display === 'block' ? 'none' : 'block';
-      });
-
-      // 단순 대시보드 로드 버튼
-      document.getElementById('btn-load-dashboard')?.addEventListener('click', loadDayDashboard);
-
-      // 초기 렌더
-      await renderAuth();
-      await loadEmployees();
-      loadDayDashboard();
-
-      // ----------------------
-      // 유틸리티
-      // ----------------------
-      function escapeHtml(str) {
-        if (!str && str !== 0) return '';
-        return String(str)
-          .replaceAll('&', '&amp;')
-          .replaceAll('<', '&lt;')
-          .replaceAll('>', '&gt;')
-          .replaceAll('"', '&quot;')
-          .replaceAll("'", '&#39;');
-      }
-
-      // Expose some functions for debugging in console (optional)
-      window.app = {
-        supabase,
-        loadEmployees,
-        loadDayDashboard,
-        REQUIRED_SQL
-      };
-    });
-  </script>
-</head>
-<body>
-  <h1>마사지샵 관리 시스템</h1>
-
-  <!-- 인증 -->
-  <section id="auth-area" class="col"></section>
-
-  <!-- 상단: 날짜 선택 및 현황 -->
-  <section class="col" id="top-col">
-    <label>날짜:
-      <input id="selected-date" type="date" />
-    </label>
-    <button id="btn-load-dashboard" class="badge">현황 불러오기</button>
-    <hr/>
-    <h3>현황판</h3>
-    <div id="dashboard-area" class="muted">날짜를 선택하고 '현황 불러오기'를 누르세요.</div>
-  </section>
-
-  <!-- 중간: 직원 목록 및 예약 패널 -->
-  <section class="col" id="middle-col">
-    <h3>직원 목록 (선택)</h3>
-    <div id="employees-list" class="muted">로딩중...</div>
-
-    <hr/>
-    <h3>예약 / 선택 항목</h3>
-    <div id="booking-panel">
-      <div id="booking-root">직원을 선택하면 예약 UI가 표시됩니다.</div>
-    </div>
-  </section>
-
-  <!-- 우측: 통계 및 관리자 -->
-  <section class="col" id="right-col">
-    <h3>통계</h3>
-    <label>범위:
-      <select id="stats-range">
-        <option value="day">일별</option>
-        <option value="week">주별</option>
-        <option value="month">월별</option>
-      </select>
-    </label>
-    <button id="load-stats" class="badge">불러오기</button>
-    <div id="stats-area" class="muted" style="margin-top:8px;">통계가 여기에 표시됩니다.</div>
-
-    <hr/>
-    <div id="admin-area" style="display:none;">
-      <h3>관리 (수퍼유저)</h3>
-      <div id="db-admin" class="muted">초기화 및 SQL 보기</div>
-      <div style="margin-top:8px;">
-        <button id="btn-show-sql" class="badge">필요 SQL 보기</button>
-        <button id="btn-create-sample" class="badge">샘플 데이터 생성</button>
-        <div id="init-result" style="margin-top:8px;"></div>
+  <div id="googleLoginModal" class="modal">
+    <div class="modal-content">
+      <h3 class="text-xl font-bold mb-4">구글 계정 로그인</h3>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-2">구글 이메일:</label>
+          <input type="email" id="googleEmail" class="w-full border rounded px-3 py-2" placeholder="example@gmail.com">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2">구글 비밀번호:</label>
+          <input type="password" id="googlePassword" class="w-full border rounded px-3 py-2" placeholder="비밀번호 입력">
+        </div>
+        <div class="text-sm text-gray-600">
+          * 실제 구글 계정 정보를 입력하세요. (UI 전용 — 실제 OAuth 동작을 위해서는 Supabase OAuth 설정 필요)
+        </div>
+      </div>
+      <div class="flex gap-2 mt-4">
+        <button id="googleLoginConfirm" onclick="processGoogleLogin()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">로그인</button>
+        <button onclick="closeGoogleLoginModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
       </div>
     </div>
-  </section>
+  </div>
 
-  <!-- 관리자용: SQL 표시 영역 (기본 숨김) -->
-  <section class="col" id="sql-section" style="display:block;">
-    <pre id="sql-view" style="display:none; white-space:pre-wrap;"></pre>
-  </section>
+  <!-- 간단한 스크립트: Supabase 세팅, 로그인/화면 전환, 모달 제어, 기본 UI 핸들러 -->
+  <script>
+    // --- Supabase 설정 (요청하신 값으로 세팅) ---
+    const SUPABASE_URL = 'https://lmjtjonlvpqcwdzisijd.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtanRqb25sdnBxY3dkemlzaWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMjY1NDksImV4cCI6MjA3ODcwMjU0OX0.HmfZaxAnaVEEHfLxnlUHxR-PAjrUnFMVWs839xJmKfw';
+
+    const supabase = supabaseJs.createClient
+      ? supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+      : window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // DOM elements
+    const loginScreen = document.getElementById('loginScreen');
+    const mainScreen = document.getElementById('mainScreen');
+    const btnLogin = document.getElementById('btnLogin');
+    const btnShowGoogleModal = document.getElementById('btnShowGoogleModal');
+    const googleLoginModal = document.getElementById('googleLoginModal');
+    const loginUsername = document.getElementById('loginUsername');
+    const loginPassword = document.getElementById('loginPassword');
+
+    // Modal helpers
+    function openModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'flex';
+    }
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    }
+
+    // Google modal control
+    btnShowGoogleModal?.addEventListener('click', () => openModal('googleLoginModal'));
+    function closeGoogleLoginModal() { closeModal('googleLoginModal'); }
+
+    // Language / Font modal wrappers (basic)
+    function showLanguageModal() { openModal('languageModal'); }
+    function setLanguageAndClose(lang) { setLanguage(lang); closeModal('languageModal'); }
+    function closeLanguageModal() { closeModal('languageModal'); }
+
+    function showFontModal() { openModal('fontModal'); }
+    function closeFontModal() { closeModal('fontModal'); }
+    function applyFontSettings() {
+      // 간단한 예: 선택된 폰트/크기 적용 (구현 상세는 저장/복원 필요)
+      closeFontModal();
+    }
+
+    // Simple modal management
+    function closeManagementModal() { closeModal('managementModal'); }
+    function showLocalBackupDialog() { alert('로컬 백업(더미)'); }
+    function showGoogleBackupDialog() { alert('구글 백업(더미)'); }
+    function showLocalRestoreDialog() { document.getElementById('restoreFile').click(); }
+    function showGoogleRestoreDialog() { alert('구글 복원(더미)'); }
+    function restoreData(e) { const f = e.target.files?.[0]; if (!f) return; const reader = new FileReader(); reader.onload = () => { try { const data = JSON.parse(reader.result); console.log('복원 데이터:', data); alert('복원 완료 (더미)'); } catch (err) { alert('파일 파싱 오류'); } }; reader.readAsText(f); }
+    function exportAllDataExcel() { alert('엑셀 내보내기(더미)'); }
+
+    // Simple UI navigation
+    function hideAllSections() {
+      document.getElementById('orderSection').style.display = 'none';
+      document.getElementById('dashboardSection').style.display = 'none';
+      document.getElementById('reservationSection').style.display = 'none';
+      document.getElementById('statisticsSection').style.display = 'none';
+      document.getElementById('dbManagementSection').style.display = 'none';
+    }
+    function showDashboard() { hideAllSections(); document.getElementById('dashboardSection').style.display = 'block'; }
+    function showOrder() { hideAllSections(); document.getElementById('orderSection').style.display = 'block'; }
+    function showReservation() { hideAllSections(); document.getElementById('reservationSection').style.display = 'block'; document.getElementById('menuListContainer').style.display = 'block'; }
+    function showStatistics() { hideAllSections(); document.getElementById('statisticsSection').style.display = 'block'; }
+    function showDBManagement() { hideAllSections(); document.getElementById('dbManagementSection').style.display = 'block'; }
+
+    // Placeholder functions for many UI actions
+    function saveStaffOrder() { alert('순번 저장(더미)'); }
+    function addMenuRow() { alert('메뉴 행 추가(더미)'); }
+    function updateAllMenuTimes() { /* noop */ }
+    function addReservation() { alert('예약 추가(더미)'); }
+    function showDailyStats() { alert('일간 통계(더미)'); }
+    function showWeeklyStats() { alert('주간 통계(더미)'); }
+    function showMonthlyStats() { alert('월간 통계(더미)'); }
+    function showMenuSales() { alert('월간 메뉴 매출(더미)'); }
+    function showMonthlySalesChart() { alert('월간 매출 그래프(더미)'); }
+    function downloadExcel() { alert('엑셀 다운로드(더미)'); }
+    function manageMenus(){ alert('메뉴 관리(더미)'); }
+    function manageStaff(){ alert('직원 관리(더미)'); }
+    function manageRooms(){ alert('방 관리(더미)'); }
+    function manageCustomers(){ alert('고객 관리(더미)'); }
+    function manageCurrency(){ alert('화폐 단위(더미)'); }
+    function managePaymentMethods(){ alert('입금방식 관리(더미)'); }
+    function manageGuarantee(){ alert('Guarantee 관리(더미)'); }
+    function manageAdmins(){ alert('관리자 관리(더미)'); }
+
+    // Language (very basic demo)
+    function setLanguage(lang){
+      // 실제 번역 맵을 연결하면 각 data-translate 요소의 innerText를 바꿉니다.
+      console.log('setLanguage', lang);
+      // 간단히 버튼 스타일 토글
+      ['langKo','langEn','langTh','langVi'].forEach(id=>document.getElementById(id)?.classList?.remove('bg-blue-500','text-white'));
+      if (lang === 'ko') document.getElementById('langKo')?.classList?.add('bg-blue-500','text-white');
+      if (lang === 'en') document.getElementById('langEn')?.classList?.add('bg-blue-500','text-white');
+      if (lang === 'th') document.getElementById('langTh')?.classList?.add('bg-blue-500','text-white');
+      if (lang === 'vi') document.getElementById('langVi')?.classList?.add('bg-blue-500','text-white');
+    }
+
+    // Font settings (simple)
+    function setFontSize(size){
+      const body = document.body;
+      if(size === 'small') body.style.fontSize = '12px';
+      if(size === 'normal') body.style.fontSize = '16px';
+      if(size === 'large') body.style.fontSize = '18px';
+      if(size === 'xlarge') body.style.fontSize = '20px';
+      if(size === 'xxlarge') body.style.fontSize = '22px';
+    }
+    function setFontFamily(family){ document.body.style.fontFamily = family; }
+
+    // Login/logout with Supabase
+    async function processLogin() {
+      const email = loginUsername.value.trim();
+      const password = loginPassword.value;
+      if(!email || !password){ alert('이메일과 비밀번호를 입력하세요.'); return; }
+      btnLogin.disabled = true;
+      btnLogin.innerText = '로그인 중...';
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          alert('로그인 실패: ' + error.message);
+          console.error(error);
+          btnLogin.disabled = false;
+          btnLogin.innerText = '로그인';
+          return;
+        }
+        // 로그인 성공
+        console.log('로그인 성공:', data);
+        onLoginChanged(data.user || (await supabase.auth.getUser()).data.user);
+      } catch (err) {
+        console.error(err);
+        alert('로그인 중 오류 발생');
+      } finally {
+        btnLogin.disabled = false;
+        btnLogin.innerText = '로그인';
+      }
+    }
+
+    // Google login (UI-only placeholder) — 실제 OAuth 사용 시 supabase.auth.signInWithOAuth({...})
+    async function processGoogleLogin() {
+      const email = document.getElementById('googleEmail').value.trim();
+      const pw = document.getElementById('googlePassword').value;
+      if(!email || !pw){ alert('구글 이메일/비밀번호를 입력하세요.'); return; }
+      // UI placeholder: simulate login by attempting signUp/signIn with provided email (not secure)
+      try {
+        const { data: signUpData, error: signUpErr } = await supabase.auth.signUp({ email, password: pw });
+        if (signUpErr && signUpErr.message && !signUpErr.message.includes('User already registered')) {
+          console.error(signUpErr);
+        }
+        // Try sign in
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password: pw });
+        if (error) {
+          alert('구글 로그인(흉내) 실패: ' + error.message + '\\n실제 구글 OAuth를 사용하려면 Supabase 프로젝트의 OAuth 설정이 필요합니다.');
+          return;
+        }
+        closeGoogleLoginModal();
+        onLoginChanged(data.user || (await supabase.auth.getUser()).data.user);
+      } catch (err) {
+        console.error(err);
+        alert('구글 로그인 시도 중 오류');
+      }
+    }
+
+    async function onLoginChanged(user) {
+      if(!user){ // not logged in
+        loginScreen.style.display = 'flex';
+        mainScreen.style.display = 'none';
+        return;
+      }
+      // show main screen
+      loginScreen.style.display = 'none';
+      mainScreen.style.display = 'block';
+      // show user info
+      const shopNameEl = document.getElementById('shopName');
+      shopNameEl.innerText = user.email || user?.user_metadata?.full_name || 'My Massage Shop';
+      // default show dashboard
+      showDashboard();
+      // load minimal data if needed — placeholders for now
+      console.log('User logged in:', user);
+    }
+
+    async function logout(){
+      await supabase.auth.signOut();
+      // reset UI
+      loginUsername.value = '';
+      loginPassword.value = '';
+      loginScreen.style.display = 'flex';
+      mainScreen.style.display = 'none';
+    }
+
+    // Initialize: check session
+    (async function init() {
+      // wire login button
+      btnLogin?.addEventListener('click', processLogin);
+
+      // language default
+      setLanguage('ko');
+
+      // check existing session
+      try {
+        const { data } = await supabase.auth.getSession();
+        const session = data?.session;
+        if (session && session.user) {
+          onLoginChanged(session.user);
+        } else {
+          loginScreen.style.display = 'flex';
+          mainScreen.style.display = 'none';
+        }
+      } catch (err) {
+        console.error('세션 확인 오류', err);
+        loginScreen.style.display = 'flex';
+        mainScreen.style.display = 'none';
+      }
+
+      // current time updater
+      setInterval(()=> {
+        const now = new Date();
+        document.getElementById('currentTime').innerText = now.toLocaleTimeString();
+      }, 1000);
+    })();
+  </script>
+
 </body>
 </html>
