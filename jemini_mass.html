@@ -584,27 +584,35 @@
             }
         }
         
-        async function loadAdminDetails(userId) {
-            const { data, error } = await supabaseClient
-                .from('shop_admins')
-                .select('role, shop_id, name')
-                .eq('id', userId)
-                .single();
+async function loadAdminDetails(userId) {
+    // 1. 현재 로그인한 사용자의 ID로 shop_admins 테이블에서 role, shop_id를 정확히 조회합니다.
+    const { data, error } = await supabaseClient
+        .from('shop_admins')
+        .select('role, shop_id, name')
+        .eq('id', userId)
+        .single();
+    
+    // RLS 오류나 데이터가 없는 경우를 대비하여 기본값 설정
+    if (error && error.code !== 'PGRST116') {
+         console.error('Error fetching admin role:', error.message);
+    }
+    
+    const role = data ? data.role : ADMIN_ROLES.SHOP_STAFF;
+    const shopId = data ? data.shop_id : 'default_shop';
 
-            if (error && error.code !== 'PGRST116') {
-                 console.error('Error fetching admin role:', error.message);
-            }
+    let shopName;
+    if (role === ADMIN_ROLES.SUPER_USER) {
+        shopName = `[${role}] 시스템 전체 관리`;
+    } else {
+        shopName = `[${shopId}] ${role} 관리자 화면`;
+    }
 
-            const role = data ? data.role : ADMIN_ROLES.SHOP_STAFF;
-            const shopId = data ? data.shop_id : 'default_shop';
-
-            return {
-                role: role,
-                shopId: shopId,
-                shopName: `[${shopId}] ${role} 관리자 화면`
-            };
-        }
-
+    return {
+        role: role,
+        shopId: shopId,
+        shopName: shopName
+    };
+}
         async function processLogin() {
             const email = document.getElementById('loginUsername').value; 
             const password = document.getElementById('loginPassword').value;
