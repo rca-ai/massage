@@ -390,16 +390,32 @@
     </div>
   </div>
 
-  <!-- 간단한 스크립트: Supabase 세팅, 로그인/화면 전환, 모달 제어, 기본 UI 핸들러 -->
-  <script>
-    // --- Supabase 설정 (요청하신 값으로 세팅) ---
-    const SUPABASE_URL = 'https://lmjtjonlvpqcwdzisijd.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtanRqb25sdnBxY3dkemlzaWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMjY1NDksImV4cCI6MjA3ODcwMjU0OX0.HmfZaxAnaVEEHfLxnlUHxR-PAjrUnFMVWs839xJmKfw';
+// 안전한 Supabase 초기화 — 복사해서 기존 블록을 완전히 교체하세요
+const SUPABASE_URL = 'https://lmjtjonlvpqcwdzisijd.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtanRqb25sdnBxY3dkemlzaWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMjY1NDksImV4cCI6MjA3ODcwMjU0OX0.HmfZaxAnaVEEHfLxnlUHxR-PAjrUnFMVWs839xJmKfw';
 
-    const supabase = supabaseJs.createClient
-      ? supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-      : window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Ensure the CDN script has loaded and create the client safely
+let supabase = null;
+function initSupabaseClient() {
+  if (window.supabase && typeof window.supabase.createClient === 'function') {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    return true;
+  } else {
+    console.error('Supabase CDN not loaded (window.supabase is undefined).');
+    return false;
+  }
+}
 
+// Try to initialize now; if CDN is delayed, retry after DOMContentLoaded
+if (!initSupabaseClient()) {
+  window.addEventListener('DOMContentLoaded', () => {
+    if (!initSupabaseClient()) {
+      // Last resort: notify user in console/UI
+      console.error('Supabase client initialization failed. Verify the <script> for @supabase/supabase-js is present and loaded before this script.');
+      alert('Supabase 초기화 실패: 콘솔을 확인하세요.');
+    }
+  });
+}
     // DOM elements
     const loginScreen = document.getElementById('loginScreen');
     const mainScreen = document.getElementById('mainScreen');
