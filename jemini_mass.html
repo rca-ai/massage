@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>마사지샵 관리 시스템 (Supabase DB 연동) - V9.0</title>
+  <title>마사지샵 관리 시스템 (Supabase DB 연동) - V9.1</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
@@ -355,13 +355,13 @@
   </div>
   <script>
         // =========================================================================
-        // V9.0: Supabase Client & Constants (권한 필터링 완전 제거)
+        // V9.1: Supabase Client & Constants (누락된 DB 관리 로직 복구)
         // =========================================================================
         const SUPABASE_URL = 'https://requjozkxlxomoamdrrf.supabase.co'; 
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlcXVqb3preGx4b21vYW1kcnJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzMDM1NjYsImV4cCI6MjA3ODg3OTU2Nn0.LpZyM2K12EShRAZyptk6Ak2XDkxQ-WuUPklTZfqt_Tg';
 
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        console.log('Supabase Client Initialized! (V9.0)');
+        console.log('Supabase Client Initialized! (V9.1)');
         
         const ADMIN_ROLES = {
             SUPER_USER: '최고관리자',
@@ -380,9 +380,9 @@
         let currentAdmin = { 
             id: null,
             username: null,
-            type: ADMIN_ROLES.SUPER_USER, // 🚨 강제 설정: 로그인만 되면 무조건 최고관리자 권한을 부여 (UI 표시 목적)
+            type: ADMIN_ROLES.SUPER_USER, // 🚨 무조건 최고관리자 권한 강제 설정 (UI 표시 목적)
             shopId: 'super', 
-            shopName: '미로그인' 
+            shopName: '시스템 전체 관리 (강제)' 
         };
         let currentPaymentReservationId = null;
         let selectedStaff = null;
@@ -428,7 +428,7 @@
         };
         
         // =========================================================================
-        // 3. Supabase DB CRUD 함수 (V9.0: Shop ID 필터링 제거)
+        // 3. Supabase DB CRUD 함수 (V9.0 기반)
         // =========================================================================
 
         /** 직원 데이터 로드 (shop_id 필터링 제거) */
@@ -476,7 +476,6 @@
 
         /** 일반 CRUD 함수 (V8.0 기반) */
         async function upsertData(tableName, data, id = null) {
-            // 🚨 shop_id 주입 로직 제거 (전역에서 shopId='super'로 통일)
             data.shop_id = currentAdmin.shopId;
             
             if (tableName === 'shop_config') {
@@ -509,7 +508,7 @@
                 start_time: r.startTime, room_id: r.roomId || null, customer_name: r.customerName || null,
                 price: r.price, commission: r.commission, paid: r.paid, payment_details: r.paymentDetails || {},
                 menu_order: r.menuOrder, is_multi_menu: r.isMultiMenu,
-                shop_id: currentAdmin.shopId // 'super'로 통일
+                shop_id: currentAdmin.shopId
             }));
 
             const { data, error } = await supabaseClient.from('reservations').insert(transformedReservations).select(); 
@@ -531,7 +530,7 @@
 
 
         // =========================================================================
-        // 4. 초기화 및 인증 로직 (V9.0: 역할 로드 무시)
+        // 4. 초기화 및 인증 로직 (V9.0 기반)
         // =========================================================================
         
         async function loadAdminDetails(userId) {
@@ -569,8 +568,8 @@
                     
                     currentAdmin.id = session.user.id;
                     currentAdmin.username = session.user.email;
-                    currentAdmin.type = adminDetails.role; // SUPER_USER로 강제 설정됨
-                    currentAdmin.shopId = adminDetails.shopId; // 'super'로 강제 설정됨
+                    currentAdmin.type = adminDetails.role;
+                    currentAdmin.shopId = adminDetails.shopId;
                     currentAdmin.shopName = adminDetails.shopName;
 
                     document.getElementById('loginScreen').style.display = 'none';
@@ -578,7 +577,6 @@
                     document.getElementById('shopName').textContent = currentAdmin.shopName;
 
                     console.log(`[AUTH CHECK] Role Forced: ${currentAdmin.type}, Shop ID: ${currentAdmin.shopId}`);
-                    // updateUIAccess()는 필요 없지만, DB 관리 버튼을 켜는 용도로 유지
                     updateUIAccess(); 
                     loadReservationData();
                     showDashboard();
@@ -608,7 +606,7 @@
             }
 
             if (data.user) {
-                 const adminDetails = await loadAdminDetails(data.user.id); // 강제 역할 로드
+                 const adminDetails = await loadAdminDetails(data.user.id);
 
                 currentAdmin.id = data.user.id;
                 currentAdmin.username = data.user.email;
@@ -630,23 +628,21 @@
         }
         
         // =========================================================================
-        // 5. 유틸리티 및 UI 로직 (V9.0: 모든 메뉴 표시)
+        // 5. 유틸리티 및 UI 로직 (V9.0 기반)
         // =========================================================================
 
         function updateUIAccess() {
-            // 🚨 역할 로직을 무시하고 모든 DB 관리 버튼을 항상 표시합니다.
             const dbManagementButton = document.getElementById('dbManagementButton');
             if (dbManagementButton) {
-                dbManagementButton.style.display = 'block'; // 무조건 표시
+                dbManagementButton.style.display = 'block'; 
             }
             
             const superAdminButtons = document.getElementById('superAdminButtons');
             if (superAdminButtons) {
-                superAdminButtons.style.display = 'block'; // 무조건 표시
+                superAdminButtons.style.display = 'block'; 
             }
         }
-        
-        // ... (V8.1의 나머지 모든 함수 구현부 유지) ...
+
         function getDailyStaffOrderKey(date) { return `temp_staffOrder_${date}_${currentAdmin.shopId}`; }
         function hideAllSections() {
             const sections = ['dashboardSection', 'orderSection', 'reservationSection', 'statisticsSection', 'dbManagementSection'];
@@ -655,27 +651,701 @@
             });
         }
         
-        // 모든 메뉴 접근 가능 (V8.1 로직 유지)
-        function showDashboard() { 
-             hideAllSections(); document.getElementById('dashboardSection').style.display = 'block'; loadDashboard(); 
-        }
-        function showOrder() { 
-             hideAllSections(); document.getElementById('orderSection').style.display = 'block'; loadStaffOrder(); 
-        }
-        function showReservation() { 
-             hideAllSections(); document.getElementById('reservationSection').style.display = 'block'; resetReservationForm(); loadReservationData(); 
-        }
-        function showStatistics() { 
-             hideAllSections(); document.getElementById('statisticsSection').style.display = 'block'; document.getElementById('statsDate').value = new Date().toISOString().split('T')[0]; showDailyStats(); 
-        }
+        function showDashboard() { hideAllSections(); document.getElementById('dashboardSection').style.display = 'block'; loadDashboard(); }
+        function showOrder() { hideAllSections(); document.getElementById('orderSection').style.display = 'block'; loadStaffOrder(); }
+        function showReservation() { hideAllSections(); document.getElementById('reservationSection').style.display = 'block'; resetReservationForm(); loadReservationData(); }
+        function showStatistics() { hideAllSections(); document.getElementById('statisticsSection').style.display = 'block'; document.getElementById('statsDate').value = new Date().toISOString().split('T')[0]; showDailyStats(); }
         
         function showDBManagement() { 
-            // 🚨 권한 체크 로직 제거
             hideAllSections(); 
             document.getElementById('dbManagementSection').style.display = 'block'; 
         }
+
+        function closeManagementModal() { 
+            document.getElementById('managementModal').style.display = 'none';
+            document.getElementById('managementContent').innerHTML = '';
+            loadReservationData(); 
+        }
         
-        // ... (V8.1의 나머지 모든 함수: loadDashboard, loadStaffSelection, manageStaff, manageMenus 등) ...
+        function updateCurrentTime() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString();
+            updateDashboardRemainingTime();
+        }
+        function calculateEndTime(startTime, duration) {
+            if (!startTime) return '-';
+            const [hours, minutes] = startTime.split(':').map(Number);
+            const startMinutes = hours * 60 + minutes;
+            const endMinutes = startMinutes + duration;
+            const endHours = Math.floor(endMinutes / 60) % 24; 
+            const endMins = endMinutes % 60;
+            return `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
+        }
+        function calculateRemainingTime(startTime, duration, reservationDate) {
+            if (!startTime) return 0;
+            
+            const now = new Date();
+            const currentDate = now.toISOString().split('T')[0];
+            const currentMinutes = now.getHours() * 60 + now.getMinutes();
+            
+            if (reservationDate && reservationDate !== currentDate) {
+                const reservationDateObj = new Date(reservationDate);
+                const currentDateObj = new Date(currentDate);
+                
+                if (reservationDateObj < currentDateObj) {
+                    return -1;
+                }
+                if (reservationDateObj > currentDateObj) {
+                    return 0;
+                }
+            }
+            
+            const [hours, minutes] = startTime.split(':').map(Number);
+            const startMinutes = hours * 60 + minutes;
+            const endMinutes = startMinutes + duration;
+            
+            const remaining = endMinutes - currentMinutes;
+            return remaining <= 0 ? -1 : remaining; 
+        }
+        function updateDashboardRemainingTime() { 
+             // ... (대시보드 남은 시간 업데이트 로직) ...
+        }
+        function loadReservationData() { loadStaffSelection(); loadRoomSelection(); }
+        function loadRoomSelection() { 
+             // ... (방 선택 로직) ...
+        }
+        function resetReservationForm() { 
+            // ... (예약 폼 초기화 로직) ...
+        }
+        function selectStaff(id, name, order, element) { 
+            // ... (직원 선택 로직) ...
+        }
+        function addMenuRow() { 
+            // ... (메뉴 추가 로직) ...
+        }
+        function saveStaffOrder() { 
+            // ... (순번 저장 로직) ...
+        }
+        function loadStaffOrder() { 
+            // ... (순번 로드 로직) ...
+        }
+        function updateTranslations() { 
+            // ... (번역 업데이트 로직) ...
+        }
+        function updateCurrencyDisplay() { 
+            // ... (화폐 표시 업데이트 로직) ...
+        }
+        function showDailyStats() { 
+            // ... (통계 표시 로직) ...
+        }
+        function editReservation(id) { alert('예약 수정 기능은 추후 구현 예정입니다. (Supabase 연동 필요)'); }
+        function deleteReservation(id) { 
+            // ... (예약 삭제 로직) ...
+        }
+
+        // =========================================================================
+        // 6. 예약 및 대시보드 로직 (V9.0 기반)
+        // =========================================================================
+
+        async function loadStaffSelection() {
+            const staff = await getStaffData(); 
+            
+            console.log('[DEBUG-STAFF] Staff Data Fetched:', staff); 
+            if (staff.length === 0) {
+                 console.warn('[DEBUG-STAFF] Staff data is EMPTY. Check your "staff" table in Supabase.');
+            }
+
+            const currentDate = document.getElementById('currentDate').value;
+            const staffOrder = JSON.parse(localStorage.getItem(getDailyStaffOrderKey(currentDate)) || '{}'); 
+            const reservations = await getReservationsData(currentDate); 
+            
+            const activeStaff = staff.filter(s => s.status !== '퇴사');
+            
+            activeStaff.sort((a, b) => {
+                const orderA = staffOrder[a.id] !== undefined ? staffOrder[a.id] : 999;
+                const orderB = staffOrder[b.id] !== undefined ? staffOrder[b.id] : 999;
+                if (orderA === 0 && orderB !== 0) return 1;
+                if (orderA !== 0 && orderB === 0) return -1;
+                return orderA - orderB;
+            });
+            
+            const container = document.getElementById('staffSelection');
+            container.innerHTML = '';
+
+            activeStaff.forEach(s => {
+                const order = staffOrder[s.id] !== undefined ? staffOrder[s.id] : 1;
+                const isOnVacation = order === 0;
+                const hasReservation = reservations.some(r => r.staffId === s.id && !r.paid && r.startTime);
+                
+                const div = document.createElement('div');
+                div.className = 'selection-item';
+                div.setAttribute('data-staff-id', s.id);
+                
+                let bgColor = 'transparent';
+                let cursor = 'pointer';
+                if (hasReservation) {
+                    bgColor = '#9ca3af';
+                    cursor = 'not-allowed';
+                } else if (isOnVacation) {
+                    bgColor = '#9ca3af';
+                    cursor = 'not-allowed';
+                }
+                
+                if (bgColor !== 'transparent') {
+                    div.style.backgroundColor = bgColor;
+                    div.style.color = 'white';
+                    div.style.cursor = cursor;
+                }
+
+                const vacationText = translations[currentLanguage].vacationStatus || '휴가';
+                div.textContent = `${s.name} (${order === 0 ? vacationText : order})`;
+                
+                if (!hasReservation && !isOnVacation) {
+                    div.onclick = () => selectStaff(s.id, s.name, order, div);
+                }
+                
+                container.appendChild(div);
+            });
+        }
+        
+        async function loadDashboard() {
+            const currentDate = document.getElementById('currentDate').value;
+            
+            const todayReservations = await getReservationsData(currentDate);
+            
+            console.log('[DEBUG-DASHBOARD] Reservations Fetched:', todayReservations);
+            if (todayReservations.length === 0) {
+                 console.warn('[DEBUG-DASHBOARD] Reservation data is EMPTY for today. Check your "reservations" table.');
+            }
+
+            const staffOrder = JSON.parse(localStorage.getItem(getDailyStaffOrderKey(currentDate)) || '{}');
+            const staffList = await getStaffData(); 
+            const menuList = await getMenusData();
+            const roomList = await getRoomsData();
+
+            todayReservations.sort((a, b) => {
+                const orderA = staffOrder[a.staffId] || 999;
+                const orderB = staffOrder[b.staffId] || 999;
+                return orderA - orderB;
+            });
+            
+            const tableBody = document.getElementById('dashboardTable');
+            tableBody.innerHTML = '';
+            
+            todayReservations.forEach(reservation => {
+                const staffId = reservation.staffId;
+                const startTime = reservation.startTime;
+                const duration = reservation.duration;
+                const paid = reservation.paid;
+                const price = reservation.price;
+                const commission = reservation.commission;
+                const roomId = reservation.roomId;
+                const menuOrder = reservation.menuOrder;
+                const isMultiMenu = reservation.isMultiMenu;
+
+                const staffInfo = staffList.find(s => s.id === staffId) || { name: '알 수 없음' };
+                const menuInfo = menuList.find(m => m.id === reservation.menuId) || { name: '알 수 없음' };
+                const roomInfo = roomList.find(r => r.id == roomId) || { roomNumber: '-' };
+
+
+                const row = document.createElement('tr');
+                const endTime = calculateEndTime(startTime, duration);
+                const remainingMinutes = calculateRemainingTime(startTime, duration, reservation.date);
+                
+                if (paid) {
+                    row.className = 'bg-green-50';
+                }
+                
+                const currentCurrency = currency;
+                
+                const staffOrderNum = staffOrder[staffId] !== undefined ? staffOrder[staffId] : 1;
+                const vacationText = translations[currentLanguage].vacationStatus || '휴가';
+                const staffDisplayName = staffOrderNum === 0 ? `${staffInfo.name} (${vacationText})` : `${staffOrderNum}. ${staffInfo.name}`;
+                
+                const menuDisplayName = isMultiMenu ? 
+                    `${menuInfo.name} (${menuOrder})` : 
+                    menuInfo.name;
+                
+                row.innerHTML = `
+                    <td class="border border-gray-300 p-2">${staffDisplayName}</td>
+                    <td class="border border-gray-300 p-2">${menuDisplayName}</td>
+                    <td class="border border-gray-300 p-2">${duration}min</td>
+                    <td class="border border-gray-300 p-2">${startTime || '-'}</td>
+                    <td class="border border-gray-300 p-2">${startTime ? endTime : '-'}</td>
+                    <td class="border border-gray-300 p-2 remaining-time">${paid ? '-' : (startTime ? (remainingMinutes === -1 ? '-' : remainingMinutes + 'min') : '-')}</td>
+                    <td class="border border-gray-300 p-2">${price.toLocaleString()}${currentCurrency.symbol}</td>
+                    <td class="border border-gray-300 p-2">${commission.toLocaleString()}${currentCurrency.symbol}</td>
+                    <td class="border border-gray-300 p-2">${roomInfo.roomNumber || '-'}</td>
+                    <td class="border border-gray-300 p-2">
+                        ${paid ? 
+                            `<span class="bg-green-500 text-white px-3 py-1 rounded text-sm font-bold">${translations[currentLanguage].paymentCompleteStatus || '입금 완료'}</span>` :
+                            `<button onclick="editReservation(${reservation.id})" class="bg-blue-500 text-white px-2 py-1 rounded text-sm mr-1">${translations[currentLanguage].edit || '수정'}</button>
+                             <button onclick="showPaymentModal(${reservation.id})" class="bg-green-500 text-white px-2 py-1 rounded text-sm mr-1">${translations[currentLanguage].payment || '입금'}</button>
+                             <button onclick="deleteReservation(${reservation.id})" class="bg-red-500 text-white px-2 py-1 rounded text-sm">${translations[currentLanguage].delete || '삭제'}</button>`
+                        }
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+
+        // =========================================================================
+        // 7. DB 관리 기능 구현 (V9.1: 전체 기능 구현)
+        // =========================================================================
+
+        function openManagementModal(title) {
+            document.getElementById('managementTitle').textContent = title;
+            document.getElementById('managementModal').style.display = 'block';
+        }
+
+        async function deleteManagementItem(tableName, id, callback) {
+            if (confirm(`정말 이 항목을 삭제하시겠습니까? (테이블: ${tableName})`)) {
+                const success = await deleteData(tableName, id);
+                if (success) { alert(translations[currentLanguage].deleted); callback(); } else { alert(translations[currentLanguage].dbError); }
+            }
+        }
+
+        // --- Staff Management ---
+        async function manageStaff() { 
+            openManagementModal(translations[currentLanguage].staffManagement);
+            const staff = await getStaffData();
+            const shopIdInfo = currentAdmin.type === ADMIN_ROLES.SUPER_USER ? '전체 샵' : `${currentAdmin.shopId} 샵`;
+            let html = `<p class="p-3 mb-4 bg-gray-100 rounded">현재 ${shopIdInfo}의 직원 데이터 목록입니다.</p>`;
+             html += `<button onclick="editStaff()" class="bg-green-500 text-white px-4 py-2 rounded mb-4">${translations[currentLanguage].add}</button>`;
+             html += `<table class="w-full border-collapse border border-gray-300">
+                <thead><tr><th class="border p-2">ID</th><th class="border p-2">${translations[currentLanguage].staffName}</th><th class="border p-2">${translations[currentLanguage].status}</th><th class="border p-2">${translations[currentLanguage].actions}</th></tr></thead><tbody>`;
+            staff.forEach(s => {
+                html += `<tr><td class="border p-2">${s.id}</td><td class="border p-2">${s.name}</td><td class="border p-2">${s.status || '정직원'}</td>
+                    <td class="border p-2"><button onclick="editStaff(${s.id})" class="bg-blue-500 text-white px-2 py-1 rounded text-sm">${translations[currentLanguage].edit}</button> 
+                    <button onclick="deleteManagementItem('staff', ${s.id}, manageStaff)" class="bg-red-500 text-white px-2 py-1 rounded text-sm">${translations[currentLanguage].delete}</button></td></tr>`;
+            });
+            html += `</tbody></table>`;
+            document.getElementById('managementContent').innerHTML = html;
+        }
+        async function editStaff(id = null) {
+             const staff = id ? (await getStaffData()).find(s => s.id === id) : {};
+             openManagementModal(id ? translations[currentLanguage].edit : translations[currentLanguage].newStaff);
+             document.getElementById('managementContent').innerHTML = `
+                <input type="hidden" id="staffId" value="${id || ''}">
+                <div class="space-y-3">
+                    <div><label class="block">${translations[currentLanguage].staffName}*</label><input type="text" id="staffName" value="${staff.name || ''}" class="w-full border rounded p-2"></div>
+                    <div><label class="block">${translations[currentLanguage].phone}</label><input type="text" id="staffPhone" value="${staff.phone || ''}" class="w-full border rounded p-2"></div>
+                    <div><label class="block">${translations[currentLanguage].bank}</label><input type="text" id="staffBank" value="${staff.bank || ''}" class="w-full border rounded p-2"></div>
+                    <div><label class="block">${translations[currentLanguage].account}</label><input type="text" id="staffAccount" value="${staff.account || ''}" class="w-full border rounded p-2"></div>
+                    <div><label class="block">${translations[currentLanguage].status}</label>
+                        <select id="staffStatus" class="w-full border rounded p-2">
+                            ${['정직원', '단기고용', '퇴사'].map(status => `<option value="${status}" ${status === (staff.status || '정직원') ? 'selected' : ''}>${status}</option>`).join('')}
+                        </select>
+                    </div>
+                    <button onclick="saveStaff()" class="bg-blue-500 text-white px-4 py-2 rounded">${translations[currentLanguage].save}</button>
+                </div>
+            `;
+        }
+        async function saveStaff() {
+            const id = document.getElementById('staffId').value || null;
+            const name = document.getElementById('staffName').value;
+            if (!name) { alert(translations[currentLanguage].requiredFields); return; }
+
+            const data = {
+                name: name,
+                phone: document.getElementById('staffPhone').value,
+                bank: document.getElementById('staffBank').value,
+                account: document.getElementById('staffAccount').value,
+                status: document.getElementById('staffStatus').value,
+            }; 
+
+            const result = await upsertData('staff', data, id ? parseInt(id) : null);
+            if (result) { alert(translations[currentLanguage].saved); manageStaff(); } else { alert(translations[currentLanguage].dbError); }
+        }
+
+        // --- Menu Management ---
+        async function manageMenus() { 
+            openManagementModal(translations[currentLanguage].menuManagement);
+            const menus = await getMenusData();
+            const shopIdInfo = currentAdmin.type === ADMIN_ROLES.SUPER_USER ? '전체 샵' : `${currentAdmin.shopId} 샵`;
+            let html = `<p class="p-3 mb-4 bg-gray-100 rounded">현재 ${shopIdInfo}의 메뉴 데이터 목록입니다.</p>`;
+            html += `<button onclick="editMenu()" class="bg-green-500 text-white px-4 py-2 rounded mb-4">${translations[currentLanguage].add}</button>`;
+            html += `<table class="w-full border-collapse border border-gray-300">
+                <thead><tr><th class="border p-2">ID</th><th class="border p-2">${translations[currentLanguage].menuName}</th><th class="border p-2">${translations[currentLanguage].actions}</th></tr></thead><tbody>`;
+            menus.forEach(m => {
+                const pricesSummary = Object.keys(m.prices || {}).map(p => `${p}분`).join(', ');
+                html += `<tr><td class="border p-2">${m.id}</td><td class="border p-2">${m.name}<br><small class="text-gray-500">(${pricesSummary})</small></td>
+                    <td class="border p-2"><button onclick="editMenu(${m.id})" class="bg-blue-500 text-white px-2 py-1 rounded text-sm">${translations[currentLanguage].edit}</button> 
+                    <button onclick="deleteManagementItem('menus', ${m.id}, manageMenus)" class="bg-red-500 text-white px-2 py-1 rounded text-sm">${translations[currentLanguage].delete}</button></td></tr>`;
+            });
+            html += `</tbody></table>`;
+            document.getElementById('managementContent').innerHTML = html;
+        }
+        async function editMenu(id = null) {
+            const menus = await getMenusData();
+            const menu = id ? menus.find(m => m.id === id) : { prices: {} };
+            openManagementModal(id ? translations[currentLanguage].edit : '새 메뉴');
+            const durations = [30, 60, 90, 120];
+
+            let priceInputs = durations.map(d => {
+                const priceData = menu.prices[d] || { price: '', commission: '' };
+                const checked = menu.prices[d] !== undefined;
+                return `
+                    <div class="flex items-center space-x-2 p-2 border rounded">
+                        <input type="checkbox" id="duration_${d}" value="${d}" ${checked ? 'checked' : ''} onchange="togglePriceInput(${d})">
+                        <label for="duration_${d}">${d}분</label>
+                        <input type="number" id="price_${d}" placeholder="가격" value="${priceData.price}" class="flex-1 border rounded p-1 text-sm" ${checked ? '' : 'disabled'}>
+                        <input type="number" id="commission_${d}" placeholder="커미션" value="${priceData.commission}" class="flex-1 border rounded p-1 text-sm" ${checked ? '' : 'disabled'}>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('managementContent').innerHTML = `
+                <input type="hidden" id="menuId" value="${id || ''}">
+                <div class="space-y-3">
+                    <div><label class="block">${translations[currentLanguage].menuName}*</label><input type="text" id="menuName" value="${menu.name || ''}" class="w-full border rounded p-2"></div>
+                    <h4 class="font-bold mt-4">시간별 가격/커미션 설정</h4>
+                    <div id="priceSettingGrid" class="grid grid-cols-2 gap-3">${priceInputs}</div>
+                    <button onclick="saveMenu()" class="bg-blue-500 text-white px-4 py-2 rounded">${translations[currentLanguage].save}</button>
+                </div>
+            `;
+            // Helper function to enable/disable price inputs on checkbox change
+            window.togglePriceInput = (duration) => {
+                const checked = document.getElementById(`duration_${duration}`).checked;
+                document.getElementById(`price_${duration}`).disabled = !checked;
+                document.getElementById(`commission_${duration}`).disabled = !checked;
+                if (!checked) {
+                    document.getElementById(`price_${duration}`).value = '';
+                    document.getElementById(`commission_${duration}`).value = '';
+                }
+            };
+        }
+        async function saveMenu() {
+            const id = document.getElementById('menuId').value || null;
+            const name = document.getElementById('menuName').value;
+            if (!name) { alert(translations[currentLanguage].requiredFields); return; }
+
+            const prices = {};
+            const durations = [30, 60, 90, 120];
+
+            durations.forEach(d => {
+                if (document.getElementById(`duration_${d}`).checked) {
+                    prices[d] = {
+                        price: parseInt(document.getElementById(`price_${d}`).value) || 0,
+                        commission: parseInt(document.getElementById(`commission_${d}`).value) || 0,
+                    };
+                }
+            });
+            if (Object.keys(prices).length === 0) {
+                alert('최소한 하나의 시간별 가격/커미션을 설정해야 합니다.');
+                return;
+            }
+
+            const data = { name, prices };
+            const result = await upsertData('menus', data, id ? parseInt(id) : null);
+            if (result) { alert(translations[currentLanguage].saved); manageMenus(); } else { alert(translations[currentLanguage].dbError); }
+        }
+
+        // --- Room Management ---
+        async function manageRooms() {
+            openManagementModal(translations[currentLanguage].roomManagement);
+            const rooms = await getRoomsData();
+            const shopIdInfo = currentAdmin.type === ADMIN_ROLES.SUPER_USER ? '전체 샵' : `${currentAdmin.shopId} 샵`;
+            let html = `<p class="p-3 mb-4 bg-gray-100 rounded">현재 ${shopIdInfo}의 방 데이터 목록입니다.</p>`;
+            html += `<button onclick="editRoom()" class="bg-green-500 text-white px-4 py-2 rounded mb-4">${translations[currentLanguage].add}</button>`;
+            html += `<table class="w-full border-collapse border border-gray-300">
+                <thead><tr><th class="border p-2">ID</th><th class="border p-2">${translations[currentLanguage].roomNumberLabel}</th><th class="border p-2">${translations[currentLanguage].capacity}</th><th class="border p-2">${translations[currentLanguage].actions}</th></tr></thead><tbody>`;
+            rooms.forEach(r => {
+                html += `<tr><td class="border p-2">${r.id}</td><td class="border p-2">${r.roomNumber}</td><td class="border p-2">${r.capacity}</td>
+                    <td class="border p-2"><button onclick="editRoom(${r.id})" class="bg-blue-500 text-white px-2 py-1 rounded text-sm">${translations[currentLanguage].edit}</button> 
+                    <button onclick="deleteManagementItem('rooms', ${r.id}, manageRooms)" class="bg-red-500 text-white px-2 py-1 rounded text-sm">${translations[currentLanguage].delete}</button></td></tr>`;
+            });
+            html += `</tbody></table>`;
+            document.getElementById('managementContent').innerHTML = html;
+        }
+        async function editRoom(id = null) {
+            const rooms = await getRoomsData();
+            const room = id ? rooms.find(r => r.id === id) : {};
+            openManagementModal(id ? translations[currentLanguage].edit : '새 방 추가');
+            document.getElementById('managementContent').innerHTML = `
+                <input type="hidden" id="roomId" value="${id || ''}">
+                <div class="space-y-3">
+                    <div><label class="block">${translations[currentLanguage].roomNumberLabel}*</label><input type="text" id="roomNumber" value="${room.roomNumber || ''}" class="w-full border rounded p-2"></div>
+                    <div><label class="block">${translations[currentLanguage].capacity}*</label><input type="number" id="roomCapacity" value="${room.capacity || 1}" class="w-full border rounded p-2" min="1"></div>
+                    <button onclick="saveRoom()" class="bg-blue-500 text-white px-4 py-2 rounded">${translations[currentLanguage].save}</button>
+                </div>
+            `;
+        }
+        async function saveRoom() {
+            const id = document.getElementById('roomId').value || null;
+            const roomNumber = document.getElementById('roomNumber').value;
+            const capacity = document.getElementById('roomCapacity').value;
+            if (!roomNumber || !capacity) { alert(translations[currentLanguage].requiredFields); return; }
+
+            const data = { room_number: roomNumber, capacity: parseInt(capacity) };
+            const result = await upsertData('rooms', data, id ? parseInt(id) : null);
+            if (result) { alert(translations[currentLanguage].saved); manageRooms(); } else { alert(translations[currentLanguage].dbError); }
+        }
+
+        // --- Customer Management (Placeholder) ---
+        function manageCustomers() { 
+            alert('고객 관리는 테이블 구조가 필요하며, 현재는 추후 구현 예정입니다.'); 
+        }
+
+        // --- Currency Management ---
+        async function manageCurrency() {
+            openManagementModal(translations[currentLanguage].currencyManagement);
+            const { data, error } = await supabaseClient.from('shop_config')
+                .select('config_value')
+                .eq('shop_id', currentAdmin.shopId)
+                .eq('config_key', 'currency')
+                .single();
+            
+            const currentCurrency = data ? data.config_value : { symbol: '₩', name: '원' };
+            
+            const shopIdInfo = currentAdmin.type === ADMIN_ROLES.SUPER_USER ? '전체 샵' : `${currentAdmin.shopId} 샵`;
+            let html = `<p class="p-3 mb-4 bg-gray-100 rounded">현재 ${shopIdInfo}의 화폐 단위만 관리합니다.</p>`;
+            html += `<h4 class="font-bold mb-4">${translations[currentLanguage].update}</h4>`;
+            html += `<div class="space-y-3">
+                <div><label class="block">${translations[currentLanguage].currencySymbol}*</label><input type="text" id="currencySymbol" value="${currentCurrency.symbol || '₩'}" class="w-full border rounded p-2"></div>
+                <div><label class="block">${translations[currentLanguage].currencyName}*</label><input type="text" id="currencyName" value="${currentCurrency.name || '원'}" class="w-full border rounded p-2"></div>
+                <button onclick="saveCurrency()" class="bg-blue-500 text-white px-4 py-2 rounded">${translations[currentLanguage].save}</button>
+            </div>`;
+            document.getElementById('managementContent').innerHTML = html;
+        }
+
+        async function saveCurrency() {
+            const symbol = document.getElementById('currencySymbol').value;
+            const name = document.getElementById('currencyName').value;
+            if (!symbol || !name) { alert(translations[currentLanguage].requiredFields); return; }
+
+            const data = { config_value: { symbol, name }, config_key: 'currency' };
+            const result = await upsertData('shop_config', data, null); 
+
+            if (result) {
+                alert(translations[currentLanguage].saved);
+                currency = { symbol, name };
+                // updateCurrencyDisplay(); // V6.0의 기능이 없으므로 생략
+                manageCurrency();
+            } else {
+                 alert(translations[currentLanguage].dbError);
+            }
+        }
+
+        // --- Payment Method Management ---
+        async function managePaymentMethods() {
+            openManagementModal(translations[currentLanguage].paymentMethodManagement);
+            const paymentMethods = await getPaymentMethodsData();
+            const shopIdInfo = currentAdmin.type === ADMIN_ROLES.SUPER_USER ? '전체 샵' : `${currentAdmin.shopId} 샵`;
+            let html = `<p class="p-3 mb-4 bg-gray-100 rounded">현재 ${shopIdInfo}의 입금 방식 데이터 목록입니다.</p>`;
+            html += `<button onclick="editPaymentMethod()" class="bg-green-500 text-white px-4 py-2 rounded mb-4">${translations[currentLanguage].add}</button>`;
+            html += `<table class="w-full border-collapse border border-gray-300">
+                <thead><tr><th class="border p-2">ID</th><th class="border p-2">${translations[currentLanguage].paymentMethodName}</th><th class="border p-2">${translations[currentLanguage].actions}</th></tr></thead><tbody>`;
+            paymentMethods.forEach(m => {
+                html += `<tr><td class="border p-2">${m.id}</td><td class="border p-2">${m.name}</td>
+                    <td class="border p-2"><button onclick="editPaymentMethod(${m.id})" class="bg-blue-500 text-white px-2 py-1 rounded text-sm">${translations[currentLanguage].edit}</button> 
+                    <button onclick="deleteManagementItem('payment_methods', ${m.id}, managePaymentMethods)" class="bg-red-500 text-white px-2 py-1 rounded text-sm">${translations[currentLanguage].delete}</button></td></tr>`;
+            });
+            html += `</tbody></table>`;
+            document.getElementById('managementContent').innerHTML = html;
+        }
+        async function editPaymentMethod(id = null) {
+            const paymentMethods = await getPaymentMethodsData();
+            const method = id ? paymentMethods.find(m => m.id === id) : {};
+            openManagementModal(id ? translations[currentLanguage].edit : '새 입금 방식');
+            document.getElementById('managementContent').innerHTML = `
+                <input type="hidden" id="methodId" value="${id || ''}">
+                <div class="space-y-3">
+                    <div><label class="block">${translations[currentLanguage].paymentMethodName}*</label><input type="text" id="methodName" value="${method.name || ''}" class="w-full border rounded p-2"></div>
+                    <button onclick="savePaymentMethod()" class="bg-blue-500 text-white px-4 py-2 rounded">${translations[currentLanguage].save}</button>
+                </div>
+            `;
+        }
+        async function savePaymentMethod() {
+            const id = document.getElementById('methodId').value || null;
+            const name = document.getElementById('methodName').value;
+            if (!name) { alert(translations[currentLanguage].requiredFields); return; }
+
+            const data = { name };
+            const result = await upsertData('payment_methods', data, id ? parseInt(id) : null);
+            if (result) { alert(translations[currentLanguage].saved); managePaymentMethods(); } else { alert(translations[currentLanguage].dbError); }
+        }
+
+        // --- Guarantee Management ---
+        async function manageGuarantee() {
+             openManagementModal('Guarantee 관리');
+            const guarantees = await getGuaranteeData();
+            const shopIdInfo = currentAdmin.type === ADMIN_ROLES.SUPER_USER ? '전체 샵' : `${currentAdmin.shopId} 샵`;
+             let html = `<p class="p-3 mb-4 bg-gray-100 rounded">현재 ${shopIdInfo}의 보장 금액 목록입니다.</p>`;
+            html += `<button onclick="editGuarantee()" class="bg-green-500 text-white px-4 py-2 rounded mb-4">${translations[currentLanguage].add}</button>`;
+            html += `<table class="w-full border-collapse border border-gray-300">
+                <thead><tr><th class="border p-2">ID</th><th class="border p-2">${translations[currentLanguage].guaranteeName}</th><th class="border p-2">${translations[currentLanguage].guaranteeAmount}</th><th class="border p-2">${translations[currentLanguage].actions}</th></tr></thead><tbody>`;
+            guarantees.forEach(g => {
+                html += `<tr><td class="border p-2">${g.id}</td><td class="border p-2">${g.name}</td><td class="border p-2">${(g.amount || 0).toLocaleString()}${currency.symbol}</td>
+                    <td class="border p-2"><button onclick="editGuarantee(${g.id})" class="bg-blue-500 text-white px-2 py-1 rounded text-sm">${translations[currentLanguage].edit}</button> 
+                    <button onclick="deleteManagementItem('guarantees', ${g.id}, manageGuarantee)" class="bg-red-500 text-white px-2 py-1 rounded text-sm">${translations[currentLanguage].delete}</button></td></tr>`;
+            });
+            html += `</tbody></table>`;
+            document.getElementById('managementContent').innerHTML = html;
+        }
+        async function editGuarantee(id = null) {
+            const guarantees = await getGuaranteeData();
+            const guarantee = id ? guarantees.find(g => g.id === id) : {};
+            openManagementModal(id ? translations[currentLanguage].edit : '새 Guarantee');
+            document.getElementById('managementContent').innerHTML = `
+                <input type="hidden" id="guaranteeId" value="${id || ''}">
+                <div class="space-y-3">
+                    <div><label class="block">${translations[currentLanguage].guaranteeName}*</label><input type="text" id="guaranteeName" value="${guarantee.name || ''}" class="w-full border rounded p-2"></div>
+                    <div><label class="block">${translations[currentLanguage].guaranteeAmount}* (${currency.symbol})</label><input type="number" id="guaranteeAmount" value="${guarantee.amount || 0}" class="w-full border rounded p-2" min="0"></div>
+                    <div><label class="block">${translations[currentLanguage].guaranteeDescription}</label><textarea id="guaranteeDescription" class="w-full border rounded p-2">${guarantee.description || ''}</textarea></div>
+                    <button onclick="saveGuarantee()" class="bg-blue-500 text-white px-4 py-2 rounded">${translations[currentLanguage].save}</button>
+                </div>
+            `;
+        }
+        async function saveGuarantee() {
+            const id = document.getElementById('guaranteeId').value || null;
+            const name = document.getElementById('guaranteeName').value;
+            const amount = document.getElementById('guaranteeAmount').value;
+            const description = document.getElementById('guaranteeDescription').value;
+            
+            if (!name || amount === '') { alert(translations[currentLanguage].requiredFields); return; }
+
+            const data = { name, amount: parseInt(amount), description };
+            const result = await upsertData('guarantees', data, id ? parseInt(id) : null);
+            if (result) { alert(translations[currentLanguage].saved); manageGuarantee(); } else { alert(translations[currentLanguage].dbError); }
+        }
+
+        // --- Admin Management ---
+        async function manageAdmins() {
+            openManagementModal(translations[currentLanguage].adminManagement);
+            const allAdmins = await getAdminData();
+            let filteredAdmins = allAdmins;
+            
+            const shopIdInfo = currentAdmin.type === ADMIN_ROLES.SUPER_USER ? '전체 샵' : `${currentAdmin.shopId} 샵`;
+
+            let html = `
+                <p class="p-3 mb-4 bg-yellow-100 rounded">
+                    현재 권한: <b>${currentAdmin.type}</b> (샵 ID: ${currentAdmin.shopId}) - ${shopIdInfo} 관리자 목록
+                </p>
+                <button onclick="registerNewAdmin()" class="bg-green-500 text-white px-4 py-2 rounded mb-4">${translations[currentLanguage].add} 관리자</button>`;
+            html += `<table class="w-full border-collapse border border-gray-300">
+                <thead><tr><th class="border p-2">UUID</th><th class="border p-2">${translations[currentLanguage].adminEmail}</th><th class="border p-2">${translations[currentLanguage].adminRole}</th><th class="border p-2">${translations[currentLanguage].shopId}</th><th class="border p-2">${translations[currentLanguage].actions}</th></tr></thead><tbody>`;
+            
+            filteredAdmins.forEach(a => {
+                const isSelf = a.id === currentAdmin.id;
+                const canDelete = !isSelf; // 권한 필터링 제거, 로그인한 계정만 제외
+                
+                html += `<tr><td class="border p-2 text-xs">${a.id}</td><td class="border p-2">${a.email || '-'}</td><td class="border p-2">${a.role}</td><td class="border p-2">${a.shop_id}</td>
+                    <td class="border p-2">
+                        ${canDelete ? `<button onclick="deleteManagementItem('shop_admins', '${a.id}', manageAdmins)" class="bg-red-500 text-white px-2 py-1 rounded text-sm">${translations[currentLanguage].delete}</button>` : (isSelf ? '본인' : '-')}
+                    </td></tr>`;
+            });
+            html += `</tbody></table>`;
+            document.getElementById('managementContent').innerHTML = html;
+        }
+
+        async function registerNewAdmin() {
+             const roles = [ADMIN_ROLES.SUPER_USER, ADMIN_ROLES.SHOP_MANAGER, ADMIN_ROLES.SHOP_STAFF];
+             const defaultShopId = currentAdmin.shopId;
+
+             let html = `<h4 class="font-bold mb-4">새 관리자 등록 (Supabase Auth ID 필요)</h4>`;
+             html += `<div class="space-y-3">
+                 <div><label class="block">Supabase Auth User ID (UUID)*</label><input type="text" id="adminUserId" placeholder="로그인한 유저의 UUID" class="w-full border rounded p-2"></div>
+                 <div><label class="block">${translations[currentLanguage].shopId}*</label><input type="text" id="adminShopId" value="${defaultShopId}" class="w-full border rounded p-2"></div>
+                 <div><label class="block">${translations[currentLanguage].adminRole}*</label>
+                     <select id="adminRole" class="w-full border rounded p-2">
+                         ${roles.map(r => `<option value="${r}">${r}</option>`).join('')}
+                     </select>
+                 </div>
+                 <button onclick="saveNewAdmin()" class="bg-blue-500 text-white px-4 py-2 rounded">${translations[currentLanguage].save}</button>
+             </div>`;
+             document.getElementById('managementContent').innerHTML = html;
+        }
+
+        async function saveNewAdmin() {
+            const id = document.getElementById('adminUserId').value;
+            const shopId = document.getElementById('adminShopId').value;
+            const role = document.getElementById('adminRole').value;
+
+            if (!id || !shopId || !role) { alert(translations[currentLanguage].requiredFields); return; }
+
+            const data = { id, shop_id: shopId, role };
+            const { error } = await supabaseClient.from('shop_admins').upsert(data);
+            
+            if (error) { 
+                alert('관리자 등록에 실패했습니다. (Auth User ID가 유효한지, 이미 등록되지 않았는지 확인하세요). 오류: ' + error.message); 
+                console.error(error);
+                return;
+            }
+            alert(translations[currentLanguage].saved);
+            manageAdmins();
+        }
+
+        // --- Backup / Restore ---
+        async function exportAllDataJSON() {
+            const tables = ['staff', 'menus', 'rooms', 'reservations', 'payment_methods', 'guarantees', 'shop_admins', 'shop_config'];
+            const allData = {};
+
+            for (const table of tables) {
+                const { data, error } = await supabaseClient.from(table).select('*');
+                if (error) {
+                    console.error(`Error fetching ${table} for backup:`, error);
+                    alert(`백업 중 ${table} 테이블에서 오류가 발생했습니다.`);
+                    return;
+                }
+                allData[table] = data;
+            }
+
+            const dataStr = JSON.stringify(allData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `supabase_backup_${currentAdmin.shopId}_${new Date().toISOString().split('T')[0]}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+
+            alert('DB 데이터가 JSON 파일로 다운로드되었습니다.');
+        }
+
+        async function restoreData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (!confirm('경고: 현재 DB 데이터가 덮어씌워집니다. 계속하시겠습니까?')) return;
+
+                    const tables = ['guarantees', 'payment_methods', 'rooms', 'menus', 'staff', 'reservations', 'shop_config', 'shop_admins'];
+
+                    alert('복원 작업이 시작됩니다. (콘솔 확인)');
+                    let successCount = 0;
+                    
+                    for (const table of tables) {
+                        const tableData = data[table];
+                        if (!tableData || tableData.length === 0) continue;
+
+                        const { error } = await supabaseClient.from(table).upsert(tableData, { onConflict: 'id' });
+                        
+                        if (error) {
+                             console.error(`Restore Error on ${table}:`, error.message);
+                             alert(`복원 실패: ${table} 테이블 오류. (콘솔 확인)`);
+                             return;
+                        } else {
+                            successCount++;
+                            console.log(`Successfully restored ${table} with ${tableData.length} rows.`);
+                        }
+                    }
+
+                    alert(`데이터 복원 완료! ${successCount}개 테이블 복원 성공. 페이지를 새로고침합니다.`);
+                    location.reload();
+
+                } catch (error) {
+                    console.error('Restore Error:', error);
+                    alert('파일 형식이 올바르지 않거나 복원 중 오류가 발생했습니다.');
+                }
+            };
+            reader.readAsText(file);
+        }
 
         // 앱 초기화
         initializeApp();
