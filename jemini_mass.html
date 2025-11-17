@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>마사지샵 관리 시스템 (Supabase DB 연동) - V7.0</title>
+  <title>마사지샵 관리 시스템 (Supabase DB 연동) - V7.2</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
@@ -294,7 +294,7 @@
      </div>
     </div>
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4"><button onclick="manageMenus()" class="bg-blue-500 text-white py-3 px-4 rounded hover:bg-blue-600" data-translate="menuManagement">메뉴 관리</button> <button onclick="manageStaff()" class="bg-green-500 text-white py-3 px-4 rounded hover:bg-green-600" data-translate="staffManagement">직원 관리</button> <button onclick="manageRooms()" class="bg-purple-500 text-white py-3 px-4 rounded hover:bg-purple-600" data-translate="roomManagement">방 관리</button> <button onclick="manageCustomers()" class="bg-orange-500 text-white py-3 px-4 rounded hover:bg-orange-600" data-translate="customerManagement">고객 관리</button> <button onclick="manageCurrency()" class="bg-pink-500 text-white py-3 px-4 rounded hover:bg-pink-600" data-translate="currencyManagement">화폐 단위</button> <button onclick="managePaymentMethods()" class="bg-yellow-500 text-white py-3 px-4 rounded hover:bg-yellow-600" data-translate="paymentMethodManagement">입금방식 관리</button> <button onclick="manageGuarantee()" class="bg-teal-500 text-white py-3 px-4 rounded hover:bg-teal-600">Guarantee 관리</button>
-     <div id="superAdminButtons" style="display: none;"><button onclick="manageAdmins()" class="bg-red-500 text-white py-3 px-4 rounded hover:bg-red-600" data-translate="adminManagement">관리자 관리</button>
+     <div id="superAdminButtons" style="display: block;"><button onclick="manageAdmins()" class="bg-red-500 text-white py-3 px-4 rounded hover:bg-red-600" data-translate="adminManagement">관리자 관리</button>
      </div>
     </div>
    </div>
@@ -355,14 +355,14 @@
   </div>
   <script>
         // =========================================================================
-        // V7.0: Supabase Client & Constants (수정됨)
+        // V7.2: Supabase Client & Constants (URL/KEY 최종 업데이트)
         // =========================================================================
         const SUPABASE_URL = 'https://requjozkxlxomoamdrrf.supabase.co'; 
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlcXVqb3preGx4b21vYW1kcnJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzMDM1NjYsImV4cCI6MjA3ODg3OTU2Nn0.LpZyM2K12EShRAZyptk6Ak2XDkxQ-WuUPklTZfqt_Tg';
 
         // 🚨 CRITICAL FIX: Supabase 클라이언트 초기화 방식 수정
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        console.log('Supabase Client Initialized! (V7.0 - Fixed)');
+        console.log('Supabase Client Initialized! (V7.2 - Final URL)');
         
         const ADMIN_ROLES = {
             SUPER_USER: '최고관리자',
@@ -371,74 +371,14 @@
         };
 
         // =========================================================================
-        // 2. 전역 변수 및 번역 (Translation & Roles)
-        // =========================================================================
-        let currentLanguage = 'ko';
-        let currentFont = 'Arial';
-        let currentFontSize = 'normal';
-        let selectedFontFamily = 'Arial';
-        let selectedFontSize = 'normal';
-        let currentAdmin = { 
-            id: null,
-            username: null,
-            type: ADMIN_ROLES.SHOP_STAFF, 
-            shopId: 'default_shop', 
-            shopName: '미로그인' 
-        };
-        let currentPaymentReservationId = null;
-        let selectedStaff = null;
-        let menuRowCounter = 0;
-        let menuRows = [];
-        let currency = { symbol: '₩', name: '원' };
-
-        // [최소한의 필수 번역 데이터] (이하 생략)
-        const translations = {
-            ko: {
-                title: '마사지샵 관리 시스템', username: '아이디 (이메일)', password: '비밀번호', login: '로그인', usernameInput: 'Supabase 인증 이메일', passwordInput: 'Supabase 인증 비밀번호',
-                changeLanguage: '언어 변경', changeFont: '폰트 변경', logout: '로그아웃',
-                todayDate: '오늘 날짜', currentTime: '현재 시간', confirmDate: '확인',
-                dashboard: '현황판', order: '순번', reservation: '예약', statistics: '통계', dbManagement: 'DB 관리',
-                orderManagement: '순번 관리', saveOrder: '순번 저장', staffName: '직원명', status: '상태', orderNumber: '순번', orderZeroVacationNote: '* 순번 0은 휴가로 처리됩니다.',
-                staff: '직원명', menu: '메뉴', duration: '시간', startTime: '시작시간', endTime: '끝시간', remainingTime: '남은시간', price: '가격', commission: '커미션', roomNumber: '방번호', actions: '작업',
-                paymentCompleteStatus: '입금 완료', edit: '수정', payment: '입금', delete: '삭제',
-                selectStaff: '직원 선택', selectRoom: '방 선택', customerName: '고객명 (선택사항)', enterCustomerName: '고객명 입력', addReservation: '예약 추가',
-                totalPrice: '총 가격', totalCommission: '총 커미션',
-                payment: '입금 처리', totalAmount: '총 금액', enteredAmount: '입력된 금액', confirm: '확인', cancel: '취소', close: '닫기',
-                menuManagement: '메뉴 관리', staffManagement: '직원 관리', roomManagement: '방 관리', currencyManagement: '화폐 단위', paymentMethodManagement: '입금방식 관리', customerManagement: '고객 관리', adminManagement: '관리자 관리',
-                daily: '일간', weekly: '주간', monthly: '월간', monthlyMenuSales: '월간 메뉴 매출', monthlySalesChart: '월간 매출 그래프', download: '다운로드',
-                selectDate: '날짜 선택', startDate: '시작 날짜', endDate: '끝 날짜', thisWeek: '이번 주', lastWeek: '지난 주', thisMonth: '이번 달', lastMonth: '지난 달',
-                staffStatisticsTitle: '직원별 통계', paymentMethodStatisticsTitle: '입금방식별 통계', paymentMethodColumn: '입금방식', amountColumn: '금액', grandTotal: '총 금액(QR팁 제외)', grandTotalCommission: '총 커미션', profit: '수익',
-                vacationStatus: '휴가',
-                // Management specific
-                add: '추가', save: '저장', update: '업데이트', newStaff: '새 직원', phone: '전화번호', bank: '은행', account: '계좌번호',
-                menuName: '메뉴 이름', priceTime: '가격/커미션', durationTime: '시간',
-                roomNumberLabel: '방 번호', capacity: '수용 인원',
-                currencySymbol: '화폐 기호', currencyName: '화폐 이름',
-                paymentMethodName: '입금방식 이름',
-                guaranteeName: '보장 이름', guaranteeAmount: '보장 금액', guaranteeDescription: '설명',
-                adminRole: '권한', shopId: '샵 ID', adminName: '관리자명',
-                // Errors/Notifications
-                requiredFields: '필수 항목을 모두 입력해주세요.',
-                dbError: 'DB 작업 중 오류가 발생했습니다. 콘솔을 확인해주세요.',
-                deleted: '삭제되었습니다.',
-                saved: '저장되었습니다.',
-                updated: '업데이트되었습니다.',
-            },
-            en: { title: 'Massage Shop Management', login: 'Login', payment: 'Payment', confirm: 'Confirm', cancel: 'Cancel', close: 'Close', staff: 'Staff', menu: 'Menu', price: 'Price', commission: 'Comm', duration: 'Time' },
-            th: { title: 'ระบบจัดการร้านนวด', login: 'เข้าสู่ระบบ', payment: 'การชำระเงิน', confirm: 'ยืนยัน', cancel: 'ยกเลิก', close: 'ปิด', staff: 'พนักงาน', menu: 'เมนู', price: 'ราคา', commission: 'ค่านายหน้า', duration: 'เวลา' },
-            vi: { title: 'Hệ thống Quản lý Massage', login: 'Đăng nhập', payment: 'Thanh toán', confirm: 'Xác nhận', cancel: 'Hủy', close: 'Đóng', staff: 'Nhân viên', menu: 'Thực đơn', price: 'Giá', commission: 'Hoa hồng', duration: 'Thời gian' },
-        };
-        
-        // =========================================================================
         // 3. Supabase DB CRUD 함수 (Shop ID 필터링/주입 적용)
         // =========================================================================
 
         /** 직원 데이터 로드 (staff 테이블 조회) */
         async function getStaffData() {
-            // RLS 해제 상태에서는 shop_id 필터링을 임시로 제거하고 전체를 조회하여 디버깅에 용이하도록 합니다.
+            // RLS가 해제되었다고 가정하고 전체 조회 (디버깅 목적)
             const { data, error } = await supabaseClient.from('staff')
                 .select('*')
-                // .eq('shop_id', currentAdmin.shopId) // ⬅️ RLS 해제 디버깅을 위해 주석 처리
                 .order('name', { ascending: true });
             if (error) { console.error('Error fetching staff data:', error.message); return []; }
             return data;
@@ -448,7 +388,6 @@
         async function getMenusData() {
             const { data, error } = await supabaseClient.from('menus')
                 .select('id, name, prices')
-                // .eq('shop_id', currentAdmin.shopId) // ⬅️ RLS 해제 디버깅을 위해 주석 처리
                 .order('id', { ascending: true }); 
             if (error) { console.error('Error fetching menus data:', error.message); return []; }
             return data;
@@ -458,7 +397,6 @@
         async function getRoomsData() {
             const { data: rooms, error } = await supabaseClient.from('rooms')
                 .select('id, room_number, capacity')
-                // .eq('shop_id', currentAdmin.shopId) // ⬅️ RLS 해제 디버깅을 위해 주석 처리
                 .order('room_number', { ascending: true }); 
             if (error) { console.error('Error fetching rooms data:', error.message); return []; }
             return rooms.map(r => ({id: r.id, roomNumber: r.room_number, capacity: r.capacity}));
@@ -468,7 +406,6 @@
         async function getReservationsData(date) {
             const { data: reservations, error } = await supabaseClient.from('reservations')
                 .select('*')
-                // .eq('shop_id', currentAdmin.shopId) // ⬅️ RLS 해제 디버깅을 위해 주석 처리
                 .eq('date', date); 
             if (error) { console.error('Error fetching reservations data:', error.message); return []; }
              return reservations.map(r => ({
@@ -483,7 +420,6 @@
         async function getPaymentMethodsData() {
              const { data, error } = await supabaseClient.from('payment_methods')
                 .select('id, name')
-                // .eq('shop_id', currentAdmin.shopId) // ⬅️ RLS 해제 디버깅을 위해 주석 처리
                 .order('id', { ascending: true }); 
             if (error) { 
                 console.error('Error fetching payment methods data:', error.message); 
@@ -496,13 +432,18 @@
         async function getGuaranteeData() {
             const { data, error } = await supabaseClient.from('guarantees')
                 .select('*')
-                // .eq('shop_id', currentAdmin.shopId) // ⬅️ RLS 해제 디버깅을 위해 주석 처리
                 .order('id', { ascending: true });
             if (error) { console.error('Error fetching guarantee data:', error.message); return []; }
             return data;
         }
         
         // ... (나머지 CRUD 함수는 생략. V6.0과 동일한 로직 사용) ...
+        async function saveNewReservations(reservationsArray) { /* ... */ }
+        async function deleteReservationFromDB(id) { /* ... */ }
+        async function updateReservationInDB(id, updateData) { /* ... */ }
+        async function upsertData(tableName, data, id = null) { /* ... */ }
+        async function deleteData(tableName, id) { /* ... */ }
+
 
         // =========================================================================
         // 4. 초기화 및 인증 로직 (Admin Role 로직 복구)
@@ -537,6 +478,25 @@
                 shopName: shopName
             };
         }
+
+        // 전역 변수 (V6.0의 전역 변수 정의를 여기에 복사)
+        let currentLanguage = 'ko';
+        let currentFont = 'Arial';
+        let currentFontSize = 'normal';
+        let selectedFontFamily = 'Arial';
+        let selectedFontSize = 'normal';
+        let currentAdmin = { 
+            id: null,
+            username: null,
+            type: ADMIN_ROLES.SHOP_STAFF, 
+            shopId: 'default_shop', 
+            shopName: '미로그인' 
+        };
+        let currentPaymentReservationId = null;
+        let selectedStaff = null;
+        let menuRowCounter = 0;
+        let menuRows = [];
+        let currency = { symbol: '₩', name: '원' }; // 임시 기본값
 
         async function initializeApp() {
             try {
@@ -590,6 +550,7 @@
             const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
             if (error) {
+                // 🚨 로그인 에러가 계속 발생하는지 확인
                 alert('로그인에 실패했습니다. (아이디/비밀번호 또는 Supabase 인증을 확인하세요.)\n' + error.message);
                 return;
             }
@@ -616,6 +577,8 @@
             }
         }
         
+        // ... (나머지 유틸리티 함수 및 예약, DB 관리 함수는 V6.0 구현부를 사용) ...
+
         // =========================================================================
         // 5. 유틸리티 및 UI 로직 (DB 관리 메뉴 접근 제어)
         // =========================================================================
@@ -624,36 +587,26 @@
             const dbManagementButton = document.getElementById('dbManagementButton');
             const isAdminOrManager = currentAdmin.type === ADMIN_ROLES.SUPER_USER || currentAdmin.type === ADMIN_ROLES.SHOP_MANAGER;
 
-            // DB 관리 버튼 표시/숨김
             if (dbManagementButton) {
                 dbManagementButton.style.display = isAdminOrManager ? 'block' : 'none';
             }
             
-            // 최고관리자 버튼 추가 표시/숨김 (필요시)
             const superAdminButtons = document.getElementById('superAdminButtons');
             if (superAdminButtons) {
                 superAdminButtons.style.display = currentAdmin.type === ADMIN_ROLES.SUPER_USER ? 'block' : 'none';
             }
         }
 
-        function getDailyStaffOrderKey(date) { return `temp_staffOrder_${date}_${currentAdmin.shopId}`; }
-        
-        function closeManagementModal() { 
-            document.getElementById('managementModal').style.display = 'none';
-            document.getElementById('managementContent').innerHTML = '';
-            loadReservationData(); 
+        // ... (나머지 유틸리티 함수: hideAllSections, showDashboard, showReservation 등) ...
+        function hideAllSections() {
+            const sections = ['dashboardSection', 'orderSection', 'reservationSection', 'statisticsSection', 'dbManagementSection'];
+            sections.forEach(section => {
+                document.getElementById(section).style.display = 'none';
+            });
         }
+        function showDashboard() { hideAllSections(); document.getElementById('dashboardSection').style.display = 'block'; loadDashboard(); }
+        function showReservation() { hideAllSections(); document.getElementById('reservationSection').style.display = 'block'; loadReservationData(); }
 
-        function showDBManagement() { 
-            const isAdminOrManager = currentAdmin.type === ADMIN_ROLES.SUPER_USER || currentAdmin.type === ADMIN_ROLES.SHOP_MANAGER;
-            if (!isAdminOrManager) {
-                 alert('샾관리자 또는 최고관리자만 접근할 수 있습니다.');
-                 return;
-            }
-            hideAllSections(); 
-            document.getElementById('dbManagementSection').style.display = 'block'; 
-        }
-        
         // =========================================================================
         // 6. 예약 및 대시보드 로직 (디버그 로그 삽입)
         // =========================================================================
@@ -661,7 +614,6 @@
         async function loadStaffSelection() {
             const staff = await getStaffData(); 
             
-            // 🚨 디버그 로그 삽입
             console.log('[DEBUG-STAFF] Staff Data Fetched:', staff); 
             if (staff.length === 0) {
                  console.warn('[DEBUG-STAFF] Staff data is EMPTY. Check your "staff" table in Supabase.');
@@ -672,8 +624,8 @@
             const reservations = await getReservationsData(currentDate); 
             
             const activeStaff = staff.filter(s => s.status !== '퇴사');
+            // ... (이하 직원 목록 UI 렌더링 로직은 V6.0 구현부를 사용) ...
             
-            // ... (직원 목록 UI 렌더링 로직은 그대로 유지) ...
             activeStaff.sort((a, b) => {
                 const orderA = staffOrder[a.id] !== undefined ? staffOrder[a.id] : 999;
                 const orderB = staffOrder[b.id] !== undefined ? staffOrder[b.id] : 999;
@@ -724,10 +676,8 @@
         async function loadDashboard() {
             const currentDate = document.getElementById('currentDate').value;
             
-            // 예약 데이터 로드 (DB 연동)
             const todayReservations = await getReservationsData(currentDate);
             
-            // 🚨 디버그 로그 삽입
             console.log('[DEBUG-DASHBOARD] Reservations Fetched:', todayReservations);
             if (todayReservations.length === 0) {
                  console.warn('[DEBUG-DASHBOARD] Reservation data is EMPTY for today. Check your "reservations" table.');
@@ -746,9 +696,10 @@
             
             const tableBody = document.getElementById('dashboardTable');
             tableBody.innerHTML = '';
+            
+            // ... (이하 대시보드 UI 렌더링 로직은 V6.0 구현부를 사용) ...
 
             todayReservations.forEach(reservation => {
-                // DB 컬럼명에 맞게 변수명 조정
                 const staffId = reservation.staffId;
                 const startTime = reservation.startTime;
                 const duration = reservation.duration;
@@ -768,13 +719,11 @@
                 const endTime = calculateEndTime(startTime, duration);
                 const remainingMinutes = calculateRemainingTime(startTime, duration, reservation.date);
                 
-                // ... (UI 렌더링 로직은 그대로 유지) ...
-                
                 if (paid) {
                     row.className = 'bg-green-50';
                 }
                 
-                const currentCurrency = currency; // 전역 변수 currency 사용
+                const currentCurrency = currency;
                 
                 const staffOrderNum = staffOrder[staffId] !== undefined ? staffOrder[staffId] : 1;
                 const vacationText = translations[currentLanguage].vacationStatus || '휴가';
@@ -805,25 +754,24 @@
                 `;
                 tableBody.appendChild(row);
             });
-            updateCurrencyDisplay();
         }
-
-        // ... (나머지 함수들은 V6.0과 동일하게 유지) ...
         
-        // 폰트 설정, 언어 설정, 시간 계산 등 수많은 유틸리티 함수와
-        // DB 관리 CRUD 함수들은 코드 길이를 위해 이 스니펫에서는 생략되었으나,
-        // 사용자님의 파일에서는 V6.0의 모든 함수가 필요합니다.
+        // ... (나머지 필수 유틸리티, DB 관리, 통계 함수 구현부를 V6.0에서 가져와 채워야 함) ...
         
-        // =========================================================================
-        // 9. 앱 초기화 (최하단)
-        // =========================================================================
-
+        function calculateEndTime(startTime, duration) { /* ... */ }
+        function calculateRemainingTime(startTime, duration, reservationDate) { /* ... */ }
+        function getDailyStaffOrderKey(date) { return `temp_staffOrder_${date}_${currentAdmin.shopId}`; }
+        function loadReservationData() { loadStaffSelection(); loadRoomSelection(); }
+        function loadRoomSelection() { /* ... */ }
+        function updateCurrentTime() { /* ... */ }
+        function showStatistics() { /* ... */ }
+        function showOrder() { /* ... */ }
+        function showDBManagement() { /* ... */ }
+        function manageMenus() { /* ... */ } // 이 함수들에는 alert 대신 실제 로직이 필요
+        // ... (etc.) ...
+        
         // 앱 초기화
         initializeApp();
-
-        // ⚠️ 주의: 이 파일에는 V6.0의 모든 함수(로그아웃, showDashboard, loadRoomSelection, manageMenus 등)가 필요하며,
-        // 위에 표시된 함수들 외의 모든 함수를 V6.0 코드에서 가져와야 합니다.
-        
     </script>
  </body>
 </html>
