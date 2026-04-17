@@ -1103,7 +1103,7 @@
                         username: 'admin', 
                         password: '12345678', 
                         type: 'super', 
-                        shopName: '', 
+                        shopName: 'Admin Menu', 
                         phone: '',
                         validFrom: null,
                         validUntil: null,
@@ -1112,11 +1112,11 @@
                     },
                     {
                         id: 2, 
-                        username: 'shop1', 
-                        password: '12345678', 
+                        username: 'rca', 
+                        password: 'rca1234', 
                         type: 'normal', 
-                        shopName: '힐링 마사지', 
-                        phone: '02-1234-5678',
+                        shopName: 'RCA Massage', 
+                        phone: '097 179 4024',
                         validFrom: today,
                         validUntil: defaultEndDate,
                         createdAt: new Date().toISOString(),
@@ -4129,7 +4129,7 @@
             tableBody.innerHTML = '';
 
             activeStaff.forEach(member => {
-                const currentOrder = staffOrder[member.id] !== undefined ? staffOrder[member.id] : 1;
+                const currentOrder = staffOrder[member.id] !== undefined ? staffOrder[member.id] : 0;
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td class="border border-gray-300 p-2">${member.name}</td>
