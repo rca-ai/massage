@@ -4148,7 +4148,7 @@
             let options = '';
             for (let i = 0; i <= 99; i++) {
                 const selected = i === selectedOrder ? 'selected' : '';
-                const label = i === 0 ? `${i} (휴가)` : i;
+                const label = i === 0 ? `${i} (off)` : i;
                 options += `<option value="${i}" ${selected}>${label}</option>`;
             }
             return options;
