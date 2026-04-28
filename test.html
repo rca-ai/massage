@@ -2968,9 +2968,44 @@
                 staffStats[r.staffName].totalPrice += r.price;
                 staffStats[r.staffName].totalCommission += r.commission;
             });
+
+            // Guarantee 적용: 통계 기간과 직원별 guarantee 비교
+            const guarantees = JSON.parse(localStorage.getItem(getAdminKey('guarantees')) || '[]');
+
+            // 현재 통계 기간의 시작/끝 날짜 구하기
+            let statsStart, statsEnd;
+            if (currentStatsType === 'daily') {
+                statsStart = statsEnd = document.getElementById('statsDate').value;
+            } else {
+                statsStart = document.getElementById('statsStartDate').value;
+                statsEnd = document.getElementById('statsEndDate').value;
+            }
+
+            Object.keys(staffStats).forEach(staffName => {
+                // 해당 직원의 guarantee 중, 시작날짜가 통계기간 내에 있는 것을 찾음
+                // (여러 개면 가장 최근 날짜 기준)
+                const applicableGuarantees = guarantees.filter(g =>
+                    g.staffName === staffName &&
+                    g.date >= statsStart &&
+                    g.date <= statsEnd
+                );
+
+                if (applicableGuarantees.length > 0) {
+                    // 가장 최근 guarantee 적용
+                    const latestGuarantee = applicableGuarantees.reduce((latest, g) =>
+                        g.date > latest.date ? g : latest
+                    );
+                    if (staffStats[staffName].totalCommission < latestGuarantee.amount) {
+                        staffStats[staffName].totalCommission = latestGuarantee.amount;
+                        staffStats[staffName].isGuaranteed = true;
+                        staffStats[staffName].guaranteeAmount = latestGuarantee.amount;
+                    }
+                }
+            });
             
             return staffStats;
         }
+
 
         // 입금방식별 통계 계산
         function calculatePaymentStatistics(reservations) {
