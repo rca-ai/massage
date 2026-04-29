@@ -1005,11 +1005,18 @@
         };
 
         // 초기화
-        function initializeApp() {
-            try {
-                initializeGlobalData();
-                updateCurrentTime();
-                setInterval(updateCurrentTime, 1000);
+function initializeApp() {
+    try {
+        // 전역 데이터 먼저 초기화
+        initializeGlobalData();
+        
+        // 시간 업데이트 시작
+        updateCurrentTime();
+        setInterval(updateCurrentTime, 1000);
+        
+        // 마지막 방문 페이지 복원 (로그인 후)
+        const savedCurrentPage = localStorage.getItem('lastVisitedPage');
+        const savedCurrentPageTab = localStorage.getItem('lastVisitedPageTab');
                 
                 const currentDateElement = document.getElementById('currentDate');
                 if (currentDateElement) {
