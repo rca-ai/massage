@@ -2986,8 +2986,7 @@
                 // (여러 개면 가장 최근 날짜 기준)
                 const applicableGuarantees = guarantees.filter(g =>
                     g.staffName === staffName &&
-                    g.date >= statsStart &&
-                    g.date <= statsEnd
+                    g.date >= statsStart
                 );
 
                 if (applicableGuarantees.length > 0) {
