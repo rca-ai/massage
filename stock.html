@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>주식아가들의 투자일기</title>
+    <title>주식아가의 투자일기</title>
     <style>
         :root {
             --bg-color: #f8f9fa;
@@ -43,12 +43,11 @@
             z-index: 100;
         }
 
-        .container { max-width: 1000px; margin: 0 auto; padding: 10px; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 10px; }
 
-        /* 탭 메뉴 */
         .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid var(--border-color); overflow-x: auto; }
         .tab-btn {
-            padding: 10px 20px;
+            padding: 10px 15px;
             border: none;
             background: none;
             color: var(--text-color);
@@ -61,7 +60,6 @@
         .section { display: none; }
         .section.active { display: block; }
 
-        /* 카드 스타일 */
         .card {
             background: var(--card-bg);
             border-radius: 12px;
@@ -70,7 +68,6 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        /* 대시보드 그리드 */
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -81,11 +78,10 @@
         .stat-label { font-size: 0.85rem; opacity: 0.8; margin-bottom: 5px; }
         .stat-value { font-size: 1.1rem; font-weight: bold; }
 
-        /* 색상 클래스 */
         .up { color: var(--up-color) !important; }
         .down { color: var(--down-color) !important; }
+        .stock-link { color: var(--primary-color); cursor: pointer; text-decoration: underline; font-weight: bold; }
 
-        /* 달력 스타일 */
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .calendar-grid {
             display: grid;
@@ -117,14 +113,14 @@
         .bg-buy { background: var(--up-color); }
         .bg-sell { background: var(--down-color); }
 
-        /* 테이블 공통 */
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
         th, td { padding: 12px 8px; text-align: right; border-bottom: 1px solid var(--border-color); }
         th { background: rgba(0,0,0,0.05); text-align: center; }
+        th.sortable { cursor: pointer; transition: 0.2s; }
+        th.sortable:hover { background: rgba(0,0,0,0.1); }
         td.text-left { text-align: left; }
         td.text-center { text-align: center; }
 
-        /* 모달 스타일 */
         .modal {
             display: none;
             position: fixed;
@@ -145,7 +141,6 @@
         }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
 
-        /* 폼 스타일 */
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-size: 0.9rem; font-weight: bold; }
         input, select, textarea {
@@ -170,7 +165,6 @@
         .btn-sm { padding: 5px 10px; font-size: 0.8rem; }
         .btn-gray { background: #6c757d; color: white; }
 
-        /* 현재가 업데이트 도구 */
         .price-updater { display: flex; gap: 5px; align-items: center; }
         .last-update { font-size: 0.75rem; opacity: 0.7; margin-top: 10px; }
 
@@ -185,29 +179,25 @@
 <body>
 
 <header>
-    <div style="font-size: 1.2rem; font-weight: bold;">📈 주식아가의 투자일기</div>
+    <div style="font-size: 1.2rem; font-weight: bold;">🐣 주식아가의 투자일기</div>
     <div style="display: flex; gap: 10px; align-items: center;">
         <button id="themeToggle" class="btn btn-sm" style="background: #555; color: white;">🌙 테마</button>
     </div>
 </header>
 
 <div class="container">
-    <!-- 탭 내비게이션 -->
     <nav class="tabs">
         <button class="tab-btn active" onclick="showSection('dashboard')">대시보드</button>
         <button class="tab-btn" onclick="showSection('calendar')">매매달력</button>
+        <button class="tab-btn" onclick="showSection('tradedItems')">매매종목</button>
         <button class="tab-btn" onclick="showSection('history')">히스토리</button>
         <button class="tab-btn" onclick="showSection('settings')">설정</button>
     </nav>
 
-    <!-- 1. 대시보드 섹션 -->
     <section id="dashboard" class="section active">
-        <div class="dashboard-grid" id="dashboardStats">
-            <!-- JS에서 렌더링 -->
-        </div>
-
+        <div class="dashboard-grid" id="dashboardStats"></div>
         <div class="card">
-            <h3 style="margin-top:0">📋 보유 종목 현황</h3>
+            <h3 style="margin-top:0">📋 현재 보유 종목</h3>
             <div style="overflow-x: auto;">
                 <table id="holdingsTable">
                     <thead>
@@ -228,21 +218,41 @@
         </div>
     </section>
 
-    <!-- 2. 월간 달력 섹션 -->
     <section id="calendar" class="section">
         <div class="card">
             <div class="calendar-header">
                 <button onclick="changeMonth(-1)" class="btn">◀ 이전달</button>
-                <h2 id="calendarTitle">2024년 5월</h2>
+                <h2 id="calendarTitle"></h2>
                 <button onclick="changeMonth(1)" class="btn">다음달 ▶</button>
             </div>
-            <div class="calendar-grid" id="calendarGrid">
-                <!-- JS에서 렌더링 -->
+            <div class="calendar-grid" id="calendarGrid"></div>
+        </div>
+    </section>
+
+    <section id="tradedItems" class="section">
+        <div class="card">
+            <h3 style="margin-top:0">📊 종목별 누적 손익 분석</h3>
+            <p style="font-size:0.85rem; opacity:0.8; margin-bottom:15px;">매매가 발생했던 모든 종목의 누적 성과입니다.</p>
+            <div style="overflow-x: auto;">
+                <table id="tradedItemsTable">
+                    <thead>
+                        <tr>
+                            <th>종목명</th>
+                            <th>누적 매수액</th>
+                            <th>누적 매도액</th>
+                            <th>실현 손익</th>
+                            <th>현재 수량</th>
+                            <th>평가 손익</th>
+                            <th>종목 총 손익</th>
+                            <th>누적 ROI</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
             </div>
         </div>
     </section>
 
-    <!-- 3. 히스토리 섹션 -->
     <section id="history" class="section">
         <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -253,13 +263,13 @@
                 <table id="historyTable">
                     <thead>
                         <tr>
-                            <th>날짜</th>
-                            <th>구분</th>
-                            <th>종목/항목</th>
+                            <th class="sortable" onclick="setSort('date')">날짜 <span id="sort_date">↕</span></th>
+                            <th class="sortable" onclick="setSort('type')">구분 <span id="sort_type">↕</span></th>
+                            <th class="sortable" onclick="setSort('name')">종목/항목 <span id="sort_name">↕</span></th>
                             <th>수량</th>
                             <th>단가</th>
                             <th>금액</th>
-                            <th>메모</th>
+                            <th class="sortable" onclick="setSort('memo')">메모 <span id="sort_memo">↕</span></th>
                             <th>관리</th>
                         </tr>
                     </thead>
@@ -269,7 +279,6 @@
         </div>
     </section>
 
-    <!-- 4. 설정 섹션 -->
     <section id="settings" class="section">
         <div class="card">
             <h3>💾 데이터 관리</h3>
@@ -284,25 +293,24 @@
     </section>
 </div>
 
-<!-- 일간 기록 모달 -->
+<!-- 입력 모달 -->
 <div id="dayModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h3 id="modalDateDisplay">2024-05-01 기록</h3>
+            <h3 id="modalDateDisplay"></h3>
             <button onclick="closeModal()" class="btn btn-sm">닫기</button>
         </div>
-        
         <div class="tabs">
             <button class="tab-btn active" id="modalTradeTab" onclick="showModalTab('trade')">주식 매매</button>
             <button class="tab-btn" id="modalCashTab" onclick="showModalTab('cash')">입출금</button>
         </div>
-
         <div id="modalTradeForm" class="modal-tab-content">
+            <div class="form-group"><label>종목명</label><input type="text" id="tradeName" placeholder="예: 삼성전자"></div>
             <div class="form-group">
-                <label>종목명 / 코드</label>
+                <label>종목코드</label>
                 <div style="display: flex; gap: 5px;">
-                    <input type="text" id="tradeName" placeholder="종목명">
-                    <input type="text" id="tradeCode" placeholder="코드(선택)" style="width: 100px;">
+                    <input type="text" id="tradeCode" placeholder="예: 005930" style="flex:1">
+                    <button onclick="searchStockCode()" class="btn btn-gray btn-sm">코드검색</button>
                 </div>
             </div>
             <div class="form-group">
@@ -314,26 +322,14 @@
             </div>
             <div class="form-group">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <div>
-                        <label>수량</label>
-                        <input type="number" id="tradeQty" oninput="calcTotal()">
-                    </div>
-                    <div>
-                        <label>단가</label>
-                        <input type="number" id="tradePrice" oninput="calcTotal()">
-                    </div>
+                    <div><label>수량</label><input type="number" id="tradeQty" oninput="calcTotal()"></div>
+                    <div><label>단가</label><input type="number" id="tradePrice" oninput="calcTotal()"></div>
                 </div>
             </div>
-            <div class="form-group">
-                <label>총 금액: <span id="tradeTotalDisplay">0</span>원</label>
-            </div>
-            <div class="form-group">
-                <label>메모</label>
-                <input type="text" id="tradeMemo">
-            </div>
-            <button onclick="saveTransaction('trade')" id="tradeSubmitBtn" class="btn btn-primary" style="width: 100%;">저장하기</button>
+            <div class="form-group"><label>총 금액: <span id="tradeTotalDisplay">0</span>원</label></div>
+            <div class="form-group"><label>메모</label><input type="text" id="tradeMemo"></div>
+            <button onclick="saveTransaction('trade')" class="btn btn-primary" style="width: 100%;">저장하기</button>
         </div>
-
         <div id="modalCashForm" class="modal-tab-content" style="display: none;">
             <div class="form-group">
                 <label>구분</label>
@@ -342,49 +338,60 @@
                     <option value="out">출금</option>
                 </select>
             </div>
-            <div class="form-group">
-                <label>금액</label>
-                <input type="number" id="cashAmount">
-            </div>
-            <div class="form-group">
-                <label>메모</label>
-                <input type="text" id="cashMemo">
-            </div>
-            <button onclick="saveTransaction('cash')" id="cashSubmitBtn" class="btn btn-primary" style="width: 100%;">저장하기</button>
+            <div class="form-group"><label>금액</label><input type="number" id="cashAmount"></div>
+            <div class="form-group"><label>메모</label><input type="text" id="cashMemo"></div>
+            <button onclick="saveTransaction('cash')" class="btn btn-primary" style="width: 100%;">저장하기</button>
         </div>
-
         <div style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 15px;">
-            <h4 id="dayLogsTitle">이 날의 기록</h4>
+            <h4>이 날의 기록</h4>
             <div id="dayLogs" style="font-size: 0.85rem;"></div>
         </div>
     </div>
 </div>
 
+<!-- 상세 모달 -->
+<div id="itemHistoryModal" class="modal">
+    <div class="modal-content" style="max-width: 850px;">
+        <div class="modal-header">
+            <h3 id="itemHistoryTitle"></h3>
+            <button onclick="closeItemModal()" class="btn btn-sm">닫기</button>
+        </div>
+        <div id="itemSummary" class="dashboard-grid" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 20px;"></div>
+        <div style="overflow-x: auto;">
+            <table id="itemDetailTable">
+                <thead>
+                    <tr><th>날짜</th><th>구분</th><th>수량</th><th>단가</th><th>금액</th><th>메모</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 <script>
-    // --- 초기 데이터 및 상태 ---
+    // --- 초기 데이터 ---
     let transactions = JSON.parse(localStorage.getItem('stock_transactions')) || [];
     let currentPrices = JSON.parse(localStorage.getItem('stock_prices')) || {}; 
     let lastPriceUpdate = localStorage.getItem('last_price_update') || '-';
     let currentViewDate = new Date();
     let selectedDate = null;
-    let editingId = null; // 수정 중인 기록의 ID
+    let editingId = null;
+    let sortConfig = { key: 'date', direction: 'desc' };
 
     // --- 유틸리티 ---
     const fmt = (num) => new Intl.NumberFormat('ko-KR').format(Math.round(num || 0)) + '원';
-    const fmtPct = (num) => (isNaN(num) ? '0.00' : num.toFixed(2)) + '%';
+    const fmtPct = (num) => (isNaN(num) || !isFinite(num) ? '0.00' : num.toFixed(2)) + '%';
 
-    // --- 테마 관리 ---
+    // --- 테마 ---
     const themeToggle = document.getElementById('themeToggle');
     let currentTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', currentTheme);
-
     themeToggle.onclick = () => {
         currentTheme = currentTheme === 'light' ? 'dark' : 'light';
         document.documentElement.setAttribute('data-theme', currentTheme);
         localStorage.setItem('theme', currentTheme);
     };
 
-    // --- 섹션 전환 ---
     function showSection(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -392,130 +399,108 @@
         if(event) event.target.classList.add('active');
         if(id === 'dashboard') renderDashboard();
         if(id === 'calendar') renderCalendar();
+        if(id === 'tradedItems') renderTradedItems();
         if(id === 'history') renderHistory();
     }
 
-    // --- 계산 로직 ---
+    // --- 정밀 계산 로직 보완 ---
     function calculateStats() {
         let totalIn = 0;
         let totalOut = 0;
-        let realizedProfit = 0;
-        let cashBalance = 0; // 실제 계좌 잔고
-        
-        let stocks = {}; // { "종목명": {qty, totalCost, avgPrice, realized} }
+        let cashBalance = 0;
+        let stocks = {}; 
 
-        // 정렬: 날짜순 (평균단가 및 현금 잔액 계산을 위함)
+        // 날짜순 정렬 (정확한 원가 계산을 위함)
         const sortedLogs = [...transactions].sort((a, b) => new Date(a.date) - new Date(b.date));
 
         sortedLogs.forEach(log => {
             if (log.category === 'cash') {
-                if (log.type === 'in') {
-                    totalIn += log.amount;
-                    cashBalance += log.amount;
-                } else {
-                    totalOut += log.amount;
-                    cashBalance -= log.amount;
-                }
+                if (log.type === 'in') { totalIn += log.amount; cashBalance += log.amount; }
+                else { totalOut += log.amount; cashBalance -= log.amount; }
             } else {
                 if (!stocks[log.name]) {
-                    stocks[log.name] = { qty: 0, totalCost: 0, avgPrice: 0, realized: 0, code: log.code };
+                    stocks[log.name] = { 
+                        name: log.name, code: log.code, qty: 0, 
+                        totalCost: 0, realized: 0, buyAmount: 0, sellAmount: 0 
+                    };
                 }
                 const s = stocks[log.name];
                 if (log.type === 'buy') {
-                    s.totalCost += (log.qty * log.price);
+                    s.buyAmount += log.amount;
+                    s.totalCost += log.amount; // 정수 가산
                     s.qty += log.qty;
-                    s.avgPrice = s.totalCost / s.qty;
-                    cashBalance -= (log.qty * log.price);
+                    cashBalance -= log.amount;
                 } else {
-                    const profit = log.qty * (log.price - s.avgPrice);
-                    s.realized += profit;
-                    realizedProfit += profit;
-                    s.qty -= log.qty;
-                    cashBalance += (log.qty * log.price);
-                    
-                    if(s.qty <= 0) {
-                        s.qty = 0;
-                        s.totalCost = 0;
+                    s.sellAmount += log.amount;
+                    // 실현 손익 계산: 매도 수량 비율만큼 원가 계산 (부동 소수점 오차 방지)
+                    let soldCostBasis;
+                    if (log.qty >= s.qty) {
+                        soldCostBasis = s.totalCost; // 전량 매도 시 남은 원가 모두 털기
                     } else {
-                        s.totalCost = s.qty * s.avgPrice;
+                        // 중간 매도 시 평균 비율로 계산하되 반올림하여 정수화
+                        soldCostBasis = Math.round(s.totalCost * (log.qty / s.qty));
                     }
+                    
+                    const profit = log.amount - soldCostBasis;
+                    s.realized += profit;
+                    s.qty -= log.qty;
+                    s.totalCost -= soldCostBasis;
+                    cashBalance += log.amount;
+                    
+                    if(s.qty <= 0) { s.qty = 0; s.totalCost = 0; }
                 }
             }
         });
 
         let evaluationProfit = 0;
-        let currentHoldingCost = 0; // 현재 보유 종목에 대한 매입금액 합계
+        let currentHoldingCost = 0;
+        let realizedProfitSum = 0;
         let holdings = [];
 
         Object.keys(stocks).forEach(name => {
             const s = stocks[name];
+            realizedProfitSum += s.realized;
             if (s.qty > 0) {
-                const currentPrice = currentPrices[name] || s.avgPrice;
-                const evalProfit = s.qty * (currentPrice - s.avgPrice);
+                const avgPrice = s.totalCost / s.qty;
+                const currentPrice = currentPrices[name] || avgPrice;
+                const evalProfit = Math.round(s.qty * currentPrice) - s.totalCost;
                 evaluationProfit += evalProfit;
-                currentHoldingCost += (s.qty * s.avgPrice);
-                holdings.push({
-                    name,
-                    code: s.code,
-                    qty: s.qty,
-                    avgPrice: s.avgPrice,
-                    currentPrice,
-                    evalProfit,
-                    roi: (evalProfit / (s.qty * s.avgPrice)) * 100
+                currentHoldingCost += s.totalCost;
+                holdings.push({ 
+                    ...s, 
+                    avgPrice, 
+                    currentPrice, 
+                    evalProfit, 
+                    roi: (evalProfit / s.totalCost) * 100 
                 });
             }
         });
 
-        const totalProfit = realizedProfit + evaluationProfit;
-
         return {
-            totalIn, totalOut, cashBalance, realizedProfit, evaluationProfit, 
-            totalProfit, currentHoldingCost, holdings
+            totalIn, totalOut, cashBalance: Math.round(cashBalance), 
+            realizedProfit: Math.round(realizedProfitSum),
+            evaluationProfit: Math.round(evaluationProfit), 
+            totalProfit: Math.round(realizedProfitSum + evaluationProfit),
+            currentHoldingCost, holdings, allStocks: stocks
         };
     }
 
-    // --- 대시보드 렌더링 ---
     function renderDashboard() {
         const stats = calculateStats();
         const container = document.getElementById('dashboardStats');
-        
         const netInvestment = stats.totalIn - stats.totalOut;
         const buyRoi = stats.currentHoldingCost > 0 ? (stats.evaluationProfit / stats.currentHoldingCost) * 100 : 0;
         const invRoi = netInvestment > 0 ? (stats.totalProfit / netInvestment) * 100 : 0;
 
         container.innerHTML = `
-            <div class="stat-item">
-                <div class="stat-label">순 투자금 (입-출)</div>
-                <div class="stat-value">${fmt(netInvestment)}</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-label">현 현금자산 (매입가능)</div>
-                <div class="stat-value" style="color: var(--primary-color)">${fmt(stats.cashBalance)}</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-label">보유종목 매입금액</div>
-                <div class="stat-value">${fmt(stats.currentHoldingCost)}</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-label">실현[매도] 손익</div>
-                <div class="stat-value ${stats.realizedProfit >= 0 ? 'up' : 'down'}">${fmt(stats.realizedProfit)}</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-label">평가[보유] 손익</div>
-                <div class="stat-value ${stats.evaluationProfit >= 0 ? 'up' : 'down'}">${fmt(stats.evaluationProfit)}</div>
-            </div>
-            <div class="stat-item" style="grid-column: span 1; background: var(--header-bg); color: #fff">
-                <div class="stat-label">총 손익 (실현+평가)</div>
-                <div class="stat-value ${stats.totalProfit >= 0 ? 'up' : 'down'}">${fmt(stats.totalProfit)}</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-label">보유종목 수익률</div>
-                <div class="stat-value ${buyRoi >= 0 ? 'up' : 'down'}">${fmtPct(buyRoi)}</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-label">순 투자금 대비 수익률</div>
-                <div class="stat-value ${invRoi >= 0 ? 'up' : 'down'}">${fmtPct(invRoi)}</div>
-            </div>
+            <div class="stat-item"><div class="stat-label">순 투자금 (입-출)</div><div class="stat-value">${fmt(netInvestment)}</div></div>
+            <div class="stat-item"><div class="stat-label">현 현금자산</div><div class="stat-value" style="color:var(--primary-color)">${fmt(stats.cashBalance)}</div></div>
+            <div class="stat-item"><div class="stat-label">보유종목 매입금액</div><div class="stat-value">${fmt(stats.currentHoldingCost)}</div></div>
+            <div class="stat-item"><div class="stat-label">실현[매도] 손익</div><div class="stat-value ${stats.realizedProfit >= 0 ? 'up' : 'down'}">${fmt(stats.realizedProfit)}</div></div>
+            <div class="stat-item"><div class="stat-label">평가[보유] 손익</div><div class="stat-value ${stats.evaluationProfit >= 0 ? 'up' : 'down'}">${fmt(stats.evaluationProfit)}</div></div>
+            <div class="stat-item" style="grid-column: span 1; background: var(--header-bg); color: #fff"><div class="stat-label">총 손익</div><div class="stat-value ${stats.totalProfit >= 0 ? 'up' : 'down'}">${fmt(stats.totalProfit)}</div></div>
+            <div class="stat-item"><div class="stat-label">보유종목 수익률</div><div class="stat-value ${buyRoi >= 0 ? 'up' : 'down'}">${fmtPct(buyRoi)}</div></div>
+            <div class="stat-item"><div class="stat-label">전체 투자금 대비 수익률</div><div class="stat-value ${invRoi >= 0 ? 'up' : 'down'}">${fmtPct(invRoi)}</div></div>
         `;
 
         const tbody = document.querySelector('#holdingsTable tbody');
@@ -523,15 +508,9 @@
         stats.holdings.forEach(h => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td class="text-left">${h.name} <br><small>${h.code || ''}</small></td>
-                <td>${h.qty}</td>
-                <td>${fmt(h.avgPrice)}</td>
-                <td>
-                    <div class="price-updater">
-                        <input type="number" value="${h.currentPrice}" onchange="updatePrice('${h.name}', this.value)" style="width:90px; padding:2px">
-                        <button onclick="openNaver('${h.code}', '${h.name}')" class="btn btn-sm">🔗</button>
-                    </div>
-                </td>
+                <td class="text-left"><span class="stock-link" onclick="showItemHistory('${h.name}')">${h.name}</span><br><small>${h.code || ''}</small></td>
+                <td>${h.qty}</td><td>${fmt(h.avgPrice)}</td>
+                <td><div class="price-updater"><input type="number" value="${h.currentPrice}" onchange="updatePrice('${h.name}', this.value)" style="width:90px; padding:2px"><button onclick="openNaver('${h.code}', '${h.name}')" class="btn btn-sm">🔗</button></div></td>
                 <td class="${h.evalProfit >= 0 ? 'up' : 'down'}">${fmt(h.evalProfit)}</td>
                 <td class="${h.roi >= 0 ? 'up' : 'down'}">${fmtPct(h.roi)}</td>
                 <td><button onclick="deleteStockTransactions('${h.name}')" class="btn btn-danger btn-sm">초기화</button></td>
@@ -541,301 +520,235 @@
         document.getElementById('lastUpdateTime').innerText = `마지막 업데이트: ${lastPriceUpdate}`;
     }
 
-    function updatePrice(name, price) {
-        currentPrices[name] = parseFloat(price);
-        lastPriceUpdate = new Date().toLocaleString();
-        localStorage.setItem('stock_prices', JSON.stringify(currentPrices));
-        localStorage.setItem('last_price_update', lastPriceUpdate);
-        renderDashboard();
-    }
-
-    function openNaver(code, name) {
-        if(!code) {
-            window.open(`https://search.naver.com/search.naver?query=${encodeURIComponent(name)}+주가`, '_blank');
-        } else {
-            window.open(`https://finance.naver.com/item/main.naver?code=${code}`, '_blank');
-        }
-    }
-
-    // --- 달력 렌더링 ---
-    function renderCalendar() {
-        const year = currentViewDate.getFullYear();
-        const month = currentViewDate.getMonth();
-        document.getElementById('calendarTitle').innerText = `${year}년 ${month + 1}월`;
-
-        const firstDay = new Date(year, month, 1).getDay(); 
-        const lastDate = new Date(year, month + 1, 0).getDate();
-        
-        const grid = document.getElementById('calendarGrid');
-        grid.innerHTML = '';
-
-        ['일','월','화','수','목','금','토'].forEach(d => {
-            const div = document.createElement('div');
-            div.className = 'calendar-day-head';
-            div.innerText = d;
-            grid.appendChild(div);
-        });
-
-        for (let i = 0; i < firstDay; i++) {
-            const div = document.createElement('div');
-            div.className = 'calendar-cell';
-            grid.appendChild(div);
-        }
-
-        for (let d = 1; d <= lastDate; d++) {
-            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-            const dayLogs = transactions.filter(t => t.date === dateStr);
-            
-            const cell = document.createElement('div');
-            cell.className = 'calendar-cell';
-            cell.onclick = () => openModal(dateStr);
-
-            let contentHtml = '';
-            dayLogs.forEach(log => {
-                if(log.category === 'cash') {
-                    contentHtml += `<span class="indicator ${log.type === 'in' ? 'bg-in' : 'bg-out'}">${log.type==='in'?'입':'출'} ${fmt(log.amount)}</span>`;
-                } else {
-                    contentHtml += `<span class="indicator ${log.type === 'buy' ? 'bg-buy' : 'bg-sell'}">${log.name} ${log.qty}주 ${log.type==='buy'?'매수':'매도'}</span>`;
-                }
-            });
-
-            cell.innerHTML = `
-                <div class="cell-date">${d}</div>
-                <div class="cell-content">${contentHtml}</div>
-            `;
-            grid.appendChild(cell);
-        }
-    }
-
-    function changeMonth(delta) {
-        currentViewDate.setMonth(currentViewDate.getMonth() + delta);
-        renderCalendar();
-    }
-
-    // --- 모달 로직 ---
-    function openModal(date, logToEdit = null) {
-        selectedDate = date;
-        editingId = logToEdit ? logToEdit.id : null;
-        
-        document.getElementById('modalDateDisplay').innerText = `${date} ${editingId ? '수정' : '기록'}`;
-        document.getElementById('dayModal').style.display = 'flex';
-        
-        if (logToEdit) {
-            showModalTab(logToEdit.category);
-            if (logToEdit.category === 'trade') {
-                document.getElementById('tradeName').value = logToEdit.name;
-                document.getElementById('tradeCode').value = logToEdit.code;
-                document.getElementById('tradeType').value = logToEdit.type;
-                document.getElementById('tradeQty').value = logToEdit.qty;
-                document.getElementById('tradePrice').value = logToEdit.price;
-                calcTotal();
-                document.getElementById('tradeMemo').value = logToEdit.memo;
-            } else {
-                document.getElementById('cashType').value = logToEdit.type;
-                document.getElementById('cashAmount').value = logToEdit.amount;
-                document.getElementById('cashMemo').value = logToEdit.memo;
-            }
-        } else {
-            resetModalForms();
-        }
-        renderDayLogs();
-    }
-
-    function resetModalForms() {
-        document.querySelectorAll('.modal-content input').forEach(i => i.value = '');
-        document.getElementById('tradeTotalDisplay').innerText = '0';
-        editingId = null;
-    }
-
-    function closeModal() {
-        document.getElementById('dayModal').style.display = 'none';
-        renderCalendar();
-        renderDashboard();
-        renderHistory();
-    }
-
-    function showModalTab(tab) {
-        document.querySelectorAll('.modal-tab-content').forEach(c => c.style.display = 'none');
-        document.querySelectorAll('#dayModal .tab-btn').forEach(b => b.classList.remove('active'));
-        if(tab === 'trade') {
-            document.getElementById('modalTradeForm').style.display = 'block';
-            document.getElementById('modalTradeTab').classList.add('active');
-        } else {
-            document.getElementById('modalCashForm').style.display = 'block';
-            document.getElementById('modalCashTab').classList.add('active');
-        }
-    }
-
-    function calcTotal() {
-        const qty = document.getElementById('tradeQty').value || 0;
-        const price = document.getElementById('tradePrice').value || 0;
-        document.getElementById('tradeTotalDisplay').innerText = (qty * price).toLocaleString();
-    }
-
-    function saveTransaction(category) {
-        let logData = { 
-            id: editingId || Date.now(), 
-            date: selectedDate, 
-            category 
-        };
-        
-        if(category === 'trade') {
-            logData.name = document.getElementById('tradeName').value;
-            logData.code = document.getElementById('tradeCode').value;
-            logData.type = document.getElementById('tradeType').value;
-            logData.qty = parseInt(document.getElementById('tradeQty').value);
-            logData.price = parseInt(document.getElementById('tradePrice').value);
-            logData.amount = logData.qty * logData.price;
-            logData.memo = document.getElementById('tradeMemo').value;
-            if(!logData.name || !logData.qty || !logData.price) return;
-        } else {
-            logData.type = document.getElementById('cashType').value;
-            logData.amount = parseInt(document.getElementById('cashAmount').value);
-            logData.memo = document.getElementById('cashMemo').value;
-            if(!logData.amount) return;
-        }
-
-        if (editingId) {
-            const idx = transactions.findIndex(t => t.id === editingId);
-            if (idx > -1) transactions[idx] = logData;
-        } else {
-            transactions.push(logData);
-        }
-
-        localStorage.setItem('stock_transactions', JSON.stringify(transactions));
-        resetModalForms();
-        renderDayLogs();
-        if (editingId) closeModal();
-    }
-
-    function renderDayLogs() {
-        const logs = transactions.filter(t => t.date === selectedDate);
-        const container = document.getElementById('dayLogs');
-        container.innerHTML = '';
-        logs.forEach(l => {
-            const div = document.createElement('div');
-            div.style.cssText = 'display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; padding:8px; background:rgba(0,0,0,0.05); border-radius:8px';
-            const label = l.category === 'trade' ? `${l.name} ${l.qty}주 ${l.type==='buy'?'매수':'매도'}` : `${l.type==='in'?'입금':'출금'}`;
-            div.innerHTML = `
-                <div style="flex:1">
-                    <strong>${label}</strong> <br> <small>${fmt(l.amount)}</small>
-                </div>
-                <div style="display:flex; gap:5px">
-                    <button onclick="editLog(${l.id})" class="btn btn-gray btn-sm">수정</button>
-                    <button onclick="deleteLog(${l.id})" class="btn btn-danger btn-sm">삭제</button>
-                </div>
-            `;
-            container.appendChild(div);
-        });
-    }
-
-    function editLog(id) {
-        const log = transactions.find(t => t.id === id);
-        if (log) openModal(log.date, log);
-    }
-
-    function deleteLog(id) {
-        if(confirm('이 기록을 삭제하시겠습니까?')) {
-            transactions = transactions.filter(t => t.id !== id);
-            localStorage.setItem('stock_transactions', JSON.stringify(transactions));
-            renderDayLogs();
-            renderHistory();
-        }
-    }
-
-    function deleteStockTransactions(name) {
-        if(confirm(`${name} 종목의 모든 매매 기록을 삭제하시겠습니까?`)) {
-            transactions = transactions.filter(t => t.name !== name);
-            localStorage.setItem('stock_transactions', JSON.stringify(transactions));
-            renderDashboard();
-        }
-    }
-
-    // --- 히스토리 관리 ---
-    function renderHistory() {
-        const tbody = document.querySelector('#historyTable tbody');
+    function renderTradedItems() {
+        const stats = calculateStats();
+        const tbody = document.querySelector('#tradedItemsTable tbody');
         tbody.innerHTML = '';
-        const sorted = [...transactions].sort((a,b) => new Date(b.date) - new Date(a.date));
-        
-        sorted.forEach(l => {
+
+        Object.values(stats.allStocks).forEach(s => {
+            const curPrice = currentPrices[s.name] || (s.qty > 0 ? s.totalCost / s.qty : 0);
+            const evalProfit = s.qty > 0 ? Math.round(s.qty * curPrice) - s.totalCost : 0;
+            const itemTotalProfit = s.realized + evalProfit;
+            const itemRoi = s.buyAmount > 0 ? (itemTotalProfit / s.buyAmount) * 100 : 0;
+
             const tr = document.createElement('tr');
-            const typeLabel = { 'buy':'📈매수', 'sell':'📉매도', 'in':'💰입금', 'out':'💸출금' }[l.type];
             tr.innerHTML = `
-                <td class="text-center">${l.date}</td>
-                <td class="text-center">${typeLabel}</td>
-                <td class="text-left">${l.category === 'trade' ? l.name : '-'}</td>
-                <td>${l.qty || '-'}</td>
-                <td>${l.price ? fmt(l.price) : '-'}</td>
-                <td>${fmt(l.amount)}</td>
-                <td class="text-left">${l.memo || ''}</td>
-                <td class="text-center">
-                    <button onclick="editLog(${l.id})" class="btn btn-gray btn-sm" style="margin-right:2px">수정</button>
-                    <button onclick="deleteLog(${l.id})" class="btn btn-danger btn-sm">삭제</button>
-                </td>
+                <td class="text-left"><span class="stock-link" onclick="showItemHistory('${s.name}')">${s.name}</span></td>
+                <td>${fmt(s.buyAmount)}</td>
+                <td>${fmt(s.sellAmount)}</td>
+                <td class="${s.realized >= 0 ? 'up' : 'down'}">${fmt(s.realized)}</td>
+                <td>${s.qty}주</td>
+                <td class="${evalProfit >= 0 ? 'up' : 'down'}">${fmt(evalProfit)}</td>
+                <td class="${itemTotalProfit >= 0 ? 'up' : 'down'}" style="font-weight:bold">${fmt(itemTotalProfit)}</td>
+                <td class="${itemRoi >= 0 ? 'up' : 'down'}">${fmtPct(itemRoi)}</td>
             `;
             tbody.appendChild(tr);
         });
     }
 
-    // --- 데이터 입출력 ---
-    function exportData() {
-        const dataStr = JSON.stringify({ transactions, currentPrices, lastPriceUpdate });
-        const blob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `stock_backup_${new Date().toISOString().split('T')[0]}.json`;
-        a.click();
+    function searchStockCode() {
+        const name = document.getElementById('tradeName').value;
+        if(!name) { alert('검색할 종목명을 먼저 입력해주세요.'); return; }
+        const url = `https://finance.naver.com/search/search.naver?query=${encodeURIComponent(name)}&endUrl=&encoding=UTF-8`;
+        window.open(url, '_blank');
     }
 
-    function importData(event) {
-        const file = event.target.files[0];
-        if(!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const data = JSON.parse(e.target.result);
-                transactions = data.transactions || [];
-                currentPrices = data.currentPrices || {};
-                lastPriceUpdate = data.lastPriceUpdate || '-';
-                localStorage.setItem('stock_transactions', JSON.stringify(transactions));
-                localStorage.setItem('stock_prices', JSON.stringify(currentPrices));
-                alert('데이터 복구 성공!');
-                location.reload();
-            } catch(err) {
-                alert('유효하지 않은 파일입니다.');
+    function showItemHistory(itemName) {
+        const itemModal = document.getElementById('itemHistoryModal');
+        const summary = document.getElementById('itemSummary');
+        const tbody = document.querySelector('#itemDetailTable tbody');
+        
+        document.getElementById('itemHistoryTitle').innerText = `[${itemName}] 상세 거래 히스토리`;
+        itemModal.style.display = 'flex';
+        
+        const itemLogs = transactions.filter(t => t.name === itemName).sort((a, b) => new Date(a.date) - new Date(b.date));
+        let bQty = 0, bAmt = 0, sQty = 0, sAmt = 0, realP = 0, curCost = 0;
+
+        itemLogs.forEach(log => {
+            if (log.type === 'buy') {
+                bQty += log.qty; bAmt += log.amount; curCost += log.amount;
+            } else {
+                sQty += log.qty; sAmt += log.amount;
+                const costBasis = (log.qty >= bQty) ? curCost : Math.round(curCost * (log.qty / (bQty + sQty - sQty))); 
+                // 위 로직은 calculateStats와 동일하게 수정
+                let sb;
+                const tempCurrentQty = (bQty - (sQty - log.qty));
+                if (log.qty >= tempCurrentQty) sb = curCost;
+                else sb = Math.round(curCost * (log.qty / tempCurrentQty));
+                
+                realP += (log.amount - sb);
+                curCost -= sb;
+                bQty -= log.qty;
             }
-        };
-        reader.readAsText(file);
-    }
-
-    function downloadCSV() {
-        let csv = '날짜,구분,종목명,수량,단가,금액,메모\n';
-        transactions.forEach(l => {
-            const name = l.category === 'trade' ? l.name : '-';
-            const qty = l.qty || 0;
-            const price = l.price || 0;
-            csv += `${l.date},${l.type},${name},${qty},${price},${l.amount},${l.memo || ''}\n`;
         });
-        const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'stock_history.csv';
-        a.click();
+
+        const curP = currentPrices[itemName] || (bQty > 0 ? curCost / bQty : 0);
+        const evalP = bQty > 0 ? Math.round(bQty * curP) - curCost : 0;
+        const totalP = realP + evalP;
+
+        summary.innerHTML = `
+            <div class="stat-item"><div class="stat-label">보유 수량</div><div class="stat-value">${bQty}주</div></div>
+            <div class="stat-item"><div class="stat-label">현재 매입원가</div><div class="stat-value">${fmt(curCost)}</div></div>
+            <div class="stat-item"><div class="stat-label">누적 실현손익</div><div class="stat-value ${realP >= 0 ? 'up' : 'down'}">${fmt(realP)}</div></div>
+            <div class="stat-item"><div class="stat-label">현재 평가손익</div><div class="stat-value ${evalP >= 0 ? 'up' : 'down'}">${fmt(evalP)}</div></div>
+            <div class="stat-item" style="grid-column: span 2; background: var(--header-bg); color: white;"><div class="stat-label">종목 총 합계 손익</div><div class="stat-value ${totalP >= 0 ? 'up' : 'down'}">${fmt(totalP)}</div></div>
+        `;
+
+        tbody.innerHTML = '';
+        [...itemLogs].reverse().forEach(l => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td class="text-center">${l.date}</td><td class="text-center">${l.type === 'buy' ? '📈매수' : '📉매도'}</td><td>${l.qty}주</td><td>${fmt(l.price)}</td><td>${fmt(l.amount)}</td><td class="text-left">${l.memo || ''}</td>`;
+            tbody.appendChild(tr);
+        });
     }
 
-    function resetData() {
-        if(confirm('정말로 모든 데이터를 삭제하시겠습니까? 복구할 수 없습니다.')) {
-            localStorage.clear();
-            location.reload();
+    function closeItemModal() { document.getElementById('itemHistoryModal').style.display = 'none'; }
+
+    function setSort(key) {
+        if (sortConfig.key === key) sortConfig.direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
+        else { sortConfig.key = key; sortConfig.direction = 'asc'; }
+        document.querySelectorAll('.sortable span').forEach(s => s.innerText = '↕');
+        document.getElementById(`sort_${key}`).innerText = sortConfig.direction === 'asc' ? '↑' : '↓';
+        renderHistory();
+    }
+
+    function renderHistory() {
+        const tbody = document.querySelector('#historyTable tbody');
+        tbody.innerHTML = '';
+        let sorted = [...transactions].sort((a, b) => {
+            let valA = a[sortConfig.key], valB = b[sortConfig.key];
+            if (sortConfig.key === 'type') { const m = { 'buy': 1, 'sell': 2, 'in': 3, 'out': 4 }; valA = m[a.type]; valB = m[b.type]; }
+            return sortConfig.direction === 'asc' ? (valA < valB ? -1 : 1) : (valA > valB ? -1 : 1);
+        });
+        sorted.forEach(l => {
+            const tr = document.createElement('tr');
+            const typeLabel = { 'buy':'📈매수', 'sell':'📉매도', 'in':'💰입금', 'out':'💸출금' }[l.type];
+            const nameDisplay = l.category === 'trade' ? `<span class="stock-link" onclick="showItemHistory('${l.name}')">${l.name}</span>` : '-';
+            tr.innerHTML = `<td class="text-center">${l.date}</td><td class="text-center">${typeLabel}</td><td class="text-left">${nameDisplay}</td><td>${l.qty || '-'}</td><td>${l.price ? fmt(l.price) : '-'}</td><td>${fmt(l.amount)}</td><td class="text-left">${l.memo || ''}</td><td class="text-center"><button onclick="editLog(${l.id})" class="btn btn-gray btn-sm">수정</button><button onclick="deleteLog(${l.id})" class="btn btn-danger btn-sm">삭제</button></td>`;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderCalendar() {
+        const year = currentViewDate.getFullYear(), month = currentViewDate.getMonth();
+        document.getElementById('calendarTitle').innerText = `${year}년 ${month + 1}월`;
+        const firstDay = new Date(year, month, 1).getDay(), lastDate = new Date(year, month + 1, 0).getDate();
+        const grid = document.getElementById('calendarGrid'); grid.innerHTML = '';
+        ['일','월','화','수','목','금','토'].forEach(d => { const div = document.createElement('div'); div.className = 'calendar-day-head'; div.innerText = d; grid.appendChild(div); });
+        for (let i = 0; i < firstDay; i++) grid.appendChild(Object.assign(document.createElement('div'), {className:'calendar-cell'}));
+        for (let d = 1; d <= lastDate; d++) {
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+            const dayLogs = transactions.filter(t => t.date === dateStr);
+            const cell = document.createElement('div'); cell.className = 'calendar-cell'; cell.onclick = () => openModal(dateStr);
+            let contentHtml = '';
+            dayLogs.forEach(log => {
+                if(log.category === 'cash') contentHtml += `<span class="indicator ${log.type === 'in' ? 'bg-in' : 'bg-out'}">${log.type==='in'?'입':'출'} ${fmt(log.amount)}</span>`;
+                else contentHtml += `<span class="indicator ${log.type === 'buy' ? 'bg-buy' : 'bg-sell'}">${log.name} ${log.qty}주</span>`;
+            });
+            cell.innerHTML = `<div class="cell-date">${d}</div><div class="cell-content">${contentHtml}</div>`;
+            grid.appendChild(cell);
         }
     }
 
-    window.onload = () => {
-        renderDashboard();
-    };
+    function changeMonth(delta) { currentViewDate.setMonth(currentViewDate.getMonth() + delta); renderCalendar(); }
 
+    function openModal(date, logToEdit = null) {
+        selectedDate = date; editingId = logToEdit ? logToEdit.id : null;
+        document.getElementById('modalDateDisplay').innerText = `${date} ${editingId ? '수정' : '기록'}`;
+        document.getElementById('dayModal').style.display = 'flex';
+        if (logToEdit) {
+            showModalTab(logToEdit.category);
+            if (logToEdit.category === 'trade') {
+                document.getElementById('tradeName').value = logToEdit.name; document.getElementById('tradeCode').value = logToEdit.code;
+                document.getElementById('tradeType').value = logToEdit.type; document.getElementById('tradeQty').value = logToEdit.qty;
+                document.getElementById('tradePrice').value = logToEdit.price; calcTotal(); document.getElementById('tradeMemo').value = logToEdit.memo;
+            } else {
+                document.getElementById('cashType').value = logToEdit.type; document.getElementById('cashAmount').value = logToEdit.amount;
+                document.getElementById('cashMemo').value = logToEdit.memo;
+            }
+        } else { resetModalForms(); }
+        renderDayLogs();
+    }
+
+    function resetModalForms() { 
+        document.querySelectorAll('.modal-content input').forEach(i => i.value = ''); 
+        document.getElementById('tradeTotalDisplay').innerText = '0'; 
+        editingId = null; 
+    }
+    
+    function closeModal() { document.getElementById('dayModal').style.display = 'none'; renderCalendar(); renderDashboard(); renderHistory(); }
+    
+    function showModalTab(tab) {
+        document.querySelectorAll('.modal-tab-content').forEach(c => c.style.display = 'none');
+        document.querySelectorAll('#dayModal .tab-btn').forEach(b => b.classList.remove('active'));
+        if(tab === 'trade') { document.getElementById('modalTradeForm').style.display = 'block'; document.getElementById('modalTradeTab').classList.add('active'); }
+        else { document.getElementById('modalCashForm').style.display = 'block'; document.getElementById('modalCashTab').classList.add('active'); }
+    }
+
+    function calcTotal() { 
+        const q = parseInt(document.getElementById('tradeQty').value) || 0; 
+        const p = parseInt(document.getElementById('tradePrice').value) || 0; 
+        document.getElementById('tradeTotalDisplay').innerText = (q * p).toLocaleString(); 
+    }
+
+    function saveTransaction(category) {
+        let logData = { id: editingId || Date.now(), date: selectedDate, category };
+        if(category === 'trade') {
+            logData.name = document.getElementById('tradeName').value; 
+            logData.code = document.getElementById('tradeCode').value;
+            logData.type = document.getElementById('tradeType').value; 
+            logData.qty = parseInt(document.getElementById('tradeQty').value) || 0;
+            logData.price = parseInt(document.getElementById('tradePrice').value) || 0; 
+            logData.amount = logData.qty * logData.price;
+            logData.memo = document.getElementById('tradeMemo').value; 
+            if(!logData.name || logData.qty <= 0 || logData.price <= 0) return;
+        } else {
+            logData.type = document.getElementById('cashType').value; 
+            logData.amount = parseInt(document.getElementById('cashAmount').value) || 0;
+            logData.memo = document.getElementById('cashMemo').value; 
+            if(logData.amount <= 0) return;
+        }
+        if (editingId) { const idx = transactions.findIndex(t => t.id === editingId); if (idx > -1) transactions[idx] = logData; }
+        else transactions.push(logData);
+        localStorage.setItem('stock_transactions', JSON.stringify(transactions));
+        resetModalForms(); renderDayLogs(); if (editingId) closeModal();
+    }
+
+    function renderDayLogs() {
+        const logs = transactions.filter(t => t.date === selectedDate);
+        const container = document.getElementById('dayLogs'); container.innerHTML = '';
+        logs.forEach(l => {
+            const div = document.createElement('div');
+            div.style.cssText = 'display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; padding:8px; background:rgba(0,0,0,0.05); border-radius:8px';
+            const label = l.category === 'trade' ? `${l.name} ${l.qty}주 ${l.type==='buy'?'매수':'매도'}` : `${l.type==='in'?'입금':'출금'}`;
+            div.innerHTML = `<div style="flex:1"><strong>${label}</strong><br><small>${fmt(l.amount)}</small></div><div style="display:flex; gap:5px"><button onclick="editLog(${l.id})" class="btn btn-gray btn-sm">수정</button><button onclick="deleteLog(${l.id})" class="btn btn-danger btn-sm">삭제</button></div>`;
+            container.appendChild(div);
+        });
+    }
+
+    function editLog(id) { const log = transactions.find(t => t.id === id); if (log) openModal(log.date, log); }
+    function deleteLog(id) { if(confirm('기록을 삭제하시겠습니까?')) { transactions = transactions.filter(t => t.id !== id); localStorage.setItem('stock_transactions', JSON.stringify(transactions)); renderDayLogs(); renderHistory(); } }
+    function deleteStockTransactions(name) { if(confirm(`${name}의 모든 기록을 삭제하시겠습니까?`)) { transactions = transactions.filter(t => t.name !== name); localStorage.setItem('stock_transactions', JSON.stringify(transactions)); renderDashboard(); } }
+
+    function updatePrice(name, price) { 
+        currentPrices[name] = parseFloat(price); 
+        lastPriceUpdate = new Date().toLocaleString(); 
+        localStorage.setItem('stock_prices', JSON.stringify(currentPrices)); 
+        localStorage.setItem('last_price_update', lastPriceUpdate); 
+        renderDashboard(); 
+    }
+    
+    function openNaver(code, name) { 
+        const url = code ? `https://finance.naver.com/item/main.naver?code=${code}` : `https://finance.naver.com/search/search.naver?query=${encodeURIComponent(name)}&endUrl=&encoding=UTF-8`;
+        window.open(url, '_blank'); 
+    }
+
+    function exportData() { const blob = new Blob([JSON.stringify({ transactions, currentPrices, lastPriceUpdate })], { type: 'application/json' }); const url = URL.createObjectURL(blob); Object.assign(document.createElement('a'), { href: url, download: `stock_diary_backup_${new Date().toISOString().split('T')[0]}.json` }).click(); }
+    function importData(e) { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = (e) => { try { const d = JSON.parse(e.target.result); transactions = d.transactions || []; currentPrices = d.currentPrices || {}; lastPriceUpdate = d.lastPriceUpdate || '-'; localStorage.setItem('stock_transactions', JSON.stringify(transactions)); localStorage.setItem('stock_prices', JSON.stringify(currentPrices)); alert('성공!'); location.reload(); } catch(err) { alert('실패!'); } }; r.readAsText(f); }
+    function downloadCSV() { let csv = '날짜,구분,종목명,수량,단가,금액,메모\n'; transactions.forEach(l => { csv += `${l.date},${l.type},${l.category==='trade'?l.name:'-'},${l.qty||0},${l.price||0},${l.amount},${l.memo||''}\n`; }); Object.assign(document.createElement('a'), { href: URL.createObjectURL(new Blob(["\uFEFF"+csv], {type:'text/csv;charset=utf-8;'})), download: 'stock_history.csv' }).click(); }
+    function resetData() { if(confirm('전체 삭제?')) { localStorage.clear(); location.reload(); } }
+
+    window.onload = () => { renderDashboard(); };
 </script>
 </body>
 </html>
