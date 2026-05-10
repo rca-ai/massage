@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>주식아가의 투자일기 v1.9</title>
+    <title>주식아가의 투자일기 v2.0</title>
     <style>
         :root {
             --bg-color: #f8f9fa;
@@ -44,12 +44,13 @@
         }
 
         .version-badge {
-            background: #555;
+            background: #007bff;
             padding: 2px 8px;
             border-radius: 4px;
             font-size: 0.7rem;
             vertical-align: middle;
             margin-left: 8px;
+            color: white;
         }
 
         .container { max-width: 1100px; margin: 0 auto; padding: 10px; }
@@ -186,7 +187,7 @@
 
 <header>
     <div style="font-size: 1.2rem; font-weight: bold;">
-        🐣 주식아가의 투자일기 <span class="version-badge">v1.9</span>
+        🐣 주식아가의 투자일기 <span class="version-badge">v2.0</span>
     </div>
     <div style="display: flex; gap: 10px; align-items: center;">
         <button id="themeToggle" class="btn btn-sm" style="background: #555; color: white;">🌙 테마</button>
@@ -390,6 +391,29 @@
     let currentModalMode = 'buy'; 
     let sortConfig = { key: 'datetime', direction: 'desc' };
 
+    // --- 데이터 마이그레이션 (이전 버전 호환성 해결) ---
+    function migrateData() {
+        let changed = false;
+        transactions = transactions.map(t => {
+            let updated = false;
+            // 1. ID가 없거나 숫자라면 고유 문자열 ID로 변환
+            if (!t.id) {
+                t.id = 'tx_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+                updated = true;
+            }
+            // 2. datetime 필드가 없다면 date 기준으로 생성
+            if (!t.datetime) {
+                t.datetime = t.date + (t.time ? " " + t.time : " 00:00:00");
+                updated = true;
+            }
+            if (updated) changed = true;
+            return t;
+        });
+        if (changed) {
+            localStorage.setItem('stock_transactions', JSON.stringify(transactions));
+        }
+    }
+
     // --- 유틸리티 함수 ---
     const fmt = (num) => new Intl.NumberFormat('ko-KR').format(Math.round(num || 0)) + '원';
     const fmtPct = (num) => (isNaN(num) || !isFinite(num) ? '0.00' : num.toFixed(2)) + '%';
@@ -409,7 +433,7 @@
         localStorage.setItem('theme', currentTheme);
     };
 
-    // --- 섹션 전환 (탭 새로고침 포함) ---
+    // --- 섹션 전환 ---
     function showSection(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -420,14 +444,13 @@
         if (targetSection) targetSection.classList.add('active');
         if (targetTab) targetTab.classList.add('active');
         
-        // 데이터 리렌더링
         if (id === 'dashboard') renderDashboard();
         else if (id === 'calendar') renderCalendar();
         else if (id === 'tradedItems') renderTradedItems();
         else if (id === 'history') renderHistory();
     }
 
-    // --- 핵심 통계 및 잔고 계산 로직 ---
+    // --- 핵심 통계 및 잔고 계산 ---
     function calculateStats() {
         let totalIn = 0; totalOut = 0; cashBalance = 0;
         let stocks = {}; 
@@ -521,13 +544,11 @@
         document.getElementById('lastUpdateTime').innerText = `마지막 업데이트: ${lastPriceUpdate}`;
     }
 
-    // --- 거래내역 렌더링 ---
     function renderHistory() {
         const tbody = document.querySelector('#historyTable tbody');
         if (!tbody) return;
         tbody.innerHTML = '';
         
-        // 잔고 추적을 위한 시간순 정렬 (오름차순)
         const chronoSorted = [...transactions].sort((a, b) => a.datetime.localeCompare(b.datetime));
         let runningBalance = 0;
         const balances = {};
@@ -537,7 +558,6 @@
             balances[t.id] = runningBalance;
         });
 
-        // 사용자 설정 기준 정렬 (기본값: 최신순)
         let sorted = [...transactions].sort((a, b) => {
             let valA = a[sortConfig.key], valB = b[sortConfig.key];
             if (sortConfig.key === 'type') { const m = { 'buy': 1, 'sell': 2, 'in': 3, 'out': 4 }; valA = m[a.type]; valB = m[b.type]; }
@@ -567,9 +587,9 @@
         });
     }
 
-    // --- 삭제 기능 (핵심 수정 부분) ---
+    // --- 삭제 기능 완벽 보완 ---
     function deleteLog(id) {
-        if (!confirm('해당 기록을 영구적으로 삭제하시겠습니까? 관련 잔고와 통계가 모두 재계산됩니다.')) return;
+        if (!confirm('해당 기록을 삭제하시겠습니까? 잔고와 통계가 즉시 재계산됩니다.')) return;
         
         const stringId = String(id);
         const originalLength = transactions.length;
@@ -578,26 +598,20 @@
         if (transactions.length < originalLength) {
             localStorage.setItem('stock_transactions', JSON.stringify(transactions));
             
-            // UI 전체 갱신
-            const currentActiveTab = document.querySelector('.tab-btn.active');
-            if (currentActiveTab) {
-                const sectionId = currentActiveTab.id.replace('tab-', '');
-                showSection(sectionId); // 현재 탭 다시 그리기
+            // 현재 활성화된 탭에 맞춰 화면 갱신
+            const activeTab = document.querySelector('.tab-btn.active');
+            if (activeTab) {
+                const sectionId = activeTab.id.replace('tab-', '');
+                showSection(sectionId);
             }
-            
-            // 모달이 열려있다면 모달 로그도 갱신
             if (selectedDate) renderDayLogs();
-            
-            // 달력 배경 요약 등은 다른 탭일 때도 갱신 필요
             renderCalendar(); 
         }
     }
 
-    // --- 거래 기록 저장 (초 단위 시간 포함) ---
+    // --- 거래 기록 저장 ---
     function saveTransactionByMode() {
         const category = (currentModalMode === 'buy' || currentModalMode === 'sell') ? 'trade' : 'cash';
-        
-        // 신규 ID는 무작위 문자열 조합으로 생성하여 비교 충돌 방지
         let logData = { 
             id: editingId || 'tx_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5), 
             date: selectedDate, 
@@ -646,7 +660,6 @@
         closeModal();
     }
 
-    // --- 달력 및 일간 로그 ---
     function renderCalendar() {
         const year = currentViewDate.getFullYear(), month = currentViewDate.getMonth();
         const titleEl = document.getElementById('calendarTitle');
@@ -709,7 +722,6 @@
         });
     }
 
-    // --- 종목별 분석 및 상세 히스토리 ---
     function renderTradedItems() {
         const stats = calculateStats();
         const tbody = document.querySelector('#tradedItemsTable tbody');
@@ -759,7 +771,6 @@
         [...itemLogs].reverse().forEach(l => { const tr = document.createElement('tr'); tr.innerHTML = `<td>${l.datetime}</td><td>${l.type === 'buy'?'매입':'매도'}</td><td>${l.qty}</td><td>${fmt(l.price)}</td><td>${fmt(l.fee)}</td><td>${fmt(l.tax)}</td><td>${fmt(l.amount)}</td><td class="text-left">${l.memo||''}</td>`; tbody.appendChild(tr); });
     }
 
-    // --- 기타 핸들러 ---
     function showModalTab(mode) {
         currentModalMode = mode;
         document.querySelectorAll('#dayModal .tab-btn').forEach(b => b.classList.remove('active'));
@@ -794,13 +805,16 @@
     function updatePrice(name, price) { currentPrices[name] = parseFloat(price); lastPriceUpdate = new Date().toLocaleString(); localStorage.setItem('stock_prices', JSON.stringify(currentPrices)); localStorage.setItem('last_price_update', lastPriceUpdate); renderDashboard(); }
     function openNaver(code, name) { window.open(code ? `https://finance.naver.com/item/main.naver?code=${code}` : `https://finance.naver.com/search/search.naver?query=${encodeURIComponent(name)}&endUrl=&encoding=UTF-8`, '_blank'); }
     function exportData() { const blob = new Blob([JSON.stringify({ transactions, currentPrices, lastPriceUpdate })], { type: 'application/json' }); const url = URL.createObjectURL(blob); Object.assign(document.createElement('a'), { href: url, download: `stock_diary_backup_${new Date().toISOString().split('T')[0]}.json` }).click(); }
-    function importData(e) { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = (e) => { try { const d = JSON.parse(e.target.result); transactions = d.transactions || []; currentPrices = d.currentPrices || {}; lastPriceUpdate = d.lastPriceUpdate || '-'; localStorage.setItem('stock_transactions', JSON.stringify(transactions)); localStorage.setItem('stock_prices', JSON.stringify(currentPrices)); alert('복구 성공!'); location.reload(); } catch(err) { alert('실패!'); } }; r.readAsText(f); }
+    function importData(e) { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = (e) => { try { const d = JSON.parse(e.target.result); transactions = d.transactions || []; currentPrices = d.currentPrices || {}; lastPriceUpdate = d.lastPriceUpdate || '-'; localStorage.setItem('stock_transactions', JSON.stringify(transactions)); localStorage.setItem('stock_prices', JSON.stringify(currentPrices)); migrateData(); alert('복구 성공!'); location.reload(); } catch(err) { alert('실패!'); } }; r.readAsText(f); }
     function downloadCSV() { let csv = '날짜시간,구분,종목명,수량,단가,수수료,거래세,금액,메모\n'; transactions.forEach(l => { csv += `${l.datetime},${l.type},${l.category==='trade'?l.name:'-'},${l.qty||0},${l.price||0},${l.fee||0},${l.tax||0},${l.amount},${l.memo||''}\n`; }); Object.assign(document.createElement('a'), { href: URL.createObjectURL(new Blob(["\uFEFF"+csv], {type:'text/csv;charset=utf-8;'})), download: 'stock_history.csv' }).click(); }
     function resetData() { if(confirm('모든 데이터를 삭제하시겠습니까?')) { localStorage.clear(); location.reload(); } }
     function deleteStockTransactions(name) { if(confirm(`${name}의 모든 기록을 삭제하시겠습니까?`)) { transactions = transactions.filter(t => t.name !== name); localStorage.setItem('stock_transactions', JSON.stringify(transactions)); renderDashboard(); renderHistory(); } }
     function searchStockCode() { const name = document.getElementById('tradeName').value; if(!name) { alert('종목명을 입력해주세요.'); return; } window.open(`https://finance.naver.com/search/search.naver?query=${encodeURIComponent(name)}&endUrl=&encoding=UTF-8`, '_blank'); }
 
-    window.onload = () => { renderDashboard(); };
+    window.onload = () => { 
+        migrateData();
+        renderDashboard(); 
+    };
 </script>
 </body>
 </html>
