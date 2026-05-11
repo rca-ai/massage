@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>주식아가의 투자일기 v3.0</title>
+    <title>주식아가의 투자일기 v3.1</title>
     <style>
         :root {
             --bg-color: #f8f9fa;
@@ -179,7 +179,7 @@
 <body>
 
 <header>
-    <div style="font-size: 1.1rem; font-weight: bold;">🐣 주식아가 <span class="version-badge">v3.0</span></div>
+    <div style="font-size: 1.1rem; font-weight: bold;">🐣 주식아가 <span class="version-badge">v3.1</span></div>
     <button id="themeToggle" class="btn btn-sm btn-gray">🌙</button>
 </header>
 
@@ -237,7 +237,7 @@
         </div>
     </section>
 
-    <!-- 종목분석 (소팅 기능 복구) -->
+    <!-- 종목분석 -->
     <section id="tradedItems" class="section">
         <div class="card">
             <h4>📊 종목별 누적 손익</h4>
@@ -261,7 +261,7 @@
         </div>
     </section>
     
-    <!-- 거래내역 (소팅 및 엑셀 기능 복구) -->
+    <!-- 거래내역 -->
     <section id="history" class="section">
         <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
@@ -476,14 +476,19 @@
 
     function calculateStats() {
         let tIn = 0, tOut = 0, bal = 0, stocks = {};
-        transactions.sort((a,b)=>a.datetime.localeCompare(b.datetime)).forEach(l => {
+        // datetime 정렬 안전 처리
+        const sortedTransactions = [...transactions].sort((a,b)=> {
+            const dtA = a.datetime || a.date + " 00:00:00";
+            const dtB = b.datetime || b.date + " 00:00:00";
+            return dtA.localeCompare(dtB);
+        });
+
+        sortedTransactions.forEach(l => {
             if(l.category==='cash') { if(l.type==='in'){ tIn+=l.amount; bal+=l.amount; } else { tOut+=l.amount; bal-=l.amount; } }
             else {
                 if(!stocks[l.name]) stocks[l.name] = { name:l.name, code:l.code, qty:0, tCost:0, realP:0, bAmt:0, sAmt:0 };
                 const s = stocks[l.name];
                 let amount = l.amount || 0;
-                let cost = l.totalCost || l.tCost || amount;
-
                 if(l.type==='buy'){ s.bAmt += amount; s.tCost += amount; s.qty += l.qty; bal -= amount; }
                 else if(l.type==='sell'){ 
                     s.sAmt += amount; 
@@ -513,10 +518,22 @@
     function renderHistory() {
         const tbody = document.querySelector('#historyTable tbody'); tbody.innerHTML = '';
         let run = 0; const bals = {};
-        transactions.sort((a,b)=>a.datetime.localeCompare(b.datetime)).forEach(t => { if(t.type==='buy'||t.type==='out') run -= t.amount; else run += t.amount; bals[t.id] = run; });
+        
+        // 시간순으로 정렬하여 잔고 계산
+        const sortedByTime = [...transactions].sort((a,b)=> {
+            const dtA = a.datetime || a.date + " 00:00:00";
+            const dtB = b.datetime || b.date + " 00:00:00";
+            return dtA.localeCompare(dtB);
+        });
+        sortedByTime.forEach(t => { if(t.type==='buy'||t.type==='out') run -= t.amount; else run += t.amount; bals[t.id] = run; });
         
         let ds = [...transactions].sort((a,b)=> { 
             let vA = a[sortConfig.key], vB = b[sortConfig.key]; 
+            // datetime 보완 정렬
+            if (sortConfig.key === 'datetime') {
+                vA = a.datetime || a.date + " 00:00:00";
+                vB = b.datetime || b.date + " 00:00:00";
+            }
             if(sortConfig.key === 'amount' || sortConfig.key === 'qty' || sortConfig.key === 'price') {
                 vA = parseFloat(vA) || 0; vB = parseFloat(vB) || 0;
             }
@@ -524,7 +541,8 @@
         });
         
         ds.forEach(l => {
-            tbody.innerHTML += `<tr><td>${l.datetime}</td><td>${l.type}</td><td style="text-align:left">${l.name}</td><td>${l.qty||'-'}</td><td>${l.price?fmt(l.price):'-'}</td><td class="${l.type==='buy'||l.type==='out'?'up':''}">${fmt(l.amount)}</td><td>${fmt(bals[l.id])}</td><td><button onclick="deleteLog('${l.id}')" class="btn btn-danger btn-sm">X</button></td></tr>`;
+            const displayTime = l.datetime || l.date + " 00:00:00";
+            tbody.innerHTML += `<tr><td>${displayTime}</td><td>${l.type}</td><td style="text-align:left">${l.name}</td><td>${l.qty||'-'}</td><td>${l.price?fmt(l.price):'-'}</td><td class="${l.type==='buy'||l.type==='out'?'up':''}">${fmt(l.amount)}</td><td>${fmt(bals[l.id])}</td><td><button onclick="deleteLog('${l.id}')" class="btn btn-danger btn-sm">X</button></td></tr>`;
         });
     }
 
@@ -568,11 +586,15 @@
     function showItemHistory(n) {
         const modal = document.getElementById('itemHistoryModal');
         document.getElementById('itemHistoryTitle').innerText = n + ' 상세 분석'; modal.style.display = 'flex';
-        const logs = transactions.filter(t => t.name === n).sort((a,b) => a.datetime.localeCompare(b.datetime));
+        const logs = transactions.filter(t => t.name === n).sort((a,b) => {
+            const dtA = a.datetime || a.date + " 00:00:00";
+            const dtB = b.datetime || b.date + " 00:00:00";
+            return dtA.localeCompare(dtB);
+        });
         const s = calculateStats().allStocks[n]; const cp = currentPrices[n] || 0; const ep = s.qty > 0 ? (s.qty*cp)-s.tCost : 0;
         document.getElementById('itemSummary').innerHTML = `<div class="stat-item"><div class="stat-label">보유수량</div><div class="stat-value">${s.qty}</div></div><div class="stat-item"><div class="stat-label">실현손익</div><div class="stat-value">${fmt(s.realP)}</div></div><div class="stat-item"><div class="stat-label">평가손익</div><div class="stat-value">${fmt(ep)}</div></div><div class="stat-item"><div class="stat-label">합계손익</div><div class="stat-value">${fmt(s.realP+ep)}</div></div>`;
         const tb = document.getElementById('itemDetailTbody'); tb.innerHTML = '';
-        logs.reverse().forEach(l => tb.innerHTML += `<tr><td>${l.datetime}</td><td>${l.type}</td><td>${l.qty||0}</td><td>${fmt(l.price)}</td><td>${fmt(l.amount)}</td></tr>`);
+        logs.reverse().forEach(l => tb.innerHTML += `<tr><td>${l.datetime || l.date}</td><td>${l.type}</td><td>${l.qty||0}</td><td>${fmt(l.price)}</td><td>${fmt(l.amount)}</td></tr>`);
     }
 
     function openModal(d) { selectedDate = d; document.getElementById('modalDateDisplay').innerText = d + ' 매매 기록'; document.getElementById('dayModal').style.display = 'flex'; renderDayLogs(); }
@@ -589,22 +611,47 @@
     function saveTransactionByMode() {
         const isTrade = currentModalMode==='buy'||currentModalMode==='sell';
         const now = new Date(); const time = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
-        let log = { id: 'tx_'+Date.now(), date: selectedDate, time, datetime: selectedDate+' '+time, type: currentModalMode, category: isTrade?'trade':'cash' };
+        let log = { id: Date.now(), date: selectedDate, time, datetime: selectedDate+' '+time, type: currentModalMode, category: isTrade?'trade':'cash' };
         if(isTrade) { log.name = document.getElementById('tradeName').value; log.code = document.getElementById('tradeCode').value; log.qty = parseInt(document.getElementById('tradeQty').value)||0; log.price = parseInt(document.getElementById('tradePrice').value)||0; log.fee = parseInt(document.getElementById('tradeFee').value)||0; log.tax = parseInt(document.getElementById('tradeTax').value)||0; log.amount = currentModalMode==='buy'?(log.qty*log.price)+log.fee+log.tax : (log.qty*log.price)-log.fee-log.tax; log.memo = document.getElementById('tradeMemo').value; if(!log.name) return; }
         else { log.amount = parseInt(document.getElementById('cashAmount').value)||0; log.memo = document.getElementById('cashMemo').value; log.name = currentModalMode==='in'?'입금':'출금'; if(!log.amount) return; }
         transactions.push(log); localStorage.setItem('stock_transactions', JSON.stringify(transactions)); closeModal();
     }
     function renderDayLogs() { const ls = transactions.filter(t => t.date === selectedDate); const c = document.getElementById('dayLogs'); c.innerHTML = ''; ls.forEach(l => c.innerHTML += `<div class="log-item" style="display:flex; justify-content:space-between; padding:8px; background:rgba(0,0,0,0.02); margin-bottom:5px; border-radius:5px; font-size:0.85rem;"><span>${l.name} (${l.type})</span><span>${fmt(l.amount)} <button onclick="deleteLog('${l.id}')" class="btn btn-danger btn-sm" style="padding:2px 6px;">X</button></span></div>`); }
-    function deleteLog(id) { if(confirm('삭제하시겠습니까?')) { transactions = transactions.filter(t => t.id !== id); localStorage.setItem('stock_transactions', JSON.stringify(transactions)); renderDayLogs(); } }
+    function deleteLog(id) { if(confirm('삭제하시겠습니까?')) { transactions = transactions.filter(t => t.id != id); localStorage.setItem('stock_transactions', JSON.stringify(transactions)); renderDayLogs(); } }
     function deleteStockTransactions(n) { if(confirm(n + '의 모든 기록을 삭제하시겠습니까?')) { transactions = transactions.filter(t => t.name !== n); localStorage.setItem('stock_transactions', JSON.stringify(transactions)); renderDashboard(); } }
     function changeMonth(d) { currentViewDate.setMonth(currentViewDate.getMonth()+d); renderCalendar(); }
     function closeItemModal() { document.getElementById('itemHistoryModal').style.display='none'; }
     function searchStockCode() { const n = document.getElementById('tradeName').value; if(n) window.open(`https://www.google.com/search?q=${encodeURIComponent(n + " 주가")}`, '_blank'); }
     
-    // 데이터 처리 관련
-    function exportData() { const b = new Blob([JSON.stringify({ transactions, currentPrices, marketIndices })], { type: 'application/json' }); const u = URL.createObjectURL(b); Object.assign(document.createElement('a'), { href: u, download: 'stock_diary_v3.0.json' }).click(); }
-    function importData(e) { const f = e.target.files[0]; if(f) { const r = new FileReader(); r.onload = (ev) => { const d = JSON.parse(ev.target.result); transactions = d.transactions || []; currentPrices = d.currentPrices || {}; marketIndices = d.marketIndices || marketIndices; localStorage.setItem('stock_transactions', JSON.stringify(transactions)); localStorage.setItem('stock_prices', JSON.stringify(currentPrices)); localStorage.setItem('market_indices', JSON.stringify(marketIndices)); location.reload(); }; r.readAsText(f); } }
-    function downloadCSV() { let csv = 'datetime,type,name,qty,price,amount,memo\n'; transactions.forEach(l => csv += `${l.datetime},${l.type},${l.name},${l.qty||0},${l.price||0},${l.amount},${l.memo||""}\n`); const blob = new Blob(["\uFEFF"+csv], {type:'text/csv'}); const url = URL.createObjectURL(blob); Object.assign(document.createElement('a'), { href: url, download: 'history.csv' }).click(); }
+    // 데이터 처리 및 호환성 보완
+    function exportData() { const b = new Blob([JSON.stringify({ transactions, currentPrices, marketIndices })], { type: 'application/json' }); const u = URL.createObjectURL(b); Object.assign(document.createElement('a'), { href: u, download: 'stock_diary_v3.1.json' }).click(); }
+    function importData(e) { 
+        const f = e.target.files[0]; 
+        if(f) { 
+            const r = new FileReader(); 
+            r.onload = (ev) => { 
+                const d = JSON.parse(ev.target.result); 
+                // 구버전 데이터 호환성 보완 로직
+                transactions = (d.transactions || []).map(t => {
+                    // datetime 필드 보완 (sort를 위함)
+                    if (!t.datetime) {
+                        t.datetime = t.date + (t.time ? ' ' + t.time : ' 00:00:00');
+                    }
+                    // 필드명 변경 대응 (totalCost -> amount)
+                    if (!t.amount && t.totalCost) t.amount = t.totalCost;
+                    return t;
+                });
+                currentPrices = d.currentPrices || {}; 
+                marketIndices = d.marketIndices || marketIndices; 
+                localStorage.setItem('stock_transactions', JSON.stringify(transactions)); 
+                localStorage.setItem('stock_prices', JSON.stringify(currentPrices)); 
+                localStorage.setItem('market_indices', JSON.stringify(marketIndices)); 
+                location.reload(); 
+            }; 
+            r.readAsText(f); 
+        } 
+    }
+    function downloadCSV() { let csv = 'datetime,type,name,qty,price,amount,memo\n'; transactions.forEach(l => csv += `${l.datetime || l.date},${l.type},${l.name},${l.qty||0},${l.price||0},${l.amount},${l.memo||""}\n`); const blob = new Blob(["\uFEFF"+csv], {type:'text/csv'}); const url = URL.createObjectURL(blob); Object.assign(document.createElement('a'), { href: url, download: 'history.csv' }).click(); }
     function resetData() { if(confirm('전체 초기화하시겠습니까?')) { localStorage.clear(); location.reload(); } }
     
     // 소팅 핸들러
