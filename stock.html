@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>주아가일기 v4.3</title>
+    <title>주아가일기 v4.4</title>
     <style>
         :root {
             --bg-color: #f8f9fa;
@@ -44,7 +44,7 @@
         }
 
         .version-badge {
-            background: #28a745;
+            background: #4285F4;
             padding: 2px 8px;
             border-radius: 4px;
             font-size: 0.7rem;
@@ -154,7 +154,7 @@
         
         .btn { padding: 12px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; }
         .btn-primary { background: var(--primary-color); color: white; }
-        .btn-naver { background: #03C75A; color: white; }
+        .btn-google { background: #4285F4; color: white; }
         .btn-gray { background: #e9ecef; color: #495057; border: 1px solid #ced4da; }
         .btn-success { background: #28a745; color: white; }
         .btn-danger { background: #dc3545; color: white; }
@@ -182,7 +182,7 @@
 <body>
 
 <header>
-    <div style="font-size: 1.1rem; font-weight: bold;">🐣 주아가일기 <span class="version-badge">v4.3</span></div>
+    <div style="font-size: 1.1rem; font-weight: bold;">🐣 주아가일기 <span class="version-badge">v4.4</span></div>
     <button id="themeToggle" class="btn btn-sm btn-gray">🌙</button>
 </header>
 
@@ -199,9 +199,9 @@
     <section id="dashboard" class="section active">
         <div id="liveClock"></div>
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap;">
-            <h4 style="margin:0">🌏 시장 지수 <span class="guide-comment" style="font-size: 0.7rem; font-weight: normal; margin-left: 10px; opacity: 0.7;">(네이버 금융 실시간 정보)</span></h4>
+            <h4 style="margin:0">🌏 시장 지수 <span class="guide-comment" style="font-size: 0.7rem; font-weight: normal; margin-left: 10px; opacity: 0.7;">(GOOGLEFINANCE 기반 실시간 연동)</span></h4>
             <div style="text-align: right;">
-                <button id="updateIndicesBtn" onclick="updateMarketIndices()" class="btn btn-naver btn-sm">⚡ 지수 업데이트</button>
+                <button id="updateIndicesBtn" onclick="updateMarketIndices()" class="btn btn-google btn-sm">⚡ 지수 업데이트</button>
                 <div id="lastIndexUpdate" class="update-info"></div>
             </div>
         </div>
@@ -219,7 +219,7 @@
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
                 <h4 style="margin:0">📋 보유 종목 현황</h4>
                 <div style="text-align: right;">
-                    <button id="updateStocksBtn" onclick="updateStockPrices()" class="btn btn-naver btn-sm">⚡ 시세 업데이트</button>
+                    <button id="updateStocksBtn" onclick="updateStockPrices()" class="btn btn-google btn-sm">⚡ 시세 업데이트</button>
                     <div id="lastPriceUpdateInfo" class="update-info"></div>
                 </div>
             </div>
@@ -310,7 +310,7 @@
         </div>
         <div class="card">
             <h4>⚙️ 시스템 설정</h4>
-            <p style="font-size: 0.8rem; opacity: 0.8;">v4.3: 해외지수(S&P 500, 다우) 스크래핑 보강 및 거래 내역 수정 기능이 추가되었습니다.</p>
+            <p style="font-size: 0.8rem; opacity: 0.8;">v4.4: 브라우저 CORS 제약 없는 Google Search Grounding 및 GOOGLEFINANCE 규격(KRX:코드, NASDAQ:티커)을 활용하여 주가와 지수를 실시간 업데이트합니다.</p>
         </div>
     </section>
 </div>
@@ -330,7 +330,7 @@
         </div>
         <div id="modalTradeForm">
             <div class="form-group"><label>종목명</label><input type="text" id="tradeName" placeholder="예: 삼성전자"></div>
-            <div class="form-group"><label>종목코드 (숫자 6자리)</label><input type="text" id="tradeCode" placeholder="예: 005930"></div>
+            <div class="form-group"><label>종목코드 (예: KRX:005930, NASDAQ:AAPL)</label><input type="text" id="tradeCode" placeholder="예: KRX:005930"></div>
             <div class="form-row">
                 <div class="form-group"><label>수량</label><input type="number" id="tradeQty" oninput="calcTotal()" placeholder="0"></div>
                 <div class="form-group"><label>단가</label><input type="number" id="tradePrice" oninput="calcTotal()" placeholder="0"></div>
@@ -388,125 +388,179 @@
     }
     setInterval(updateClock, 1000);
 
-    /**
-     * CORS 우회를 위한 다중 Mirror fetch 함수
-     */
-    async function fetchNaverPage(url) {
-        const proxyConfigs = [
-            { url: `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`, type: 'raw' },
-            { url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`, type: 'raw' },
-            { url: `https://corsproxy.io/?${encodeURIComponent(url)}`, type: 'raw' },
-            { url: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, type: 'json' }
-        ];
-
-        for (const config of proxyConfigs) {
-            try {
-                const response = await fetch(config.url, { method: 'GET' });
-                if (!response.ok) continue;
-                if (config.type === 'json') {
-                    const data = await response.json();
-                    if (data.contents) return data.contents;
-                } else {
-                    const text = await response.text();
-                    if (text && text.length > 100) return text;
-                }
-            } catch (e) { continue; }
+    // 하위 호환성 및 편리함을 위해 순수 6자리 숫자인 경우 KRX: 형태로 자동 변환해주는 헬퍼 함수
+    function cleanCode(code) {
+        if (!code) return "";
+        const trimmed = code.trim();
+        if (/^\d{6}$/.test(trimmed)) {
+            return `KRX:${trimmed}`;
         }
-        return null;
+        return trimmed;
     }
 
-    // 네이버 금융 지수 업데이트
+    /**
+     * Gemini 2.5 Flash를 활용한 Google Search Grounding 데이터 가져오기 (CORS 우회 및 완전 안정화)
+     */
+    async function geminiFetch(prompt) {
+        const apiKey = ""; // preview 환경에서 런타임에 주입됨
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        
+        const systemPrompt = "당신은 금융 데이터 전송 에이전트입니다. 반드시 순수한 JSON 형식으로만 응답해야 하며, 그 외의 설명, 마크다운 코드블록 기호(예: ```json)는 절대 출력하지 마십시오. 구글 실시간 검색(google_search) 도구를 사용해 구글 파이낸스(Google Finance)의 실제 실시간 정보를 조회하십시오.";
+        
+        const payload = {
+            contents: [{ parts: [{ text: prompt }] }],
+            systemInstruction: { parts: [{ text: systemPrompt }] },
+            tools: [{ "google_search": {} }]
+        };
+
+        // 지수적 백오프 구현 (최대 5회 시도)
+        for (let i = 0; i < 5; i++) {
+            try {
+                const response = await fetch(url, { 
+                    method: "POST", 
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload) 
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    const rawText = result.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+                    const cleanText = extractJson(rawText);
+                    return JSON.parse(cleanText);
+                } else {
+                    const errorText = await response.text();
+                    console.error(`Gemini API Error (${response.status}):`, errorText);
+                }
+            } catch (e) {
+                console.warn(`Connection retry ${i+1}/5 failed:`, e);
+            }
+            await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000));
+        }
+        throw new Error("Gemini API 연결에 연속적으로 실패했습니다.");
+    }
+
+    // 마크다운 형식 등 불필요한 텍스트에서 순수 JSON만 추출해내는 견고한 헬퍼
+    function extractJson(text) {
+        try {
+            const start = text.indexOf('{');
+            const end = text.lastIndexOf('}');
+            if (start !== -1 && end !== -1 && end > start) {
+                return text.substring(start, end + 1);
+            }
+            return text.trim();
+        } catch(e) { return "{}"; }
+    }
+
+    // 시장 지수 업데이트 (Gemini Google Search Grounding 활용)
     async function updateMarketIndices() {
         const btn = document.getElementById('updateIndicesBtn');
         btn.classList.add('btn-loading'); btn.innerText = "⏳";
         
+        const prompt = `Google Search를 사용하여 구글 금융(Google Finance)에서 다음 시장 지수의 현재 지수값(val)과 오늘 변동률(chg, % 표시)을 찾아줘. 
+        대상 지수 심볼:
+        1. KOSPI (INDEXKRX:KOSPI)
+        2. KOSDAQ (INDEXKRX:KOSDAQ)
+        3. S&P 500 (INDEXSP:.INX)
+        4. DOW (INDEXDJX:.DJI)
+
+        반드시 다음 형식을 따르는 완벽한 JSON 오브젝트 하나만 응답해줘 (마크다운 기호 없이 순수 텍스트로):
+        {
+          "indices": {
+            "kospi": { "val": "지수값", "chg": "변동률%" },
+            "kosdaq": { "val": "지수값", "chg": "변동률%" },
+            "snp500": { "val": "지수값", "chg": "변동률%" },
+            "dow": { "val": "지수값", "chg": "변동률%" }
+          }
+        }`;
+        
         try {
-            // 1. 국내 지수
-            const mainHtml = await fetchNaverPage('https://finance.naver.com/');
-            if (mainHtml) {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(mainHtml, 'text/html');
-                const kospNow = doc.getElementById('KOSPI_now')?.innerText || doc.querySelector('.kospi_area .num')?.innerText || '-';
-                const kospChg = doc.querySelector('#KOSPI_change')?.innerText.trim().replace(/\s+/g, ' ') || doc.querySelector('.kospi_area .num2')?.innerText || '-';
-                const kosdNow = doc.getElementById('KOSDAQ_now')?.innerText || doc.querySelector('.kosdaq_area .num')?.innerText || '-';
-                const kosdChg = doc.querySelector('#KOSDAQ_change')?.innerText.trim().replace(/\s+/g, ' ') || doc.querySelector('.kosdaq_area .num2')?.innerText || '-';
-                
-                if (kospNow !== '-') marketIndices.kospi = { val: kospNow, chg: kospChg };
-                if (kosdNow !== '-') marketIndices.kosdaq = { val: kosdNow, chg: kosdChg };
+            const data = await geminiFetch(prompt);
+            if (data && data.indices) {
+                let updated = false;
+                Object.keys(marketIndices).forEach(k => { 
+                    if(data.indices[k]) {
+                        marketIndices[k].val = data.indices[k].val || '-';
+                        marketIndices[k].chg = data.indices[k].chg || '-';
+                        updated = true;
+                    }
+                });
+                if (updated) {
+                    lastIdxUpdate = new Date().toLocaleString();
+                    localStorage.setItem('last_index_update', lastIdxUpdate);
+                    localStorage.setItem('market_indices', JSON.stringify(marketIndices));
+                    renderDashboard();
+                } else {
+                    alert("지수 데이터 매칭에 실패했습니다.");
+                }
+            } else {
+                alert("지수 데이터를 파싱하지 못했습니다.");
             }
-
-            // 2. 해외 지수 (S&P 500 & DOW 전용 페이지 시도)
-            // S&P 500
-            const snpHtml = await fetchNaverPage('https://finance.naver.com/world/sise.naver?symbol=SPI@SPX');
-            if (snpHtml) {
-                const doc = new DOMParser().parseFromString(snpHtml, 'text/html');
-                const val = doc.querySelector('.no_today .blind')?.innerText || '-';
-                const chg = doc.querySelector('.no_exday .blind')?.nextElementSibling?.innerText || doc.querySelector('.no_exday .rate')?.innerText || '-';
-                if (val !== '-') marketIndices.snp500 = { val, chg: chg + (chg.includes('%') ? '' : '%') };
-            }
-
-            // DOW
-            const dowHtml = await fetchNaverPage('https://finance.naver.com/world/sise.naver?symbol=DJI@DJI');
-            if (dowHtml) {
-                const doc = new DOMParser().parseFromString(dowHtml, 'text/html');
-                const val = doc.querySelector('.no_today .blind')?.innerText || '-';
-                const chg = doc.querySelector('.no_exday .blind')?.nextElementSibling?.innerText || doc.querySelector('.no_exday .rate')?.innerText || '-';
-                if (val !== '-') marketIndices.dow = { val, chg: chg + (chg.includes('%') ? '' : '%') };
-            }
-
-            lastIdxUpdate = new Date().toLocaleString();
-            localStorage.setItem('last_index_update', lastIdxUpdate);
-            localStorage.setItem('market_indices', JSON.stringify(marketIndices));
-            renderDashboard();
         } catch (e) {
             console.error(e);
-            alert("지수 업데이트 중 오류가 발생했습니다.");
+            alert("지수 업데이트 오류: " + e.message);
         } finally {
             btn.classList.remove('btn-loading'); btn.innerText = "⚡ 지수 업데이트";
         }
     }
 
-    // 네이버 금융 종목 시세 업데이트
+    // 주식 실시간 시세 업데이트 (Gemini Google Search Grounding 활용)
     async function updateStockPrices() {
         const btn = document.getElementById('updateStocksBtn');
         btn.classList.add('btn-loading'); btn.innerText = "⏳";
         
         const stats = calculateStats();
-        const stocks = stats.holdings.filter(h => h.code && h.code.trim().length >= 6);
+        // 종목코드가 입력된 항목만 수집 및 6자리 숫자는 자동 포맷 변환
+        const stocks = stats.holdings.filter(h => h.code && h.code.trim().length > 0).map(s => ({
+            name: s.name,
+            code: cleanCode(s.code)
+        }));
         
         if (stocks.length === 0) {
-            alert("종목 코드가 입력된 보유 종목이 없습니다.");
+            alert("등록된 보유 종목 중 종목 코드가 입력된 것이 없습니다.");
             btn.classList.remove('btn-loading'); btn.innerText = "⚡ 시세 업데이트";
             return;
         }
 
-        let successCount = 0;
+        const stockListString = stocks.map(s => `{"name": "${s.name}", "code": "${s.code}"}`).join(", ");
+        const prompt = `Google Search를 활용하여 구글 금융(Google Finance)에서 다음 주식들의 실시간 현재가를 검색해서 매칭해줘.
+        조회 주식 목록: [ ${stockListString} ]
+        각 주식의 'code'(예: KRX:005930, NASDAQ:AAPL 등)를 그대로 검색 엔진에 조회하여 해당 주식의 현재가(종가 혹은 현재 가격 숫자만)를 매칭해야 해. 
+
+        반드시 다음 형식의 JSON만 정확히 반환해줘 (어떤 설명이나 마크다운 백틱도 달지 마십시오):
+        {
+          "stocks": [
+            { "name": "종목명", "price": 현재가숫자 }
+          ]
+        }`;
+        
         try {
-            for (const stock of stocks) {
-                const html = await fetchNaverPage(`https://finance.naver.com/item/main.naver?code=${stock.code.trim()}`);
-                if (html) {
-                    const doc = new DOMParser().parseFromString(html, 'text/html');
-                    let priceText = doc.querySelector('.no_today .blind')?.innerText || doc.querySelector('.today .blind')?.innerText;
-                    if (priceText) {
-                        const priceNum = parseInt(priceText.replace(/,/g, '').replace(/[^0-9]/g, ''));
+            const data = await geminiFetch(prompt);
+            if (data && data.stocks && Array.isArray(data.stocks)) {
+                let count = 0;
+                data.stocks.forEach(s => { 
+                    if(s.price && s.name) {
+                        const priceNum = typeof s.price === 'string' ? parseFloat(s.price.replace(/,/g, '').replace(/[^0-9.]/g, '')) : s.price;
                         if (!isNaN(priceNum)) {
-                            currentPrices[stock.name] = priceNum;
-                            successCount++;
+                            currentPrices[s.name] = priceNum;
+                            count++;
                         }
                     }
+                });
+                if (count > 0) {
+                    localStorage.setItem('stock_prices', JSON.stringify(currentPrices));
+                    lastPriceUpdate = new Date().toLocaleString();
+                    localStorage.setItem('last_price_update', lastPriceUpdate);
+                    renderDashboard();
+                    alert(`${count}개 종목의 시세가 성공적으로 업데이트되었습니다.`);
+                } else {
+                    alert("업데이트 대상 가격 정보를 찾지 못했습니다.");
                 }
-                await new Promise(r => setTimeout(r, 200));
-            }
-
-            if (successCount > 0) {
-                localStorage.setItem('stock_prices', JSON.stringify(currentPrices));
-                lastPriceUpdate = new Date().toLocaleString();
-                localStorage.setItem('last_price_update', lastPriceUpdate);
-                renderDashboard();
-                alert(`${successCount}개 종목 업데이트 완료`);
+            } else {
+                alert("시세 데이터를 파싱하지 못했습니다.");
             }
         } catch (e) {
-            alert("시세 업데이트 중 오류가 발생했습니다.");
+            console.error(e);
+            alert("시세 업데이트 오류: " + e.message);
         } finally {
             btn.classList.remove('btn-loading'); btn.innerText = "⚡ 시세 업데이트";
         }
@@ -671,7 +725,7 @@
             return dtA.localeCompare(dtB);
         });
         const s = calculateStats().allStocks[n]; const cp = currentPrices[n] || 0; const ep = s.qty > 0 ? (s.qty*cp)-s.tCost : 0;
-        document.getElementById('itemSummary').innerHTML = `<div class="stat-item"><div class="stat-label">보유수량</div><div class="stat-value">${s.qty}</div></div><div class="stat-item"><div class="stat-label">실현손익</div><div class="stat-value">${fmt(s.realP)}</div></div><div class="stat-item"><div class="stat-label">평가손익</div><div class="stat-value">${fmt(ep)}</div></div><div class="stat-item"><div class="stat-label">합계손익</div><div class="stat-value">${fmt(s.realP+ep)}</div></div>`;
+        document.getElementById('itemSummary').innerHTML = `<div class="stat-item"><div class="stat-label">보유수량</div><div class="stat-value">${s.qty}</div></div><div class="stat-item"><div class="stat-label">실현손익</div><div class="stat-value">${s.realP}</div></div><div class="stat-item"><div class="stat-label">평가손익</div><div class="stat-value">${fmt(ep)}</div></div><div class="stat-item"><div class="stat-label">합계손익</div><div class="stat-value">${fmt(s.realP+ep)}</div></div>`;
         const tb = document.getElementById('itemDetailTbody'); tb.innerHTML = '';
         logs.reverse().forEach(l => tb.innerHTML += `<tr><td>${l.datetime || l.date}</td><td>${l.type}</td><td>${l.qty||0}</td><td>${fmt(l.price)}</td><td>${fmt(l.amount)}</td></tr>`);
     }
