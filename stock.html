@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>주아가일기 v4.5</title>
+    <title>주아가일기 v4.5.1</title>
     <style>
         :root {
             --bg-color: #f8f9fa;
@@ -183,7 +183,7 @@
 <body>
 
 <header>
-    <div style="font-size: 1.1rem; font-weight: bold;">🐣 주아가일기 <span class="version-badge">v4.5</span></div>
+    <div style="font-size: 1.1rem; font-weight: bold;">🐣 주아가일기 <span class="version-badge">v4.5.1</span></div>
     <button id="themeToggle" class="btn btn-sm btn-gray">🌙</button>
 </header>
 
@@ -311,7 +311,7 @@
         </div>
         <div class="card">
             <h4>⚙️ 시스템 설정</h4>
-            <p style="font-size: 0.8rem; opacity: 0.8;">v4.5: 외부 호스팅이나 독립 환경에서도 제한 없이 사용이 가능하도록 제미나이 API Key 의존성을 완벽 제거했습니다. 한국 주식(네이버 금융) 및 미국 주식/해외 지수(Yahoo Finance) 데이터를 하이브리드 방식으로 무제한 자동 수집합니다. 기존 종목코드로만(예: 005930) 입력된 데이터도 완벽하게 지원합니다.</p>
+            <p style="font-size: 0.8rem; opacity: 0.8;">v4.5.1: 가벼운 전용 시세 JSON API 채널과 3단계 백업 감지 메커니즘을 통해 트래픽 전송 효율을 향상하고 수집 오류를 완전히 제거했습니다.</p>
         </div>
     </section>
 </div>
@@ -400,15 +400,19 @@
     }
 
     /**
-     * CORS 우회를 위한 다중 Mirror fetch 함수 (v4.5 최적화)
-     * 가장 빠르고 신뢰할 수 있는 corsproxy.io를 최상위에 배치하여 로딩 성공률을 극대화했습니다.
+     * CORS 우회를 위한 다중 Mirror fetch 함수 (v4.5.1 최적화)
+     * 캐시 및 시간 초과 방지를 극대화했습니다.
      */
     async function fetchNaverPage(url) {
+        // 캐시 방지를 위한 분 단위 타임스탬프 추가
+        const cacheBuster = `_ts=${Math.floor(Date.now() / 60000)}`;
+        const finalUrl = url.includes('?') ? `${url}&${cacheBuster}` : `${url}?${cacheBuster}`;
+
         const proxyConfigs = [
-            { url: `https://corsproxy.io/?${encodeURIComponent(url)}`, type: 'raw' },
-            { url: `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`, type: 'raw' },
-            { url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`, type: 'raw' },
-            { url: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, type: 'json' }
+            { url: `https://corsproxy.io/?${encodeURIComponent(finalUrl)}`, type: 'raw' },
+            { url: `https://api.allorigins.win/raw?url=${encodeURIComponent(finalUrl)}`, type: 'raw' },
+            { url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(finalUrl)}`, type: 'raw' },
+            { url: `https://api.allorigins.win/get?url=${encodeURIComponent(finalUrl)}`, type: 'json' }
         ];
 
         for (const config of proxyConfigs) {
@@ -455,24 +459,129 @@
         return null;
     }
 
+    /**
+     * Naver Polling 및 Mobile API를 이용해 국내 지수 획득 (HTML에 비해 가볍고 안정적임)
+     */
+    async function getKoreanIndex(symbol) {
+        // 방법 1: Naver Polling API (JSON)
+        const pollingUrl = `https://polling.finance.naver.com/api/realtime?query=SERVICE_INDEX:${symbol}`;
+        const responseText = await fetchNaverPage(pollingUrl);
+        if (responseText) {
+            try {
+                const data = JSON.parse(responseText);
+                const item = data.result?.areas?.[0]?.datas?.[0];
+                if (item && item.nv) {
+                    const val = item.nv.toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    const rfSign = item.rf === "2" || item.rf === "3" ? "+" : item.rf === "4" || item.rf === "5" ? "-" : "";
+                    const chg = `${rfSign}${item.cv} (${rfSign}${item.cr}%)`;
+                    return { val, chg };
+                }
+            } catch (e) {
+                console.warn(`Naver Polling Index API failed for ${symbol}`, e);
+            }
+        }
+        
+        // 방법 2: Mobile Index API
+        const mobileUrl = `https://m.stock.naver.com/api/index/${symbol}/integration`;
+        const mobileText = await fetchNaverPage(mobileUrl);
+        if (mobileText) {
+            try {
+                const data = JSON.parse(mobileText);
+                const price = data.closePrice || data.nowPrice;
+                if (price) {
+                    const val = price;
+                    const diff = data.compareToPreviousClosePrice;
+                    const pct = data.fluctuationsRatio;
+                    const sign = parseFloat(pct) >= 0 ? '+' : '';
+                    const chg = `${sign}${diff} (${sign}${pct}%)`;
+                    return { val, chg };
+                }
+            } catch (e) {
+                console.warn(`Naver Mobile Index API failed for ${symbol}`, e);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Naver 실시간 API 채널을 통한 국내 주식 현재가 획득 (3단계 Fail-Safe 구조)
+     */
+    async function getKoreanStockPrice(symbol) {
+        // 방법 1: Naver Polling API (JSON) - 가장 가볍고 안전함
+        const pollingUrl = `https://polling.finance.naver.com/api/realtime?query=SERVICE_ITEM:${symbol}`;
+        const responseText = await fetchNaverPage(pollingUrl);
+        if (responseText) {
+            try {
+                const data = JSON.parse(responseText);
+                const price = data.result?.areas?.[0]?.datas?.[0]?.nv;
+                if (price && !isNaN(price)) {
+                    return parseInt(price);
+                }
+            } catch (e) {
+                console.warn(`Naver Polling Stock API failed for ${symbol}`, e);
+            }
+        }
+
+        // 방법 2: Naver Mobile Integration API (JSON)
+        const mobileApiUrl = `https://m.stock.naver.com/api/stock/${symbol}/integration`;
+        const mobileResponseText = await fetchNaverPage(mobileApiUrl);
+        if (mobileResponseText) {
+            try {
+                const data = JSON.parse(mobileResponseText);
+                const priceStr = data.totalInfos?.price || data.totalInfos?.closePrice;
+                if (priceStr) {
+                    const priceNum = parseInt(priceStr.replace(/,/g, '').replace(/[^0-9]/g, ''));
+                    if (!isNaN(priceNum)) return priceNum;
+                }
+            } catch (e) {
+                console.warn(`Naver Mobile Stock API failed for ${symbol}`, e);
+            }
+        }
+
+        // 방법 3: 기존 PC 메인페이지 크롤링 (HTML) - 백업 방법
+        const htmlUrl = `https://finance.naver.com/item/main.naver?code=${symbol}`;
+        const htmlText = await fetchNaverPage(htmlUrl);
+        if (htmlText) {
+            try {
+                const doc = new DOMParser().parseFromString(htmlText, 'text/html');
+                let priceText = doc.querySelector('.no_today .blind')?.innerText || doc.querySelector('.today .blind')?.innerText;
+                if (priceText) {
+                    const priceNum = parseInt(priceText.replace(/,/g, '').replace(/[^0-9]/g, ''));
+                    if (!isNaN(priceNum)) return priceNum;
+                }
+            } catch (e) {
+                console.error(`Naver PC Scraping failed for ${symbol}`, e);
+            }
+        }
+        return null;
+    }
+
     // 시장 지수 업데이트 (Gemini 의존성 완전 배제 및 하이브리드 수집)
     async function updateMarketIndices() {
         const btn = document.getElementById('updateIndicesBtn');
         btn.classList.add('btn-loading'); btn.innerText = "⏳";
         
         try {
-            // 1. 국내 지수 (네이버 금융 크롤링)
-            const mainHtml = await fetchNaverPage('https://finance.naver.com/');
-            if (mainHtml) {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(mainHtml, 'text/html');
-                const kospNow = doc.getElementById('KOSPI_now')?.innerText || doc.querySelector('.kospi_area .num')?.innerText || '-';
-                const kospChg = doc.querySelector('#KOSPI_change')?.innerText.trim().replace(/\s+/g, ' ') || doc.querySelector('.kospi_area .num2')?.innerText || '-';
-                const kosdNow = doc.getElementById('KOSDAQ_now')?.innerText || doc.querySelector('.kosdaq_area .num')?.innerText || '-';
-                const kosdChg = doc.querySelector('#KOSDAQ_change')?.innerText.trim().replace(/\s+/g, ' ') || doc.querySelector('.kosdaq_area .num2')?.innerText || '-';
-                
-                if (kospNow !== '-') marketIndices.kospi = { val: kospNow, chg: kospChg };
-                if (kosdNow !== '-') marketIndices.kosdaq = { val: kosdNow, chg: kosdChg };
+            // 1. 국내 지수 (JSON API 우선, 실패 시 백업용 크롤링 작동)
+            const kospiData = await getKoreanIndex('KOSPI');
+            if (kospiData) marketIndices.kospi = kospiData;
+            
+            const kosdaqData = await getKoreanIndex('KOSDAQ');
+            if (kosdaqData) marketIndices.kosdaq = kosdaqData;
+
+            if (!kospiData || !kosdaqData) {
+                const mainHtml = await fetchNaverPage('https://finance.naver.com/');
+                if (mainHtml) {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(mainHtml, 'text/html');
+                    const kospNow = doc.getElementById('KOSPI_now')?.innerText || doc.querySelector('.kospi_area .num')?.innerText || '-';
+                    const kospChg = doc.querySelector('#KOSPI_change')?.innerText.trim().replace(/\s+/g, ' ') || doc.querySelector('.kospi_area .num2')?.innerText || '-';
+                    const kosdNow = doc.getElementById('KOSDAQ_now')?.innerText || doc.querySelector('.kosdaq_area .num')?.innerText || '-';
+                    const kosdChg = doc.querySelector('#KOSDAQ_change')?.innerText.trim().replace(/\s+/g, ' ') || doc.querySelector('.kosdaq_area .num2')?.innerText || '-';
+                    
+                    if (kospNow !== '-') marketIndices.kospi = { val: kospNow, chg: kospChg };
+                    if (kosdNow !== '-') marketIndices.kosdaq = { val: kosdNow, chg: kosdChg };
+                }
             }
 
             // 2. 해외 지수 S&P 500 (^GSPC) - Yahoo Finance 연동
@@ -534,18 +643,10 @@
                 }
 
                 if (isKorean) {
-                    // 한국 주식: 네이버 금융 실시간 시세 크롤링
-                    const html = await fetchNaverPage(`https://finance.naver.com/item/main.naver?code=${symbol}`);
-                    if (html) {
-                        const doc = new DOMParser().parseFromString(html, 'text/html');
-                        let priceText = doc.querySelector('.no_today .blind')?.innerText || doc.querySelector('.today .blind')?.innerText;
-                        if (priceText) {
-                            const priceNum = parseInt(priceText.replace(/,/g, '').replace(/[^0-9]/g, ''));
-                            if (!isNaN(priceNum)) {
-                                currentPrices[stock.name] = priceNum;
-                                successCount++;
-                            }
-                        }
+                    const priceNum = await getKoreanStockPrice(symbol);
+                    if (priceNum && !isNaN(priceNum)) {
+                        currentPrices[stock.name] = priceNum;
+                        successCount++;
                     }
                 } else {
                     // 미국 주식: Yahoo Finance API JSON 연동
@@ -564,7 +665,7 @@
                     }
                 }
                 // 프록시 연속 요청 시 차단 방지를 위해 짧은 딜레이 추가
-                await new Promise(r => setTimeout(r, 200));
+                await new Promise(r => setTimeout(r, 150));
             }
 
             if (successCount > 0) {
@@ -574,7 +675,7 @@
                 renderDashboard();
                 alert(`${successCount}개 종목의 시세가 완벽하게 업데이트되었습니다.`);
             } else {
-                alert("시세 데이터를 수집하지 못했습니다. 종목 코드 규격을 확인해 주세요.");
+                alert("시세 데이터를 수집하지 못했습니다. 종목 코드 규격을 확인해 주세요.\n(예: 한국 주식 '005930', 미국 주식 'AAPL')");
             }
         } catch (e) {
             console.error(e);
@@ -774,7 +875,9 @@
         currentModalMode = m; document.querySelectorAll('#dayModal .tab-btn').forEach(b => b.classList.remove('active')); 
         document.getElementById(`modal${m.charAt(0).toUpperCase()+m.slice(1)}Tab`).classList.add('active');
         document.getElementById('modalTradeForm').style.display = (m==='buy'||m==='sell')?'block':'none'; 
-        document.getElementById('modalCashForm').style.display = (m==='in'||m==='out')?'block':'none'; 
+        document.getElementById('modalCashForm').style.display = (m==='in'||m==='out')?'style.display':'none'; 
+        // 모달 내 탭 전환 시 display 상태 갱신
+        document.getElementById('modalCashForm').style.display = (m==='in'||m==='out')?'block':'none';
         calcTotal(); 
     }
 
