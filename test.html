@@ -3350,12 +3350,12 @@ function initializeApp() {
                 let csvContent = '\uFEFF'; // UTF-8 BOM
                 
                 if (exportType === 'statistics') {
-                    csvContent += '날짜,직원명,메뉴,시간,가격,커미션,방번호,고객명\n';
+                    csvContent += translateLegacyText('날짜,직원명,메뉴,시간,가격,커미션,방번호,고객명') + '\n';
                     data.forEach(r => {
                         csvContent += `${r.date},${r.staffName},${r.menuName},${r.duration}분,${r.price},${r.commission},${r.roomNumber || ''},${r.customerName || ''}\n`;
                     });
                 } else {
-                    csvContent += '날짜,직원명,메뉴,시간(분),시작시간,끝시간,가격,커미션,방번호,고객명,입금상태\n';
+                    csvContent += translateLegacyText('날짜,직원명,메뉴,시간(분),시작시간,끝시간,가격,커미션,방번호,고객명,입금상태') + '\n';
                     data.forEach(r => {
                         const endTime = calculateEndTime(r.startTime, r.duration);
                         const paymentStatus = r.paid ? '입금완료' : '미입금';
@@ -5311,6 +5311,176 @@ function initializeApp() {
                 manageAdmins();
             }
         }
+
+
+        // ===== 다국어 보완: 동적 HTML/알림/확인창 =====
+        (function installLegacyLocalization() {
+            const extra = {
+                en: {
+                    '선택된 직원: ': 'Selected Staff: ', '순번: ': 'Order: ', '직원 변경': 'Change Staff',
+                    '메뉴 목록': 'Menu List', '메뉴 추가': 'Add Menu', '메뉴별 시간 설정': 'Menu Time Settings',
+                    '시작 시간 (선택사항)': 'Start Time (Optional)', '방번호 (선택사항)': 'Room Number (Optional)',
+                    '고객명 (선택사항)': 'Customer Name (Optional)', '가격:': 'Price:', '커미션:': 'Commission:',
+                    '시작 시간:': 'Start Time:', '종료:': 'End:', '메뉴명': 'Menu Name', '판매 횟수': 'Sales Count',
+                    '총 매출': 'Total Sales', '일일 매출': 'Daily Sales', '매출 그래프': 'Sales Chart',
+                    '새 메뉴 추가': 'Add New Menu', '새 직원 추가': 'Add New Staff', '새 방 추가': 'Add New Room',
+                    '새 고객 추가': 'Add New Customer', '새 관리자 추가': 'Add New Admin',
+                    '새 입금방식 추가': 'Add New Payment Method', '새 Guarantee 추가': 'Add New Guarantee',
+                    'Guarantee 관리': 'Guarantee Management', 'Guarantee 수정': 'Edit Guarantee',
+                    '작업': 'Actions', '수용인원:': 'Capacity:', '은행:': 'Bank:', '전화번호:': 'Phone Number:',
+                    '계좌번호:': 'Account Number:', '방번호:': 'Room Number:', '고객번호:': 'Customer Number:',
+                    '아이디:': 'Username:', '비밀번호:': 'Password:', '타입:': 'Type:', '상점명:': 'Shop Name:',
+                    '유효기간 시작일:': 'Valid From:', '유효기간 종료일:': 'Valid Until:', '참고:': 'Note:',
+                    '최고관리자': 'Super Admin', '일반관리자': 'Normal Admin', '무제한': 'Unlimited', '만료됨': 'Expired',
+                    '날짜:': 'Date:', '직원명:': 'Staff Name:', '금액:': 'Amount:', '메모:': 'Memo:',
+                    '정직원': 'Full Time', '단기고용': 'Temporary', '단기직원': 'Temporary', '퇴사': 'Resigned', '휴가': 'Vacation',
+                    '입금완료': 'Payment Complete', '입금 완료': 'Payment Complete', '입금': 'Payment',
+                    '직원을 선택하세요': 'Select a staff member', '직원을 선택해주세요.': 'Please select a staff member.',
+                    '모든 메뉴의 선택을 완료해주세요.': 'Please complete all menu selections.',
+                    '정말 삭제하시겠습니까?': 'Are you sure you want to delete this?', '로그아웃 하시겠습니까?': 'Do you want to log out?',
+                    '아이디와 비밀번호를 입력해주세요.': 'Please enter your username and password.',
+                    '아이디 또는 비밀번호가 잘못되었습니다.': 'Incorrect username or password.',
+                    '날짜를 선택해주세요.': 'Please select a date.', '해당 기간에 데이터가 없습니다.': 'There is no data for the selected period.',
+                    '입금이 완료되었습니다.': 'Payment completed.', '예약 수정 기능은 추후 구현 예정입니다.': 'Reservation editing will be implemented later.',
+                    '화폐 단위가 저장되었습니다.': 'Currency settings saved.', '관리자에게 문의하세요.': 'Please contact the administrator.',
+                    '최고 관리자만 접근할 수 있습니다.': 'Only the super administrator can access this section.',
+                    '사용 기간이 만료되었습니다.': 'Your usage period has expired.', '만료일:': 'Expiration date:',
+                    'Guarantee가 추가되었습니다.': 'Guarantee added.', 'Guarantee가 수정되었습니다.': 'Guarantee updated.',
+                    'Guarantee가 삭제되었습니다.': 'Guarantee deleted.', '날짜, 직원명, 금액을 모두 입력해주세요.': 'Please enter the date, staff name, and amount.'
+                },
+                th: {
+                    '선택된 직원: ': 'พนักงานที่เลือก: ', '순번: ': 'ลำดับ: ', '직원 변경': 'เปลี่ยนพนักงาน',
+                    '메뉴 목록': 'รายการเมนู', '메뉴 추가': 'เพิ่มเมนู', '메뉴별 시간 설정': 'ตั้งเวลาสำหรับแต่ละเมนู',
+                    '시작 시간 (선택사항)': 'เวลาเริ่ม (ไม่บังคับ)', '방번호 (선택사항)': 'หมายเลขห้อง (ไม่บังคับ)',
+                    '고객명 (선택사항)': 'ชื่อลูกค้า (ไม่บังคับ)', '가격:': 'ราคา:', '커미션:': 'คอมมิชชั่น:',
+                    '시작 시간:': 'เวลาเริ่ม:', '종료:': 'สิ้นสุด:', '메뉴명': 'ชื่อเมนู', '판매 횟수': 'จำนวนครั้งที่ขาย',
+                    '총 매출': 'ยอดขายรวม', '일일 매출': 'ยอดขายรายวัน', '매출 그래프': 'กราฟยอดขาย',
+                    '새 메뉴 추가': 'เพิ่มเมนูใหม่', '새 직원 추가': 'เพิ่มพนักงานใหม่', '새 방 추가': 'เพิ่มห้องใหม่',
+                    '새 고객 추가': 'เพิ่มลูกค้าใหม่', '새 관리자 추가': 'เพิ่มผู้ดูแลใหม่',
+                    '새 입금방식 추가': 'เพิ่มวิธีชำระเงินใหม่', '새 Guarantee 추가': 'เพิ่ม Guarantee ใหม่',
+                    'Guarantee 관리': 'จัดการ Guarantee', 'Guarantee 수정': 'แก้ไข Guarantee',
+                    '작업': 'การดำเนินการ', '수용인원:': 'ความจุ:', '은행:': 'ธนาคาร:', '전화번호:': 'หมายเลขโทรศัพท์:',
+                    '계좌번호:': 'หมายเลขบัญชี:', '방번호:': 'หมายเลขห้อง:', '고객번호:': 'หมายเลขลูกค้า:',
+                    '아이디:': 'ชื่อผู้ใช้:', '비밀번호:': 'รหัสผ่าน:', '타입:': 'ประเภท:', '상점명:': 'ชื่อร้าน:',
+                    '유효기간 시작일:': 'วันที่เริ่มใช้:', '유효기간 종료일:': 'วันที่สิ้นสุด:', '참고:': 'หมายเหตุ:',
+                    '최고관리자': 'ผู้ดูแลสูงสุด', '일반관리자': 'ผู้ดูแลทั่วไป', '무제한': 'ไม่จำกัด', '만료됨': 'หมดอายุ',
+                    '날짜:': 'วันที่:', '직원명:': 'ชื่อพนักงาน:', '금액:': 'จำนวนเงิน:', '메모:': 'หมายเหตุ:',
+                    '정직원': 'พนักงานประจำ', '단기고용': 'พนักงานชั่วคราว', '단기직원': 'พนักงานชั่วคราว', '퇴사': 'ลาออก', '휴가': 'วันหยุด',
+                    '입금완료': 'ชำระเงินแล้ว', '입금 완료': 'ชำระเงินแล้ว', '입금': 'ชำระเงิน',
+                    '직원을 선택하세요': 'กรุณาเลือกพนักงาน', '직원을 선택해주세요.': 'กรุณาเลือกพนักงาน',
+                    '모든 메뉴의 선택을 완료해주세요.': 'กรุณาเลือกเมนูให้ครบทุกเมนู',
+                    '정말 삭제하시겠습니까?': 'ต้องการลบจริงหรือไม่?', '로그아웃 하시겠습니까?': 'ต้องการออกจากระบบหรือไม่?',
+                    '아이디와 비밀번호를 입력해주세요.': 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน',
+                    '아이디 또는 비밀번호가 잘못되었습니다.': 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
+                    '날짜를 선택해주세요.': 'กรุณาเลือกวันที่', '해당 기간에 데이터가 없습니다.': 'ไม่มีข้อมูลในช่วงเวลาที่เลือก',
+                    '입금이 완료되었습니다.': 'ชำระเงินเรียบร้อยแล้ว', '예약 수정 기능은 추후 구현 예정입니다.': 'ฟังก์ชันแก้ไขการจองจะเพิ่มในภายหลัง',
+                    '화폐 단위가 저장되었습니다.': 'บันทึกสกุลเงินแล้ว', '관리자에게 문의하세요.': 'กรุณาติดต่อผู้ดูแล',
+                    '최고 관리자만 접근할 수 있습니다.': 'เฉพาะผู้ดูแลสูงสุดเท่านั้นที่เข้าถึงได้',
+                    '사용 기간이 만료되었습니다.': 'หมดอายุการใช้งานแล้ว', '만료일:': 'วันหมดอายุ:',
+                    'Guarantee가 추가되었습니다.': 'เพิ่ม Guarantee แล้ว', 'Guarantee가 수정되었습니다.': 'อัปเดต Guarantee แล้ว',
+                    'Guarantee가 삭제되었습니다.': 'ลบ Guarantee แล้ว', '날짜, 직원명, 금액을 모두 입력해주세요.': 'กรุณากรอกวันที่ ชื่อพนักงาน และจำนวนเงินให้ครบ'
+                },
+                vi: {
+                    '선택된 직원: ': 'Nhân viên đã chọn: ', '순번: ': 'Thứ tự: ', '직원 변경': 'Đổi nhân viên',
+                    '메뉴 목록': 'Danh sách menu', '메뉴 추가': 'Thêm menu', '메뉴별 시간 설정': 'Cài đặt thời gian từng menu',
+                    '시작 시간 (선택사항)': 'Giờ bắt đầu (Tùy chọn)', '방번호 (선택사항)': 'Số phòng (Tùy chọn)',
+                    '고객명 (선택사항)': 'Tên khách hàng (Tùy chọn)', '가격:': 'Giá:', '커미션:': 'Hoa hồng:',
+                    '시작 시간:': 'Giờ bắt đầu:', '종료:': 'Kết thúc:', '메뉴명': 'Tên menu', '판매 횟수': 'Số lần bán',
+                    '총 매출': 'Tổng doanh thu', '일일 매출': 'Doanh thu hàng ngày', '매출 그래프': 'Biểu đồ doanh thu',
+                    '새 메뉴 추가': 'Thêm menu mới', '새 직원 추가': 'Thêm nhân viên mới', '새 방 추가': 'Thêm phòng mới',
+                    '새 고객 추가': 'Thêm khách hàng mới', '새 관리자 추가': 'Thêm quản trị viên mới',
+                    '새 입금방식 추가': 'Thêm phương thức thanh toán', '새 Guarantee 추가': 'Thêm Guarantee mới',
+                    'Guarantee 관리': 'Quản lý Guarantee', 'Guarantee 수정': 'Sửa Guarantee',
+                    '작업': 'Thao tác', '수용인원:': 'Sức chứa:', '은행:': 'Ngân hàng:', '전화번호:': 'Số điện thoại:',
+                    '계좌번호:': 'Số tài khoản:', '방번호:': 'Số phòng:', '고객번호:': 'Mã khách hàng:',
+                    '아이디:': 'Tên đăng nhập:', '비밀번호:': 'Mật khẩu:', '타입:': 'Loại:', '상점명:': 'Tên cửa hàng:',
+                    '유효기간 시작일:': 'Ngày bắt đầu:', '유효기간 종료일:': 'Ngày kết thúc:', '참고:': 'Lưu ý:',
+                    '최고관리자': 'Quản trị viên cấp cao', '일반관리자': 'Quản trị viên thường', '무제한': 'Không giới hạn', '만료됨': 'Hết hạn',
+                    '날짜:': 'Ngày:', '직원명:': 'Tên nhân viên:', '금액:': 'Số tiền:', '메모:': 'Ghi chú:',
+                    '정직원': 'Toàn thời gian', '단기고용': 'Tạm thời', '단기직원': 'Tạm thời', '퇴사': 'Đã nghỉ việc', '휴가': 'Nghỉ phép',
+                    '입금완료': 'Đã thanh toán', '입금 완료': 'Đã thanh toán', '입금': 'Thanh toán',
+                    '직원을 선택하세요': 'Vui lòng chọn nhân viên', '직원을 선택해주세요.': 'Vui lòng chọn nhân viên.',
+                    '모든 메뉴의 선택을 완료해주세요.': 'Vui lòng hoàn tất việc chọn tất cả menu.',
+                    '정말 삭제하시겠습니까?': 'Bạn có chắc muốn xóa không?', '로그아웃 하시겠습니까?': 'Bạn có muốn đăng xuất không?',
+                    '아이디와 비밀번호를 입력해주세요.': 'Vui lòng nhập tên đăng nhập và mật khẩu.',
+                    '아이디 또는 비밀번호가 잘못되었습니다.': 'Tên đăng nhập hoặc mật khẩu không đúng.',
+                    '날짜를 선택해주세요.': 'Vui lòng chọn ngày.', '해당 기간에 데이터가 없습니다.': 'Không có dữ liệu trong khoảng thời gian đã chọn.',
+                    '입금이 완료되었습니다.': 'Thanh toán đã hoàn tất.', '예약 수정 기능은 추후 구현 예정입니다.': 'Chức năng sửa đặt chỗ sẽ được triển khai sau.',
+                    '화폐 단위가 저장되었습니다.': 'Đã lưu đơn vị tiền tệ.', '관리자에게 문의하세요.': 'Vui lòng liên hệ quản trị viên.',
+                    '최고 관리자만 접근할 수 있습니다.': 'Chỉ quản trị viên cấp cao mới có quyền truy cập.',
+                    '사용 기간이 만료되었습니다.': 'Thời hạn sử dụng đã hết.', '만료일:': 'Ngày hết hạn:',
+                    'Guarantee가 추가되었습니다.': 'Đã thêm Guarantee.', 'Guarantee가 수정되었습니다.': 'Đã cập nhật Guarantee.',
+                    'Guarantee가 삭제되었습니다.': 'Đã xóa Guarantee.', '날짜, 직원명, 금액을 모두 입력해주세요.': 'Vui lòng nhập đầy đủ ngày, tên nhân viên và số tiền.'
+                }
+            };
+
+            function translateLegacy(value) {
+                if (value === null || value === undefined) return value;
+                let s = String(value);
+                const lang = currentLanguage || 'ko';
+                if (lang === 'ko') return s;
+                const composite = {'날짜,직원명,메뉴,시간,가격,커미션,방번호,고객명':{en:'Date,Staff,Menu,Time,Price,Commission,Room,Customer',th:'วันที่,พนักงาน,เมนู,เวลา,ราคา,คอมมิชชั่น,ห้อง,ลูกค้า',vi:'Ngày,Nhân viên,Menu,Thời gian,Giá,Hoa hồng,Phòng,Khách hàng'},'날짜,직원명,메뉴,시간(분),시작시간,끝시간,가격,커미션,방번호,고객명,입금상태':{en:'Date,Staff,Menu,Duration (min),Start Time,End Time,Price,Commission,Room,Customer,Payment Status',th:'วันที่,พนักงาน,เมนู,ระยะเวลา (นาที),เวลาเริ่ม,เวลาสิ้นสุด,ราคา,คอมมิชชั่น,ห้อง,ลูกค้า,สถานะการชำระเงิน',vi:'Ngày,Nhân viên,Menu,Thời lượng (phút),Giờ bắt đầu,Giờ kết thúc,Giá,Hoa hồng,Phòng,Khách hàng,Trạng thái thanh toán'}}; if (composite[s] && composite[s][lang]) return composite[s][lang];
+                const ko = translations.ko || {};
+                const dict = translations[lang] || {};
+                for (const key of Object.keys(ko)) {
+                    if (ko[key] === s && dict[key] !== undefined) return dict[key];
+                }
+                if (extra[lang] && extra[lang][s] !== undefined) return extra[lang][s];
+                s = s.replace(/(\d+)\s*분/g, (_, n) => lang === 'en' ? n + ' min' : lang === 'th' ? n + ' นาที' : n + ' phút');
+                s = s.replace(/(\d+)\s*명/g, (_, n) => lang === 'en' ? n + ' people' : lang === 'th' ? n + ' คน' : n + ' người');
+                s = s.replace(/(\d+)\s*회/g, (_, n) => lang === 'en' ? n + ' times' : lang === 'th' ? n + ' ครั้ง' : n + ' lần');
+                s = s.replace(/메뉴\s+(\d+)/g, (_, n) => lang === 'en' ? 'Menu ' + n : lang === 'th' ? 'เมนู ' + n : 'Menu ' + n);
+                return s;
+            }
+
+            function rememberAndTranslate(node) {
+                if (!node || node.nodeType !== Node.TEXT_NODE) return;
+                if (!node.__koOriginal && /[가-힣]/.test(node.nodeValue || '')) node.__koOriginal = node.nodeValue;
+                if (node.__koOriginal) node.nodeValue = translateLegacy(node.__koOriginal);
+            }
+
+            function translateAttributes(root) {
+                const els = root.querySelectorAll ? root.querySelectorAll('input,textarea,button,option,[title]') : [];
+                els.forEach(el => ['placeholder','title'].forEach(attr => {
+                    const v = el.getAttribute(attr);
+                    if (v && /[가-힣]/.test(v)) el.dataset['ko' + attr] = v;
+                    const original = el.dataset['ko' + attr];
+                    if (original) el.setAttribute(attr, translateLegacy(original));
+                }));
+            }
+
+            function translatePage() {
+                document.documentElement.lang = currentLanguage || 'ko';
+                const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+                const nodes = [];
+                while (w.nextNode()) nodes.push(w.currentNode);
+                nodes.forEach(rememberAndTranslate);
+                translateAttributes(document);
+            }
+
+            const nativeAlert = window.alert.bind(window);
+            const nativeConfirm = window.confirm.bind(window);
+            window.alert = msg => nativeAlert(translateLegacy(msg));
+            window.confirm = msg => nativeConfirm(translateLegacy(msg));
+
+            const observer = new MutationObserver(ms => ms.forEach(m => {
+                if (m.type === 'characterData') rememberAndTranslate(m.target);
+                if (m.type === 'childList') m.addedNodes.forEach(n => {
+                    if (n.nodeType === Node.TEXT_NODE) rememberAndTranslate(n);
+                    else if (n.nodeType === Node.ELEMENT_NODE) {
+                        const w = document.createTreeWalker(n, NodeFilter.SHOW_TEXT);
+                        const nodes = [];
+                        while (w.nextNode()) nodes.push(w.currentNode);
+                        nodes.forEach(rememberAndTranslate);
+                        translateAttributes(n);
+                    }
+                });
+            }));
+            observer.observe(document.body, {subtree:true, childList:true, characterData:true});
+
+            window.localizeLegacyUI = translatePage;
+            window.translateLegacyText = translateLegacy;
+        })();
 
         // 앱 초기화
         initializeApp();
