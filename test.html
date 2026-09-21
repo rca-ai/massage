@@ -3095,7 +3095,16 @@ function initializeApp() {
         }
 
         function updateStats() {
-            loadStatistics();
+            // 현재 통계 화면에 맞는 데이터 로딩 함수를 호출합니다.
+            // 빠른 날짜 선택(이번 주/지난 주/이번 달/지난 달)으로 날짜가 변경된 경우에도
+            // 메뉴별 통계와 월간 매출 그래프가 선택된 기간으로 즉시 다시 계산되도록 합니다.
+            if (currentStatsType === 'menuSales') {
+                loadMenuSalesStatistics();
+            } else if (currentStatsType === 'monthlySalesChart') {
+                loadMonthlySalesChart();
+            } else {
+                loadStatistics();
+            }
         }
 
         // 통계 데이터 로딩 함수
