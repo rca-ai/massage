@@ -283,7 +283,6 @@
         <tr class="bg-gray-100">
          <th class="border border-gray-300 p-2" data-translate="staff">마사지사</th>
          <th class="border border-gray-300 p-2" data-translate="totalPrice">총 가격</th>
-         <th class="border border-gray-300 p-2" data-translate="totalCommission">총 커미션</th>
         </tr>
        </thead>
        <tbody id="statsTable">
@@ -1423,7 +1422,7 @@ function initializeApp() {
                             superAdminButtons.style.display = 'block';
                         }
                     } else {
-                        shopNameElement.textContent = admin.shopName || '관리자 화면';
+                        shopNameElement.textContent = (admin.shopName || '관리자 화면') + (admin.type !== 'super' && admin.validUntil ? ' · 만료일: ' + translateLegacy('만료일:') + ' ' + admin.validUntil : '');
                         const superAdminButtons = document.getElementById('superAdminButtons');
                         if (superAdminButtons) {
                             superAdminButtons.style.display = 'none';
@@ -1799,6 +1798,9 @@ function initializeApp() {
             updateMenuTimeSettings();
         }
 
+        function calculateCommission(price, commissionConfig) { if (commissionConfig && typeof commissionConfig === "object") { const value=Number(commissionConfig.value)||0; return commissionConfig.type==="percent" ? price*value/100 : value; } return Number(commissionConfig)||0; }
+        function formatCommissionConfig(config) { if (config && typeof config === "object") return Number(config.value||0).toLocaleString()+(config.type==="percent"?"%":""); return Number(config||0).toLocaleString(); }
+
         function selectMenuForRow(menuRowId, menuId, menuName) {
             const menuRow = menuRows.find(row => row.id === menuRowId);
             if (!menuRow) return;
@@ -1877,7 +1879,7 @@ function initializeApp() {
             if (menu && menu.prices[duration]) {
                 menuRow.duration = duration;
                 menuRow.price = menu.prices[duration].price;
-                menuRow.commission = menu.prices[duration].commission;
+                menuRow.commission = calculateCommission(menuRow.price, menu.prices[duration].commission);
                 
                 document.getElementById(`menuPrice_${menuRowId}`).textContent = menuRow.price.toLocaleString();
                 document.getElementById(`menuCommission_${menuRowId}`).textContent = menuRow.commission.toLocaleString();
@@ -2613,10 +2615,10 @@ function initializeApp() {
                 content += `
                     <tr>
                         <td class="border border-gray-300 p-2">${menu.name}</td>
-                        <td class="border border-gray-300 p-2">${menu.prices[30] ? `${menu.prices[30].price}/${menu.prices[30].commission}` : '-'}</td>
-                        <td class="border border-gray-300 p-2">${menu.prices[60] ? `${menu.prices[60].price}/${menu.prices[60].commission}` : '-'}</td>
-                        <td class="border border-gray-300 p-2">${menu.prices[90] ? `${menu.prices[90].price}/${menu.prices[90].commission}` : '-'}</td>
-                        <td class="border border-gray-300 p-2">${menu.prices[120] ? `${menu.prices[120].price}/${menu.prices[120].commission}` : '-'}</td>
+                        <td class="border border-gray-300 p-2">${menu.prices[30] ? `${menu.prices[30].price}/${formatCommissionConfig(menu.prices[30].commission)}` : '-'}</td>
+                        <td class="border border-gray-300 p-2">${menu.prices[60] ? `${menu.prices[60].price}/${formatCommissionConfig(menu.prices[60].commission)}` : '-'}</td>
+                        <td class="border border-gray-300 p-2">${menu.prices[90] ? `${menu.prices[90].price}/${formatCommissionConfig(menu.prices[90].commission)}` : '-'}</td>
+                        <td class="border border-gray-300 p-2">${menu.prices[120] ? `${menu.prices[120].price}/${formatCommissionConfig(menu.prices[120].commission)}` : '-'}</td>
                         <td class="border border-gray-300 p-2">
                             <button onclick="editMenu(${menu.id})" class="bg-blue-500 text-white px-2 py-1 rounded text-sm mr-1">수정</button>
                             <button onclick="deleteMenu(${menu.id})" class="bg-red-500 text-white px-2 py-1 rounded text-sm">삭제</button>
@@ -3224,10 +3226,13 @@ function initializeApp() {
                 row.innerHTML = `
                     <td class="border border-gray-300 p-2">${staffName}</td>
                     <td class="border border-gray-300 p-2">${stats.totalPrice.toLocaleString()}${currency.symbol}</td>
-                    <td class="border border-gray-300 p-2">${stats.totalCommission.toLocaleString()}${currency.symbol}</td>
                 `;
                 tableBody.appendChild(row);
             });
+            const totalPrice=Object.values(staffStats).reduce((s,x)=>s+(Number(x.totalPrice)||0),0);
+            const totalCommission=Object.values(staffStats).reduce((s,x)=>s+(Number(x.totalCommission)||0),0);
+            if(staffFooter) staffFooter.innerHTML=`<tr class="bg-gray-100 font-bold"><td class="border border-gray-300 p-2">직원별 합계</td><td class="border border-gray-300 p-2">${totalPrice.toLocaleString()}${currency.symbol}</td><td class="border border-gray-300 p-2">${totalCommission.toLocaleString()}${currency.symbol}</td></tr>`;
+            if(window.localizeLegacyUI) window.localizeLegacyUI();
         }
 
         // 입금방식별 통계 표시
@@ -3350,7 +3355,6 @@ function initializeApp() {
             // 메뉴별 합계
             const menuTotalCount = Object.values(menuSales).reduce((sum, stats) => sum + (Number(stats.count) || 0), 0);
             const menuTotalPrice = Object.values(menuSales).reduce((sum, stats) => sum + (Number(stats.totalPrice) || 0), 0);
-            const menuTotalCommission = Object.values(menuSales).reduce((sum, stats) => sum + (Number(stats.totalCommission) || 0), 0);
 
             if (tableFoot) {
                 tableFoot.innerHTML = `
@@ -3358,7 +3362,6 @@ function initializeApp() {
                         <td class="border border-gray-300 p-2" data-translate="menuTotal">메뉴별 합계</td>
                         <td class="border border-gray-300 p-2">${menuTotalCount.toLocaleString()}</td>
                         <td class="border border-gray-300 p-2">${menuTotalPrice.toLocaleString()}${currency.symbol}</td>
-                        <td class="border border-gray-300 p-2">${menuTotalCommission.toLocaleString()}${currency.symbol}</td>
                     </tr>
                 `;
             }
@@ -4438,28 +4441,28 @@ function initializeApp() {
                             <label class="block text-sm font-medium mb-2">30분 가격/커미션:</label>
                             <div class="flex gap-2">
                                 <input type="number" id="menu30Price" class="flex-1 border rounded px-2 py-1" placeholder="가격">
-                                <input type="number" id="menu30Commission" class="flex-1 border rounded px-2 py-1" placeholder="커미션">
+                                <input type="number" id="menu30Commission" class="flex-1 border rounded px-2 py-1" placeholder="커미션"><select id="menu30CommissionType" class="border rounded px-1"><option value="amount">금액</option><option value="percent">%</option></select>
                             </div>
                         </div>
                         <div>
                             <label class="block text-sm font-medium mb-2">60분 가격/커미션:</label>
                             <div class="flex gap-2">
                                 <input type="number" id="menu60Price" class="flex-1 border rounded px-2 py-1" placeholder="가격">
-                                <input type="number" id="menu60Commission" class="flex-1 border rounded px-2 py-1" placeholder="커미션">
+                                <input type="number" id="menu60Commission" class="flex-1 border rounded px-2 py-1" placeholder="커미션"><select id="menu60CommissionType" class="border rounded px-1"><option value="amount">금액</option><option value="percent">%</option></select>
                             </div>
                         </div>
                         <div>
                             <label class="block text-sm font-medium mb-2">90분 가격/커미션:</label>
                             <div class="flex gap-2">
                                 <input type="number" id="menu90Price" class="flex-1 border rounded px-2 py-1" placeholder="가격">
-                                <input type="number" id="menu90Commission" class="flex-1 border rounded px-2 py-1" placeholder="커미션">
+                                <input type="number" id="menu90Commission" class="flex-1 border rounded px-2 py-1" placeholder="커미션"><select id="menu90CommissionType" class="border rounded px-1"><option value="amount">금액</option><option value="percent">%</option></select>
                             </div>
                         </div>
                         <div>
                             <label class="block text-sm font-medium mb-2">120분 가격/커미션:</label>
                             <div class="flex gap-2">
                                 <input type="number" id="menu120Price" class="flex-1 border rounded px-2 py-1" placeholder="가격">
-                                <input type="number" id="menu120Commission" class="flex-1 border rounded px-2 py-1" placeholder="커미션">
+                                <input type="number" id="menu120Commission" class="flex-1 border rounded px-2 py-1" placeholder="커미션"><select id="menu120CommissionType" class="border rounded px-1"><option value="amount">금액</option><option value="percent">%</option></select>
                             </div>
                         </div>
                     </div>
@@ -4489,11 +4492,10 @@ function initializeApp() {
             
             durations.forEach(duration => {
                 const price = parseInt(document.getElementById(`menu${duration}Price`).value);
-                const commission = parseInt(document.getElementById(`menu${duration}Commission`).value);
+                const commission = parseFloat(document.getElementById(`menu${duration}Commission`).value);
                 
-                if (price && commission) {
-                    prices[duration] = { price, commission };
-                }
+                const commissionType = document.getElementById(`menu${duration}CommissionType`).value;
+                if (price > 0 && commission >= 0) prices[duration] = { price, commission: { value: commission, type: commissionType } };
             });
 
             if (Object.keys(prices).length === 0) {
@@ -5521,6 +5523,7 @@ function initializeApp() {
         (function installLegacyLocalization() {
             const extra = {
                 en: {
+                    '현금':'Cash','쿠폰':'Coupon','기타':'Other','화폐 단위 관리':'Currency Management','화폐 이름:':'Currency Name:','화폐 기호:':'Currency Symbol:','은행':'Bank','메뉴명:':'Menu Name:','가격':'Price','커미션':'Commission','수용인원':'Capacity','직원별 합계':'Staff Total','메뉴별 합계':'Menu Total','금액':'Amount',
                     '선택된 직원: ': 'Selected Staff: ', '순번: ': 'Order: ', '직원 변경': 'Change Staff',
                     '메뉴 목록': 'Menu List', '메뉴 추가': 'Add Menu', '메뉴별 시간 설정': 'Menu Time Settings',
                     '시작 시간 (선택사항)': 'Start Time (Optional)', '방번호 (선택사항)': 'Room Number (Optional)',
@@ -5553,6 +5556,7 @@ function initializeApp() {
                     'Guarantee가 삭제되었습니다.': 'Guarantee deleted.', '날짜, 직원명, 금액을 모두 입력해주세요.': 'Please enter the date, staff name, and amount.'
                 },
                 th: {
+                    '현금':'เงินสด','쿠폰':'คูปอง','기타':'อื่นๆ','화폐 단위 관리':'จัดการสกุลเงิน','화폐 이름:':'ชื่อสกุลเงิน:','화폐 기호:':'สัญลักษณ์สกุลเงิน:','은행':'ธนาคาร','메뉴명:':'ชื่อเมนู:','가격':'ราคา','커미션':'คอมมิชชั่น','수용인원':'ความจุ','직원별 합계':'รวมพนักงาน','메뉴별 합계':'รวมเมนู','금액':'จำนวนเงิน',
                     '선택된 직원: ': 'พนักงานที่เลือก: ', '순번: ': 'ลำดับ: ', '직원 변경': 'เปลี่ยนพนักงาน',
                     '메뉴 목록': 'รายการเมนู', '메뉴 추가': 'เพิ่มเมนู', '메뉴별 시간 설정': 'ตั้งเวลาสำหรับแต่ละเมนู',
                     '시작 시간 (선택사항)': 'เวลาเริ่ม (ไม่บังคับ)', '방번호 (선택사항)': 'หมายเลขห้อง (ไม่บังคับ)',
@@ -5585,6 +5589,7 @@ function initializeApp() {
                     'Guarantee가 삭제되었습니다.': 'ลบ Guarantee แล้ว', '날짜, 직원명, 금액을 모두 입력해주세요.': 'กรุณากรอกวันที่ ชื่อพนักงาน และจำนวนเงินให้ครบ'
                 },
                 vi: {
+                    '현금':'Tiền mặt','쿠폰':'Phiếu giảm giá','기타':'Khác','화폐 단위 관리':'Quản lý tiền tệ','화폐 이름:':'Tên tiền tệ:','화폐 기호:':'Ký hiệu tiền tệ:','은행':'Ngân hàng','메뉴명:':'Tên menu:','가격':'Giá','커미션':'Hoa hồng','수용인원':'Sức chứa','직원별 합계':'Tổng nhân viên','메뉴별 합계':'Tổng menu','금액':'Số tiền',
                     '선택된 직원: ': 'Nhân viên đã chọn: ', '순번: ': 'Thứ tự: ', '직원 변경': 'Đổi nhân viên',
                     '메뉴 목록': 'Danh sách menu', '메뉴 추가': 'Thêm menu', '메뉴별 시간 설정': 'Cài đặt thời gian từng menu',
                     '시작 시간 (선택사항)': 'Giờ bắt đầu (Tùy chọn)', '방번호 (선택사항)': 'Số phòng (Tùy chọn)',
