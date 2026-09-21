@@ -246,7 +246,22 @@
      </div>
     </div><!-- 차트 영역 -->
     <div id="chartContainer" class="mb-6" style="display: none;">
-     <canvas id="statsChart" width="800" height="400"></canvas>
+     <canvas id="statsChart" width="800" height="400" style="display:none;"></canvas>
+    </div>
+    <!-- 월간 매출 그래프: 날짜별/직원별/메뉴별 -->
+    <div id="monthlySalesGraphsContainer" class="mb-6" style="display: none;">
+     <div class="bg-white rounded-lg shadow-md p-4 mb-4">
+      <h3 class="text-lg font-bold mb-3" data-translate="dailySalesChartTitle">날짜별 통계 그래프</h3>
+      <div id="dailySalesGraph" class="space-y-2"></div>
+     </div>
+     <div class="bg-white rounded-lg shadow-md p-4 mb-4">
+      <h3 class="text-lg font-bold mb-3" data-translate="staffSalesChartTitle">직원별 통계 그래프</h3>
+      <div id="staffSalesGraph" class="space-y-2"></div>
+     </div>
+     <div class="bg-white rounded-lg shadow-md p-4">
+      <h3 class="text-lg font-bold mb-3" data-translate="menuSalesChartTitle">메뉴별 통계 그래프</h3>
+      <div id="menuSalesGraph" class="space-y-2"></div>
+     </div>
     </div><!-- 직원별 통계 -->
     <div class="mb-6">
      <h3 class="text-lg font-bold mb-2" data-translate="staffStatisticsTitle">직원별 통계</h3>
@@ -506,6 +521,9 @@
                 enterCustomerName: '고객명 입력',
                 monthlyMenuSales: '월간 메뉴 매출',
                 monthlySalesChart: '월간 매출 그래프',
+                dailySalesChartTitle: '날짜별 통계 그래프',
+                staffSalesChartTitle: '직원별 통계 그래프',
+                menuSalesChartTitle: '메뉴별 통계 그래프',
                 download: '다운로드',
                 staffStats: '직원별 통계',
                 menuStatisticsTitle: '메뉴별 통계',
@@ -664,6 +682,9 @@
                 enterCustomerName: 'Enter customer name',
                 monthlyMenuSales: 'Monthly Menu Sales',
                 monthlySalesChart: 'Monthly Sales Chart',
+                dailySalesChartTitle: 'Daily Sales Graph',
+                staffSalesChartTitle: 'Staff Sales Graph',
+                menuSalesChartTitle: 'Menu Sales Graph',
                 download: 'Download',
                 staffStats: 'Staff Statistics',
                 menuStatisticsTitle: 'Menu Statistics',
@@ -822,6 +843,9 @@
                 enterCustomerName: 'กรอกชื่อลูกค้า',
                 monthlyMenuSales: 'ยอดขายเมนูรายเดือน',
                 monthlySalesChart: 'กราฟยอดขายรายเดือน',
+                dailySalesChartTitle: 'กราฟสถิติรายวัน',
+                staffSalesChartTitle: 'กราฟสถิติพนักงาน',
+                menuSalesChartTitle: 'กราฟสถิติเมนู',
                 download: 'ดาวน์โหลด',
                 staffStats: 'สถิติพนักงาน',
                 menuStatisticsTitle: 'สถิติเมนู',
@@ -980,6 +1004,9 @@
                 enterCustomerName: 'Nhập tên khách hàng',
                 monthlyMenuSales: 'Doanh số menu hàng tháng',
                 monthlySalesChart: 'Biểu đồ doanh số hàng tháng',
+                dailySalesChartTitle: 'Biểu đồ thống kê theo ngày',
+                staffSalesChartTitle: 'Biểu đồ thống kê theo nhân viên',
+                menuSalesChartTitle: 'Biểu đồ thống kê theo menu',
                 download: 'Tải xuống',
                 staffStats: 'Thống kê nhân viên',
                 menuStatisticsTitle: 'Thống kê menu',
@@ -2833,6 +2860,8 @@ function initializeApp() {
         let currentStatsType = 'daily';
 
         function showDailyStats() {
+            const graphsContainer = document.getElementById('monthlySalesGraphsContainer');
+            if (graphsContainer) graphsContainer.style.display = 'none';
             currentStatsType = 'daily';
             const menuContainer = document.getElementById('menuStatisticsContainer');
             if (menuContainer) menuContainer.style.display = 'none';
@@ -2842,6 +2871,8 @@ function initializeApp() {
         }
 
         function showWeeklyStats() {
+            const graphsContainer = document.getElementById('monthlySalesGraphsContainer');
+            if (graphsContainer) graphsContainer.style.display = 'none';
             currentStatsType = 'weekly';
             const menuContainer = document.getElementById('menuStatisticsContainer');
             if (menuContainer) menuContainer.style.display = 'none';
@@ -2852,6 +2883,8 @@ function initializeApp() {
         }
 
         function showMonthlyStats() {
+            const graphsContainer = document.getElementById('monthlySalesGraphsContainer');
+            if (graphsContainer) graphsContainer.style.display = 'none';
             currentStatsType = 'monthly';
             const menuContainer = document.getElementById('menuStatisticsContainer');
             if (menuContainer) menuContainer.style.display = 'none';
@@ -2951,6 +2984,8 @@ function initializeApp() {
         }
 
         function showMenuSales() {
+            const graphsContainer = document.getElementById('monthlySalesGraphsContainer');
+            if (graphsContainer) graphsContainer.style.display = 'none';
             currentStatsType = 'menuSales';
             const menuContainer = document.getElementById('menuStatisticsContainer');
             if (menuContainer) menuContainer.style.display = 'block';
@@ -2962,6 +2997,8 @@ function initializeApp() {
 
         function showMonthlySalesChart() {
             currentStatsType = 'monthlySalesChart';
+            const graphsContainer = document.getElementById('monthlySalesGraphsContainer');
+            if (graphsContainer) graphsContainer.style.display = 'block';
             const menuContainer = document.getElementById('menuStatisticsContainer');
             if (menuContainer) menuContainer.style.display = 'none';
             updateStatsButtonStyles();
@@ -3247,82 +3284,97 @@ function initializeApp() {
             if (window.localizeLegacyUI) window.localizeLegacyUI();
         }
 
-        // 월간 매출 차트 로딩
+        // 월간 매출 그래프 로딩
         function loadMonthlySalesChart() {
             const menuContainer = document.getElementById('menuStatisticsContainer');
             if (menuContainer) menuContainer.style.display = 'none';
+            const graphsContainer = document.getElementById('monthlySalesGraphsContainer');
+            if (graphsContainer) graphsContainer.style.display = 'block';
+
             const reservations = JSON.parse(localStorage.getItem(getAdminKey('reservations')) || '[]');
             const startDate = document.getElementById('statsStartDate').value;
             const endDate = document.getElementById('statsEndDate').value;
-            
-            if (!startDate || !endDate) {
-                return;
-            }
-            
-            // 날짜 범위에 해당하는 입금 완료된 예약만 필터링
+            if (!startDate || !endDate) return;
+
             const filteredReservations = reservations.filter(r => {
                 if (!r.paid) return false;
-                const reservationDate = r.date;
-                return reservationDate >= startDate && reservationDate <= endDate;
+                return r.date >= startDate && r.date <= endDate;
             });
-            
-            // 일별 매출 계산
+
             const dailySales = {};
+            const staffSales = {};
+            const menuSales = {};
+
             filteredReservations.forEach(r => {
-                if (!dailySales[r.date]) {
-                    dailySales[r.date] = 0;
-                }
-                dailySales[r.date] += r.price;
+                const price = Number(r.price) || 0;
+                const commission = Number(r.commission) || 0;
+
+                if (!dailySales[r.date]) dailySales[r.date] = { price: 0, count: 0 };
+                dailySales[r.date].price += price;
+                dailySales[r.date].count++;
+
+                const staff = r.staffName || 'Unknown';
+                if (!staffSales[staff]) staffSales[staff] = { price: 0, count: 0 };
+                staffSales[staff].price += price;
+                staffSales[staff].count++;
+
+                const menu = r.menuName || 'Unknown';
+                if (!menuSales[menu]) menuSales[menu] = { price: 0, commission: 0, count: 0 };
+                menuSales[menu].price += price;
+                menuSales[menu].commission += commission;
+                menuSales[menu].count++;
             });
-            
-            // 차트 데이터 표시 (간단한 텍스트 형태)
-            displayMonthlySalesChart(dailySales);
-            
-            // 입금방식별 통계도 함께 표시
+
+            displayMonthlySalesGraphs(dailySales, staffSales, menuSales);
             const paymentStats = calculatePaymentStatistics(filteredReservations);
             displayPaymentStatistics(paymentStats);
-            
-            // 총계 표시
-            displayTotalStatistics(filteredReservations);
+            const staffStats = calculateStaffStatistics(filteredReservations);
+            displayStaffStatistics(staffStats);
+            displayTotalStatistics(filteredReservations, staffStats);
         }
 
-        // 월간 매출 차트 표시 (간단한 텍스트 형태)
-        function displayMonthlySalesChart(dailySales) {
-            const tableBody = document.getElementById('statsTable');
-            const currency = JSON.parse(localStorage.getItem(getAdminKey('currency')) || '{"symbol":"","name":"원"}');
-            
-            tableBody.innerHTML = '';
-            
-            // 테이블 헤더 변경
-            const headerRow = tableBody.parentElement.querySelector('thead tr');
-            headerRow.innerHTML = `
-                <th class="border border-gray-300 p-2">날짜</th>
-                <th class="border border-gray-300 p-2">일일 매출</th>
-                <th class="border border-gray-300 p-2">매출 그래프</th>
-            `;
-            
-            // 최대 매출 계산 (그래프 스케일용)
-            const maxSales = Math.max(...Object.values(dailySales));
-            
-            Object.entries(dailySales).sort().forEach(([date, sales]) => {
-                const percentage = maxSales > 0 ? (sales / maxSales) * 100 : 0;
-                const barWidth = Math.max(percentage, 5); // 최소 5% 너비
-                
-                const row = document.createElement('tr');
+        function renderBarGraph(containerId, entries, formatter) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            container.innerHTML = '';
+
+            const values = entries.map(e => e.value);
+            const maxValue = Math.max(...values, 0);
+
+            entries.forEach(e => {
+                const pct = maxValue > 0 ? (e.value / maxValue) * 100 : 0;
+                const row = document.createElement('div');
+                row.className = 'flex items-center gap-2';
                 row.innerHTML = `
-                    <td class="border border-gray-300 p-2">${date}</td>
-                    <td class="border border-gray-300 p-2">${sales.toLocaleString()}${currency.symbol}</td>
-                    <td class="border border-gray-300 p-2">
-                        <div class="w-full bg-gray-200 rounded-full h-6">
-                            <div class="bg-blue-500 h-6 rounded-full flex items-center justify-center text-white text-xs" 
-                                 style="width: ${barWidth}%">
-                                ${percentage.toFixed(1)}%
-                            </div>
+                    <div class="w-28 md:w-40 text-sm truncate" title="${e.label}">${e.label}</div>
+                    <div class="flex-1 bg-gray-200 rounded-full h-7 overflow-hidden">
+                        <div class="bg-blue-500 h-7 rounded-full flex items-center px-2 text-white text-xs" style="width:${Math.max(pct, e.value > 0 ? 4 : 0)}%">
+                            ${formatter(e.value, e)}
                         </div>
-                    </td>
+                    </div>
+                    <div class="w-28 text-right text-sm font-medium">${formatter(e.value, e)}</div>
                 `;
-                tableBody.appendChild(row);
+                container.appendChild(row);
             });
+
+            if (!entries.length) {
+                container.innerHTML = '<div class="text-gray-500 text-sm">데이터가 없습니다.</div>';
+            }
+        }
+
+        function displayMonthlySalesGraphs(dailySales, staffSales, menuSales) {
+            const currency = JSON.parse(localStorage.getItem(getAdminKey('currency')) || '{"symbol":"","name":"원"}');
+
+            const dailyEntries = Object.entries(dailySales).sort((a,b) => a[0].localeCompare(b[0]))
+                .map(([label, v]) => ({label, value:v.price}));
+            const staffEntries = Object.entries(staffSales).sort((a,b) => b[1].price-a[1].price)
+                .map(([label, v]) => ({label, value:v.price}));
+            const menuEntries = Object.entries(menuSales).sort((a,b) => b[1].price-a[1].price)
+                .map(([label, v]) => ({label, value:v.price}));
+
+            renderBarGraph('dailySalesGraph', dailyEntries, value => value.toLocaleString() + currency.symbol);
+            renderBarGraph('staffSalesGraph', staffEntries, value => value.toLocaleString() + currency.symbol);
+            renderBarGraph('menuSalesGraph', menuEntries, value => value.toLocaleString() + currency.symbol);
         }
 
         // 엑셀 내보내기 함수
