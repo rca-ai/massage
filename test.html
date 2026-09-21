@@ -2957,7 +2957,7 @@ function initializeApp() {
             displayPaymentStatistics(paymentStats);
             
             // 총계 계산 및 표시
-            displayTotalStatistics(filteredReservations);
+            displayTotalStatistics(filteredReservations, staffStats);
         }
 
         // 직원별 통계 계산
@@ -3075,31 +3075,33 @@ function initializeApp() {
         }
 
         // 총계 표시
-        function displayTotalStatistics(reservations) {
+        function displayTotalStatistics(reservations, staffStats) {
             const currency = JSON.parse(localStorage.getItem(getAdminKey('currency')) || '{"symbol":"","name":"원"}');
             
-            // QR TIP을 제외한 총 금액 계산
             let grandTotalPrice = 0;
             let grandTotalCommission = 0;
             let qrTipTotal = 0;
             
             reservations.forEach(r => {
-                grandTotalPrice += r.price;
-                grandTotalCommission += r.commission;
+                grandTotalPrice += Number(r.price) || 0;
                 
-                // QR TIP 금액 계산
                 if (r.paymentDetails && r.paymentDetails['QR TIP']) {
-                    qrTipTotal += r.paymentDetails['QR TIP'];
+                    qrTipTotal += Number(r.paymentDetails['QR TIP']) || 0;
                 }
             });
             
+            // 직원별 통계에 이미 적용된 Guarantee 금액을 합산
+            Object.values(staffStats).forEach(stats => {
+                grandTotalCommission += Number(stats.totalCommission) || 0;
+            });
+            
+            // Guarantee 적용 후 커미션을 기준으로 수익 계산
             const profit = grandTotalPrice - grandTotalCommission;
             
             document.getElementById('grandTotalPrice').textContent = grandTotalPrice.toLocaleString();
             document.getElementById('grandTotalCommission').textContent = grandTotalCommission.toLocaleString();
             document.getElementById('totalProfit').textContent = profit.toLocaleString();
             
-            // 화폐 단위 업데이트
             document.getElementById('grandTotalCurrency').textContent = currency.symbol;
             document.getElementById('grandTotalCommissionCurrency').textContent = currency.symbol;
             document.getElementById('totalProfitCurrency').textContent = currency.symbol;
