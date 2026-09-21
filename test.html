@@ -5464,22 +5464,46 @@ function initializeApp() {
             window.alert = msg => nativeAlert(translateLegacy(msg));
             window.confirm = msg => nativeConfirm(translateLegacy(msg));
 
-            const observer = new MutationObserver(ms => ms.forEach(m => {
-                if (m.type === 'characterData') rememberAndTranslate(m.target);
-                if (m.type === 'childList') m.addedNodes.forEach(n => {
-                    if (n.nodeType === Node.TEXT_NODE) rememberAndTranslate(n);
-                    else if (n.nodeType === Node.ELEMENT_NODE) {
-                        const w = document.createTreeWalker(n, NodeFilter.SHOW_TEXT);
-                        const nodes = [];
-                        while (w.nextNode()) nodes.push(w.currentNode);
-                        nodes.forEach(rememberAndTranslate);
-                        translateAttributes(n);
-                    }
-                });
-            }));
+            // 번역 중 DOM 변경이 MutationObserver를 재호출하는 무한 루프를 방지합니다.
+            let isLocalizing = false;
+            function safeLocalizePage() {
+                if (isLocalizing) return;
+                isLocalizing = true;
+                try { translatePage(); } finally { isLocalizing = false; }
+            }
+
+            const observer = new MutationObserver(ms => {
+                if (isLocalizing) return;
+                isLocalizing = true;
+                try {
+                    ms.forEach(m => {
+                        if (m.type === 'characterData') {
+                            const node = m.target;
+                            if (!node || node.nodeType !== Node.TEXT_NODE) return;
+                            const original = node.__koOriginal;
+                            const translated = original ? translateLegacy(original) : translateLegacy(node.nodeValue);
+                            if (node.nodeValue !== translated) node.nodeValue = translated;
+                        } else if (m.type === 'childList') {
+                            m.addedNodes.forEach(n => {
+                                if (n.nodeType === Node.TEXT_NODE) {
+                                    rememberAndTranslate(n);
+                                } else if (n.nodeType === Node.ELEMENT_NODE) {
+                                    const w = document.createTreeWalker(n, NodeFilter.SHOW_TEXT);
+                                    const nodes = [];
+                                    while (w.nextNode()) nodes.push(w.currentNode);
+                                    nodes.forEach(rememberAndTranslate);
+                                    translateAttributes(n);
+                                }
+                            });
+                        }
+                    });
+                } finally {
+                    isLocalizing = false;
+                }
+            });
             observer.observe(document.body, {subtree:true, childList:true, characterData:true});
 
-            window.localizeLegacyUI = translatePage;
+            window.localizeLegacyUI = safeLocalizePage;
             window.translateLegacyText = translateLegacy;
         })();
 
