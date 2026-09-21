@@ -168,7 +168,7 @@
      <table class="w-full border-collapse border border-gray-300">
       <thead>
        <tr class="bg-gray-100">
-        <th class="border border-gray-300 p-2" data-translate="staff">직원명</th>
+        <th class="border border-gray-300 p-2 cursor-pointer hover:bg-blue-100" data-translate="staff" onclick="sortDashboardByStaff()">직원명 ↕</th>
         <th class="border border-gray-300 p-2" data-translate="menu">메뉴</th>
         <th class="border border-gray-300 p-2" data-translate="duration">시간</th>
         <th class="border border-gray-300 p-2" data-translate="startTime">시작시간</th>
@@ -176,7 +176,7 @@
         <th class="border border-gray-300 p-2" data-translate="remainingTime">남은시간</th>
         <th class="border border-gray-300 p-2" data-translate="price">가격</th>
         <th class="border border-gray-300 p-2" data-translate="commission">커미션</th>
-        <th class="border border-gray-300 p-2" data-translate="roomNumber">방번호</th>
+        <th class="border border-gray-300 p-2 cursor-pointer hover:bg-blue-100" data-translate="roomNumber" onclick="sortDashboardByRoom()">방번호 ↕</th>
         <th class="border border-gray-300 p-2" data-translate="actions">작업</th>
        </tr>
       </thead>
@@ -184,6 +184,18 @@
       </tbody>
      </table>
     </div>
+   </div>
+   <div id="dashboardSummarySection" class="bg-white rounded-lg shadow-md p-6 mt-6" style="display: none;">
+    <h3 class="text-lg font-bold mb-3" data-translate="dashboardSummaryTitle">순번별현황</h3>
+    <div class="overflow-x-auto"><table class="w-full border-collapse border border-gray-300">
+     <thead><tr class="bg-gray-100">
+      <th class="border border-gray-300 p-2" data-translate="staff">직원명</th>
+      <th class="border border-gray-300 p-2" data-translate="massageCount">마사지횟수</th>
+      <th class="border border-gray-300 p-2" data-translate="price">가격</th>
+      <th class="border border-gray-300 p-2" data-translate="commission">커미션</th>
+     </tr></thead>
+     <tbody id="dashboardSummaryTable"></tbody><tfoot id="dashboardSummaryTableFoot"></tfoot>
+    </table></div>
    </div><!-- 예약 섹션 -->
    <div id="reservationSection" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
     <h2 class="text-2xl font-bold mb-4" data-translate="reservation">예약</h2><!-- 직원 선택 (필수) -->
@@ -424,6 +436,8 @@
         let selectedStaff = null;
         let menuRowCounter = 0;
         let menuRows = [];
+        let dashboardSortMode = "staffOrder";
+        let dashboardSortDirection = "asc";
 
         // 번역 데이터
         const translations = {
@@ -450,6 +464,9 @@
                 statistics: '통계',
                 dbManagement: 'DB 관리',
                 staff: '직원명',
+                dashboardSummaryTitle: '순번별현황',
+                massageCount: '마사지횟수',
+                dashboardSummaryTotal: '합계',
                 menu: '메뉴',
                 duration: '시간',
                 startTime: '시작시간',
@@ -1536,11 +1553,16 @@ function initializeApp() {
             sections.forEach(section => {
                 document.getElementById(section).style.display = 'none';
             });
+            const dashboardSummary = document.getElementById('dashboardSummarySection');
+            if (dashboardSummary) dashboardSummary.style.display = 'none';
         }
 
         function showDashboard() {
             hideAllSections();
             document.getElementById('dashboardSection').style.display = 'block';
+            document.getElementById('dashboardSummarySection').style.display = 'block';
+            dashboardSortMode = "staffOrder";
+            dashboardSortDirection = "asc";
             loadDashboard();
         }
 
@@ -2083,17 +2105,41 @@ function initializeApp() {
         }
 
         // 현황판 관련 함수
+        function sortDashboardByStaff() {
+            if (dashboardSortMode === "staffOrder") dashboardSortDirection = dashboardSortDirection === "asc" ? "desc" : "asc";
+            else { dashboardSortMode = "staffOrder"; dashboardSortDirection = "asc"; }
+            loadDashboard();
+        }
+
+        function sortDashboardByRoom() {
+            if (dashboardSortMode === "room") dashboardSortDirection = dashboardSortDirection === "asc" ? "desc" : "asc";
+            else { dashboardSortMode = "room"; dashboardSortDirection = "asc"; }
+            loadDashboard();
+        }
+
         function loadDashboard() {
             const reservations = JSON.parse(localStorage.getItem(getAdminKey('reservations')) || '[]');
             const currentDate = document.getElementById('currentDate').value;
             const staffOrder = JSON.parse(localStorage.getItem(getDailyStaffOrderKey(currentDate)) || '{}');
             const todayReservations = reservations.filter(r => r.date === currentDate);
             
-            // 순번 순서로 정렬
+            // 선택된 기준으로 정렬
             todayReservations.sort((a, b) => {
-                const orderA = staffOrder[a.staffId] || 999;
-                const orderB = staffOrder[b.staffId] || 999;
-                return orderA - orderB;
+                let comparison = 0;
+                if (dashboardSortMode === "room") {
+                    const roomA = String(a.roomNumber || "");
+                    const roomB = String(b.roomNumber || "");
+                    const numA = parseInt(roomA, 10);
+                    const numB = parseInt(roomB, 10);
+                    comparison = (!isNaN(numA) && !isNaN(numB)) ? numA - numB :
+                        roomA.localeCompare(roomB, undefined, {numeric: true, sensitivity: "base"});
+                } else {
+                    const orderA = staffOrder[a.staffId] !== undefined ? Number(staffOrder[a.staffId]) : 999;
+                    const orderB = staffOrder[b.staffId] !== undefined ? Number(staffOrder[b.staffId]) : 999;
+                    comparison = orderA - orderB;
+                }
+                if (comparison === 0) comparison = String(a.staffName || "").localeCompare(String(b.staffName || ""), undefined, {sensitivity: "base"});
+                return dashboardSortDirection === "asc" ? comparison : -comparison;
             });
             
             const tableBody = document.getElementById('dashboardTable');
@@ -2140,6 +2186,41 @@ function initializeApp() {
                 `;
                 tableBody.appendChild(row);
             });
+
+            displayDashboardSummary(todayReservations, staffOrder);
+        }
+
+        function displayDashboardSummary(todayReservations, staffOrder) {
+            const tableBody = document.getElementById("dashboardSummaryTable");
+            const tableFoot = document.getElementById("dashboardSummaryTableFoot");
+            if (!tableBody) return;
+            const currency = JSON.parse(localStorage.getItem(getAdminKey("currency")) || '{"symbol":"","name":"원"}');
+            const summary = {};
+            todayReservations.forEach(r => {
+                const key = r.staffId || r.staffName || "unknown";
+                if (!summary[key]) summary[key] = {staffId:r.staffId, staffName:r.staffName || "", count:0, price:0, commission:0};
+                summary[key].count += 1;
+                summary[key].price += Number(r.price) || 0;
+                summary[key].commission += Number(r.commission) || 0;
+            });
+            const rows = Object.values(summary).sort((a,b) => {
+                const oa = staffOrder[a.staffId] !== undefined ? Number(staffOrder[a.staffId]) : 999;
+                const ob = staffOrder[b.staffId] !== undefined ? Number(staffOrder[b.staffId]) : 999;
+                return oa - ob;
+            });
+            tableBody.innerHTML = rows.map(stats => {
+                const order = staffOrder[stats.staffId];
+                const name = order !== undefined && Number(order) > 0 ? order + ". " + stats.staffName : stats.staffName;
+                return '<tr><td class="border border-gray-300 p-2">' + name + '</td><td class="border border-gray-300 p-2">' +
+                    stats.count.toLocaleString() + '</td><td class="border border-gray-300 p-2">' +
+                    stats.price.toLocaleString() + currency.symbol + '</td><td class="border border-gray-300 p-2">' +
+                    stats.commission.toLocaleString() + currency.symbol + '</td></tr>';
+            }).join("");
+            const total = rows.reduce((a,x) => ({count:a.count+x.count,price:a.price+x.price,commission:a.commission+x.commission}), {count:0,price:0,commission:0});
+            tableFoot.innerHTML = '<tr class="bg-gray-100 font-bold"><td class="border border-gray-300 p-2" data-translate="dashboardSummaryTotal">합계</td><td class="border border-gray-300 p-2">' +
+                total.count.toLocaleString() + '</td><td class="border border-gray-300 p-2">' + total.price.toLocaleString() + currency.symbol +
+                '</td><td class="border border-gray-300 p-2">' + total.commission.toLocaleString() + currency.symbol + '</td></tr>';
+            if (window.localizeLegacyUI) window.localizeLegacyUI();
         }
 
         function calculateEndTime(startTime, duration) {
