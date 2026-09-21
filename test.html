@@ -1393,6 +1393,7 @@ function initializeApp() {
             document.getElementById('langVi').className = lang === 'vi' ? 'bg-blue-500 text-white py-2 px-3 rounded text-sm hover:bg-blue-600' : 'bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm hover:bg-gray-400';
             
             updateTranslations();
+            if (window.localizeLegacyUI) window.localizeLegacyUI();
             
             // 메인 화면이 표시된 경우에만 데이터 로드
             if (document.getElementById('mainScreen').style.display === 'block') {
@@ -5485,6 +5486,7 @@ function initializeApp() {
         // 앱 초기화
         initializeApp();
         updateTranslations();
+        if (window.localizeLegacyUI) window.localizeLegacyUI();
     </script>
  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99a6c0c3942d55a1',t:'MTc2MjQ1NDc4MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
