@@ -3225,7 +3225,8 @@ function initializeApp() {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td class="border border-gray-300 p-2">${staffName}</td>
-                    <td class="border border-gray-300 p-2">${stats.totalPrice.toLocaleString()}${currency.symbol}</td>
+                    <td class="border border-gray-300 p-2">${(Number(stats.totalPrice) || 0).toLocaleString()}${currency.symbol}</td>
+                    <td class="border border-gray-300 p-2">${(Number(stats.totalCommission) || 0).toLocaleString()}${currency.symbol}</td>
                 `;
                 tableBody.appendChild(row);
             });
