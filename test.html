@@ -261,6 +261,24 @@
        </thead>
        <tbody id="statsTable">
        </tbody>
+       <tfoot id="staffStatsTableFoot"></tfoot>
+      </table>
+     </div>
+    </div><!-- 메뉴별 통계 (월간 메뉴 매출) -->
+    <div id="menuStatisticsContainer" class="mb-6" style="display: none;">
+     <h3 class="text-lg font-bold mb-2" data-translate="menuStatisticsTitle">메뉴별 통계</h3>
+     <div class="overflow-x-auto">
+      <table class="w-full border-collapse border border-gray-300">
+       <thead>
+        <tr class="bg-gray-100">
+         <th class="border border-gray-300 p-2" data-translate="menuName">메뉴명</th>
+         <th class="border border-gray-300 p-2" data-translate="salesCount">판매 횟수</th>
+         <th class="border border-gray-300 p-2" data-translate="totalSales">총 매출</th>
+         <th class="border border-gray-300 p-2" data-translate="totalCommission">총 커미션</th>
+        </tr>
+       </thead>
+       <tbody id="menuStatsTable"></tbody>
+       <tfoot id="menuStatsTableFoot"></tfoot>
       </table>
      </div>
     </div><!-- 입금방식별 통계 -->
@@ -490,6 +508,12 @@
                 monthlySalesChart: '월간 매출 그래프',
                 download: '다운로드',
                 staffStats: '직원별 통계',
+                menuStatisticsTitle: '메뉴별 통계',
+                menuName: '메뉴명',
+                salesCount: '판매 횟수',
+                totalSales: '총 매출',
+                staffTotal: '직원별 합계',
+                menuTotal: '메뉴별 합계',
                 paymentMethodStats: '입금방식별 통계',
                 paymentMethod: '입금방식',
                 amount: '금액',
@@ -642,6 +666,12 @@
                 monthlySalesChart: 'Monthly Sales Chart',
                 download: 'Download',
                 staffStats: 'Staff Statistics',
+                menuStatisticsTitle: 'Menu Statistics',
+                menuName: 'Menu',
+                salesCount: 'Sales Count',
+                totalSales: 'Total Sales',
+                staffTotal: 'Staff Total',
+                menuTotal: 'Menu Total',
                 paymentMethodStats: 'Payment Method Statistics',
                 paymentMethod: 'Payment Method',
                 amount: 'Amount',
@@ -794,6 +824,12 @@
                 monthlySalesChart: 'กราฟยอดขายรายเดือน',
                 download: 'ดาวน์โหลด',
                 staffStats: 'สถิติพนักงาน',
+                menuStatisticsTitle: 'สถิติเมนู',
+                menuName: 'ชื่อเมนู',
+                salesCount: 'จำนวนครั้งที่ขาย',
+                totalSales: 'ยอดขายรวม',
+                staffTotal: 'รวมพนักงาน',
+                menuTotal: 'รวมเมนู',
                 paymentMethodStats: 'สถิติวิธีการชำระเงิน',
                 paymentMethod: 'วิธีการชำระเงิน',
                 amount: 'จำนวนเงิน',
@@ -946,6 +982,12 @@
                 monthlySalesChart: 'Biểu đồ doanh số hàng tháng',
                 download: 'Tải xuống',
                 staffStats: 'Thống kê nhân viên',
+                menuStatisticsTitle: 'Thống kê menu',
+                menuName: 'Tên menu',
+                salesCount: 'Số lần bán',
+                totalSales: 'Tổng doanh thu',
+                staffTotal: 'Tổng nhân viên',
+                menuTotal: 'Tổng menu',
                 paymentMethodStats: 'Thống kê phương thức thanh toán',
                 paymentMethod: 'Phương thức thanh toán',
                 amount: 'Số tiền',
@@ -2792,6 +2834,8 @@ function initializeApp() {
 
         function showDailyStats() {
             currentStatsType = 'daily';
+            const menuContainer = document.getElementById('menuStatisticsContainer');
+            if (menuContainer) menuContainer.style.display = 'none';
             updateStatsButtonStyles();
             showDateSelection('daily');
             loadStatistics();
@@ -2799,6 +2843,8 @@ function initializeApp() {
 
         function showWeeklyStats() {
             currentStatsType = 'weekly';
+            const menuContainer = document.getElementById('menuStatisticsContainer');
+            if (menuContainer) menuContainer.style.display = 'none';
             updateStatsButtonStyles();
             showDateSelection('range');
             setThisWeek(); // 기본값으로 이번 주 설정
@@ -2807,6 +2853,8 @@ function initializeApp() {
 
         function showMonthlyStats() {
             currentStatsType = 'monthly';
+            const menuContainer = document.getElementById('menuStatisticsContainer');
+            if (menuContainer) menuContainer.style.display = 'none';
             updateStatsButtonStyles();
             showDateSelection('range');
             setThisMonth(); // 기본값으로 이번 달 설정
@@ -2904,6 +2952,8 @@ function initializeApp() {
 
         function showMenuSales() {
             currentStatsType = 'menuSales';
+            const menuContainer = document.getElementById('menuStatisticsContainer');
+            if (menuContainer) menuContainer.style.display = 'block';
             updateStatsButtonStyles();
             showDateSelection('range');
             setThisMonth(); // 기본값으로 이번 달 설정
@@ -2912,6 +2962,8 @@ function initializeApp() {
 
         function showMonthlySalesChart() {
             currentStatsType = 'monthlySalesChart';
+            const menuContainer = document.getElementById('menuStatisticsContainer');
+            if (menuContainer) menuContainer.style.display = 'none';
             updateStatsButtonStyles();
             showDateSelection('range');
             setThisMonth(); // 기본값으로 이번 달 설정
@@ -3038,6 +3090,8 @@ function initializeApp() {
             const currency = JSON.parse(localStorage.getItem(getAdminKey('currency')) || '{"symbol":"","name":"원"}');
             
             tableBody.innerHTML = '';
+            const staffFooter = document.getElementById('staffStatsTableFoot');
+            if (staffFooter) staffFooter.innerHTML = '';
             
             // 기본 테이블 헤더로 복원
             const headerRow = tableBody.parentElement.querySelector('thead tr');
@@ -3140,47 +3194,63 @@ function initializeApp() {
                 menuSales[r.menuName].totalCommission += r.commission;
             });
             
-            // 메뉴별 매출 표시
+            // 월간 메뉴 매출에서는 직원별 통계와 메뉴별 통계를 함께 표시
+            const staffStats = calculateStaffStatistics(filteredReservations);
+            displayStaffStatistics(staffStats);
             displayMenuSalesStatistics(menuSales);
             
             // 입금방식별 통계도 함께 표시
             const paymentStats = calculatePaymentStatistics(filteredReservations);
             displayPaymentStatistics(paymentStats);
             
-            // 총계 표시
-            displayTotalStatistics(filteredReservations);
+            // Guarantee 적용 후 전체 총계 표시
+            displayTotalStatistics(filteredReservations, staffStats);
         }
 
         // 메뉴별 매출 통계 표시
         function displayMenuSalesStatistics(menuSales) {
-            const tableBody = document.getElementById('statsTable');
+            const tableBody = document.getElementById('menuStatsTable');
+            const tableFoot = document.getElementById('menuStatsTableFoot');
             const currency = JSON.parse(localStorage.getItem(getAdminKey('currency')) || '{"symbol":"","name":"원"}');
-            
+
+            if (!tableBody) return;
+
             tableBody.innerHTML = '';
-            
-            // 테이블 헤더 변경
-            const headerRow = tableBody.parentElement.querySelector('thead tr');
-            headerRow.innerHTML = `
-                <th class="border border-gray-300 p-2">메뉴명</th>
-                <th class="border border-gray-300 p-2">판매 횟수</th>
-                <th class="border border-gray-300 p-2">총 매출</th>
-                <th class="border border-gray-300 p-2">총 커미션</th>
-            `;
-            
+            if (tableFoot) tableFoot.innerHTML = '';
+
             Object.entries(menuSales).forEach(([menuName, stats]) => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td class="border border-gray-300 p-2">${menuName}</td>
-                    <td class="border border-gray-300 p-2">${stats.count}회</td>
+                    <td class="border border-gray-300 p-2">${stats.count.toLocaleString()}</td>
                     <td class="border border-gray-300 p-2">${stats.totalPrice.toLocaleString()}${currency.symbol}</td>
                     <td class="border border-gray-300 p-2">${stats.totalCommission.toLocaleString()}${currency.symbol}</td>
                 `;
                 tableBody.appendChild(row);
             });
+
+            // 메뉴별 합계
+            const menuTotalCount = Object.values(menuSales).reduce((sum, stats) => sum + (Number(stats.count) || 0), 0);
+            const menuTotalPrice = Object.values(menuSales).reduce((sum, stats) => sum + (Number(stats.totalPrice) || 0), 0);
+            const menuTotalCommission = Object.values(menuSales).reduce((sum, stats) => sum + (Number(stats.totalCommission) || 0), 0);
+
+            if (tableFoot) {
+                tableFoot.innerHTML = `
+                    <tr class="bg-gray-100 font-bold">
+                        <td class="border border-gray-300 p-2" data-translate="menuTotal">메뉴별 합계</td>
+                        <td class="border border-gray-300 p-2">${menuTotalCount.toLocaleString()}</td>
+                        <td class="border border-gray-300 p-2">${menuTotalPrice.toLocaleString()}${currency.symbol}</td>
+                        <td class="border border-gray-300 p-2">${menuTotalCommission.toLocaleString()}${currency.symbol}</td>
+                    </tr>
+                `;
+            }
+            if (window.localizeLegacyUI) window.localizeLegacyUI();
         }
 
         // 월간 매출 차트 로딩
         function loadMonthlySalesChart() {
+            const menuContainer = document.getElementById('menuStatisticsContainer');
+            if (menuContainer) menuContainer.style.display = 'none';
             const reservations = JSON.parse(localStorage.getItem(getAdminKey('reservations')) || '[]');
             const startDate = document.getElementById('statsStartDate').value;
             const endDate = document.getElementById('statsEndDate').value;
