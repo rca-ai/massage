@@ -196,7 +196,22 @@
      </tr></thead>
      <tbody id="dashboardSummaryTable"></tbody><tfoot id="dashboardSummaryTableFoot"></tfoot>
     </table></div>
-   </div><!-- 예약 섹션 -->
+   </div>
+   <div id="dashboardDetailSection" class="mt-6 space-y-6" style="display: none;">
+    <div class="bg-white rounded-lg shadow-md p-6">
+     <h3 class="text-lg font-bold mb-3">직원별 현황</h3>
+     <div class="overflow-x-auto">
+      <table id="staffStatusTable" class="border-collapse border border-gray-300 w-full text-sm"></table>
+     </div>
+    </div>
+    <div class="bg-white rounded-lg shadow-md p-6">
+     <h3 class="text-lg font-bold mb-3">방번호별 현황</h3>
+     <div class="overflow-x-auto">
+      <table id="roomStatusTable" class="border-collapse border border-gray-300 w-full text-sm"></table>
+     </div>
+    </div>
+   </div>
+   <!-- 예약 섹션 -->
    <div id="reservationSection" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
     <h2 class="text-2xl font-bold mb-4" data-translate="reservation">예약</h2><!-- 직원 선택 (필수) -->
     <div class="mb-6"><label class="block text-sm font-medium mb-2 required-label" data-translate="selectStaff">직원 선택</label>
@@ -2234,6 +2249,7 @@ function initializeApp() {
             });
 
             displayDashboardSummary(todayReservations, staffOrder);
+            displayDashboardDetailStatus(todayReservations, staffOrder);
         }
 
         function displayDashboardSummary(todayReservations, staffOrder) {
@@ -2267,6 +2283,125 @@ function initializeApp() {
                 total.count.toLocaleString() + '</td><td class="border border-gray-300 p-2">' + total.price.toLocaleString() + currency.symbol +
                 '</td><td class="border border-gray-300 p-2">' + total.commission.toLocaleString() + currency.symbol + '</td></tr>';
             if (window.localizeLegacyUI) window.localizeLegacyUI();
+        }
+
+        function displayDashboardDetailStatus(todayReservations, staffOrder) {
+            const container = document.getElementById('dashboardDetailSection');
+            const staffTable = document.getElementById('staffStatusTable');
+            const roomTable = document.getElementById('roomStatusTable');
+            if (!container || !staffTable || !roomTable) return;
+
+            const currency = JSON.parse(localStorage.getItem(getAdminKey('currency')) || '{"symbol":"","name":"원"}');
+            const staff = JSON.parse(localStorage.getItem(getAdminKey('staff')) || '[]');
+            const rooms = JSON.parse(localStorage.getItem(getAdminKey('rooms')) || '[]');
+
+            const getOrder = (staffId) => staffOrder[staffId] !== undefined ? Number(staffOrder[staffId]) : 999;
+            const getReservations = (items, key) => items
+                .filter(r => key === 'staff' ? r.staffId !== undefined && String(r.staffId) === String(items.__groupKey) : String(r.roomNumber || '') === String(items.__groupKey))
+                .sort((a,b) => {
+                    const at = String(a.startTime || '');
+                    const bt = String(b.startTime || '');
+                    if (at && bt && at !== bt) return at.localeCompare(bt);
+                    if (at && !bt) return -1;
+                    if (!at && bt) return 1;
+                    return (Number(a.menuOrder) || 0) - (Number(b.menuOrder) || 0) || (Number(a.id) || 0) - (Number(b.id) || 0);
+                });
+
+            const buildRows = (groups, type) => {
+                const normalized = groups.map(group => {
+                    const key = type === 'staff' ? group.id : (group.roomNumber || '');
+                    const groupReservations = todayReservations.filter(r =>
+                        type === 'staff'
+                            ? String(r.staffId) === String(key)
+                            : String(r.roomNumber || '') === String(key)
+                    ).sort((a,b) => {
+                        const at = String(a.startTime || '');
+                        const bt = String(b.startTime || '');
+                        if (at && bt && at !== bt) return at.localeCompare(bt);
+                        if (at && !bt) return -1;
+                        if (!at && bt) return 1;
+                        return (Number(a.menuOrder) || 0) - (Number(b.menuOrder) || 0) || (Number(a.id) || 0) - (Number(b.id) || 0);
+                    });
+                    return { group, reservations: groupReservations };
+                });
+                if (type === 'staff') {
+                    normalized.sort((a,b) => {
+                        const oa = getOrder(a.group.id), ob = getOrder(b.group.id);
+                        if (oa !== ob) return oa - ob;
+                        return String(a.group.name || '').localeCompare(String(b.group.name || ''), undefined, {numeric:true, sensitivity:'base'});
+                    });
+                } else {
+                    normalized.sort((a,b) => String(a.group.roomNumber || '').localeCompare(String(b.group.roomNumber || ''), undefined, {numeric:true, sensitivity:'base'}));
+                }
+                return normalized;
+            };
+
+            const staffGroups = buildRows(staff, 'staff');
+            const roomGroups = buildRows(rooms, 'room');
+            const maxColumns = Math.max(1,
+                ...staffGroups.map(g => g.reservations.length),
+                ...roomGroups.map(g => g.reservations.length)
+            );
+
+            const border = 'border border-gray-300 p-2 align-top';
+            const renderReservationCell = (r, field) => {
+                if (!r) return '<td class="' + border + '"></td>';
+                const unpaidStyle = !r.paid ? ' cursor-pointer hover:bg-blue-50' : '';
+                const paidStyle = r.paid ? ' bg-gray-200' : '';
+                const click = !r.paid ? ' onclick="showPaymentModal(' + Number(r.id) + ')" title="입금 처리"' : '';
+                let value = '';
+                if (field === 'menu') value = String(r.menuName || '');
+                if (field === 'duration') value = (r.duration !== undefined && r.duration !== null ? r.duration + 'min' : '');
+                if (field === 'remaining') {
+                    if (r.paid) value = '-';
+                    else if (r.startTime) {
+                        const remaining = calculateRemainingTime(r.startTime, r.duration, r.date);
+                        value = remaining === -1 ? '-' : (remaining > 0 ? remaining + 'min' : '-');
+                    } else value = '-';
+                }
+                if (field === 'price') value = (Number(r.price) || 0).toLocaleString() + currency.symbol;
+                if (field === 'commission') value = (Number(r.commission) || 0).toLocaleString() + currency.symbol;
+                return '<td class="' + border + paidStyle + unpaidStyle + '"' + click + '>' + value + '</td>';
+            };
+
+            const renderStatusTable = (table, groups, type) => {
+                let html = '<thead><tr class="bg-gray-100">' +
+                    '<th class="' + border + '" rowspan="1">' + (type === 'staff' ? '직원명' : '방번호') + '</th>' +
+                    '<th class="' + border + '">구분</th><th class="' + border + '">합계</th>';
+                for (let i=0; i<maxColumns; i++) html += '<th class="' + border + '">' + (i+1) + '회</th>';
+                html += '</tr></thead><tbody>';
+
+                groups.forEach(({group, reservations}) => {
+                    const totalPrice = reservations.reduce((sum,r) => sum + (Number(r.price)||0), 0);
+                    const totalCommission = reservations.reduce((sum,r) => sum + (Number(r.commission)||0), 0);
+                    const groupName = type === 'staff'
+                        ? ((getOrder(group.id) !== 999 && getOrder(group.id) > 0 ? getOrder(group.id) + '. ' : '') + String(group.name || ''))
+                        : String(group.roomNumber || '');
+                    const fields = [
+                        ['메뉴','menu'],
+                        ['시간','duration'],
+                        ['남은시간','remaining'],
+                        ['가격','price'],
+                        ['커미션','commission']
+                    ];
+                    fields.forEach((field, rowIndex) => {
+                        html += '<tr>';
+                        if (rowIndex === 0) html += '<td class="' + border + ' font-semibold" rowspan="5">' + groupName + '</td>';
+                        html += '<td class="' + border + ' font-medium">' + field[0] + '</td>';
+                        const totalValue = field[1] === 'price' ? totalPrice.toLocaleString() + currency.symbol :
+                            field[1] === 'commission' ? totalCommission.toLocaleString() + currency.symbol : '';
+                        html += '<td class="' + border + ' font-semibold">' + totalValue + '</td>';
+                        for (let i=0; i<maxColumns; i++) html += renderReservationCell(reservations[i], field[1]);
+                        html += '</tr>';
+                    });
+                });
+                html += '</tbody>';
+                table.innerHTML = html;
+            };
+
+            renderStatusTable(staffTable, staffGroups, 'staff');
+            renderStatusTable(roomTable, roomGroups, 'room');
+            container.style.display = 'block';
         }
 
         function calculateEndTime(startTime, duration) {
