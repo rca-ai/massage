@@ -5717,25 +5717,7 @@ function initializeApp() {
         // ===== 다국어 보완: 동적 HTML/알림/확인창 =====
         (function installLegacyLocalization() {
             const extra = {
-                en: {
-                    '년간 메뉴 매출': 'Annual Menu Sales', '년간 매출 그래프': 'Annual Sales Graph',
-                    '년간 메뉴 매출': 'Annual Menu Sales', '년간 메뉴 매출': 'Annual Menu Sales',
-                    '년간 매출 그래프': 'Annual Sales Graph', '년도': 'Year', '월': 'Month',
-                    '년간 메뉴 매출': 'Annual Menu Sales', '월별 매출 그래프': 'Monthly Sales Graph',
-                    '직원별 연간 매출 그래프': 'Annual Sales by Staff', '메뉴별 연간 매출 그래프': 'Annual Sales by Menu'
-                },
-                th: {
-                    '년간 메뉴 매출': 'ยอดขายเมนูรายปี', '년간 매출 그래프': 'กราฟยอดขายรายปี',
-                    '년도': 'ปี', '월': 'เดือน', '월별 매출 그래프': 'กราฟยอดขายรายเดือน',
-                    '직원별 연간 매출 그래프': 'กราฟยอดขายรายปีตามพนักงาน', '메뉴별 연간 매출 그래프': 'กราฟยอดขายรายปีตามเมนู'
-                },
-                vi: {
-                    '년간 메뉴 매출': 'Doanh thu menu hàng năm', '년간 매출 그래프': 'Biểu đồ doanh thu hàng năm',
-                    '년도': 'Năm', '월': 'Tháng', '월별 매출 그래프': 'Biểu đồ doanh thu theo tháng',
-                    '직원별 연간 매출 그래프': 'Doanh thu hàng năm theo nhân viên', '메뉴별 연간 매출 그래프': 'Doanh thu hàng năm theo menu'
-                }
-            };
-                en: {
+en: {
                     '현금':'Cash','쿠폰':'Coupon','기타':'Other','화폐 단위 관리':'Currency Management','화폐 이름:':'Currency Name:','화폐 기호:':'Currency Symbol:','은행':'Bank','메뉴명:':'Menu Name:','가격':'Price','커미션':'Commission','수용인원':'Capacity','직원별 합계':'Staff Total','메뉴별 합계':'Menu Total','금액':'Amount',
                     '선택된 직원: ': 'Selected Staff: ', '순번: ': 'Order: ', '직원 변경': 'Change Staff',
                     '메뉴 목록': 'Menu List', '메뉴 추가': 'Add Menu', '메뉴별 시간 설정': 'Menu Time Settings',
@@ -5767,6 +5749,10 @@ function initializeApp() {
                     '사용 기간이 만료되었습니다.': 'Your usage period has expired.', '만료일:': 'Expiration date:',
                     'Guarantee가 추가되었습니다.': 'Guarantee added.', 'Guarantee가 수정되었습니다.': 'Guarantee updated.',
                     'Guarantee가 삭제되었습니다.': 'Guarantee deleted.', '날짜, 직원명, 금액을 모두 입력해주세요.': 'Please enter the date, staff name, and amount.'
+
+                    '년간 메뉴 매출': 'Annual Menu Sales', '년간 매출 그래프': 'Annual Sales Graph',
+                    '년도': 'Year', '월': 'Month', '월별 매출 그래프': 'Monthly Sales Graph',
+                    '직원별 연간 매출 그래프': 'Annual Sales by Staff', '메뉴별 연간 매출 그래프': 'Annual Sales by Menu',
                 },
                 th: {
                     '현금':'เงินสด','쿠폰':'คูปอง','기타':'อื่นๆ','화폐 단위 관리':'จัดการสกุลเงิน','화폐 이름:':'ชื่อสกุลเงิน:','화폐 기호:':'สัญลักษณ์สกุลเงิน:','은행':'ธนาคาร','메뉴명:':'ชื่อเมนู:','가격':'ราคา','커미션':'คอมมิชชั่น','수용인원':'ความจุ','직원별 합계':'รวมพนักงาน','메뉴별 합계':'รวมเมนู','금액':'จำนวนเงิน',
@@ -5800,6 +5786,9 @@ function initializeApp() {
                     '사용 기간이 만료되었습니다.': 'หมดอายุการใช้งานแล้ว', '만료일:': 'วันหมดอายุ:',
                     'Guarantee가 추가되었습니다.': 'เพิ่ม Guarantee แล้ว', 'Guarantee가 수정되었습니다.': 'อัปเดต Guarantee แล้ว',
                     'Guarantee가 삭제되었습니다.': 'ลบ Guarantee แล้ว', '날짜, 직원명, 금액을 모두 입력해주세요.': 'กรุณากรอกวันที่ ชื่อพนักงาน และจำนวนเงินให้ครบ'
+                    '년간 메뉴 매출': 'ยอดขายเมนูรายปี', '년간 매출 그래프': 'กราฟยอดขายรายปี',
+                    '년도': 'ปี', '월': 'เดือน', '월별 매출 그래프': 'กราฟยอดขายรายเดือน',
+                    '직원별 연간 매출 그래프': 'กราฟยอดขายรายปีตามพนักงาน', '메뉴별 연간 매출 그래프': 'กราฟยอดขายรายปีตามเมนู',
                 },
                 vi: {
                     '현금':'Tiền mặt','쿠폰':'Phiếu giảm giá','기타':'Khác','화폐 단위 관리':'Quản lý tiền tệ','화폐 이름:':'Tên tiền tệ:','화폐 기호:':'Ký hiệu tiền tệ:','은행':'Ngân hàng','메뉴명:':'Tên menu:','가격':'Giá','커미션':'Hoa hồng','수용인원':'Sức chứa','직원별 합계':'Tổng nhân viên','메뉴별 합계':'Tổng menu','금액':'Số tiền',
@@ -5833,10 +5822,12 @@ function initializeApp() {
                     '사용 기간이 만료되었습니다.': 'Thời hạn sử dụng đã hết.', '만료일:': 'Ngày hết hạn:',
                     'Guarantee가 추가되었습니다.': 'Đã thêm Guarantee.', 'Guarantee가 수정되었습니다.': 'Đã cập nhật Guarantee.',
                     'Guarantee가 삭제되었습니다.': 'Đã xóa Guarantee.', '날짜, 직원명, 금액을 모두 입력해주세요.': 'Vui lòng nhập đầy đủ ngày, tên nhân viên và số tiền.'
+                    '년간 메뉴 매출': 'Doanh thu menu hàng năm', '년간 매출 그래프': 'Biểu đồ doanh thu hàng năm',
+                    '년도': 'Năm', '월': 'Tháng', '월별 매출 그래프': 'Biểu đồ doanh thu theo tháng',
+                    '직원별 연간 매출 그래프': 'Doanh thu hàng năm theo nhân viên', '메뉴별 연간 매출 그래프': 'Doanh thu hàng năm theo menu'
                 }
             };
-
-            function translateLegacy(value) {
+function translateLegacy(value) {
                 if (value === null || value === undefined) return value;
                 let s = String(value);
                 const lang = currentLanguage || 'ko';
