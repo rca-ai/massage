@@ -1614,12 +1614,16 @@ function initializeApp() {
             });
             const dashboardSummary = document.getElementById('dashboardSummarySection');
             if (dashboardSummary) dashboardSummary.style.display = 'none';
+            const dashboardDetail = document.getElementById('dashboardDetailSection');
+            if (dashboardDetail) dashboardDetail.style.display = 'none';
         }
 
         function showDashboard() {
             hideAllSections();
             document.getElementById('dashboardSection').style.display = 'block';
             document.getElementById('dashboardSummarySection').style.display = 'block';
+            const dashboardDetail = document.getElementById('dashboardDetailSection');
+            if (dashboardDetail) dashboardDetail.style.display = 'block';
             dashboardSortMode = "staffOrder";
             dashboardSortDirection = "asc";
             loadDashboard();
