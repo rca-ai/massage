@@ -2337,7 +2337,12 @@ function initializeApp() {
                 return normalized;
             };
 
-            const staffGroups = buildRows(staff, 'staff');
+            // 직원별 현황은 현재 순번이 배정된 직원만 표시
+            const orderedStaff = staff.filter(member => {
+                const order = Number(staffOrder[member.id]);
+                return Number.isFinite(order) && order > 0;
+            });
+            const staffGroups = buildRows(orderedStaff, 'staff');
             const roomGroups = buildRows(rooms, 'room');
             const maxColumns = Math.max(1,
                 ...staffGroups.map(g => g.reservations.length),
