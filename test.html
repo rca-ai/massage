@@ -416,8 +416,42 @@
      <div class="mt-4"><button onclick="exportAllDataExcel()" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700" data-translate="exportAllDataButton">전체 데이터 엑셀 내보내기</button>
      </div>
     </div>
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4"><button onclick="manageMenus()" class="bg-blue-500 text-white py-3 px-4 rounded hover:bg-blue-600" data-translate="menuManagement">메뉴 관리</button> <button onclick="manageStaff()" class="bg-green-500 text-white py-3 px-4 rounded hover:bg-green-600" data-translate="staffManagement">직원 관리</button> <button onclick="manageRooms()" class="bg-purple-500 text-white py-3 px-4 rounded hover:bg-purple-600" data-translate="roomManagement">방 관리</button> <button onclick="manageCustomers()" class="bg-orange-500 text-white py-3 px-4 rounded hover:bg-orange-600" data-translate="customerManagement">고객 관리</button> <button onclick="manageCurrency()" class="bg-pink-500 text-white py-3 px-4 rounded hover:bg-pink-600" data-translate="currencyManagement">화폐 단위</button> <button onclick="managePaymentMethods()" class="bg-yellow-500 text-white py-3 px-4 rounded hover:bg-yellow-600" data-translate="paymentMethodManagement">입금방식 관리</button> <button onclick="manageGuarantee()" class="bg-teal-500 text-white py-3 px-4 rounded hover:bg-teal-600">Guarantee 관리</button>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4"><button onclick="manageMenus()" class="bg-blue-500 text-white py-3 px-4 rounded hover:bg-blue-600" data-translate="menuManagement">메뉴 관리</button> <button onclick="manageStaff()" class="bg-green-500 text-white py-3 px-4 rounded hover:bg-green-600" data-translate="staffManagement">직원 관리</button> <button onclick="manageRooms()" class="bg-purple-500 text-white py-3 px-4 rounded hover:bg-purple-600" data-translate="roomManagement">방 관리</button> <button onclick="manageCustomers()" class="bg-orange-500 text-white py-3 px-4 rounded hover:bg-orange-600" data-translate="customerManagement">고객 관리</button> <button onclick="manageCurrency()" class="bg-pink-500 text-white py-3 px-4 rounded hover:bg-pink-600" data-translate="currencyManagement">화폐 단위</button> <button onclick="managePaymentMethods()" class="bg-yellow-500 text-white py-3 px-4 rounded hover:bg-yellow-600" data-translate="paymentMethodManagement">입금방식 관리</button> <button onclick="manageGuarantee()" class="bg-teal-500 text-white py-3 px-4 rounded hover:bg-teal-600">Guarantee 관리</button> <button onclick="showDBDeleteSection()" class="bg-red-600 text-white py-3 px-4 rounded hover:bg-red-700">DB 삭제</button>
      <div id="superAdminButtons" style="display: none;"><button onclick="manageAdmins()" class="bg-red-500 text-white py-3 px-4 rounded hover:bg-red-600" data-translate="adminManagement">관리자 관리</button>
+     </div>
+    </div>
+    <div id="dbDeleteSection" class="mt-6 p-4 border-2 border-red-200 rounded-lg bg-red-50" style="display: none;">
+     <div class="flex justify-between items-center mb-4">
+      <h3 class="text-lg font-bold text-red-700">DB 삭제</h3>
+      <button onclick="closeDBDeleteSection()" class="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600">닫기</button>
+     </div>
+     <div class="flex flex-wrap items-end gap-3 mb-4">
+      <div>
+       <label class="block text-sm font-medium mb-1">삭제 대상 날짜</label>
+       <input type="date" id="dbDeleteDate" class="border rounded px-3 py-2">
+      </div>
+      <button onclick="loadDBDeleteStatus()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">현황 보기</button>
+      <button onclick="deletePaidReservationsForDate()" class="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900">선택 날짜 입금완료 데이터 전체 삭제</button>
+     </div>
+     <div id="dbDeleteSummary" class="mb-3 text-sm font-semibold"></div>
+     <div class="overflow-x-auto">
+      <table class="w-full border-collapse border border-gray-300 text-sm">
+       <thead>
+        <tr class="bg-gray-200">
+         <th class="border border-gray-300 p-2">상태</th>
+         <th class="border border-gray-300 p-2">직원명</th>
+         <th class="border border-gray-300 p-2">방번호</th>
+         <th class="border border-gray-300 p-2">메뉴</th>
+         <th class="border border-gray-300 p-2">시간</th>
+         <th class="border border-gray-300 p-2">가격</th>
+         <th class="border border-gray-300 p-2">입금방식</th>
+         <th class="border border-gray-300 p-2">작업</th>
+        </tr>
+       </thead>
+       <tbody id="dbDeleteTable">
+        <tr><td colspan="8" class="border border-gray-300 p-4 text-center text-gray-500">날짜를 선택하고 현황 보기를 눌러주세요.</td></tr>
+       </tbody>
+      </table>
      </div>
     </div>
    </div>
@@ -1616,6 +1650,8 @@ function initializeApp() {
             if (dashboardSummary) dashboardSummary.style.display = 'none';
             const dashboardDetail = document.getElementById('dashboardDetailSection');
             if (dashboardDetail) dashboardDetail.style.display = 'none';
+            const dbDeleteSection = document.getElementById('dbDeleteSection');
+            if (dbDeleteSection) dbDeleteSection.style.display = 'none';
         }
 
         function showDashboard() {
@@ -1652,6 +1688,130 @@ function initializeApp() {
         function showDBManagement() {
             hideAllSections();
             document.getElementById('dbManagementSection').style.display = 'block';
+            const section = document.getElementById('dbDeleteSection');
+            if (section) section.style.display = 'none';
+        }
+
+        function showDBDeleteSection() {
+            hideAllSections();
+            document.getElementById('dbManagementSection').style.display = 'block';
+            const section = document.getElementById('dbDeleteSection');
+            section.style.display = 'block';
+            const dateInput = document.getElementById('dbDeleteDate');
+            if (!dateInput.value) dateInput.value = document.getElementById('currentDate').value;
+            loadDBDeleteStatus();
+            section.scrollIntoView({behavior: 'smooth', block: 'start'});
+        }
+
+        function closeDBDeleteSection() {
+            const section = document.getElementById('dbDeleteSection');
+            if (section) section.style.display = 'none';
+        }
+
+        function formatPaymentDetails(paymentDetails) {
+            if (!paymentDetails || typeof paymentDetails !== 'object') return '-';
+            const entries = Object.entries(paymentDetails).filter(([name, amount]) => Number(amount) > 0);
+            if (!entries.length) return '-';
+            return entries.map(([name, amount]) => String(name) + ' ' + Number(amount).toLocaleString()).join(', ');
+        }
+
+        function loadDBDeleteStatus() {
+            const dateInput = document.getElementById('dbDeleteDate');
+            const tableBody = document.getElementById('dbDeleteTable');
+            const summary = document.getElementById('dbDeleteSummary');
+            if (!dateInput || !tableBody || !summary) return;
+
+            const selectedDate = dateInput.value;
+            if (!selectedDate) {
+                tableBody.innerHTML = '<tr><td colspan="8" class="border border-gray-300 p-4 text-center">삭제할 날짜를 선택해주세요.</td></tr>';
+                summary.textContent = '';
+                return;
+            }
+
+            const reservations = JSON.parse(localStorage.getItem(getAdminKey('reservations')) || '[]');
+            const rows = reservations
+                .filter(r => r.date === selectedDate)
+                .sort((a,b) => {
+                    const at = String(a.startTime || '');
+                    const bt = String(b.startTime || '');
+                    if (at && bt && at !== bt) return at.localeCompare(bt);
+                    return (Number(a.id) || 0) - (Number(b.id) || 0);
+                });
+
+            const paidCount = rows.filter(r => r.paid).length;
+            const paidAmount = rows.filter(r => r.paid).reduce((sum,r) => sum + (Number(r.price) || 0), 0);
+            const currency = JSON.parse(localStorage.getItem(getAdminKey('currency')) || '{"symbol":"","name":"원"}');
+            summary.textContent = '선택 날짜: ' + selectedDate + ' / 전체 ' + rows.length + '건 / 입금완료 ' + paidCount + '건 / 입금완료 금액 ' + paidAmount.toLocaleString() + currency.symbol;
+
+            if (!rows.length) {
+                tableBody.innerHTML = '<tr><td colspan="8" class="border border-gray-300 p-4 text-center text-gray-500">선택한 날짜의 데이터가 없습니다.</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = rows.map(r => {
+                const paid = !!r.paid;
+                const status = paid ? '입금 완료' : '미입금';
+                const rowClass = paid ? 'bg-gray-200' : '';
+                const payment = formatPaymentDetails(r.paymentDetails);
+                const deleteButton = paid
+                    ? '<button onclick="deletePaidReservationById(' + Number(r.id) + ')" class="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700">삭제</button>'
+                    : '<span class="text-gray-400">삭제 불가</span>';
+                return '<tr class="' + rowClass + '">' +
+                    '<td class="border border-gray-300 p-2 font-semibold">' + status + '</td>' +
+                    '<td class="border border-gray-300 p-2">' + String(r.staffName || '') + '</td>' +
+                    '<td class="border border-gray-300 p-2">' + String(r.roomNumber || '-') + '</td>' +
+                    '<td class="border border-gray-300 p-2">' + String(r.menuName || '') + '</td>' +
+                    '<td class="border border-gray-300 p-2">' + String(r.duration || '') + 'min</td>' +
+                    '<td class="border border-gray-300 p-2">' + (Number(r.price) || 0).toLocaleString() + currency.symbol + '</td>' +
+                    '<td class="border border-gray-300 p-2">' + payment + '</td>' +
+                    '<td class="border border-gray-300 p-2">' + deleteButton + '</td>' +
+                    '</tr>';
+            }).join('');
+        }
+
+        function deletePaidReservationById(id) {
+            const reservations = JSON.parse(localStorage.getItem(getAdminKey('reservations')) || '[]');
+            const reservation = reservations.find(r => Number(r.id) === Number(id));
+            if (!reservation) {
+                alert('데이터를 찾을 수 없습니다.');
+                return;
+            }
+            if (!reservation.paid) {
+                alert('입금 처리된 데이터만 삭제할 수 있습니다.');
+                return;
+            }
+            if (!confirm('입금 처리된 데이터를 삭제하시겠습니까?\n삭제 후에는 복구할 수 없습니다.')) return;
+
+            const filtered = reservations.filter(r => Number(r.id) !== Number(id));
+            localStorage.setItem(getAdminKey('reservations'), JSON.stringify(filtered));
+            loadDBDeleteStatus();
+            if (document.getElementById('dashboardSection').style.display === 'block') loadDashboard();
+        }
+
+        function deletePaidReservationsForDate() {
+            const dateInput = document.getElementById('dbDeleteDate');
+            if (!dateInput || !dateInput.value) {
+                alert('삭제할 날짜를 선택해주세요.');
+                return;
+            }
+            const selectedDate = dateInput.value;
+            const reservations = JSON.parse(localStorage.getItem(getAdminKey('reservations')) || '[]');
+            const paidRows = reservations.filter(r => r.date === selectedDate && r.paid);
+            if (!paidRows.length) {
+                alert('선택한 날짜에 입금 처리된 데이터가 없습니다.');
+                return;
+            }
+
+            const currency = JSON.parse(localStorage.getItem(getAdminKey('currency')) || '{"symbol":"","name":"원"}');
+            const total = paidRows.reduce((sum,r) => sum + (Number(r.price) || 0), 0);
+            if (!confirm(selectedDate + '의 입금 완료 데이터 ' + paidRows.length + '건(' + total.toLocaleString() + currency.symbol + ')을 모두 삭제하시겠습니까?\n삭제 후에는 복구할 수 없습니다.')) return;
+
+            const paidIds = new Set(paidRows.map(r => Number(r.id)));
+            const filtered = reservations.filter(r => !paidIds.has(Number(r.id)));
+            localStorage.setItem(getAdminKey('reservations'), JSON.stringify(filtered));
+            loadDBDeleteStatus();
+            if (document.getElementById('dashboardSection').style.display === 'block') loadDashboard();
+            alert('입금 완료 데이터가 삭제되었습니다.');
         }
 
         // 예약 폼 초기화
