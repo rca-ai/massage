@@ -243,7 +243,7 @@
    </div><!-- 통계 섹션 -->
    <div id="statisticsSection" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
     <h2 class="text-2xl font-bold mb-4" data-translate="statistics">통계</h2>
-    <div class="mb-4 flex gap-4 flex-wrap"><button onclick="showDailyStats()" id="dailyStatsBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" data-translate="daily">일간</button> <button onclick="showWeeklyStats()" id="weeklyStatsBtn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400" data-translate="weekly">주간</button> <button onclick="showMonthlyStats()" id="monthlyStatsBtn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400" data-translate="monthly">월간</button> <button onclick="showMenuSales()" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600" data-translate="monthlyMenuSales">월간 메뉴 매출</button> <button onclick="showMonthlySalesChart()" class="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600" data-translate="monthlySalesChart">월간 매출 그래프</button> <button onclick="downloadExcel()" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700" data-translate="download">다운로드</button>
+    <div class="mb-4 flex gap-4 flex-wrap"><button onclick="showDailyStats()" id="dailyStatsBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" data-translate="daily">일간</button> <button onclick="showWeeklyStats()" id="weeklyStatsBtn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400" data-translate="weekly">주간</button> <button onclick="showMonthlyStats()" id="monthlyStatsBtn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400" data-translate="monthly">월간</button> <button onclick="showMenuSales()" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600" data-translate="monthlyMenuSales">월간 메뉴 매출</button> <button onclick="showMonthlySalesChart()" class="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600" data-translate="monthlySalesChart">월간 매출 그래프</button> <button onclick="showAnnualMenuSales()" class="bg-teal-500 text-white px-4 py-2 rounded hover:bg-teal-600" data-translate="annualMenuSales">년간 메뉴 매출</button> <button onclick="showAnnualSalesChart()" class="bg-cyan-500 text-white px-4 py-2 rounded hover:bg-cyan-600" data-translate="annualSalesChart">년간 매출 그래프</button> <button onclick="downloadExcel()" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700" data-translate="download">다운로드</button>
     </div><!-- 날짜 선택 영역 -->
     <div class="mb-6 p-4 bg-gray-50 rounded"><!-- 일간 선택 -->
      <div id="dailyDateSelection" class="mb-4"><label class="block text-sm font-medium mb-2" data-translate="selectDate">날짜 선택</label> <input type="date" id="statsDate" class="border rounded px-3 py-2" onchange="updateStats()">
@@ -254,7 +254,20 @@
       <div><label class="block text-sm font-medium mb-2" data-translate="endDate">끝 날짜</label> <input type="date" id="statsEndDate" class="w-full border rounded px-3 py-2" onchange="updateStats()">
       </div>
      </div><!-- 빠른 선택 버튼들 (주간/월간용) -->
-     <div id="quickDateSelection" class="mt-3 flex gap-2 flex-wrap" style="display: none;"><button onclick="setThisWeek()" class="bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm hover:bg-blue-200" data-translate="thisWeek">이번 주</button> <button onclick="setLastWeek()" class="bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm hover:bg-blue-200" data-translate="lastWeek">지난 주</button> <button onclick="setThisMonth()" class="bg-green-100 text-green-700 px-3 py-1 rounded text-sm hover:bg-green-200" data-translate="thisMonth">이번 달</button> <button onclick="setLastMonth()" class="bg-green-100 text-green-700 px-3 py-1 rounded text-sm hover:bg-green-200" data-translate="lastMonth">지난 달</button>
+     <div id="quickDateSelection" class="mt-3 flex gap-2 flex-wrap" style="display: none;"></div>
+     <div id="monthlyReportSelection" class="mt-3 flex gap-3 flex-wrap items-center" style="display: none;">
+      <div>
+       <label class="text-sm font-medium mr-2" data-translate="selectYear">년도</label>
+       <select id="statsReportYear" class="border rounded px-3 py-2" onchange="updateStats()"></select>
+      </div>
+      <div id="statsReportMonthWrap">
+       <label class="text-sm font-medium mr-2" data-translate="selectMonth">월</label>
+       <select id="statsReportMonth" class="border rounded px-3 py-2" onchange="updateStats()">
+        <option value="1">1월</option><option value="2">2월</option><option value="3">3월</option><option value="4">4월</option>
+        <option value="5">5월</option><option value="6">6월</option><option value="7">7월</option><option value="8">8월</option>
+        <option value="9">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
+       </select>
+      </div>
      </div>
     </div><!-- 차트 영역 -->
     <div id="chartContainer" class="mb-6" style="display: none;">
@@ -273,6 +286,37 @@
      <div class="bg-white rounded-lg shadow-md p-4">
       <h3 class="text-lg font-bold mb-3" data-translate="menuSalesChartTitle">메뉴별 통계 그래프</h3>
       <div id="menuSalesGraph" class="space-y-2"></div>
+     </div>
+    </div>
+    <!-- 년간 메뉴 매출 -->
+    <div id="annualMenuSalesContainer" class="mb-6" style="display: none;">
+     <h3 class="text-lg font-bold mb-2" data-translate="annualMenuSalesTitle">년간 메뉴 매출</h3>
+     <div class="overflow-x-auto">
+      <table class="w-full border-collapse border border-gray-300">
+       <thead><tr class="bg-gray-100">
+        <th class="border border-gray-300 p-2" data-translate="menuName">메뉴명</th>
+        <th class="border border-gray-300 p-2" data-translate="salesCount">판매 횟수</th>
+        <th class="border border-gray-300 p-2" data-translate="totalSales">총 매출</th>
+        <th class="border border-gray-300 p-2" data-translate="totalCommission">총 커미션</th>
+       </tr></thead>
+       <tbody id="annualMenuStatsTable"></tbody>
+       <tfoot id="annualMenuStatsTableFoot"></tfoot>
+      </table>
+     </div>
+    </div>
+    <!-- 년간 매출 그래프 -->
+    <div id="annualSalesGraphsContainer" class="mb-6" style="display: none;">
+     <div class="bg-white rounded-lg shadow-md p-4 mb-4">
+      <h3 class="text-lg font-bold mb-3" data-translate="annualMonthlySalesChartTitle">월별 매출 그래프</h3>
+      <div id="annualMonthlySalesGraph" class="space-y-2"></div>
+     </div>
+     <div class="bg-white rounded-lg shadow-md p-4 mb-4">
+      <h3 class="text-lg font-bold mb-3" data-translate="annualStaffSalesChartTitle">직원별 연간 매출 그래프</h3>
+      <div id="annualStaffSalesGraph" class="space-y-2"></div>
+     </div>
+     <div class="bg-white rounded-lg shadow-md p-4">
+      <h3 class="text-lg font-bold mb-3" data-translate="annualMenuSalesChartTitle">메뉴별 연간 매출 그래프</h3>
+      <div id="annualMenuSalesGraph" class="space-y-2"></div>
      </div>
     </div><!-- 직원별 통계 -->
     <div class="mb-6">
@@ -3001,16 +3045,14 @@ function initializeApp() {
             const dailySelection = document.getElementById('dailyDateSelection');
             const rangeSelection = document.getElementById('rangeDateSelection');
             const quickSelection = document.getElementById('quickDateSelection');
-            
-            if (type === 'daily') {
-                dailySelection.style.display = 'block';
-                rangeSelection.style.display = 'none';
-                quickSelection.style.display = 'none';
-            } else if (type === 'range') {
-                dailySelection.style.display = 'none';
-                rangeSelection.style.display = 'grid';
-                quickSelection.style.display = 'flex';
-            }
+            const monthlySelection = document.getElementById('monthlyReportSelection');
+            const monthWrap = document.getElementById('statsReportMonthWrap');
+
+            dailySelection.style.display = type === 'daily' ? 'block' : 'none';
+            rangeSelection.style.display = type === 'range' ? 'grid' : 'none';
+            quickSelection.style.display = 'none';
+            monthlySelection.style.display = (type === 'month' || type === 'annual') ? 'flex' : 'none';
+            if (monthWrap) monthWrap.style.display = type === 'month' ? 'block' : 'none';
         }
 
         // 빠른 날짜 선택 함수들
@@ -3066,28 +3108,86 @@ function initializeApp() {
             updateStats();
         }
 
+        function populateReportYearSelect() {
+            const yearSelect = document.getElementById('statsReportYear');
+            if (!yearSelect) return;
+            const currentYear = new Date().getFullYear();
+            const selectedYear = Number(yearSelect.value) || currentYear;
+            yearSelect.innerHTML = '';
+            for (let y = currentYear - 5; y <= currentYear + 1; y++) {
+                const option = document.createElement('option');
+                option.value = y;
+                option.textContent = y;
+                yearSelect.appendChild(option);
+            }
+            yearSelect.value = String(selectedYear >= currentYear - 5 && selectedYear <= currentYear + 1 ? selectedYear : currentYear);
+        }
+
+        function setMonthlyReportPeriod() {
+            const year = Number(document.getElementById('statsReportYear').value) || new Date().getFullYear();
+            const month = Number(document.getElementById('statsReportMonth').value) || (new Date().getMonth() + 1);
+            const start = new Date(year, month - 1, 1);
+            const end = new Date(year, month, 0);
+            const formatDate = d => {
+                const y = d.getFullYear();
+                const m = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return y + '-' + m + '-' + day;
+            };
+            document.getElementById('statsStartDate').value = formatDate(start);
+            document.getElementById('statsEndDate').value = formatDate(end);
+        }
+
         function showMenuSales() {
-            const graphsContainer = document.getElementById('monthlySalesGraphsContainer');
-            if (graphsContainer) graphsContainer.style.display = 'none';
+            document.getElementById('monthlySalesGraphsContainer').style.display = 'none';
+            document.getElementById('annualMenuSalesContainer').style.display = 'none';
+            document.getElementById('annualSalesGraphsContainer').style.display = 'none';
             currentStatsType = 'menuSales';
-            const menuContainer = document.getElementById('menuStatisticsContainer');
-            if (menuContainer) menuContainer.style.display = 'block';
+            document.getElementById('menuStatisticsContainer').style.display = 'block';
             updateStatsButtonStyles();
-            showDateSelection('range');
-            setThisMonth(); // 기본값으로 이번 달 설정
+            showDateSelection('month');
+            populateReportYearSelect();
+            document.getElementById('statsReportMonth').value = String(new Date().getMonth() + 1);
+            setMonthlyReportPeriod();
             loadMenuSalesStatistics();
         }
 
         function showMonthlySalesChart() {
             currentStatsType = 'monthlySalesChart';
-            const graphsContainer = document.getElementById('monthlySalesGraphsContainer');
-            if (graphsContainer) graphsContainer.style.display = 'block';
-            const menuContainer = document.getElementById('menuStatisticsContainer');
-            if (menuContainer) menuContainer.style.display = 'none';
+            document.getElementById('monthlySalesGraphsContainer').style.display = 'block';
+            document.getElementById('annualMenuSalesContainer').style.display = 'none';
+            document.getElementById('annualSalesGraphsContainer').style.display = 'none';
+            document.getElementById('menuStatisticsContainer').style.display = 'none';
             updateStatsButtonStyles();
-            showDateSelection('range');
-            setThisMonth(); // 기본값으로 이번 달 설정
+            showDateSelection('month');
+            populateReportYearSelect();
+            document.getElementById('statsReportMonth').value = String(new Date().getMonth() + 1);
+            setMonthlyReportPeriod();
             loadMonthlySalesChart();
+        }
+
+        function showAnnualMenuSales() {
+            currentStatsType = 'annualMenuSales';
+            document.getElementById('monthlySalesGraphsContainer').style.display = 'none';
+            document.getElementById('annualSalesGraphsContainer').style.display = 'none';
+            document.getElementById('menuStatisticsContainer').style.display = 'none';
+            document.getElementById('annualMenuSalesContainer').style.display = 'block';
+            updateStatsButtonStyles();
+            showDateSelection('annual');
+            populateReportYearSelect();
+            loadAnnualMenuSales();
+        }
+
+        function showAnnualSalesChart() {
+            currentStatsType = 'annualSalesChart';
+            document.getElementById('monthlySalesGraphsContainer').style.display = 'none';
+            document.getElementById('annualMenuSalesContainer').style.display = 'none';
+            document.getElementById('menuStatisticsContainer').style.display = 'none';
+            document.getElementById('annualSalesGraphsContainer').style.display = 'block';
+            updateStatsButtonStyles();
+            showDateSelection('annual');
+            populateReportYearSelect();
+            loadAnnualSalesChart();
         }
 
         function downloadExcel() {
@@ -3095,13 +3195,14 @@ function initializeApp() {
         }
 
         function updateStats() {
-            // 현재 통계 화면에 맞는 데이터 로딩 함수를 호출합니다.
-            // 빠른 날짜 선택(이번 주/지난 주/이번 달/지난 달)으로 날짜가 변경된 경우에도
-            // 메뉴별 통계와 월간 매출 그래프가 선택된 기간으로 즉시 다시 계산되도록 합니다.
-            if (currentStatsType === 'menuSales') {
-                loadMenuSalesStatistics();
-            } else if (currentStatsType === 'monthlySalesChart') {
-                loadMonthlySalesChart();
+            if (currentStatsType === 'menuSales' || currentStatsType === 'monthlySalesChart') {
+                setMonthlyReportPeriod();
+                if (currentStatsType === 'menuSales') loadMenuSalesStatistics();
+                else loadMonthlySalesChart();
+            } else if (currentStatsType === 'annualMenuSales') {
+                loadAnnualMenuSales();
+            } else if (currentStatsType === 'annualSalesChart') {
+                loadAnnualSalesChart();
             } else {
                 loadStatistics();
             }
@@ -3469,6 +3570,90 @@ function initializeApp() {
             renderBarGraph('dailySalesGraph', dailyEntries, value => value.toLocaleString() + currency.symbol);
             renderBarGraph('staffSalesGraph', staffEntries, value => value.toLocaleString() + currency.symbol);
             renderBarGraph('menuSalesGraph', menuEntries, value => value.toLocaleString() + currency.symbol);
+        }
+
+        // 년간 메뉴 매출 로딩
+        function loadAnnualMenuSales() {
+            const year = Number(document.getElementById('statsReportYear').value) || new Date().getFullYear();
+            const reservations = JSON.parse(localStorage.getItem(getAdminKey('reservations')) || '[]');
+            const prefix = String(year).padStart(4, '0') + '-';
+            const filteredReservations = reservations.filter(r => r.paid && String(r.date || '').startsWith(prefix));
+
+            const menuSales = {};
+            filteredReservations.forEach(r => {
+                const menu = r.menuName || 'Unknown';
+                if (!menuSales[menu]) menuSales[menu] = { count: 0, totalPrice: 0, totalCommission: 0 };
+                menuSales[menu].count++;
+                menuSales[menu].totalPrice += Number(r.price) || 0;
+                menuSales[menu].totalCommission += Number(r.commission) || 0;
+            });
+
+            displayAnnualMenuSalesStatistics(menuSales);
+        }
+
+        function displayAnnualMenuSalesStatistics(menuSales) {
+            const body = document.getElementById('annualMenuStatsTable');
+            const foot = document.getElementById('annualMenuStatsTableFoot');
+            const currency = JSON.parse(localStorage.getItem(getAdminKey('currency')) || '{"symbol":"","name":"원"}');
+            if (!body) return;
+            body.innerHTML = '';
+            if (foot) foot.innerHTML = '';
+
+            Object.entries(menuSales).sort((a,b) => b[1].totalPrice - a[1].totalPrice).forEach(([menuName, stats]) => {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td class="border border-gray-300 p-2">' + menuName + '</td>' +
+                    '<td class="border border-gray-300 p-2">' + stats.count.toLocaleString() + '</td>' +
+                    '<td class="border border-gray-300 p-2">' + stats.totalPrice.toLocaleString() + currency.symbol + '</td>' +
+                    '<td class="border border-gray-300 p-2">' + stats.totalCommission.toLocaleString() + currency.symbol + '</td>';
+                body.appendChild(row);
+            });
+
+            const totalCount = Object.values(menuSales).reduce((s,v) => s + v.count, 0);
+            const totalPrice = Object.values(menuSales).reduce((s,v) => s + v.totalPrice, 0);
+            const totalCommission = Object.values(menuSales).reduce((s,v) => s + v.totalCommission, 0);
+            if (foot) foot.innerHTML = '<tr class="bg-gray-100 font-bold">' +
+                '<td class="border border-gray-300 p-2">합계</td>' +
+                '<td class="border border-gray-300 p-2">' + totalCount.toLocaleString() + '</td>' +
+                '<td class="border border-gray-300 p-2">' + totalPrice.toLocaleString() + currency.symbol + '</td>' +
+                '<td class="border border-gray-300 p-2">' + totalCommission.toLocaleString() + currency.symbol + '</td></tr>';
+            if (window.localizeLegacyUI) window.localizeLegacyUI();
+        }
+
+        // 년간 매출 그래프 로딩: 1~12월 + 직원별/메뉴별 연간 매출
+        function loadAnnualSalesChart() {
+            const year = Number(document.getElementById('statsReportYear').value) || new Date().getFullYear();
+            const reservations = JSON.parse(localStorage.getItem(getAdminKey('reservations')) || '[]');
+            const prefix = String(year).padStart(4, '0') + '-';
+            const filteredReservations = reservations.filter(r => r.paid && String(r.date || '').startsWith(prefix));
+
+            const monthlySales = {};
+            for (let month = 1; month <= 12; month++) monthlySales[month] = { price: 0, count: 0 };
+            const staffSales = {};
+            const menuSales = {};
+
+            filteredReservations.forEach(r => {
+                const price = Number(r.price) || 0;
+                const month = Number(String(r.date).slice(5, 7));
+                if (month >= 1 && month <= 12) {
+                    monthlySales[month].price += price;
+                    monthlySales[month].count++;
+                }
+                const staff = r.staffName || 'Unknown';
+                if (!staffSales[staff]) staffSales[staff] = { price: 0 };
+                staffSales[staff].price += price;
+                const menu = r.menuName || 'Unknown';
+                if (!menuSales[menu]) menuSales[menu] = { price: 0 };
+                menuSales[menu].price += price;
+            });
+
+            const currency = JSON.parse(localStorage.getItem(getAdminKey('currency')) || '{"symbol":"","name":"원"}');
+            const monthlyEntries = Object.entries(monthlySales).map(([m,v]) => ({label: m + '월', value: v.price}));
+            const staffEntries = Object.entries(staffSales).sort((a,b) => b[1].price-a[1].price).map(([label,v]) => ({label, value:v.price}));
+            const menuEntries = Object.entries(menuSales).sort((a,b) => b[1].price-a[1].price).map(([label,v]) => ({label, value:v.price}));
+
+            renderBarGraph('annualMonthlySalesGraph', monthlyEntries, value => value.toLocaleString() + currency.symbol);
+            renderBarGraph('annualStaffSalesGraph', staffEntries, value => value.toLocaleString() + currency.symbol);
+            renderBarGraph('annualMenuSalesGraph', menuEntries, value => value.toLocaleString() + currency.symbol);
         }
 
         // 엑셀 내보내기 함수
@@ -5532,6 +5717,24 @@ function initializeApp() {
         // ===== 다국어 보완: 동적 HTML/알림/확인창 =====
         (function installLegacyLocalization() {
             const extra = {
+                en: {
+                    '년간 메뉴 매출': 'Annual Menu Sales', '년간 매출 그래프': 'Annual Sales Graph',
+                    '년간 메뉴 매출': 'Annual Menu Sales', '년간 메뉴 매출': 'Annual Menu Sales',
+                    '년간 매출 그래프': 'Annual Sales Graph', '년도': 'Year', '월': 'Month',
+                    '년간 메뉴 매출': 'Annual Menu Sales', '월별 매출 그래프': 'Monthly Sales Graph',
+                    '직원별 연간 매출 그래프': 'Annual Sales by Staff', '메뉴별 연간 매출 그래프': 'Annual Sales by Menu'
+                },
+                th: {
+                    '년간 메뉴 매출': 'ยอดขายเมนูรายปี', '년간 매출 그래프': 'กราฟยอดขายรายปี',
+                    '년도': 'ปี', '월': 'เดือน', '월별 매출 그래프': 'กราฟยอดขายรายเดือน',
+                    '직원별 연간 매출 그래프': 'กราฟยอดขายรายปีตามพนักงาน', '메뉴별 연간 매출 그래프': 'กราฟยอดขายรายปีตามเมนู'
+                },
+                vi: {
+                    '년간 메뉴 매출': 'Doanh thu menu hàng năm', '년간 매출 그래프': 'Biểu đồ doanh thu hàng năm',
+                    '년도': 'Năm', '월': 'Tháng', '월별 매출 그래프': 'Biểu đồ doanh thu theo tháng',
+                    '직원별 연간 매출 그래프': 'Doanh thu hàng năm theo nhân viên', '메뉴별 연간 매출 그래프': 'Doanh thu hàng năm theo menu'
+                }
+            };
                 en: {
                     '현금':'Cash','쿠폰':'Coupon','기타':'Other','화폐 단위 관리':'Currency Management','화폐 이름:':'Currency Name:','화폐 기호:':'Currency Symbol:','은행':'Bank','메뉴명:':'Menu Name:','가격':'Price','커미션':'Commission','수용인원':'Capacity','직원별 합계':'Staff Total','메뉴별 합계':'Menu Total','금액':'Amount',
                     '선택된 직원: ': 'Selected Staff: ', '순번: ': 'Order: ', '직원 변경': 'Change Staff',
