@@ -2987,6 +2987,10 @@ function initializeApp() {
         let currentStatsType = 'daily';
 
         function showDailyStats() {
+            const annualMenu = document.getElementById('annualMenuSalesContainer');
+            const annualGraph = document.getElementById('annualSalesGraphsContainer');
+            if (annualMenu) annualMenu.style.display = 'none';
+            if (annualGraph) annualGraph.style.display = 'none';
             const graphsContainer = document.getElementById('monthlySalesGraphsContainer');
             if (graphsContainer) graphsContainer.style.display = 'none';
             currentStatsType = 'daily';
@@ -2998,6 +3002,10 @@ function initializeApp() {
         }
 
         function showWeeklyStats() {
+            const annualMenu = document.getElementById('annualMenuSalesContainer');
+            const annualGraph = document.getElementById('annualSalesGraphsContainer');
+            if (annualMenu) annualMenu.style.display = 'none';
+            if (annualGraph) annualGraph.style.display = 'none';
             const graphsContainer = document.getElementById('monthlySalesGraphsContainer');
             if (graphsContainer) graphsContainer.style.display = 'none';
             currentStatsType = 'weekly';
@@ -3010,6 +3018,10 @@ function initializeApp() {
         }
 
         function showMonthlyStats() {
+            const annualMenu = document.getElementById('annualMenuSalesContainer');
+            const annualGraph = document.getElementById('annualSalesGraphsContainer');
+            if (annualMenu) annualMenu.style.display = 'none';
+            if (annualGraph) annualGraph.style.display = 'none';
             const graphsContainer = document.getElementById('monthlySalesGraphsContainer');
             if (graphsContainer) graphsContainer.style.display = 'none';
             currentStatsType = 'monthly';
