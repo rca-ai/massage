@@ -3062,7 +3062,7 @@ function initializeApp() {
 
             dailySelection.style.display = type === 'daily' ? 'block' : 'none';
             rangeSelection.style.display = type === 'range' ? 'grid' : 'none';
-            quickSelection.style.display = 'none';
+            quickSelection.style.display = type === 'range' ? 'flex' : 'none';
             monthlySelection.style.display = (type === 'month' || type === 'annual') ? 'flex' : 'none';
             if (monthWrap) monthWrap.style.display = type === 'month' ? 'block' : 'none';
         }
