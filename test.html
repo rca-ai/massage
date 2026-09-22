@@ -3309,16 +3309,18 @@ function initializeApp() {
 
 
         // 입금방식별 통계 계산
-        function calculatePaymentStatistics(reservations) {
+        function calculatePaymentStatistics(reservations, excludeQrTip = false) {
             const paymentStats = {};
             
             reservations.forEach(r => {
                 if (r.paymentDetails) {
                     Object.entries(r.paymentDetails).forEach(([method, amount]) => {
+                        // QR TIP은 서비스 매출/직원별 가격 합계에 포함되지 않으므로 비교용 통계에서는 제외할 수 있습니다.
+                        if (excludeQrTip && method === 'QR TIP') return;
                         if (!paymentStats[method]) {
                             paymentStats[method] = 0;
                         }
-                        paymentStats[method] += amount;
+                        paymentStats[method] += Number(amount) || 0;
                     });
                 }
             });
@@ -3584,6 +3586,19 @@ function initializeApp() {
             renderBarGraph('menuSalesGraph', menuEntries, value => value.toLocaleString() + currency.symbol);
         }
 
+        // 연간 통계 공통 표시
+        // 직원별 가격 합계와 입금방식별 합계를 같은 서비스 매출 기준으로 맞춥니다.
+        function displayAnnualStatistics(filteredReservations) {
+            const staffStats = calculateStaffStatistics(filteredReservations);
+            displayStaffStatistics(staffStats);
+
+            // QR TIP은 직원별 가격 합계에 포함되지 않으므로 입금방식별 합계에서도 제외합니다.
+            const paymentStats = calculatePaymentStatistics(filteredReservations, true);
+            displayPaymentStatistics(paymentStats);
+
+            displayTotalStatistics(filteredReservations, staffStats);
+        }
+
         // 년간 메뉴 매출 로딩
         function loadAnnualMenuSales() {
             const year = Number(document.getElementById('statsReportYear').value) || new Date().getFullYear();
@@ -3601,6 +3616,7 @@ function initializeApp() {
             });
 
             displayAnnualMenuSalesStatistics(menuSales);
+            displayAnnualStatistics(filteredReservations);
         }
 
         function displayAnnualMenuSalesStatistics(menuSales) {
@@ -3666,6 +3682,9 @@ function initializeApp() {
             renderBarGraph('annualMonthlySalesGraph', monthlyEntries, value => value.toLocaleString() + currency.symbol);
             renderBarGraph('annualStaffSalesGraph', staffEntries, value => value.toLocaleString() + currency.symbol);
             renderBarGraph('annualMenuSalesGraph', menuEntries, value => value.toLocaleString() + currency.symbol);
+
+            // 년간 매출 그래프에서도 동일한 연간 기준의 직원별/입금방식별 통계를 표시합니다.
+            displayAnnualStatistics(filteredReservations);
         }
 
         // 엑셀 내보내기 함수
