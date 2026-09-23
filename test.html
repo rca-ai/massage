@@ -165,6 +165,12 @@
    </div><!-- 현황판 -->
    <div id="dashboardSection" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
     <h2 class="text-2xl font-bold mb-4" data-translate="dashboard">현황판</h2>
+    <div class="mb-4 flex gap-2 flex-wrap">
+     <button id="dashboardMainTab" onclick="showDashboardCategory('main')" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">현황판</button>
+     <button id="dashboardStaffTab" onclick="showDashboardCategory('staff')" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">직원별 현황판</button>
+     <button id="dashboardRoomTab" onclick="showDashboardCategory('room')" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">방번호별 현황판</button>
+    </div>
+    <div id="dashboardMainView">
     <div class="overflow-x-auto">
      <table class="w-full border-collapse border border-gray-300">
       <thead>
@@ -185,6 +191,7 @@
       </tbody>
      </table>
     </div>
+    </div>
    </div>
    <div id="dashboardSummarySection" class="bg-white rounded-lg shadow-md p-6 mt-6" style="display: none;">
     <h3 class="text-lg font-bold mb-3" data-translate="dashboardSummaryTitle">순번별현황</h3>
@@ -198,15 +205,15 @@
      <tbody id="dashboardSummaryTable"></tbody><tfoot id="dashboardSummaryTableFoot"></tfoot>
     </table></div>
    </div>
-   <div id="dashboardDetailSection" class="mt-6 space-y-6" style="display: none;">
-    <div class="bg-white rounded-lg shadow-md p-6">
-     <h3 class="text-lg font-bold mb-3">직원별 현황</h3>
+   <div id="dashboardDetailSection" class="mt-6" style="display: none;">
+    <div id="dashboardStaffView" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
+     <h3 class="text-lg font-bold mb-3">직원별 현황판</h3>
      <div class="overflow-x-auto">
       <table id="staffStatusTable" class="border-collapse border border-gray-300 w-full text-sm"></table>
      </div>
     </div>
-    <div class="bg-white rounded-lg shadow-md p-6">
-     <h3 class="text-lg font-bold mb-3">방번호별 현황</h3>
+    <div id="dashboardRoomView" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
+     <h3 class="text-lg font-bold mb-3">방번호별 현황판</h3>
      <div class="overflow-x-auto">
       <table id="roomStatusTable" class="border-collapse border border-gray-300 w-full text-sm"></table>
      </div>
@@ -1658,6 +1665,8 @@ function initializeApp() {
             if (dashboardSummary) dashboardSummary.style.display = 'none';
             const dashboardDetail = document.getElementById('dashboardDetailSection');
             if (dashboardDetail) dashboardDetail.style.display = 'none';
+            const dashboardMainView = document.getElementById('dashboardMainView');
+            if (dashboardMainView) dashboardMainView.style.display = 'none';
             const dbDeleteSection = document.getElementById('dbDeleteSection');
             if (dbDeleteSection) dbDeleteSection.style.display = 'none';
         }
@@ -1665,12 +1674,37 @@ function initializeApp() {
         function showDashboard() {
             hideAllSections();
             document.getElementById('dashboardSection').style.display = 'block';
-            document.getElementById('dashboardSummarySection').style.display = 'block';
-            const dashboardDetail = document.getElementById('dashboardDetailSection');
-            if (dashboardDetail) dashboardDetail.style.display = 'block';
             dashboardSortMode = "staffOrder";
             dashboardSortDirection = "asc";
             loadDashboard();
+            showDashboardCategory('main');
+        }
+
+        function showDashboardCategory(category) {
+            const mainView = document.getElementById('dashboardMainView');
+            const summary = document.getElementById('dashboardSummarySection');
+            const detail = document.getElementById('dashboardDetailSection');
+            const staffView = document.getElementById('dashboardStaffView');
+            const roomView = document.getElementById('dashboardRoomView');
+            const mainTab = document.getElementById('dashboardMainTab');
+            const staffTab = document.getElementById('dashboardStaffTab');
+            const roomTab = document.getElementById('dashboardRoomTab');
+            if (!mainView || !summary || !detail || !staffView || !roomView) return;
+
+            mainView.style.display = category === 'main' ? 'block' : 'none';
+            summary.style.display = category === 'main' ? 'block' : 'none';
+            detail.style.display = category === 'main' ? 'none' : 'block';
+            staffView.style.display = category === 'staff' ? 'block' : 'none';
+            roomView.style.display = category === 'room' ? 'block' : 'none';
+
+            [mainTab, staffTab, roomTab].forEach(btn => {
+                if (!btn) return;
+                btn.className = 'px-4 py-2 rounded hover:bg-blue-600';
+            });
+            const active = category === 'main' ? mainTab : category === 'staff' ? staffTab : roomTab;
+            const inactive = [mainTab, staffTab, roomTab].filter(btn => btn && btn !== active);
+            if (active) active.className = 'bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600';
+            inactive.forEach(btn => btn.className = 'bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400');
         }
 
         function showReservation() {
