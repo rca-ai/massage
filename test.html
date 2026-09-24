@@ -1365,6 +1365,25 @@ function initializeApp() {
                 }
             }
 
+            // 기본 관리자 비밀번호 동기화
+            // 기존 localStorage에 이미 관리자 정보가 있는 경우에도 기본 계정의 비밀번호를 확실히 적용합니다.
+            try {
+                const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
+                let changed = false;
+                admins.forEach(admin => {
+                    if (admin && (admin.username === 'rca' || admin.username === 'Test') && admin.password !== '1111') {
+                        admin.password = '1111';
+                        admin.updatedAt = new Date().toISOString();
+                        changed = true;
+                    }
+                });
+                if (changed) {
+                    localStorage.setItem('globalAdmins', JSON.stringify(admins));
+                }
+            } catch (adminPasswordError) {
+                console.error('기본 관리자 비밀번호 동기화 오류:', adminPasswordError);
+            }
+
             if (!localStorage.getItem('globalCurrency')) {
                 localStorage.setItem('globalCurrency', JSON.stringify({
                     symbol: '',
@@ -1513,13 +1532,35 @@ function initializeApp() {
                     currentAdmin = admin;
                     localStorage.setItem('currentAdmin', JSON.stringify(admin));
                     
+                    // 관리자별 초기화 오류가 로그인 전체를 중단시키지 않도록 분리 처리합니다.
                     try {
                         initializeAdminData();
                     } catch (initError) {
-                        console.log('관리자 데이터 초기화 오류:', initError);
-                        // 기본 데이터로 재시도
-                        initializeGlobalData();
-                        initializeAdminData();
+                        console.error('관리자 데이터 초기화 오류:', initError);
+                        // 손상된 관리자별 데이터가 있더라도 필수 기본 데이터는 개별적으로 복구합니다.
+                        const adminDefaults = {
+                            menus: [
+                                {id: 1, name: '타이 마사지', prices: {30:{price:30000,commission:15000},60:{price:50000,commission:25000},90:{price:70000,commission:35000},120:{price:90000,commission:45000}}},
+                                {id: 2, name: '오일 마사지', prices: {60:{price:80000,commission:40000},90:{price:110000,commission:55000},120:{price:140000,commission:70000}}}
+                            ],
+                            staff: [
+                                {id: 1, name: '김미영', phone: '010-1234-5678', bank: '국민은행', account: '123-456-789', status: '정직원'},
+                                {id: 2, name: '이수진', phone: '010-9876-5432', bank: '신한은행', account: '987-654-321', status: '정직원'}
+                            ],
+                            staffOrder: {},
+                            rooms: [{id:1,roomNumber:'101',capacity:1},{id:2,roomNumber:'102',capacity:2},{id:3,roomNumber:'103',capacity:1}],
+                            customers: [{id:1,name:'홍길동',phone:'010-1111-2222',customerNumber:'100001'},{id:2,name:'김철수',phone:'010-3333-4444',customerNumber:'100002'}],
+                            paymentMethods: [{id:1,name:'현금'},{id:2,name:'QR'},{id:3,name:'쿠폰'},{id:4,name:'QR TIP'},{id:5,name:'기타'}],
+                            reservations: [],
+                            currency: {symbol:'',name:'원'},
+                            guarantees: []
+                        };
+                        Object.entries(adminDefaults).forEach(([type, value]) => {
+                            const key = getAdminKey(type);
+                            if (!localStorage.getItem(key)) {
+                                localStorage.setItem(key, JSON.stringify(value));
+                            }
+                        });
                     }
                     
                     document.getElementById('loginScreen').style.display = 'none';
@@ -1558,6 +1599,26 @@ function initializeApp() {
                 }
             } catch (error) {
                 console.error('로그인 처리 중 오류:', error);
+                // 로그인 자체는 성공했지만 부가 처리에서 발생한 오류로 전체 로그인이 막히지 않도록
+                // 화면 전환/날짜/상점명 등 핵심 로그인 단계만 최소한으로 복구합니다.
+                try {
+                    if (currentAdmin) {
+                        localStorage.setItem('currentAdmin', JSON.stringify(currentAdmin));
+                        document.getElementById('loginScreen').style.display = 'none';
+                        document.getElementById('mainScreen').style.display = 'block';
+                        const dateEl = document.getElementById('currentDate');
+                        if (dateEl) dateEl.value = getLocalDateISO();
+                        const timeEl = document.getElementById('currentTime');
+                        if (timeEl) timeEl.textContent = new Date().toLocaleTimeString();
+                        const shopEl = document.getElementById('shopName');
+                        if (shopEl) shopEl.textContent = currentAdmin.type === 'super'
+                            ? '최고 관리자 화면'
+                            : (currentAdmin.shopName || '관리자 화면') + (currentAdmin.validUntil ? ' · 만료일: ' + currentAdmin.validUntil : '');
+                        return;
+                    }
+                } catch (recoveryError) {
+                    console.error('로그인 복구 처리 중 오류:', recoveryError);
+                }
                 alert('로그인 처리 중 오류가 발생했습니다. 페이지를 새로고침 후 다시 시도해주세요.');
             }
         }
