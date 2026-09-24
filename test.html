@@ -714,6 +714,9 @@
                 lastMonth: '지난 달'
             },
             en: {
+                    '순번별현황': 'Staff Order Status', '합계': 'Total', '마사지사': 'Massage Therapist', '선택날짜': 'Selected Date',
+                    '전체': 'Total', '입금완료 0건': 'Paid 0 records', '입금완료 금액': 'Paid Amount',
+
                 title: 'Massage Management System',
                 changeLanguage: 'Change Language',
                 changeFont: 'Change Font',
@@ -875,6 +878,9 @@
                 lastMonth: 'Last Month'
             },
             th: {
+                    '순번별현황': 'สถานะตามลำดับพนักงาน', '합계': 'รวม', '마사지사': 'พนักงานนวด', '선택날짜': 'วันที่เลือก',
+                    '전체': 'ทั้งหมด', '입금완료 0건': 'ชำระแล้ว 0 รายการ', '입금완료 금액': 'ยอดเงินที่ชำระแล้ว',
+
                 title: 'ระบบจัดการนวดแผนไทย',
                 changeLanguage: 'เปลี่ยนภาษา',
                 changeFont: 'เปลี่ยนฟอนต์',
@@ -1036,6 +1042,9 @@
                 lastMonth: 'เดือนที่แล้ว'
             },
             vi: {
+                    '순번별현황': 'Trạng thái theo thứ tự nhân viên', '합계': 'Tổng', '마사지사': 'Nhân viên massage', '선택날짜': 'Ngày đã chọn',
+                    '전체': 'Tổng', '입금완료 0건': 'Đã thanh toán 0 bản ghi', '입금완료 금액': 'Số tiền đã thanh toán',
+
                 title: 'Hệ thống quản lý massage',
                 changeLanguage: 'Đổi ngôn ngữ',
                 changeFont: 'Đổi phông chữ',
@@ -6457,6 +6466,12 @@ function translateLegacy(value) {
                 for (const key of Object.keys(ko)) {
                     if (ko[key] === s && dict[key] !== undefined) return dict[key];
                 }
+                const dynamicUi = {
+                    en: [/^선택 날짜: (.+) \/ 전체 (\d+)건 \/ 입금완료 (\d+)건 \/ 입금완료 금액 (.+)$/, 'Selected Date: $1 / Total $2 records / Paid $3 records / Paid Amount $4'],
+                    th: [/^선택 날짜: (.+) \/ 전체 (\d+)건 \/ 입금완료 (\d+)건 \/ 입금완료 금액 (.+)$/, 'วันที่เลือก: $1 / ทั้งหมด $2 รายการ / ชำระแล้ว $3 รายการ / ยอดเงินที่ชำระแล้ว $4'],
+                    vi: [/^선택 날짜: (.+) \/ 전체 (\d+)건 \/ 입금완료 (\d+)건 \/ 입금완료 금액 (.+)$/, 'Ngày đã chọn: $1 / Tổng $2 bản ghi / Đã thanh toán $3 bản ghi / Số tiền đã thanh toán $4']
+                };
+                if (dynamicUi[lang] && dynamicUi[lang][0].test(s)) return s.replace(dynamicUi[lang][0], dynamicUi[lang][1]);
                 const uiTranslations = {
                     en: {'직원별 현황판':'Staff Status Board','방번호별 현황판':'Room Status Board','마사지횟수':'Massage Count','DB 삭제':'Delete DB','엑셀데이타 업로드':'Upload Excel Data','업로드샘플 다운로드':'Download Upload Sample','삭제 대상 날짜':'Target Date','현황 보기':'View Status','선택 날짜 입금완료 데이터 전체 삭제':'Delete All Paid Data for Selected Date','선택 날짜':'Selected Date','전체':'Total','건':'records','입금완료':'Paid','입금완료 금액':'Paid Amount','미입금':'Unpaid','삭제 불가':'Cannot Delete','입금 완료':'Paid','만료일':'Expiration date','만료일:':'Expiration date:','날짜를 선택하고 현황 보기를 눌러주세요.':'Select a date and click View Status.','선택한 날짜의 데이터가 없습니다.':'No data for the selected date.'},
                     th: {'직원별 현황판':'กระดานสถานะพนักงาน','방번호별 현황판':'กระดานสถานะตามหมายเลขห้อง','마사지횟수':'จำนวนครั้งนวด','DB 삭제':'ลบฐานข้อมูล','엑셀데이타 업로드':'อัปโหลดข้อมูล Excel','업로드샘플 다운로드':'ดาวน์โหลดตัวอย่างการอัปโหลด','삭제 대상 날짜':'วันที่ที่จะลบ','현황 보기':'ดูสถานะ','선택 날짜 입금완료 데이터 전체 삭제':'ลบข้อมูลที่ชำระเงินแล้วทั้งหมดของวันที่เลือก','선택 날짜':'วันที่เลือก','전체':'ทั้งหมด','건':'รายการ','입금완료':'ชำระเงินแล้ว','입금완료 금액':'ยอดเงินที่ชำระแล้ว','미입금':'ยังไม่ชำระ','삭제 불가':'ไม่สามารถลบได้','입금 완료':'ชำระเงินแล้ว','만료일':'วันหมดอายุ','만료일:':'วันหมดอายุ:','날짜를 선택하고 현황 보기를 눌러주세요.':'เลือกวันที่แล้วกดดูสถานะ','선택한 날짜의 데이터가 없습니다.':'ไม่มีข้อมูลสำหรับวันที่เลือก'},
