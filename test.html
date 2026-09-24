@@ -1213,8 +1213,8 @@ function initializeApp() {
         const savedCurrentPageTab = localStorage.getItem('lastVisitedPageTab');
                 
                 const currentDateElement = document.getElementById('currentDate');
-                if (currentDateElement) {
-                    currentDateElement.value = new Date().toISOString().split('T')[0];
+                if (currentDateElement && !currentDateElement.value) {
+                    currentDateElement.value = getLocalDateISO();
                 }
                 
                 // 저장된 폰트 설정 복원
@@ -1256,7 +1256,8 @@ function initializeApp() {
                                         superAdminButtons.style.display = 'block';
                                     }
                                 } else {
-                                    shopNameElement.textContent = currentAdmin.shopName || '관리자 화면';
+                                    shopNameElement.textContent = (currentAdmin.shopName || '관리자 화면') +
+                                        (currentAdmin.validUntil ? ' · 만료일: ' + translateLegacy('만료일:') + ' ' + currentAdmin.validUntil : '');
                                     const superAdminButtons = document.getElementById('superAdminButtons');
                                     if (superAdminButtons) {
                                         superAdminButtons.style.display = 'none';
@@ -1452,7 +1453,9 @@ function initializeApp() {
             }
 
             if (!localStorage.getItem(getAdminKey('currency'))) {
-                const globalCurrency = JSON.parse(localStorage.getItem('globalCurrency'));
+                let globalCurrency = null;
+                try { globalCurrency = JSON.parse(localStorage.getItem('globalCurrency') || 'null'); } catch (e) {}
+                if (!globalCurrency || typeof globalCurrency !== 'object') globalCurrency = {symbol:'', name:'원'};
                 localStorage.setItem(getAdminKey('currency'), JSON.stringify(globalCurrency));
             }
 
@@ -1521,6 +1524,10 @@ function initializeApp() {
                     
                     document.getElementById('loginScreen').style.display = 'none';
                     document.getElementById('mainScreen').style.display = 'block';
+
+                    const loginDateElement = document.getElementById('currentDate');
+                    if (loginDateElement && !loginDateElement.value) loginDateElement.value = getLocalDateISO();
+                    updateCurrentTime();
                     
                     // 상점명 설정
                     const shopNameElement = document.getElementById('shopName');
@@ -1631,9 +1638,19 @@ function initializeApp() {
         }
 
         // 시간 업데이트
+        function getLocalDateISO(date = new Date()) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return y + '-' + m + '-' + d;
+        }
+
         function updateCurrentTime() {
             const now = new Date();
-            document.getElementById('currentTime').textContent = now.toLocaleTimeString();
+            const timeElement = document.getElementById('currentTime');
+            if (timeElement) timeElement.textContent = now.toLocaleTimeString();
+            const dateElement = document.getElementById('currentDate');
+            if (dateElement && !dateElement.value) dateElement.value = getLocalDateISO(now);
             updateDashboardRemainingTime();
         }
 
@@ -2630,7 +2647,7 @@ function initializeApp() {
             if (!startTime) return 0;
             
             const now = new Date();
-            const currentDate = now.toISOString().split('T')[0];
+            const currentDate = getLocalDateISO(now);
             const currentMinutes = now.getHours() * 60 + now.getMinutes();
             
             // 예약 날짜가 오늘이 아닌 경우
@@ -4972,9 +4989,9 @@ function initializeApp() {
                 alert('엑셀 기능을 불러오지 못했습니다. 인터넷 연결을 확인해주세요.');
                 return;
             }
-            const headers = ['날짜','직원명','메뉴명','시간(분)','시작시간','방번호','고객명','가격','커미션','입금상태','입금방식상세','메뉴순서','다중메뉴'];
+            const headers = ['날짜','직원명','메뉴명','시간(분)','시작시간','방번호','고객명','가격','커미션','입금상태','입금방식','입금액','메뉴순서','다중메뉴'];
             const sample = [
-                ['2026-09-22','Rung','타이마사지',60,'10:00','101','홍길동',450,180,'입금완료','현금: 450',1,'아니오']
+                ['2026-09-22','Rung','타이마사지',60,'10:00','101','홍길동',450,180,'입금완료','현금',450,1,'아니오']
             ];
             const ws = XLSX.utils.aoa_to_sheet([headers, ...sample]);
             ws['!cols'] = [
@@ -4991,16 +5008,23 @@ function initializeApp() {
             return ['입금완료','완료','입금','paid','true','yes','y','1'].includes(textValue) || value === true;
         }
 
-        function parseExcelPaymentDetails(value) {
-            if (!value) return {};
+        function parseExcelPaymentDetails(methodValue, amountValue, legacyValue) {
+            const result = {};
+            const method = String(methodValue ?? '').trim();
+            const amount = Number(String(amountValue ?? '').replace(/,/g,'')) || 0;
+            if (method && amount > 0) {
+                result[method] = amount;
+                return result;
+            }
+            const value = legacyValue;
+            if (!value) return result;
             if (typeof value === 'object') return value;
             const textValue = String(value).trim();
-            if (!textValue) return {};
+            if (!textValue) return result;
             try {
                 const parsed = JSON.parse(textValue);
                 if (parsed && typeof parsed === 'object') return parsed;
             } catch (e) {}
-            const result = {};
             textValue.split(',').forEach(part => {
                 const m = part.trim().match(/^(.+?)\s*[:=]\s*([\d,]+)$/);
                 if (m) result[m[1].trim()] = Number(m[2].replace(/,/g,'')) || 0;
@@ -5099,7 +5123,7 @@ function initializeApp() {
                             price,
                             commission,
                             paid,
-                            paymentDetails: paid ? parseExcelPaymentDetails(row['입금방식상세']) : {},
+                            paymentDetails: paid ? parseExcelPaymentDetails(row['입금방식'], row['입금액'], row['입금방식상세']) : {},
                             menuOrder: Number(row['메뉴순서'] || 1) || 1,
                             isMultiMenu: ['예','yes','true','1','y'].includes(String(row['다중메뉴'] ?? '').trim().toLowerCase())
                         });
