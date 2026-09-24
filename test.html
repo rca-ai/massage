@@ -2456,7 +2456,7 @@ function initializeApp() {
                     <td class="border border-gray-300 p-2">${reservation.duration}min</td>
                     <td class="border border-gray-300 p-2">${reservation.startTime || '-'}</td>
                     <td class="border border-gray-300 p-2">${reservation.startTime ? endTime : '-'}</td>
-                    <td class="border border-gray-300 p-2 remaining-time">${reservation.paid ? '-' : (reservation.startTime ? (remainingMinutes === -1 ? '-' : remainingMinutes + 'min') : '-')}</td>
+                    <td class="border border-gray-300 p-2 remaining-time" data-reservation-id="${reservation.id}">${reservation.paid ? '-' : (reservation.startTime ? (remainingMinutes === -1 ? '-' : remainingMinutes + 'min') : '-')}</td>
                     <td class="border border-gray-300 p-2">${reservation.price.toLocaleString()}${currency.symbol}</td>
                     <td class="border border-gray-300 p-2">${reservation.commission.toLocaleString()}${currency.symbol}</td>
                     <td class="border border-gray-300 p-2">${reservation.roomNumber || '-'}</td>
@@ -2676,54 +2676,19 @@ function initializeApp() {
         function updateDashboardRemainingTime() {
             const remainingCells = document.querySelectorAll('.remaining-time');
             const reservations = JSON.parse(localStorage.getItem(getAdminKey('reservations')) || '[]');
-            const currentDate = document.getElementById('currentDate').value;
-            const staffOrder = JSON.parse(localStorage.getItem(getDailyStaffOrderKey(currentDate)) || '{}');
-            const todayReservations = reservations.filter(r => r.date === currentDate);
-            
-            // 순번 순서로 정렬
-            todayReservations.sort((a, b) => {
-                const orderA = staffOrder[a.staffId] || 999;
-                const orderB = staffOrder[b.staffId] || 999;
-                return orderA - orderB;
-            });
-            
-            remainingCells.forEach((cell, index) => {
-                if (todayReservations[index]) {
-                    const reservation = todayReservations[index];
-                    
-                    if (reservation.paid) {
-                        cell.textContent = '-';
-                        cell.style.color = '#10b981';
-                        cell.style.fontWeight = 'bold';
-                    } else if (reservation.startTime) {
-                        const remaining = calculateRemainingTime(reservation.startTime, reservation.duration, reservation.date);
-                        
-                        if (remaining === -1) {
-                            cell.textContent = '-';
-                            cell.style.color = '#6b7280';
-                        } else if (remaining === 0) {
-                            // 미래 날짜이거나 아직 시작되지 않은 경우
-                            cell.textContent = '-';
-                            cell.style.color = '#6b7280';
-                        } else {
-                            cell.textContent = `${remaining}min`;
-                            
-                            if (remaining <= 10) {
-                                cell.style.color = '#ef4444';
-                            } else if (remaining <= 30) {
-                                cell.style.color = '#f59e0b';
-                            } else {
-                                cell.style.color = '#10b981';
-                            }
-                        }
-                    } else {
-                        cell.textContent = '-';
-                        cell.style.color = '#6b7280';
-                    }
-                }
+            const reservationMap = new Map(reservations.map(r => [String(r.id), r]));
+            remainingCells.forEach(cell => {
+                const reservation = reservationMap.get(String(cell.dataset.reservationId || ''));
+                if (!reservation) return;
+                if (reservation.paid) {
+                    cell.textContent = '-'; cell.style.color = '#10b981'; cell.style.fontWeight = 'bold';
+                } else if (reservation.startTime) {
+                    const remaining = calculateRemainingTime(reservation.startTime, reservation.duration, reservation.date);
+                    if (remaining === -1 || remaining === 0) { cell.textContent = '-'; cell.style.color = '#6b7280'; }
+                    else { cell.textContent = remaining + 'min'; if (remaining <= 10) cell.style.color = '#ef4444'; else if (remaining <= 30) cell.style.color = '#f59e0b'; else cell.style.color = '#10b981'; }
+                } else { cell.textContent = '-'; cell.style.color = '#6b7280'; }
             });
         }
-
         // 입금 관련 함수
         function showPaymentModal(reservationId) {
             currentPaymentReservationId = reservationId;
@@ -4996,7 +4961,7 @@ function initializeApp() {
             const ws = XLSX.utils.aoa_to_sheet([headers, ...sample]);
             ws['!cols'] = [
                 {wch:14},{wch:14},{wch:18},{wch:10},{wch:10},{wch:10},{wch:16},
-                {wch:12},{wch:12},{wch:12},{wch:30},{wch:10},{wch:12}
+                {wch:12},{wch:12},{wch:12},{wch:14},{wch:10},{wch:10},{wch:12}
             ];
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, '예약데이터');
