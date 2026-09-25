@@ -166,9 +166,9 @@
    <div id="dashboardSection" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
     <h2 class="text-2xl font-bold mb-4" data-translate="dashboard">현황판</h2>
     <div class="mb-4 flex gap-2 flex-wrap">
-     <button id="dashboardMainTab" onclick="showDashboardCategory('main')" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">현황판</button>
-     <button id="dashboardStaffTab" onclick="showDashboardCategory('staff')" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">직원별 현황판</button>
-     <button id="dashboardRoomTab" onclick="showDashboardCategory('room')" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">방번호별 현황판</button>
+     <button id="dashboardMainTab" onclick="showDashboardCategory('main')" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" data-translate="dashboard">현황판</button>
+     <button id="dashboardStaffTab" onclick="showDashboardCategory('staff')" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400" data-translate="staffDashboard">직원별 현황판</button>
+     <button id="dashboardRoomTab" onclick="showDashboardCategory('room')" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400" data-translate="roomDashboard">방번호별 현황판</button>
     </div>
     <div id="dashboardMainView">
     <div class="overflow-x-auto">
@@ -207,13 +207,13 @@
    </div>
    <div id="dashboardDetailSection" class="mt-6" style="display: none;">
     <div id="dashboardStaffView" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
-     <h3 class="text-lg font-bold mb-3">직원별 현황판</h3>
+     <h3 class="text-lg font-bold mb-3" data-translate="staffDashboard">직원별 현황판</h3>
      <div class="overflow-x-auto">
       <table id="staffStatusTable" class="border-collapse border border-gray-300 w-full text-sm"></table>
      </div>
     </div>
     <div id="dashboardRoomView" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
-     <h3 class="text-lg font-bold mb-3">방번호별 현황판</h3>
+     <h3 class="text-lg font-bold mb-3" data-translate="roomDashboard">방번호별 현황판</h3>
      <div class="overflow-x-auto">
       <table id="roomStatusTable" class="border-collapse border border-gray-300 w-full text-sm"></table>
      </div>
@@ -424,22 +424,22 @@
      <div class="mt-4"><button onclick="exportAllDataExcel()" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700" data-translate="exportAllDataButton">전체 데이터 엑셀 내보내기</button>
      </div>
     </div>
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4"><button onclick="manageMenus()" class="bg-blue-500 text-white py-3 px-4 rounded hover:bg-blue-600" data-translate="menuManagement">메뉴 관리</button> <button onclick="manageStaff()" class="bg-green-500 text-white py-3 px-4 rounded hover:bg-green-600" data-translate="staffManagement">직원 관리</button> <button onclick="manageRooms()" class="bg-purple-500 text-white py-3 px-4 rounded hover:bg-purple-600" data-translate="roomManagement">방 관리</button> <button onclick="manageCustomers()" class="bg-orange-500 text-white py-3 px-4 rounded hover:bg-orange-600" data-translate="customerManagement">고객 관리</button> <button onclick="manageCurrency()" class="bg-pink-500 text-white py-3 px-4 rounded hover:bg-pink-600" data-translate="currencyManagement">화폐 단위</button> <button onclick="managePaymentMethods()" class="bg-yellow-500 text-white py-3 px-4 rounded hover:bg-yellow-600" data-translate="paymentMethodManagement">입금방식 관리</button> <button onclick="manageGuarantee()" class="bg-teal-500 text-white py-3 px-4 rounded hover:bg-teal-600">Guarantee 관리</button> <button onclick="showDBDeleteSection()" class="bg-red-600 text-white py-3 px-4 rounded hover:bg-red-700">DB 삭제</button>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4"><button onclick="manageMenus()" class="bg-blue-500 text-white py-3 px-4 rounded hover:bg-blue-600" data-translate="menuManagement">메뉴 관리</button> <button onclick="manageStaff()" class="bg-green-500 text-white py-3 px-4 rounded hover:bg-green-600" data-translate="staffManagement">직원 관리</button> <button onclick="manageRooms()" class="bg-purple-500 text-white py-3 px-4 rounded hover:bg-purple-600" data-translate="roomManagement">방 관리</button> <button onclick="manageCustomers()" class="bg-orange-500 text-white py-3 px-4 rounded hover:bg-orange-600" data-translate="customerManagement">고객 관리</button> <button onclick="manageCurrency()" class="bg-pink-500 text-white py-3 px-4 rounded hover:bg-pink-600" data-translate="currencyManagement">화폐 단위</button> <button onclick="managePaymentMethods()" class="bg-yellow-500 text-white py-3 px-4 rounded hover:bg-yellow-600" data-translate="paymentMethodManagement">입금방식 관리</button> <button onclick="manageGuarantee()" class="bg-teal-500 text-white py-3 px-4 rounded hover:bg-teal-600">Guarantee 관리</button> <button onclick="showDBDeleteSection()" class="bg-red-600 text-white py-3 px-4 rounded hover:bg-red-700" data-translate="dbDelete">DB 삭제</button>
      <div id="superAdminButtons" style="display: none;"><button onclick="manageAdmins()" class="bg-red-500 text-white py-3 px-4 rounded hover:bg-red-600" data-translate="adminManagement">관리자 관리</button>
      </div>
     </div>
     <div id="dbDeleteSection" class="mt-6 p-4 border-2 border-red-200 rounded-lg bg-red-50" style="display: none;">
      <div class="flex justify-between items-center mb-4">
-      <h3 class="text-lg font-bold text-red-700">DB 삭제</h3>
-      <button onclick="closeDBDeleteSection()" class="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600">닫기</button>
+      <h3 class="text-lg font-bold text-red-700" data-translate="dbDelete">DB 삭제</h3>
+      <button onclick="closeDBDeleteSection()" class="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600" data-translate="close">닫기</button>
      </div>
      <div class="flex flex-wrap items-end gap-3 mb-4">
       <div>
-       <label class="block text-sm font-medium mb-1">삭제 대상 날짜</label>
+       <label class="block text-sm font-medium mb-1" data-translate="deleteTargetDate">삭제 대상 날짜</label>
        <input type="date" id="dbDeleteDate" class="border rounded px-3 py-2">
       </div>
-      <button onclick="loadDBDeleteStatus()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">현황 보기</button>
-      <button onclick="deletePaidReservationsForDate()" class="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900">선택 날짜 입금완료 데이터 전체 삭제</button>
+      <button onclick="loadDBDeleteStatus()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700" data-translate="viewStatus">현황 보기</button>
+      <button onclick="deletePaidReservationsForDate()" class="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-900" data-translate="deletePaidAll">선택 날짜 입금완료 데이터 전체 삭제</button>
      </div>
      <div id="dbDeleteSummary" class="mb-3 text-sm font-semibold"></div>
      <div class="overflow-x-auto">
@@ -714,6 +714,9 @@
                 lastMonth: '지난 달'
             },
             en: {
+                    '순번별현황': 'Staff Order Status', '합계': 'Total', '마사지사': 'Massage Therapist', '선택날짜': 'Selected Date',
+                    '전체': 'Total', '입금완료 0건': 'Paid 0 records', '입금완료 금액': 'Paid Amount',
+
                 title: 'Massage Management System',
                 changeLanguage: 'Change Language',
                 changeFont: 'Change Font',
@@ -875,6 +878,9 @@
                 lastMonth: 'Last Month'
             },
             th: {
+                    '순번별현황': 'สถานะตามลำดับพนักงาน', '합계': 'รวม', '마사지사': 'พนักงานนวด', '선택날짜': 'วันที่เลือก',
+                    '전체': 'ทั้งหมด', '입금완료 0건': 'ชำระแล้ว 0 รายการ', '입금완료 금액': 'ยอดเงินที่ชำระแล้ว',
+
                 title: 'ระบบจัดการนวดแผนไทย',
                 changeLanguage: 'เปลี่ยนภาษา',
                 changeFont: 'เปลี่ยนฟอนต์',
@@ -1036,6 +1042,9 @@
                 lastMonth: 'เดือนที่แล้ว'
             },
             vi: {
+                    '순번별현황': 'Trạng thái theo thứ tự nhân viên', '합계': 'Tổng', '마사지사': 'Nhân viên massage', '선택날짜': 'Ngày đã chọn',
+                    '전체': 'Tổng', '입금완료 0건': 'Đã thanh toán 0 bản ghi', '입금완료 금액': 'Số tiền đã thanh toán',
+
                 title: 'Hệ thống quản lý massage',
                 changeLanguage: 'Đổi ngôn ngữ',
                 changeFont: 'Đổi phông chữ',
@@ -1213,8 +1222,8 @@ function initializeApp() {
         const savedCurrentPageTab = localStorage.getItem('lastVisitedPageTab');
                 
                 const currentDateElement = document.getElementById('currentDate');
-                if (currentDateElement) {
-                    currentDateElement.value = new Date().toISOString().split('T')[0];
+                if (currentDateElement && !currentDateElement.value) {
+                    currentDateElement.value = getLocalDateISO();
                 }
                 
                 // 저장된 폰트 설정 복원
@@ -1256,7 +1265,8 @@ function initializeApp() {
                                         superAdminButtons.style.display = 'block';
                                     }
                                 } else {
-                                    shopNameElement.textContent = currentAdmin.shopName || '관리자 화면';
+                                    shopNameElement.textContent = (currentAdmin.shopName || '관리자 화면') +
+                                        (currentAdmin.validUntil ? ' · 만료일: ' + translateLegacy('만료일:') + ' ' + currentAdmin.validUntil : '');
                                     const superAdminButtons = document.getElementById('superAdminButtons');
                                     if (superAdminButtons) {
                                         superAdminButtons.style.display = 'none';
@@ -1364,6 +1374,25 @@ function initializeApp() {
                 }
             }
 
+            // 기본 관리자 비밀번호 동기화
+            // 기존 localStorage에 이미 관리자 정보가 있는 경우에도 기본 계정의 비밀번호를 확실히 적용합니다.
+            try {
+                const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
+                let changed = false;
+                admins.forEach(admin => {
+                    if (admin && (admin.username === 'rca' || admin.username === 'Test') && admin.password !== '1111') {
+                        admin.password = '1111';
+                        admin.updatedAt = new Date().toISOString();
+                        changed = true;
+                    }
+                });
+                if (changed) {
+                    localStorage.setItem('globalAdmins', JSON.stringify(admins));
+                }
+            } catch (adminPasswordError) {
+                console.error('기본 관리자 비밀번호 동기화 오류:', adminPasswordError);
+            }
+
             if (!localStorage.getItem('globalCurrency')) {
                 localStorage.setItem('globalCurrency', JSON.stringify({
                     symbol: '',
@@ -1452,7 +1481,9 @@ function initializeApp() {
             }
 
             if (!localStorage.getItem(getAdminKey('currency'))) {
-                const globalCurrency = JSON.parse(localStorage.getItem('globalCurrency'));
+                let globalCurrency = null;
+                try { globalCurrency = JSON.parse(localStorage.getItem('globalCurrency') || 'null'); } catch (e) {}
+                if (!globalCurrency || typeof globalCurrency !== 'object') globalCurrency = {symbol:'', name:'원'};
                 localStorage.setItem(getAdminKey('currency'), JSON.stringify(globalCurrency));
             }
 
@@ -1510,17 +1541,43 @@ function initializeApp() {
                     currentAdmin = admin;
                     localStorage.setItem('currentAdmin', JSON.stringify(admin));
                     
+                    // 관리자별 초기화 오류가 로그인 전체를 중단시키지 않도록 분리 처리합니다.
                     try {
                         initializeAdminData();
                     } catch (initError) {
-                        console.log('관리자 데이터 초기화 오류:', initError);
-                        // 기본 데이터로 재시도
-                        initializeGlobalData();
-                        initializeAdminData();
+                        console.error('관리자 데이터 초기화 오류:', initError);
+                        // 손상된 관리자별 데이터가 있더라도 필수 기본 데이터는 개별적으로 복구합니다.
+                        const adminDefaults = {
+                            menus: [
+                                {id: 1, name: '타이 마사지', prices: {30:{price:30000,commission:15000},60:{price:50000,commission:25000},90:{price:70000,commission:35000},120:{price:90000,commission:45000}}},
+                                {id: 2, name: '오일 마사지', prices: {60:{price:80000,commission:40000},90:{price:110000,commission:55000},120:{price:140000,commission:70000}}}
+                            ],
+                            staff: [
+                                {id: 1, name: '김미영', phone: '010-1234-5678', bank: '국민은행', account: '123-456-789', status: '정직원'},
+                                {id: 2, name: '이수진', phone: '010-9876-5432', bank: '신한은행', account: '987-654-321', status: '정직원'}
+                            ],
+                            staffOrder: {},
+                            rooms: [{id:1,roomNumber:'101',capacity:1},{id:2,roomNumber:'102',capacity:2},{id:3,roomNumber:'103',capacity:1}],
+                            customers: [{id:1,name:'홍길동',phone:'010-1111-2222',customerNumber:'100001'},{id:2,name:'김철수',phone:'010-3333-4444',customerNumber:'100002'}],
+                            paymentMethods: [{id:1,name:'현금'},{id:2,name:'QR'},{id:3,name:'쿠폰'},{id:4,name:'QR TIP'},{id:5,name:'기타'}],
+                            reservations: [],
+                            currency: {symbol:'',name:'원'},
+                            guarantees: []
+                        };
+                        Object.entries(adminDefaults).forEach(([type, value]) => {
+                            const key = getAdminKey(type);
+                            if (!localStorage.getItem(key)) {
+                                localStorage.setItem(key, JSON.stringify(value));
+                            }
+                        });
                     }
                     
                     document.getElementById('loginScreen').style.display = 'none';
                     document.getElementById('mainScreen').style.display = 'block';
+
+                    const loginDateElement = document.getElementById('currentDate');
+                    if (loginDateElement && !loginDateElement.value) loginDateElement.value = getLocalDateISO();
+                    updateCurrentTime();
                     
                     // 상점명 설정
                     const shopNameElement = document.getElementById('shopName');
@@ -1551,6 +1608,26 @@ function initializeApp() {
                 }
             } catch (error) {
                 console.error('로그인 처리 중 오류:', error);
+                // 로그인 자체는 성공했지만 부가 처리에서 발생한 오류로 전체 로그인이 막히지 않도록
+                // 화면 전환/날짜/상점명 등 핵심 로그인 단계만 최소한으로 복구합니다.
+                try {
+                    if (currentAdmin) {
+                        localStorage.setItem('currentAdmin', JSON.stringify(currentAdmin));
+                        document.getElementById('loginScreen').style.display = 'none';
+                        document.getElementById('mainScreen').style.display = 'block';
+                        const dateEl = document.getElementById('currentDate');
+                        if (dateEl) dateEl.value = getLocalDateISO();
+                        const timeEl = document.getElementById('currentTime');
+                        if (timeEl) timeEl.textContent = new Date().toLocaleTimeString();
+                        const shopEl = document.getElementById('shopName');
+                        if (shopEl) shopEl.textContent = currentAdmin.type === 'super'
+                            ? '최고 관리자 화면'
+                            : (currentAdmin.shopName || '관리자 화면') + (currentAdmin.validUntil ? ' · 만료일: ' + currentAdmin.validUntil : '');
+                        return;
+                    }
+                } catch (recoveryError) {
+                    console.error('로그인 복구 처리 중 오류:', recoveryError);
+                }
                 alert('로그인 처리 중 오류가 발생했습니다. 페이지를 새로고침 후 다시 시도해주세요.');
             }
         }
@@ -1631,9 +1708,19 @@ function initializeApp() {
         }
 
         // 시간 업데이트
+        function getLocalDateISO(date = new Date()) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return y + '-' + m + '-' + d;
+        }
+
         function updateCurrentTime() {
             const now = new Date();
-            document.getElementById('currentTime').textContent = now.toLocaleTimeString();
+            const timeElement = document.getElementById('currentTime');
+            if (timeElement) timeElement.textContent = now.toLocaleTimeString();
+            const dateElement = document.getElementById('currentDate');
+            if (dateElement && !dateElement.value) dateElement.value = getLocalDateISO(now);
             updateDashboardRemainingTime();
         }
 
@@ -2439,7 +2526,7 @@ function initializeApp() {
                     <td class="border border-gray-300 p-2">${reservation.duration}min</td>
                     <td class="border border-gray-300 p-2">${reservation.startTime || '-'}</td>
                     <td class="border border-gray-300 p-2">${reservation.startTime ? endTime : '-'}</td>
-                    <td class="border border-gray-300 p-2 remaining-time">${reservation.paid ? '-' : (reservation.startTime ? (remainingMinutes === -1 ? '-' : remainingMinutes + 'min') : '-')}</td>
+                    <td class="border border-gray-300 p-2 remaining-time" data-reservation-id="${reservation.id}">${reservation.paid ? '-' : (reservation.startTime ? (remainingMinutes === -1 ? '-' : remainingMinutes + 'min') : '-')}</td>
                     <td class="border border-gray-300 p-2">${reservation.price.toLocaleString()}${currency.symbol}</td>
                     <td class="border border-gray-300 p-2">${reservation.commission.toLocaleString()}${currency.symbol}</td>
                     <td class="border border-gray-300 p-2">${reservation.roomNumber || '-'}</td>
@@ -2630,7 +2717,7 @@ function initializeApp() {
             if (!startTime) return 0;
             
             const now = new Date();
-            const currentDate = now.toISOString().split('T')[0];
+            const currentDate = getLocalDateISO(now);
             const currentMinutes = now.getHours() * 60 + now.getMinutes();
             
             // 예약 날짜가 오늘이 아닌 경우
@@ -2659,54 +2746,19 @@ function initializeApp() {
         function updateDashboardRemainingTime() {
             const remainingCells = document.querySelectorAll('.remaining-time');
             const reservations = JSON.parse(localStorage.getItem(getAdminKey('reservations')) || '[]');
-            const currentDate = document.getElementById('currentDate').value;
-            const staffOrder = JSON.parse(localStorage.getItem(getDailyStaffOrderKey(currentDate)) || '{}');
-            const todayReservations = reservations.filter(r => r.date === currentDate);
-            
-            // 순번 순서로 정렬
-            todayReservations.sort((a, b) => {
-                const orderA = staffOrder[a.staffId] || 999;
-                const orderB = staffOrder[b.staffId] || 999;
-                return orderA - orderB;
-            });
-            
-            remainingCells.forEach((cell, index) => {
-                if (todayReservations[index]) {
-                    const reservation = todayReservations[index];
-                    
-                    if (reservation.paid) {
-                        cell.textContent = '-';
-                        cell.style.color = '#10b981';
-                        cell.style.fontWeight = 'bold';
-                    } else if (reservation.startTime) {
-                        const remaining = calculateRemainingTime(reservation.startTime, reservation.duration, reservation.date);
-                        
-                        if (remaining === -1) {
-                            cell.textContent = '-';
-                            cell.style.color = '#6b7280';
-                        } else if (remaining === 0) {
-                            // 미래 날짜이거나 아직 시작되지 않은 경우
-                            cell.textContent = '-';
-                            cell.style.color = '#6b7280';
-                        } else {
-                            cell.textContent = `${remaining}min`;
-                            
-                            if (remaining <= 10) {
-                                cell.style.color = '#ef4444';
-                            } else if (remaining <= 30) {
-                                cell.style.color = '#f59e0b';
-                            } else {
-                                cell.style.color = '#10b981';
-                            }
-                        }
-                    } else {
-                        cell.textContent = '-';
-                        cell.style.color = '#6b7280';
-                    }
-                }
+            const reservationMap = new Map(reservations.map(r => [String(r.id), r]));
+            remainingCells.forEach(cell => {
+                const reservation = reservationMap.get(String(cell.dataset.reservationId || ''));
+                if (!reservation) return;
+                if (reservation.paid) {
+                    cell.textContent = '-'; cell.style.color = '#10b981'; cell.style.fontWeight = 'bold';
+                } else if (reservation.startTime) {
+                    const remaining = calculateRemainingTime(reservation.startTime, reservation.duration, reservation.date);
+                    if (remaining === -1 || remaining === 0) { cell.textContent = '-'; cell.style.color = '#6b7280'; }
+                    else { cell.textContent = remaining + 'min'; if (remaining <= 10) cell.style.color = '#ef4444'; else if (remaining <= 30) cell.style.color = '#f59e0b'; else cell.style.color = '#10b981'; }
+                } else { cell.textContent = '-'; cell.style.color = '#6b7280'; }
             });
         }
-
         // 입금 관련 함수
         function showPaymentModal(reservationId) {
             currentPaymentReservationId = reservationId;
@@ -4972,14 +5024,14 @@ function initializeApp() {
                 alert('엑셀 기능을 불러오지 못했습니다. 인터넷 연결을 확인해주세요.');
                 return;
             }
-            const headers = ['날짜','직원명','메뉴명','시간(분)','시작시간','방번호','고객명','가격','커미션','입금상태','입금방식상세','메뉴순서','다중메뉴'];
+            const headers = ['날짜','직원명','메뉴명','시간(분)','시작시간','방번호','고객명','가격','커미션','입금상태','입금방식','입금액','메뉴순서','다중메뉴'];
             const sample = [
-                ['2026-09-22','Rung','타이마사지',60,'10:00','101','홍길동',450,180,'입금완료','현금: 450',1,'아니오']
+                ['2026-09-22','Rung','타이마사지',60,'10:00','101','홍길동',450,180,'입금완료','현금',450,1,'아니오']
             ];
             const ws = XLSX.utils.aoa_to_sheet([headers, ...sample]);
             ws['!cols'] = [
                 {wch:14},{wch:14},{wch:18},{wch:10},{wch:10},{wch:10},{wch:16},
-                {wch:12},{wch:12},{wch:12},{wch:30},{wch:10},{wch:12}
+                {wch:12},{wch:12},{wch:12},{wch:14},{wch:10},{wch:10},{wch:12}
             ];
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, '예약데이터');
@@ -4991,16 +5043,23 @@ function initializeApp() {
             return ['입금완료','완료','입금','paid','true','yes','y','1'].includes(textValue) || value === true;
         }
 
-        function parseExcelPaymentDetails(value) {
-            if (!value) return {};
+        function parseExcelPaymentDetails(methodValue, amountValue, legacyValue) {
+            const result = {};
+            const method = String(methodValue ?? '').trim();
+            const amount = Number(String(amountValue ?? '').replace(/,/g,'')) || 0;
+            if (method && amount > 0) {
+                result[method] = amount;
+                return result;
+            }
+            const value = legacyValue;
+            if (!value) return result;
             if (typeof value === 'object') return value;
             const textValue = String(value).trim();
-            if (!textValue) return {};
+            if (!textValue) return result;
             try {
                 const parsed = JSON.parse(textValue);
                 if (parsed && typeof parsed === 'object') return parsed;
             } catch (e) {}
-            const result = {};
             textValue.split(',').forEach(part => {
                 const m = part.trim().match(/^(.+?)\s*[:=]\s*([\d,]+)$/);
                 if (m) result[m[1].trim()] = Number(m[2].replace(/,/g,'')) || 0;
@@ -5099,7 +5158,7 @@ function initializeApp() {
                             price,
                             commission,
                             paid,
-                            paymentDetails: paid ? parseExcelPaymentDetails(row['입금방식상세']) : {},
+                            paymentDetails: paid ? parseExcelPaymentDetails(row['입금방식'], row['입금액'], row['입금방식상세']) : {},
                             menuOrder: Number(row['메뉴순서'] || 1) || 1,
                             isMultiMenu: ['예','yes','true','1','y'].includes(String(row['다중메뉴'] ?? '').trim().toLowerCase())
                         });
@@ -6407,6 +6466,18 @@ function translateLegacy(value) {
                 for (const key of Object.keys(ko)) {
                     if (ko[key] === s && dict[key] !== undefined) return dict[key];
                 }
+                const dynamicUi = {
+                    en: [/^선택 날짜: (.+) \/ 전체 (\d+)건 \/ 입금완료 (\d+)건 \/ 입금완료 금액 (.+)$/, 'Selected Date: $1 / Total $2 records / Paid $3 records / Paid Amount $4'],
+                    th: [/^선택 날짜: (.+) \/ 전체 (\d+)건 \/ 입금완료 (\d+)건 \/ 입금완료 금액 (.+)$/, 'วันที่เลือก: $1 / ทั้งหมด $2 รายการ / ชำระแล้ว $3 รายการ / ยอดเงินที่ชำระแล้ว $4'],
+                    vi: [/^선택 날짜: (.+) \/ 전체 (\d+)건 \/ 입금완료 (\d+)건 \/ 입금완료 금액 (.+)$/, 'Ngày đã chọn: $1 / Tổng $2 bản ghi / Đã thanh toán $3 bản ghi / Số tiền đã thanh toán $4']
+                };
+                if (dynamicUi[lang] && dynamicUi[lang][0].test(s)) return s.replace(dynamicUi[lang][0], dynamicUi[lang][1]);
+                const uiTranslations = {
+                    en: {'직원별 현황판':'Staff Status Board','방번호별 현황판':'Room Status Board','마사지횟수':'Massage Count','DB 삭제':'Delete DB','엑셀데이타 업로드':'Upload Excel Data','업로드샘플 다운로드':'Download Upload Sample','삭제 대상 날짜':'Target Date','현황 보기':'View Status','선택 날짜 입금완료 데이터 전체 삭제':'Delete All Paid Data for Selected Date','선택 날짜':'Selected Date','전체':'Total','건':'records','입금완료':'Paid','입금완료 금액':'Paid Amount','미입금':'Unpaid','삭제 불가':'Cannot Delete','입금 완료':'Paid','만료일':'Expiration date','만료일:':'Expiration date:','날짜를 선택하고 현황 보기를 눌러주세요.':'Select a date and click View Status.','선택한 날짜의 데이터가 없습니다.':'No data for the selected date.'},
+                    th: {'직원별 현황판':'กระดานสถานะพนักงาน','방번호별 현황판':'กระดานสถานะตามหมายเลขห้อง','마사지횟수':'จำนวนครั้งนวด','DB 삭제':'ลบฐานข้อมูล','엑셀데이타 업로드':'อัปโหลดข้อมูล Excel','업로드샘플 다운로드':'ดาวน์โหลดตัวอย่างการอัปโหลด','삭제 대상 날짜':'วันที่ที่จะลบ','현황 보기':'ดูสถานะ','선택 날짜 입금완료 데이터 전체 삭제':'ลบข้อมูลที่ชำระเงินแล้วทั้งหมดของวันที่เลือก','선택 날짜':'วันที่เลือก','전체':'ทั้งหมด','건':'รายการ','입금완료':'ชำระเงินแล้ว','입금완료 금액':'ยอดเงินที่ชำระแล้ว','미입금':'ยังไม่ชำระ','삭제 불가':'ไม่สามารถลบได้','입금 완료':'ชำระเงินแล้ว','만료일':'วันหมดอายุ','만료일:':'วันหมดอายุ:','날짜를 선택하고 현황 보기를 눌러주세요.':'เลือกวันที่แล้วกดดูสถานะ','선택한 날짜의 데이터가 없습니다.':'ไม่มีข้อมูลสำหรับวันที่เลือก'},
+                    vi: {'직원별 현황판':'Bảng trạng thái nhân viên','방번호별 현황판':'Bảng trạng thái theo phòng','마사지횟수':'Số lần massage','DB 삭제':'Xóa DB','엑셀데이타 업로드':'Tải dữ liệu Excel lên','업로드샘플 다운로드':'Tải mẫu tải lên','삭제 대상 날짜':'Ngày cần xóa','현황 보기':'Xem trạng thái','선택 날짜 입금완료 데이터 전체 삭제':'Xóa toàn bộ dữ liệu đã thanh toán của ngày đã chọn','선택 날짜':'Ngày đã chọn','전체':'Tổng','건':'bản ghi','입금완료':'Đã thanh toán','입금완료 금액':'Số tiền đã thanh toán','미입금':'Chưa thanh toán','삭제 불가':'Không thể xóa','입금 완료':'Đã thanh toán','만료일':'Ngày hết hạn','만료일:':'Ngày hết hạn:','날짜를 선택하고 현황 보기를 눌러주세요.':'Chọn ngày và nhấn Xem trạng thái.','선택한 날짜의 데이터가 없습니다.':'Không có dữ liệu cho ngày đã chọn'}
+                };
+                if (uiTranslations[lang] && uiTranslations[lang][s] !== undefined) return uiTranslations[lang][s];
                 if (extra[lang] && extra[lang][s] !== undefined) return extra[lang][s];
                 s = s.replace(/(\d+)\s*분/g, (_, n) => lang === 'en' ? n + ' min' : lang === 'th' ? n + ' นาที' : n + ' phút');
                 s = s.replace(/(\d+)\s*명/g, (_, n) => lang === 'en' ? n + ' people' : lang === 'th' ? n + ' คน' : n + ' người');
