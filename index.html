@@ -3994,12 +3994,12 @@ function initializeApp() {
             document.getElementById('managementContent').innerHTML = content;
         }
 
-        function saveNewAdmin() {
-            const username = document.getElementById('newAdminUsername').value;
+        async function saveNewAdmin() {
+            const username = document.getElementById('newAdminUsername').value.trim();
             const password = document.getElementById('newAdminPassword').value;
             const type = document.getElementById('newAdminType').value;
-            const shopName = document.getElementById('newAdminShopName').value;
-            const phone = document.getElementById('newAdminPhone').value;
+            const shopName = document.getElementById('newAdminShopName').value.trim();
+            const phone = document.getElementById('newAdminPhone').value.trim();
             const startDate = document.getElementById('newAdminStartDate').value;
             const endDate = document.getElementById('newAdminEndDate').value;
 
@@ -4018,32 +4018,67 @@ function initializeApp() {
                 return;
             }
 
-            const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
-            
-            // 중복 아이디 체크
-            if (admins.some(a => a.username === username)) {
-                alert('이미 존재하는 아이디입니다.');
-                return;
+            const saveButton = document.querySelector('#managementContent button[onclick="saveNewAdmin()"]');
+            if (saveButton) {
+                saveButton.disabled = true;
+                saveButton.textContent = '저장 중...';
             }
 
-            const newId = Math.max(...admins.map(a => a.id), 0) + 1;
+            try {
+                // 관리자 로그인과 동일한 D1 계정 체계를 사용합니다.
+                // 화면의 localStorage에만 저장하지 않고 서버 D1에 비밀번호를 안전한 해시 형태로 저장합니다.
+                const response = await apiFetch('/api/admins', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        username,
+                        password,
+                        type,
+                        shopName,
+                        phone,
+                        validFrom: startDate,
+                        validUntil: endDate
+                    })
+                });
 
-            admins.push({
-                id: newId,
-                username: username,
-                password: password,
-                type: type,
-                shopName: shopName,
-                phone: phone,
-                validFrom: startDate,
-                validUntil: endDate,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-            });
+                const result = await response.json();
+                if (!response.ok || !result.ok) {
+                    if (response.status === 409 || result?.error === 'username_exists') {
+                        alert('이미 존재하는 아이디입니다.');
+                    } else {
+                        console.error('D1 관리자 추가 오류:', result);
+                        alert('관리자 추가 중 오류가 발생했습니다.\n' + (result?.error || '서버 오류'));
+                    }
+                    return;
+                }
 
-            localStorage.setItem('globalAdmins', JSON.stringify(admins));
-            alert('관리자가 추가되었습니다.');
-            manageAdmins();
+                // 기존 화면의 관리자별 localStorage 구조도 유지합니다.
+                const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
+                const created = result.admin || {};
+                admins.push({
+                    id: created.id,
+                    username,
+                    password,
+                    type,
+                    shopName,
+                    phone,
+                    validFrom: startDate,
+                    validUntil: endDate,
+                    createdAt: created.createdAt || new Date().toISOString(),
+                    updatedAt: created.updatedAt || new Date().toISOString()
+                });
+                localStorage.setItem('globalAdmins', JSON.stringify(admins));
+
+                alert('관리자가 추가되었습니다.\n이제 새 관리자 계정으로 로그인할 수 있습니다.');
+                manageAdmins();
+            } catch (error) {
+                console.error('D1 관리자 추가 연결 오류:', error);
+                alert('관리자 추가 중 서버 연결 오류가 발생했습니다.\n잠시 후 다시 시도해주세요.');
+            } finally {
+                if (saveButton) {
+                    saveButton.disabled = false;
+                    saveButton.textContent = '저장';
+                }
+            }
         }
 
         function editAdmin(id) {
