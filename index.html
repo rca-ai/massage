@@ -3243,6 +3243,16 @@ function initializeApp() {
                 }
 
                 initializeAdminData();
+
+                // 로그인 상태에서는 직원 관리 화면이 D1 데이터를 우선 사용하므로,
+                // 로컬 백업에서 복원한 직원 데이터도 D1에 동기화합니다.
+                if (currentAdmin?.sessionToken) {
+                    const synced = await syncStaffToD1();
+                    if (!synced) {
+                        console.warn('로컬 복원 후 직원 D1 동기화에 실패했습니다.');
+                    }
+                }
+
                 loadReservationData();
                 showDashboard();
                 alert('백업 데이터 복원이 완료되었습니다.');
