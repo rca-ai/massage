@@ -1,6 +1,7 @@
 {
   "$schema": "https://unpkg.com/wrangler@4/config-schema.json",
   "name": "massage",
+  "main": "src/index.js",
   "compatibility_date": "2026-10-03",
   "assets": {
     "directory": ".",
