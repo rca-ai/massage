@@ -1,0 +1,16 @@
+# Server/config files
+wrangler.json
+wrangler.jsonc
+package.json
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+.assetsignore
+
+# Database/server code
+db/
+src/
+
+# Repository-only files
+.git/
+.github/
