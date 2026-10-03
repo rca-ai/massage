@@ -1493,7 +1493,7 @@ function initializeApp() {
         }
 
         // 로그인 처리
-        function processLogin() {
+        async function processLogin() {
             try {
                 const username = document.getElementById('loginUsername').value;
                 const password = document.getElementById('loginPassword').value;
@@ -1503,8 +1503,36 @@ function initializeApp() {
                     return;
                 }
 
-                const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
-                const admin = admins.find(a => a.username === username && a.password === password);
+                let admin = null;
+                let useLocalFallback = false;
+
+                // DB 로그인 우선. 네트워크/서버 오류일 때만 기존 localStorage 로그인으로 임시 복구합니다.
+                try {
+                    const response = await fetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    });
+                    const result = await response.json();
+
+                    if (result && result.ok && result.admin) {
+                        admin = result.admin;
+                    } else if (response.status === 403 && result?.error === 'expired') {
+                        alert('사용 기간이 만료되었습니다.\\n관리자에게 문의하세요.\\n만료일: ' + (result.validUntil || ''));
+                        return;
+                    } else {
+                        alert('아이디 또는 비밀번호가 잘못되었습니다.');
+                        return;
+                    }
+                } catch (dbLoginError) {
+                    console.warn('D1 로그인 연결 실패, 기존 로컬 로그인으로 임시 전환:', dbLoginError);
+                    useLocalFallback = true;
+                }
+
+                if (useLocalFallback) {
+                    const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
+                    admin = admins.find(a => a.username === username && a.password === password);
+                }
                 
                 if (admin) {
                     // 유효기간 검사 (최고관리자는 제외)
