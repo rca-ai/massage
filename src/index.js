@@ -197,7 +197,9 @@ export default {
             username: admin.username,
             type: admin.role === "super" ? "super" : "normal",
             role: admin.role,
-            shopName: admin.shop_name,
+            // New normal admins store the entered shop name in display_name.
+            // Fall back to the tenant shop name for existing accounts.
+            shopName: admin.display_name || admin.shop_name,
             displayName: admin.display_name || admin.shop_name,
             validUntil: admin.valid_until || null
           }
@@ -333,6 +335,7 @@ export default {
           username: session.username,
           type: session.role === "super" ? "super" : "normal",
           role: session.role,
+          shopName: session.display_name || session.username,
           displayName: session.display_name || session.username
         }
       }, 200, request);
