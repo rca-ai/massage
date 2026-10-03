@@ -1,0 +1,18 @@
+{
+  "$schema": "https://unpkg.com/wrangler@4/config-schema.json",
+  "name": "massage",
+  "compatibility_date": "2026-10-03",
+  "assets": {
+    "directory": ".",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "massage-db",
+      "database_id": "769d340d-8f50-49ec-9055-c4dd9f7e377e",
+      "migrations_dir": "db/migrations"
+    }
+  ]
+}
