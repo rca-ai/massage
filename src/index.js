@@ -14,11 +14,15 @@ async function hashToken(token) {
     .join("");
 }
 
-function json(data, status = 200) {
-  return Response.json(data, {
-    status,
-    headers: { "Cache-Control": "no-store" }
-  });
+function json(data, status = 200, request = null) {
+  const origin = request?.headers.get("Origin") || "";
+  const headers = {
+    "Cache-Control": "no-store",
+    "Access-Control-Allow-Origin": origin || "*",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization"
+  };
+  return Response.json(data, { status, headers });
 }
 
 function getBearerToken(request) {
@@ -76,6 +80,19 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
+    if (request.method === "OPTIONS" && url.pathname.startsWith("/api/")) {
+      const origin = request.headers.get("Origin") || "*";
+      return new Response(null, {
+        status: 204,
+        headers: {
+          "Access-Control-Allow-Origin": origin,
+          "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type, Authorization",
+          "Access-Control-Max-Age": "86400"
+        }
+      });
+    }
+
     if (url.pathname === "/api/db/health") {
       try {
         const result = await env.DB.prepare(
@@ -87,7 +104,7 @@ export default {
           database: "massage-db",
           tableCount: Number(result?.table_count || 0),
           timestamp: new Date().toISOString()
-        });
+        }, 200, request);
       } catch (error) {
         return json(
           {
@@ -106,7 +123,7 @@ export default {
         const password = String(body?.password || "");
 
         if (!username || !password) {
-          return json({ ok: false, error: "missing_credentials" }, 400);
+          return json({ ok: false, error: "missing_credentials" }, 400, request);
         }
 
         // A username is unique within a shop, not globally. Check all active
@@ -140,7 +157,7 @@ export default {
         }
 
         if (!admin) {
-          return json({ ok: false, error: "invalid_credentials" }, 401);
+          return json({ ok: false, error: "invalid_credentials" }, 401, request);
         }
 
         const today = new Date().toISOString().slice(0, 10);
@@ -149,7 +166,7 @@ export default {
             ok: false,
             error: "expired",
             validUntil: admin.valid_until
-          }, 403);
+          }, 403, request);
         }
 
         const token = crypto.randomUUID() + "-" + crypto.randomUUID();
@@ -184,7 +201,7 @@ export default {
             displayName: admin.display_name || admin.shop_name,
             validUntil: admin.valid_until || null
           }
-        });
+        }, 200, request);
       } catch (error) {
         return json(
           {
@@ -205,15 +222,15 @@ export default {
             .bind(tokenHash)
             .run();
         }
-        return json({ ok: true });
+        return json({ ok: true }, 200, request);
       } catch (error) {
-        return json({ ok: false, error: error instanceof Error ? error.message : String(error) }, 500);
+        return json({ ok: false, error: error instanceof Error ? error.message : String(error) }, 500, request);
       }
     }
 
     if (url.pathname === "/api/auth/me" && request.method === "GET") {
       const session = await requireSession(request, env);
-      if (!session) return json({ ok: false, error: "unauthorized" }, 401);
+      if (!session) return json({ ok: false, error: "unauthorized" }, 401, request);
       return json({
         ok: true,
         admin: {
@@ -224,12 +241,12 @@ export default {
           role: session.role,
           displayName: session.display_name || session.username
         }
-      });
+      }, 200, request);
     }
 
     if (url.pathname === "/api/staff") {
       const session = await requireSession(request, env);
-      if (!session) return json({ ok: false, error: "unauthorized" }, 401);
+      if (!session) return json({ ok: false, error: "unauthorized" }, 401, request);
 
       try {
         if (request.method === "GET") {
@@ -243,14 +260,14 @@ export default {
           return json({
             ok: true,
             staff: (result.results || []).map(mapStaff)
-          });
+          }, 200, request);
         }
 
         if (request.method === "POST") {
           const body = await request.json();
           const staff = Array.isArray(body?.staff) ? body.staff : [body];
 
-          if (!staff.length) return json({ ok: true, staff: [] });
+          if (!staff.length) return json({ ok: true, staff: [] }, 200, request);
 
           const statements = [];
           for (const member of staff) {
@@ -292,33 +309,33 @@ export default {
             "SELECT id, legacy_id, name, phone, bank_name, bank_account, status, sequence_no, notes FROM staff WHERE shop_id = ? ORDER BY CASE WHEN sequence_no IS NULL THEN 999999 ELSE sequence_no END, name"
           ).bind(session.shop_id).all();
 
-          return json({ ok: true, staff: (result.results || []).map(mapStaff) });
+          return json({ ok: true, staff: (result.results || []).map(mapStaff) }, 200, request);
         }
 
-        return json({ ok: false, error: "method_not_allowed" }, 405);
+        return json({ ok: false, error: "method_not_allowed" }, 405, request);
       } catch (error) {
-        return json({ ok: false, error: error instanceof Error ? error.message : String(error) }, 500);
+        return json({ ok: false, error: error instanceof Error ? error.message : String(error) }, 500, request);
       }
     }
 
     if (url.pathname === "/api/staff/item" && (request.method === "PUT" || request.method === "DELETE")) {
       const session = await requireSession(request, env);
-      if (!session) return json({ ok: false, error: "unauthorized" }, 401);
+      if (!session) return json({ ok: false, error: "unauthorized" }, 401, request);
 
       try {
         const body = await request.json();
         const legacyId = Number(body?.legacyId ?? body?.id);
-        if (!Number.isFinite(legacyId)) return json({ ok: false, error: "invalid_staff_id" }, 400);
+        if (!Number.isFinite(legacyId)) return json({ ok: false, error: "invalid_staff_id" }, 400, request);
 
         if (request.method === "DELETE") {
           await env.DB.prepare(
             "DELETE FROM staff WHERE shop_id = ? AND legacy_id = ?"
           ).bind(session.shop_id, legacyId).run();
-          return json({ ok: true });
+          return json({ ok: true }, 200, request);
         }
 
         const name = String(body?.name || "").trim();
-        if (!name) return json({ ok: false, error: "name_required" }, 400);
+        if (!name) return json({ ok: false, error: "name_required" }, 400, request);
 
         await env.DB.prepare(
           `UPDATE staff
@@ -337,9 +354,9 @@ export default {
           legacyId
         ).run();
 
-        return json({ ok: true });
+        return json({ ok: true }, 200, request);
       } catch (error) {
-        return json({ ok: false, error: error instanceof Error ? error.message : String(error) }, 500);
+        return json({ ok: false, error: error instanceof Error ? error.message : String(error) }, 500, request);
       }
     }
 
