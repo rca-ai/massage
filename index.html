@@ -1408,7 +1408,9 @@ function initializeApp() {
 
         // 관리자별 데이터베이스 키 생성
         function getAdminKey(dataType) {
-            return `${currentAdmin.username}_${dataType}`;
+            // 로그인 전 초기화 과정에서도 관리자 키를 요청할 수 있으므로 null 접근을 방지합니다.
+            const username = currentAdmin?.username;
+            return username ? `${username}_${dataType}` : `__anonymous_${dataType}`;
         }
 
         async function apiFetch(path, options = {}) {
@@ -3257,9 +3259,23 @@ function initializeApp() {
                     });
                 }
 
+                // 백업 데이터의 가장 최근 날짜를 오늘 날짜로 지정하여 즉시 테스트할 수 있게 합니다.
+                let testDate = '';
+                try {
+                    const restoredReservations = JSON.parse(localStorage.getItem(getAdminKey('reservations')) || '[]');
+                    testDate = restoredReservations.map(r => r?.date).filter(Boolean).sort().pop() || '';
+                } catch (e) {}
+                if (testDate) {
+                    const dateInput = document.getElementById('currentDate');
+                    if (dateInput) dateInput.value = testDate;
+                    const statsDate = document.getElementById('statsDate');
+                    if (statsDate) statsDate.value = testDate;
+                }
+
                 loadReservationData();
                 showDashboard();
-                alert('RCA 테스트 백업 복원이 완료되었습니다.\n2025-11-01 / 2025-11-02 날짜를 선택하면 백업 데이터를 확인할 수 있습니다.');
+                if (currentAdmin?.sessionToken) syncStaffToD1().catch(err => console.warn('RCA 테스트 직원 D1 동기화 실패:', err));
+                alert('RCA 테스트 데이터 복원이 완료되었습니다.\n가장 최근 백업 날짜(' + (testDate || '데이터 날짜') + ')가 자동으로 선택되었습니다.');
             } catch (error) {
                 console.error('RCA 테스트 백업 복원 오류:', error);
                 alert('RCA 테스트 백업 복원에 실패했습니다.\n' + (error?.message || error));
