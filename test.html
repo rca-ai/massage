@@ -1252,7 +1252,7 @@ function initializeApp() {
                         // 관리자 데이터 유효성 검사
                         if (currentAdmin && currentAdmin.username) {
                             initializeAdminData();
-                            if (admin.sessionToken) await syncStaffToD1();
+                            if (currentAdmin.sessionToken) syncStaffToD1().catch(err => console.warn('D1 직원 동기화 오류:', err));
 
                     document.getElementById('loginScreen').style.display = 'none';
                             document.getElementById('mainScreen').style.display = 'block';
