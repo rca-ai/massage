@@ -1543,13 +1543,21 @@ function initializeApp() {
                     });
                     const result = await response.json();
 
-                    if (result && result.ok && result.admin) {
-                        admin = { ...result.admin, sessionToken: result.token || '' };
+                    if (result && result.ok && result.admin && result.token) {
+                        admin = { ...result.admin, sessionToken: result.token };
                     } else if (response.status === 403 && result?.error === 'expired') {
                         alert('사용 기간이 만료되었습니다.\\n관리자에게 문의하세요.\\n만료일: ' + (result.validUntil || ''));
                         return;
-                    } else {
+                    } else if (response.status === 401) {
                         alert('아이디 또는 비밀번호가 잘못되었습니다.');
+                        return;
+                    } else if (response.status >= 500) {
+                        console.error('D1 로그인 서버 오류:', result);
+                        alert('서버 로그인 오류가 발생했습니다.\\n잠시 후 다시 시도해주세요.');
+                        return;
+                    } else {
+                        console.error('D1 로그인 실패:', result);
+                        alert('로그인 처리에 실패했습니다.');
                         return;
                     }
                 } catch (dbLoginError) {
