@@ -213,6 +213,100 @@ export default {
       }
     }
 
+    if (url.pathname === "/api/admins" && (request.method === "GET" || request.method === "POST")) {
+      const session = await requireSession(request, env);
+      if (!session) return json({ ok: false, error: "unauthorized" }, 401, request);
+      if (session.role !== "super") return json({ ok: false, error: "forbidden" }, 403, request);
+
+      try {
+        if (request.method === "GET") {
+          const result = await env.DB.prepare(
+            `SELECT id, shop_id, username, display_name, role, email, status, valid_until, created_at, updated_at
+             FROM admins
+             WHERE shop_id = ?
+             ORDER BY id`
+          ).bind(session.shop_id).all();
+
+          return json({
+            ok: true,
+            admins: (result.results || []).map(a => ({
+              id: a.id,
+              username: a.username,
+              displayName: a.display_name || "",
+              role: a.role,
+              type: a.role === "super" ? "super" : "normal",
+              email: a.email || "",
+              status: a.status,
+              validUntil: a.valid_until || null,
+              createdAt: a.created_at,
+              updatedAt: a.updated_at
+            }))
+          }, 200, request);
+        }
+
+        const body = await request.json();
+        const username = String(body?.username || "").trim();
+        const password = String(body?.password || "");
+        const type = body?.type === "super" ? "super" : "normal";
+        const displayName = String(body?.shopName || body?.displayName || "").trim();
+        const email = String(body?.email || "").trim();
+        const validUntil = type === "super" ? null : String(body?.validUntil || "").trim();
+
+        if (!username || !password) {
+          return json({ ok: false, error: "missing_credentials" }, 400, request);
+        }
+        if (type === "normal" && !validUntil) {
+          return json({ ok: false, error: "valid_until_required" }, 400, request);
+        }
+
+        const duplicate = await env.DB.prepare(
+          "SELECT id FROM admins WHERE shop_id = ? AND username = ? LIMIT 1"
+        ).bind(session.shop_id, username).first();
+        if (duplicate) return json({ ok: false, error: "username_exists" }, 409, request);
+
+        const id = crypto.randomUUID();
+        const salt = crypto.randomUUID();
+        const passwordHash = await hashPassword(password, salt);
+
+        await env.DB.prepare(
+          `INSERT INTO admins
+            (shop_id, username, password_hash, display_name, role, email, status, valid_until, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, 'active', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`
+        ).bind(
+          session.shop_id,
+          username,
+          salt + ":" + passwordHash,
+          displayName || username,
+          type,
+          email,
+          validUntil
+        ).run();
+
+        const created = await env.DB.prepare(
+          `SELECT id, username, display_name, role, email, status, valid_until, created_at, updated_at
+           FROM admins WHERE shop_id = ? AND username = ? LIMIT 1`
+        ).bind(session.shop_id, username).first();
+
+        return json({
+          ok: true,
+          admin: {
+            id: created.id,
+            username: created.username,
+            displayName: created.display_name || "",
+            role: created.role,
+            type: created.role === "super" ? "super" : "normal",
+            email: created.email || "",
+            status: created.status,
+            validUntil: created.valid_until || null,
+            createdAt: created.created_at,
+            updatedAt: created.updated_at
+          }
+        }, 201, request);
+      } catch (error) {
+        return json({ ok: false, error: error instanceof Error ? error.message : String(error) }, 500, request);
+      }
+    }
+
     if (url.pathname === "/api/auth/logout" && request.method === "POST") {
       try {
         const token = getBearerToken(request);
