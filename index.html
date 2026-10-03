@@ -417,7 +417,7 @@
       </div>
       <div>
        <h4 class="font-semibold mb-2" data-translate="restoreButton">복원</h4>
-       <div class="flex gap-2 flex-wrap"><input type="file" id="restoreFile" accept=".json" style="display: none;" onchange="restoreData(event)"> <input type="file" id="excelUploadFile" accept=".xlsx,.xls" style="display: none;" onchange="uploadExcelData(event)"> <button onclick="showLocalRestoreDialog()" class="bg-orange-600 text-white px-3 py-2 rounded hover:bg-orange-700 text-sm" data-translate="localRestoreButton">로컬 복원</button> <button onclick="showGoogleRestoreDialog()" class="bg-indigo-600 text-white px-3 py-2 rounded hover:bg-indigo-700 text-sm" data-translate="googleRestoreButton">구글 복원</button> <button onclick="document.getElementById('excelUploadFile').click()" class="bg-green-700 text-white px-3 py-2 rounded hover:bg-green-800 text-sm">엑셀데이타 업로드</button> <button onclick="downloadExcelUploadSample()" class="bg-blue-700 text-white px-3 py-2 rounded hover:bg-blue-800 text-sm">업로드샘플 다운로드</button>
+       <div class="flex gap-2 flex-wrap"><input type="file" id="restoreFile" accept=".json" style="display: none;" onchange="restoreData(event)"> <input type="file" id="excelUploadFile" accept=".xlsx,.xls" style="display: none;" onchange="uploadExcelData(event)"> <button onclick="showLocalRestoreDialog()" class="bg-orange-600 text-white px-3 py-2 rounded hover:bg-orange-700 text-sm" data-translate="localRestoreButton">로컬 복원</button> <button onclick="restoreRcaTestBackup()" class="bg-red-700 text-white px-3 py-2 rounded hover:bg-red-800 text-sm">RCA 테스트 백업 복원</button> <button onclick="showGoogleRestoreDialog()" class="bg-indigo-600 text-white px-3 py-2 rounded hover:bg-indigo-700 text-sm" data-translate="googleRestoreButton">구글 복원</button> <button onclick="document.getElementById('excelUploadFile').click()" class="bg-green-700 text-white px-3 py-2 rounded hover:bg-green-800 text-sm">엑셀데이타 업로드</button> <button onclick="downloadExcelUploadSample()" class="bg-blue-700 text-white px-3 py-2 rounded hover:bg-blue-800 text-sm">업로드샘플 다운로드</button>
        </div>
       </div>
      </div>
@@ -1270,7 +1270,7 @@ function initializeApp() {
                                     }
                                 } else {
                                     shopNameElement.textContent = (currentAdmin.shopName || '관리자 화면') +
-                                        (currentAdmin.validUntil ? ' · 만료일: ' + translateLegacy('만료일:') + ' ' + currentAdmin.validUntil : '');
+                                        (currentAdmin.validUntil ? ' · 만료일: ' + (window.translateLegacyText ? window.translateLegacyText('만료일:') : '만료일:') + ' ' + currentAdmin.validUntil : '');
                                     const superAdminButtons = document.getElementById('superAdminButtons');
                                     if (superAdminButtons) {
                                         superAdminButtons.style.display = 'none';
@@ -1769,6 +1769,7 @@ function initializeApp() {
 
         // 화폐 단위 표시 업데이트
         function updateCurrencyDisplay() {
+            if (!currentAdmin?.username) return;
             const currency = JSON.parse(localStorage.getItem(getAdminKey('currency')) || '{"symbol":"","name":"원"}');
             const currencyElements = document.querySelectorAll('[id$="Currency"]');
             currencyElements.forEach(element => {
@@ -1790,7 +1791,11 @@ function initializeApp() {
             if (timeElement) timeElement.textContent = now.toLocaleTimeString();
             const dateElement = document.getElementById('currentDate');
             if (dateElement && !dateElement.value) dateElement.value = getLocalDateISO(now);
-            updateDashboardRemainingTime();
+
+            // 로그인 전에는 관리자별 localStorage를 조회하지 않습니다.
+            // 이 가드가 없으면 초기화 시 getAdminKey()가 currentAdmin null을 읽어
+            // setInterval 등록까지 중단되어 현재 시간이 고정되는 문제가 발생합니다.
+            if (currentAdmin?.username) updateDashboardRemainingTime();
         }
 
         function updateCurrentDate() {
@@ -3129,6 +3134,46 @@ function initializeApp() {
         // 관리 모달 관련 함수들
         function closeManagementModal() {
             document.getElementById('managementModal').style.display = 'none';
+        }
+
+        // 업로드된 RCA 테스트 백업을 현재 로그인한 rca 관리자 영역으로 복원합니다.
+        async function restoreRcaTestBackup() {
+            if (!currentAdmin?.username || String(currentAdmin.username).toLowerCase() !== 'rca') {
+                alert('RCA 관리자 로그인 상태에서만 테스트 백업을 복원할 수 있습니다.');
+                return;
+            }
+            if (!confirm('현재 RCA 관리자 데이터에 테스트 백업을 덮어쓰시겠습니까?\n기존 RCA 로컬 테스트 데이터는 백업 데이터로 교체됩니다.')) return;
+
+            try {
+                const response = await fetch('/data/massage_backup_RCA_2025-11-03.json', { cache: 'no-store' });
+                if (!response.ok) throw new Error('백업 파일을 불러오지 못했습니다. HTTP ' + response.status);
+                const backup = await response.json();
+                if (!backup?.data) throw new Error('백업 데이터 형식이 올바르지 않습니다.');
+
+                const keyMap = ['menus','staff','rooms','customers','paymentMethods','reservations','currency','guarantees'];
+                keyMap.forEach(key => {
+                    if (backup.data[key] !== undefined) {
+                        const value = typeof backup.data[key] === 'string'
+                            ? backup.data[key]
+                            : JSON.stringify(backup.data[key]);
+                        localStorage.setItem(getAdminKey(key), value);
+                    }
+                });
+
+                if (backup.data.staffOrders && typeof backup.data.staffOrders === 'object') {
+                    Object.entries(backup.data.staffOrders).forEach(([date, value]) => {
+                        const storageValue = typeof value === 'string' ? value : JSON.stringify(value);
+                        localStorage.setItem(getDailyStaffOrderKey(date), storageValue);
+                    });
+                }
+
+                loadReservationData();
+                showDashboard();
+                alert('RCA 테스트 백업 복원이 완료되었습니다.\n2025-11-01 / 2025-11-02 날짜를 선택하면 백업 데이터를 확인할 수 있습니다.');
+            } catch (error) {
+                console.error('RCA 테스트 백업 복원 오류:', error);
+                alert('RCA 테스트 백업 복원에 실패했습니다.\n' + (error?.message || error));
+            }
         }
 
         // DB 관리 함수들
