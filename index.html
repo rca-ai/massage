@@ -38,6 +38,30 @@
             max-height: 80%;
             overflow-y: auto;
         }
+        #managementModal .modal-content {
+            width: 95%;
+            max-width: 760px;
+            box-sizing: border-box;
+        }
+        .menu-duration-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+        .menu-duration-fields {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+            gap: 8px;
+            align-items: center;
+        }
+        .menu-duration-fields input,
+        .menu-duration-fields select {
+            min-width: 0;
+            box-sizing: border-box;
+        }
+        @media (max-width: 640px) {
+            .menu-duration-grid { grid-template-columns: 1fr; }
+        }
         .selection-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -6281,49 +6305,22 @@ function translateLegacy(value) {
         }
 
         function addNewMenu() {
-            const content = `
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-2">메뉴명:</label>
-                        <input type="text" id="newMenuName" class="w-full border rounded px-3 py-2" placeholder="메뉴명을 입력하세요">
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium mb-2">30분 가격/커미션:</label>
-                            <div class="flex gap-2">
-                                <input type="number" id="menu30Price" class="flex-1 border rounded px-2 py-1" placeholder="가격">
-                                <input type="number" id="menu30Commission" class="flex-1 border rounded px-2 py-1" placeholder="커미션"><select id="menu30CommissionType" class="border rounded px-1"><option value="amount">금액</option><option value="percent">%</option></select>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-2">60분 가격/커미션:</label>
-                            <div class="flex gap-2">
-                                <input type="number" id="menu60Price" class="flex-1 border rounded px-2 py-1" placeholder="가격">
-                                <input type="number" id="menu60Commission" class="flex-1 border rounded px-2 py-1" placeholder="커미션"><select id="menu60CommissionType" class="border rounded px-1"><option value="amount">금액</option><option value="percent">%</option></select>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-2">90분 가격/커미션:</label>
-                            <div class="flex gap-2">
-                                <input type="number" id="menu90Price" class="flex-1 border rounded px-2 py-1" placeholder="가격">
-                                <input type="number" id="menu90Commission" class="flex-1 border rounded px-2 py-1" placeholder="커미션"><select id="menu90CommissionType" class="border rounded px-1"><option value="amount">금액</option><option value="percent">%</option></select>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-2">120분 가격/커미션:</label>
-                            <div class="flex gap-2">
-                                <input type="number" id="menu120Price" class="flex-1 border rounded px-2 py-1" placeholder="가격">
-                                <input type="number" id="menu120Commission" class="flex-1 border rounded px-2 py-1" placeholder="커미션"><select id="menu120CommissionType" class="border rounded px-1"><option value="amount">금액</option><option value="percent">%</option></select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="saveNewMenu()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">저장</button>
-                        <button onclick="manageMenus()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
-                    </div>
-                </div>
-            `;
-            
+            const durations = [30, 60, 90, 120];
+            const content = '<div class="space-y-4">' +
+                '<div><label class="block text-sm font-medium mb-2">메뉴명:</label>' +
+                '<input type="text" id="newMenuName" class="w-full border rounded px-3 py-2" placeholder="메뉴명을 입력하세요"></div>' +
+                '<div class="menu-duration-grid">' +
+                durations.map(function(duration) { return '<div>' +
+                    '<label class="block text-sm font-medium mb-2">' + duration + '분 가격/커미션:</label>' +
+                    '<div class="menu-duration-fields">' +
+                    '<input type="number" id="menu' + duration + 'Price" class="w-full border rounded px-2 py-2" placeholder="가격">' +
+                    '<input type="number" id="menu' + duration + 'Commission" class="w-full border rounded px-2 py-2" placeholder="커미션">' +
+                    '<select id="menu' + duration + 'CommissionType" class="border rounded px-2 py-2"><option value="amount">금액</option><option value="percent">%</option></select>' +
+                    '</div></div>'; }).join('') +
+                '</div>' +
+                '<div class="flex gap-2"><button onclick="saveNewMenu()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">저장</button>' +
+                '<button onclick="manageMenus()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button></div>' +
+                '</div>';
             document.getElementById('managementTitle').textContent = '새 메뉴 추가';
             document.getElementById('managementContent').innerHTML = content;
         }
@@ -6367,87 +6364,58 @@ function translateLegacy(value) {
 
         function editMenu(id) {
             const menus = JSON.parse(localStorage.getItem(getAdminKey('menus')) || '[]');
-            const menu = menus.find(m => m.id === id);
-            
+            const menu = menus.find(function(m) { return m.id === id; });
             if (!menu) return;
-
-            const content = `
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-2">메뉴명:</label>
-                        <input type="text" id="editMenuName" value="${menu.name}" class="w-full border rounded px-3 py-2">
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium mb-2">30분 가격/커미션:</label>
-                            <div class="flex gap-2">
-                                <input type="number" id="editMenu30Price" value="${menu.prices[30]?.price || ''}" class="flex-1 border rounded px-2 py-1" placeholder="가격">
-                                <input type="number" id="editMenu30Commission" value="${menu.prices[30]?.commission || ''}" class="flex-1 border rounded px-2 py-1" placeholder="커미션">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-2">60분 가격/커미션:</label>
-                            <div class="flex gap-2">
-                                <input type="number" id="editMenu60Price" value="${menu.prices[60]?.price || ''}" class="flex-1 border rounded px-2 py-1" placeholder="가격">
-                                <input type="number" id="editMenu60Commission" value="${menu.prices[60]?.commission || ''}" class="flex-1 border rounded px-2 py-1" placeholder="커미션">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-2">90분 가격/커미션:</label>
-                            <div class="flex gap-2">
-                                <input type="number" id="editMenu90Price" value="${menu.prices[90]?.price || ''}" class="flex-1 border rounded px-2 py-1" placeholder="가격">
-                                <input type="number" id="editMenu90Commission" value="${menu.prices[90]?.commission || ''}" class="flex-1 border rounded px-2 py-1" placeholder="커미션">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-2">120분 가격/커미션:</label>
-                            <div class="flex gap-2">
-                                <input type="number" id="editMenu120Price" value="${menu.prices[120]?.price || ''}" class="flex-1 border rounded px-2 py-1" placeholder="가격">
-                                <input type="number" id="editMenu120Commission" value="${menu.prices[120]?.commission || ''}" class="flex-1 border rounded px-2 py-1" placeholder="커미션">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="updateMenu(${id})" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">수정</button>
-                        <button onclick="manageMenus()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
-                    </div>
-                </div>
-            `;
-            
+            const durations = [30, 60, 90, 120];
+            const renderDuration = function(duration) {
+                const priceData = menu.prices && menu.prices[duration] ? menu.prices[duration] : {};
+                const commissionData = priceData.commission;
+                const commissionValue = commissionData && typeof commissionData === 'object' ? (commissionData.value ?? '') : (commissionData ?? '');
+                const commissionType = commissionData && typeof commissionData === 'object' ? (commissionData.type || 'amount') : 'amount';
+                return '<div><label class="block text-sm font-medium mb-2">' + duration + '분 가격/커미션:</label>' +
+                    '<div class="menu-duration-fields">' +
+                    '<input type="number" id="editMenu' + duration + 'Price" value="' + (priceData.price ?? '') + '" class="w-full border rounded px-2 py-2" placeholder="가격">' +
+                    '<input type="number" id="editMenu' + duration + 'Commission" value="' + commissionValue + '" class="w-full border rounded px-2 py-2" placeholder="커미션">' +
+                    '<select id="editMenu' + duration + 'CommissionType" class="border rounded px-2 py-2">' +
+                    '<option value="amount" ' + (commissionType === 'amount' ? 'selected' : '') + '>금액</option>' +
+                    '<option value="percent" ' + (commissionType === 'percent' ? 'selected' : '') + '>%</option>' +
+                    '</select></div></div>';
+            };
+            const safeName = String(menu.name ?? '').replace(/"/g, '&quot;');
+            const content = '<div class="space-y-4">' +
+                '<div><label class="block text-sm font-medium mb-2">메뉴명:</label>' +
+                '<input type="text" id="editMenuName" value="' + safeName + '" class="w-full border rounded px-3 py-2"></div>' +
+                '<div class="menu-duration-grid">' + durations.map(renderDuration).join('') + '</div>' +
+                '<div class="flex gap-2"><button onclick="updateMenu(' + id + ')" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">수정</button>' +
+                '<button onclick="manageMenus()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button></div></div>';
             document.getElementById('managementTitle').textContent = '메뉴 수정';
             document.getElementById('managementContent').innerHTML = content;
         }
 
         function updateMenu(id) {
-            const name = document.getElementById('editMenuName').value;
-            if (!name) {
-                alert('메뉴명을 입력해주세요.');
-                return;
-            }
-
+            const name = document.getElementById('editMenuName').value.trim();
+            if (!name) { alert('메뉴명을 입력해주세요.'); return; }
             const menus = JSON.parse(localStorage.getItem(getAdminKey('menus')) || '[]');
-            const menuIndex = menus.findIndex(m => m.id === id);
-            
+            const menuIndex = menus.findIndex(function(m) { return m.id === id; });
             if (menuIndex === -1) return;
-
+            const oldMenu = menus[menuIndex];
             const prices = {};
             const durations = [30, 60, 90, 120];
-            
-            durations.forEach(duration => {
-                const price = parseInt(document.getElementById(`editMenu${duration}Price`).value);
-                const commission = parseInt(document.getElementById(`editMenu${duration}Commission`).value);
-                
-                if (price && commission) {
-                    prices[duration] = { price, commission };
+            durations.forEach(function(duration) {
+                const priceInput = document.getElementById('editMenu' + duration + 'Price');
+                const commissionInput = document.getElementById('editMenu' + duration + 'Commission');
+                const typeInput = document.getElementById('editMenu' + duration + 'CommissionType');
+                const price = Number(priceInput && priceInput.value || 0);
+                const commissionRaw = commissionInput ? commissionInput.value : '';
+                const commission = commissionRaw === '' ? NaN : Number(commissionRaw);
+                if (price > 0 && Number.isFinite(commission) && commission >= 0) {
+                    const oldCommission = oldMenu.prices && oldMenu.prices[duration] ? oldMenu.prices[duration].commission : null;
+                    const commissionType = (typeInput && typeInput.value) || (oldCommission && typeof oldCommission === 'object' ? oldCommission.type : 'amount') || 'amount';
+                    prices[duration] = { price: price, commission: { value: commission, type: commissionType } };
                 }
             });
-
-            menus[menuIndex] = {
-                id: id,
-                name: name,
-                prices: prices
-            };
-
+            if (Object.keys(prices).length === 0) { alert('최소 하나의 시간대에 대한 가격과 커미션을 입력해주세요.'); return; }
+            menus[menuIndex] = Object.assign({}, oldMenu, { id: id, name: name, prices: prices });
             localStorage.setItem(getAdminKey('menus'), JSON.stringify(menus));
             alert('메뉴가 수정되었습니다.');
             manageMenus();
