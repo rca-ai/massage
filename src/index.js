@@ -109,7 +109,9 @@ export default {
           return json({ ok: false, error: "missing_credentials" }, 400);
         }
 
-        const admin = await env.DB.prepare(
+        // A username is unique within a shop, not globally. Check all active
+        // matching usernames so one shop's account cannot mask another shop's account.
+        const adminRows = await env.DB.prepare(
           `SELECT
              a.id,
              a.shop_id,
@@ -123,20 +125,21 @@ export default {
            FROM admins a
            JOIN shops s ON s.id = a.shop_id
            WHERE a.username = ?
-           LIMIT 1`
-        ).bind(username).first();
+             AND a.status = 'active'`
+        ).bind(username).all();
 
-        if (!admin || admin.status !== "active") {
-          return json({ ok: false, error: "invalid_credentials" }, 401);
+        let admin = null;
+        for (const candidate of (adminRows.results || [])) {
+          const [salt, storedHash] = String(candidate.password_hash || "").split(":");
+          if (!salt || !storedHash) continue;
+          const passwordHash = await hashPassword(password, salt);
+          if (passwordHash === storedHash) {
+            admin = candidate;
+            break;
+          }
         }
 
-        const [salt, storedHash] = String(admin.password_hash || "").split(":");
-        if (!salt || !storedHash) {
-          return json({ ok: false, error: "invalid_credentials" }, 401);
-        }
-
-        const passwordHash = await hashPassword(password, salt);
-        if (passwordHash !== storedHash) {
+        if (!admin) {
           return json({ ok: false, error: "invalid_credentials" }, 401);
         }
 
@@ -153,17 +156,19 @@ export default {
         const tokenHash = await hashToken(token);
         const sessionId = crypto.randomUUID();
 
-        await env.DB.batch([
-          env.DB.prepare(
-            "DELETE FROM sessions WHERE admin_id = ? AND datetime(expires_at) <= datetime('now')"
-          ).bind(admin.id),
-          env.DB.prepare(
-            "INSERT INTO sessions (id, admin_id, shop_id, token_hash, expires_at, last_seen_at) VALUES (?, ?, ?, ?, datetime('now', '+7 days'), CURRENT_TIMESTAMP)"
-          ).bind(sessionId, admin.id, admin.shop_id, tokenHash),
-          env.DB.prepare(
-            "UPDATE admins SET last_login_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ?"
-          ).bind(admin.id)
-        ]);
+        // Keep session creation simple and isolated so a stale/expired session
+        // cannot prevent a valid account from logging in.
+        await env.DB.prepare(
+          "DELETE FROM sessions WHERE admin_id = ? AND datetime(expires_at) <= datetime('now')"
+        ).bind(admin.id).run();
+
+        await env.DB.prepare(
+          "INSERT INTO sessions (id, admin_id, shop_id, token_hash, expires_at, last_seen_at) VALUES (?, ?, ?, ?, datetime('now', '+7 days'), CURRENT_TIMESTAMP)"
+        ).bind(sessionId, admin.id, admin.shop_id, tokenHash).run();
+
+        await env.DB.prepare(
+          "UPDATE admins SET last_login_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ?"
+        ).bind(admin.id).run();
 
         return json({
           ok: true,
