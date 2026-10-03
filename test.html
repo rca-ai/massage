@@ -540,6 +540,8 @@
         let selectedFontFamily = 'Arial';
         let selectedFontSize = 'normal';
         let currentAdmin = null;
+        // D1/Cloudflare Worker API endpoint. This keeps GitHub-hosted test.html connected to the same backend.
+        const API_BASE_URL = 'https://massage.guidrthai.workers.dev';
         let currentPaymentReservationId = null;
         let selectedStaff = null;
         let menuRowCounter = 0;
@@ -1536,7 +1538,7 @@ function initializeApp() {
 
                 // DB 로그인 우선. 네트워크/서버 오류일 때만 기존 localStorage 로그인으로 임시 복구합니다.
                 try {
-                    const response = await fetch('/api/auth/login', {
+                    const response = await fetch(API_BASE_URL + '/api/auth/login', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ username, password })
