@@ -6,11 +6,70 @@ async function hashPassword(password, salt) {
     .join("");
 }
 
+async function hashToken(token) {
+  const data = new TextEncoder().encode(token);
+  const digest = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 function json(data, status = 200) {
   return Response.json(data, {
     status,
     headers: { "Cache-Control": "no-store" }
   });
+}
+
+function getBearerToken(request) {
+  const value = request.headers.get("Authorization") || "";
+  return value.startsWith("Bearer ") ? value.slice(7).trim() : "";
+}
+
+async function requireSession(request, env) {
+  const token = getBearerToken(request);
+  if (!token) return null;
+
+  const tokenHash = await hashToken(token);
+  const session = await env.DB.prepare(
+    `SELECT
+       s.id,
+       s.admin_id,
+       s.shop_id,
+       s.expires_at,
+       a.username,
+       a.role,
+       a.status,
+       a.display_name
+     FROM sessions s
+     JOIN admins a ON a.id = s.admin_id
+     WHERE s.token_hash = ?
+       AND a.status = 'active'
+       AND datetime(s.expires_at) > datetime('now')
+     LIMIT 1`
+  ).bind(tokenHash).first();
+
+  if (!session) return null;
+
+  await env.DB.prepare(
+    "UPDATE sessions SET last_seen_at = CURRENT_TIMESTAMP WHERE id = ?"
+  ).bind(session.id).run();
+
+  return session;
+}
+
+function mapStaff(row) {
+  return {
+    id: row.id,
+    legacyId: row.legacy_id,
+    name: row.name,
+    phone: row.phone || "",
+    bank: row.bank_name || "",
+    account: row.bank_account || "",
+    status: row.status || "정직원",
+    sequenceNo: row.sequence_no ?? null,
+    notes: row.notes || ""
+  };
 }
 
 export default {
@@ -90,12 +149,26 @@ export default {
           }, 403);
         }
 
-        await env.DB.prepare(
-          "UPDATE admins SET last_login_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ?"
-        ).bind(admin.id).run();
+        const token = crypto.randomUUID() + "-" + crypto.randomUUID();
+        const tokenHash = await hashToken(token);
+        const sessionId = crypto.randomUUID();
+
+        await env.DB.batch([
+          env.DB.prepare(
+            "DELETE FROM sessions WHERE admin_id = ? AND datetime(expires_at) <= datetime('now')"
+          ).bind(admin.id),
+          env.DB.prepare(
+            "INSERT INTO sessions (id, admin_id, shop_id, token_hash, expires_at, last_seen_at) VALUES (?, ?, ?, ?, datetime('now', '+7 days'), CURRENT_TIMESTAMP)"
+          ).bind(sessionId, admin.id, admin.shop_id, tokenHash),
+          env.DB.prepare(
+            "UPDATE admins SET last_login_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ?"
+          ).bind(admin.id)
+        ]);
 
         return json({
           ok: true,
+          token,
+          expiresInDays: 7,
           admin: {
             id: admin.id,
             shopId: admin.shop_id,
@@ -115,6 +188,153 @@ export default {
           },
           500
         );
+      }
+    }
+
+    if (url.pathname === "/api/auth/logout" && request.method === "POST") {
+      try {
+        const token = getBearerToken(request);
+        if (token) {
+          const tokenHash = await hashToken(token);
+          await env.DB.prepare("DELETE FROM sessions WHERE token_hash = ?")
+            .bind(tokenHash)
+            .run();
+        }
+        return json({ ok: true });
+      } catch (error) {
+        return json({ ok: false, error: error instanceof Error ? error.message : String(error) }, 500);
+      }
+    }
+
+    if (url.pathname === "/api/auth/me" && request.method === "GET") {
+      const session = await requireSession(request, env);
+      if (!session) return json({ ok: false, error: "unauthorized" }, 401);
+      return json({
+        ok: true,
+        admin: {
+          id: session.admin_id,
+          shopId: session.shop_id,
+          username: session.username,
+          type: session.role === "super" ? "super" : "normal",
+          role: session.role,
+          displayName: session.display_name || session.username
+        }
+      });
+    }
+
+    if (url.pathname === "/api/staff") {
+      const session = await requireSession(request, env);
+      if (!session) return json({ ok: false, error: "unauthorized" }, 401);
+
+      try {
+        if (request.method === "GET") {
+          const result = await env.DB.prepare(
+            `SELECT id, legacy_id, name, phone, bank_name, bank_account, status, sequence_no, notes
+             FROM staff
+             WHERE shop_id = ?
+             ORDER BY CASE WHEN sequence_no IS NULL THEN 999999 ELSE sequence_no END, name`
+          ).bind(session.shop_id).all();
+
+          return json({
+            ok: true,
+            staff: (result.results || []).map(mapStaff)
+          });
+        }
+
+        if (request.method === "POST") {
+          const body = await request.json();
+          const staff = Array.isArray(body?.staff) ? body.staff : [body];
+
+          if (!staff.length) return json({ ok: true, staff: [] });
+
+          const statements = [];
+          for (const member of staff) {
+            const legacyId = Number(member?.legacyId ?? member?.id);
+            const name = String(member?.name || "").trim();
+            if (!Number.isFinite(legacyId) || !name) continue;
+
+            statements.push(
+              env.DB.prepare(
+                `INSERT INTO staff
+                  (shop_id, legacy_id, name, phone, bank_name, bank_account, status, sequence_no, notes)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 ON CONFLICT(shop_id, legacy_id) DO UPDATE SET
+                   name = excluded.name,
+                   phone = excluded.phone,
+                   bank_name = excluded.bank_name,
+                   bank_account = excluded.bank_account,
+                   status = excluded.status,
+                   sequence_no = excluded.sequence_no,
+                   notes = excluded.notes,
+                   updated_at = CURRENT_TIMESTAMP`
+              ).bind(
+                session.shop_id,
+                legacyId,
+                name,
+                String(member?.phone || ""),
+                String(member?.bank || ""),
+                String(member?.account || ""),
+                String(member?.status || "정직원"),
+                member?.sequenceNo == null || member?.sequenceNo === "" ? null : Number(member.sequenceNo),
+                String(member?.notes || "")
+              )
+            );
+          }
+
+          if (statements.length) await env.DB.batch(statements);
+
+          const result = await env.DB.prepare(
+            "SELECT id, legacy_id, name, phone, bank_name, bank_account, status, sequence_no, notes FROM staff WHERE shop_id = ? ORDER BY CASE WHEN sequence_no IS NULL THEN 999999 ELSE sequence_no END, name"
+          ).bind(session.shop_id).all();
+
+          return json({ ok: true, staff: (result.results || []).map(mapStaff) });
+        }
+
+        return json({ ok: false, error: "method_not_allowed" }, 405);
+      } catch (error) {
+        return json({ ok: false, error: error instanceof Error ? error.message : String(error) }, 500);
+      }
+    }
+
+    if (url.pathname === "/api/staff/item" && (request.method === "PUT" || request.method === "DELETE")) {
+      const session = await requireSession(request, env);
+      if (!session) return json({ ok: false, error: "unauthorized" }, 401);
+
+      try {
+        const body = await request.json();
+        const legacyId = Number(body?.legacyId ?? body?.id);
+        if (!Number.isFinite(legacyId)) return json({ ok: false, error: "invalid_staff_id" }, 400);
+
+        if (request.method === "DELETE") {
+          await env.DB.prepare(
+            "DELETE FROM staff WHERE shop_id = ? AND legacy_id = ?"
+          ).bind(session.shop_id, legacyId).run();
+          return json({ ok: true });
+        }
+
+        const name = String(body?.name || "").trim();
+        if (!name) return json({ ok: false, error: "name_required" }, 400);
+
+        await env.DB.prepare(
+          `UPDATE staff
+           SET name = ?, phone = ?, bank_name = ?, bank_account = ?, status = ?,
+               sequence_no = ?, notes = ?, updated_at = CURRENT_TIMESTAMP
+           WHERE shop_id = ? AND legacy_id = ?`
+        ).bind(
+          name,
+          String(body?.phone || ""),
+          String(body?.bank || ""),
+          String(body?.account || ""),
+          String(body?.status || "정직원"),
+          body?.sequenceNo == null || body?.sequenceNo === "" ? null : Number(body.sequenceNo),
+          String(body?.notes || ""),
+          session.shop_id,
+          legacyId
+        ).run();
+
+        return json({ ok: true });
+      } catch (error) {
+        return json({ ok: false, error: error instanceof Error ? error.message : String(error) }, 500);
       }
     }
 
