@@ -417,7 +417,7 @@
       </div>
       <div>
        <h4 class="font-semibold mb-2" data-translate="restoreButton">복원</h4>
-       <div class="flex gap-2 flex-wrap"><input type="file" id="restoreFile" accept=".json" style="display: none;" onchange="restoreData(event)"> <input type="file" id="excelUploadFile" accept=".xlsx,.xls" style="display: none;" onchange="uploadExcelData(event)"> <button onclick="showLocalRestoreDialog()" class="bg-orange-600 text-white px-3 py-2 rounded hover:bg-orange-700 text-sm" data-translate="localRestoreButton">로컬 복원</button> <button onclick="restoreRcaTestBackup()" class="bg-red-700 text-white px-3 py-2 rounded hover:bg-red-800 text-sm">RCA 테스트 백업 복원</button> <button onclick="showGoogleRestoreDialog()" class="bg-indigo-600 text-white px-3 py-2 rounded hover:bg-indigo-700 text-sm" data-translate="googleRestoreButton">구글 복원</button> <button onclick="document.getElementById('excelUploadFile').click()" class="bg-green-700 text-white px-3 py-2 rounded hover:bg-green-800 text-sm">엑셀데이타 업로드</button> <button onclick="downloadExcelUploadSample()" class="bg-blue-700 text-white px-3 py-2 rounded hover:bg-blue-800 text-sm">업로드샘플 다운로드</button>
+       <div class="flex gap-2 flex-wrap"><input type="file" id="restoreFile" accept=".json" style="display: none;" onchange="restoreData(event)"> <input type="file" id="excelUploadFile" accept=".xlsx,.xls" style="display: none;" onchange="uploadExcelData(event)"> <button onclick="showLocalRestoreDialog()" class="bg-orange-600 text-white px-3 py-2 rounded hover:bg-orange-700 text-sm" data-translate="localRestoreButton">로컬 복원</button> <button onclick="restoreRcaTestBackup()" class="bg-red-700 text-white px-3 py-2 rounded hover:bg-red-800 text-sm">RCA 테스트 데이터 불러오기</button> <button onclick="showGoogleRestoreDialog()" class="bg-indigo-600 text-white px-3 py-2 rounded hover:bg-indigo-700 text-sm" data-translate="googleRestoreButton">구글 복원</button> <button onclick="document.getElementById('excelUploadFile').click()" class="bg-green-700 text-white px-3 py-2 rounded hover:bg-green-800 text-sm">엑셀데이타 업로드</button> <button onclick="downloadExcelUploadSample()" class="bg-blue-700 text-white px-3 py-2 rounded hover:bg-blue-800 text-sm">업로드샘플 다운로드</button>
        </div>
       </div>
      </div>
@@ -3136,6 +3136,95 @@ function initializeApp() {
             document.getElementById('managementModal').style.display = 'none';
         }
 
+        // 로컬 백업/복원
+        function collectCurrentAdminBackup() {
+            if (!currentAdmin?.username) throw new Error('로그인된 관리자가 없습니다.');
+            const data = {};
+            ['menus','staff','rooms','customers','paymentMethods','reservations','currency','guarantees'].forEach(key => {
+                data[key] = localStorage.getItem(getAdminKey(key)) || (key === 'currency' ? '{"symbol":"","name":"원"}' : '[]');
+            });
+            const staffOrders = {};
+            const dates = new Set();
+            try {
+                const reservations = JSON.parse(data.reservations || '[]');
+                reservations.forEach(r => { if (r?.date) dates.add(r.date); });
+            } catch (e) {}
+            dates.forEach(date => {
+                const value = localStorage.getItem(getDailyStaffOrderKey(date));
+                if (value) staffOrders[date] = value;
+            });
+            data.staffOrders = staffOrders;
+            return {
+                timestamp: new Date().toISOString(),
+                adminUsername: currentAdmin.username,
+                data
+            };
+        }
+
+        function showLocalBackupDialog() {
+            try {
+                const backup = collectCurrentAdminBackup();
+                const blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json;charset=utf-8'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'massage_backup_' + currentAdmin.username + '_' + getLocalDateISO() + '.json';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+                alert('로컬 백업 파일이 다운로드되었습니다.');
+            } catch (error) {
+                console.error('로컬 백업 오류:', error);
+                alert('로컬 백업에 실패했습니다.\n' + (error?.message || error));
+            }
+        }
+
+        function showLocalRestoreDialog() {
+            if (!currentAdmin?.username) {
+                alert('먼저 로그인해주세요.');
+                return;
+            }
+            const input = document.getElementById('restoreFile');
+            if (input) {
+                input.value = '';
+                input.click();
+            }
+        }
+
+        async function restoreData(event) {
+            try {
+                const file = event?.target?.files?.[0];
+                if (!file) return;
+                const text = await file.text();
+                const backup = JSON.parse(text);
+                if (!backup?.data) throw new Error('백업 데이터 형식이 올바르지 않습니다.');
+
+                if (!confirm('선택한 백업을 현재 로그인한 관리자 데이터에 복원하시겠습니까?\n현재 데이터가 백업 데이터로 교체됩니다.')) return;
+
+                ['menus','staff','rooms','customers','paymentMethods','reservations','currency','guarantees'].forEach(key => {
+                    if (backup.data[key] !== undefined) {
+                        const value = typeof backup.data[key] === 'string' ? backup.data[key] : JSON.stringify(backup.data[key]);
+                        localStorage.setItem(getAdminKey(key), value);
+                    }
+                });
+
+                if (backup.data.staffOrders && typeof backup.data.staffOrders === 'object') {
+                    Object.entries(backup.data.staffOrders).forEach(([date,value]) => {
+                        localStorage.setItem(getDailyStaffOrderKey(date), typeof value === 'string' ? value : JSON.stringify(value));
+                    });
+                }
+
+                initializeAdminData();
+                loadReservationData();
+                showDashboard();
+                alert('백업 데이터 복원이 완료되었습니다.');
+            } catch (error) {
+                console.error('로컬 복원 오류:', error);
+                alert('로컬 복원에 실패했습니다.\n' + (error?.message || error));
+            }
+        }
+
         // 업로드된 RCA 테스트 백업을 현재 로그인한 rca 관리자 영역으로 복원합니다.
         async function restoreRcaTestBackup() {
             if (!currentAdmin?.username || String(currentAdmin.username).toLowerCase() !== 'rca') {
@@ -3145,7 +3234,7 @@ function initializeApp() {
             if (!confirm('현재 RCA 관리자 데이터에 테스트 백업을 덮어쓰시겠습니까?\n기존 RCA 로컬 테스트 데이터는 백업 데이터로 교체됩니다.')) return;
 
             try {
-                const response = await fetch('/data/massage_backup_RCA_2025-11-03.json', { cache: 'no-store' });
+                const response = await fetch('/data/rca_test_backup_2025-11-03.json', { cache: 'no-store' });
                 if (!response.ok) throw new Error('백업 파일을 불러오지 못했습니다. HTTP ' + response.status);
                 const backup = await response.json();
                 if (!backup?.data) throw new Error('백업 데이터 형식이 올바르지 않습니다.');
