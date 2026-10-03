@@ -1689,8 +1689,15 @@ function initializeApp() {
         }
 
         // 로그아웃
-        function logout() {
+        async function logout() {
             if (confirm('로그아웃 하시겠습니까?')) {
+                try {
+                    if (currentAdmin?.sessionToken) {
+                        await apiFetch('/api/auth/logout', { method: 'POST' });
+                    }
+                } catch (error) {
+                    console.warn('D1 로그아웃 처리 오류:', error);
+                }
                 currentAdmin = null;
                 localStorage.removeItem('currentAdmin');
                 selectedStaff = null;
@@ -1700,11 +1707,7 @@ function initializeApp() {
                 document.getElementById('loginScreen').style.display = 'flex';
                 document.getElementById('loginUsername').value = '';
                 document.getElementById('loginPassword').value = '';
-                
-                // 모든 섹션 숨기기
                 hideAllSections();
-                
-                // 언어를 한국어로 초기화
                 setLanguage('ko');
             }
         }
