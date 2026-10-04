@@ -1,0 +1,28 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.guidrthai.massage'
+    compileSdk 36
+
+    defaultConfig {
+        applicationId 'com.guidrthai.massage'
+        minSdk 23
+        targetSdk 36
+        versionCode 38
+        versionName "38.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            versionNameSuffix "-debug"
+        }
+    }
+}
+
