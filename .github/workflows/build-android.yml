@@ -46,8 +46,12 @@ jobs:
         run: |
           gradle --no-daemon assembleRelease bundleRelease
           mkdir -p ../android-build-output
-          cp app/build/outputs/apk/release/app-release.apk ../android-build-output/MassageManagement-v38.apk
-          cp app/build/outputs/bundle/release/app-release.aab ../android-build-output/MassageManagement-v38.aab
+          APK_PATH="$(find app/build/outputs/apk/release -maxdepth 1 -type f -name '*.apk' | head -n 1)"
+          AAB_PATH="$(find app/build/outputs/bundle/release -maxdepth 1 -type f -name '*.aab' | head -n 1)"
+          test -n "$APK_PATH" && test -f "$APK_PATH"
+          test -n "$AAB_PATH" && test -f "$AAB_PATH"
+          cp "$APK_PATH" ../android-build-output/MassageManagement-v38.apk
+          cp "$AAB_PATH" ../android-build-output/MassageManagement-v38.aab
           cp massage-upload-key.jks ../android-build-output/massage-upload-key.jks
           printf 'Keystore password: massage2026\nAlias: massage-upload\n' > ../android-build-output/SIGNING-INFO.txt
 
