@@ -138,6 +138,9 @@ export default {
              a.role,
              a.status,
              a.valid_until,
+             a.phone,
+             a.google_maps_url,
+             a.language,
              s.shop_name
            FROM admins a
            JOIN shops s ON s.id = a.shop_id
@@ -201,7 +204,11 @@ export default {
             // Fall back to the tenant shop name for existing accounts.
             shopName: admin.display_name || admin.shop_name,
             displayName: admin.display_name || admin.shop_name,
-            validUntil: admin.valid_until || null
+            validUntil: admin.valid_until || null,
+            phone: admin.phone || "",
+            googleMapsUrl: admin.google_maps_url || "",
+            language: admin.language || "ko",
+            email: admin.email || ""
           }
         }, 200, request);
       } catch (error) {
@@ -223,7 +230,7 @@ export default {
       try {
         if (request.method === "GET") {
           const result = await env.DB.prepare(
-            `SELECT id, shop_id, username, display_name, role, email, status, valid_until, created_at, updated_at
+            `SELECT id, shop_id, username, display_name, role, email, phone, google_maps_url, language, status, valid_until, created_at, updated_at
              FROM admins
              WHERE shop_id = ?
              ORDER BY id`
@@ -238,6 +245,9 @@ export default {
               role: a.role,
               type: a.role === "super" ? "super" : "normal",
               email: a.email || "",
+              phone: a.phone || "",
+              googleMapsUrl: a.google_maps_url || "",
+              language: a.language || "ko",
               status: a.status,
               validUntil: a.valid_until || null,
               createdAt: a.created_at,
@@ -252,6 +262,9 @@ export default {
         const type = body?.type === "super" ? "super" : "normal";
         const displayName = String(body?.shopName || body?.displayName || "").trim();
         const email = String(body?.email || "").trim();
+        const phone = String(body?.phone || "").trim();
+        const googleMapsUrl = String(body?.googleMapsUrl || "").trim();
+        const language = ["ko","en","th","vi"].includes(String(body?.language || "")) ? String(body.language) : "ko";
         const validUntil = type === "super" ? null : String(body?.validUntil || "").trim();
 
         if (!username || !password) {
@@ -262,8 +275,8 @@ export default {
         }
 
         const duplicate = await env.DB.prepare(
-          "SELECT id FROM admins WHERE shop_id = ? AND username = ? LIMIT 1"
-        ).bind(session.shop_id, username).first();
+          "SELECT id FROM admins WHERE username = ? LIMIT 1"
+        ).bind(username).first();
         if (duplicate) return json({ ok: false, error: "username_exists" }, 409, request);
 
         const id = crypto.randomUUID();
@@ -272,8 +285,8 @@ export default {
 
         await env.DB.prepare(
           `INSERT INTO admins
-            (shop_id, username, password_hash, display_name, role, email, status, valid_until, created_at, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?, 'active', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`
+            (shop_id, username, password_hash, display_name, role, email, phone, google_maps_url, language, status, valid_until, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`
         ).bind(
           session.shop_id,
           username,
@@ -281,11 +294,14 @@ export default {
           displayName || username,
           type,
           email,
+          phone,
+          googleMapsUrl,
+          language,
           validUntil
         ).run();
 
         const created = await env.DB.prepare(
-          `SELECT id, username, display_name, role, email, status, valid_until, created_at, updated_at
+          `SELECT id, username, display_name, role, email, phone, google_maps_url, language, status, valid_until, created_at, updated_at
            FROM admins WHERE shop_id = ? AND username = ? LIMIT 1`
         ).bind(session.shop_id, username).first();
 
@@ -298,6 +314,9 @@ export default {
             role: created.role,
             type: created.role === "super" ? "super" : "normal",
             email: created.email || "",
+            phone: created.phone || "",
+            googleMapsUrl: created.google_maps_url || "",
+            language: created.language || "ko",
             status: created.status,
             validUntil: created.valid_until || null,
             createdAt: created.created_at,
@@ -306,6 +325,42 @@ export default {
         }, 201, request);
       } catch (error) {
         return json({ ok: false, error: error instanceof Error ? error.message : String(error) }, 500, request);
+      }
+    }
+
+    if (url.pathname === "/api/auth/register" && request.method === "POST") {
+      try {
+        const body = await request.json();
+        const username = String(body?.username || "").trim();
+        const password = String(body?.password || "");
+        const shopName = String(body?.shopName || "").trim();
+        const email = String(body?.email || "").trim();
+        const phone = String(body?.phone || "").trim();
+        const googleMapsUrl = String(body?.googleMapsUrl || "").trim();
+        const language = ["ko","en","th","vi"].includes(String(body?.language || "")) ? String(body.language) : "ko";
+        if (!username || !password || !shopName) return json({ ok:false, error:"required_fields" }, 400, request);
+        if (username.length < 3 || username.length > 50) return json({ ok:false, error:"invalid_username" }, 400, request);
+        if (password.length < 4) return json({ ok:false, error:"invalid_password" }, 400, request);
+        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ ok:false, error:"invalid_email" }, 400, request);
+        const duplicate = await env.DB.prepare("SELECT id FROM admins WHERE username = ? LIMIT 1").bind(username).first();
+        if (duplicate) return json({ ok:false, error:"username_exists" }, 409, request);
+        const shopId = crypto.randomUUID();
+        const salt = crypto.randomUUID();
+        const passwordHash = await hashPassword(password, salt);
+        const validFrom = new Date().toISOString().slice(0,10);
+        const end = new Date(); end.setDate(end.getDate() + 7);
+        const validUntil = end.toISOString().slice(0,10);
+        await env.DB.batch([
+          env.DB.prepare(`INSERT INTO shops (id, shop_name, email, address, google_maps_url, valid_until, status, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, 'active', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(shopId, shopName, email, "", googleMapsUrl, validUntil),
+          env.DB.prepare(`INSERT INTO admins
+            (shop_id, username, password_hash, display_name, role, email, phone, google_maps_url, language, status, valid_until, created_at, updated_at)
+            VALUES (?, ?, ?, ?, 'manager', ?, ?, ?, ?, 'active', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
+              shopId, username, salt + ":" + passwordHash, shopName, email, phone, googleMapsUrl, language, validUntil)
+        ]);
+        return json({ ok:true, admin:{ username, shopName, displayName:shopName, email, phone, googleMapsUrl, language, validFrom, validUntil, type:"normal", role:"manager" } }, 201, request);
+      } catch (error) {
+        return json({ ok:false, error:error instanceof Error ? error.message : String(error) }, 500, request);
       }
     }
 
