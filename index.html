@@ -1976,6 +1976,22 @@ async function initializeApp() {
             
             updateTranslations();
             if (window.localizeLegacyUI) window.localizeLegacyUI();
+
+            // 로그인 후 상단 상점명/만료일 표시도 선택한 언어로 즉시 갱신합니다.
+            const shopNameElement = document.getElementById('shopName');
+            if (shopNameElement && currentAdmin && currentAdmin.username) {
+                if (currentAdmin.type === 'super') {
+                    shopNameElement.textContent = window.translateLegacyText
+                        ? window.translateLegacyText('최고 관리자 화면')
+                        : '최고 관리자 화면';
+                } else {
+                    const expiryLabel = window.translateLegacyText
+                        ? window.translateLegacyText('만료일:')
+                        : 'Expiration date:';
+                    shopNameElement.textContent = (currentAdmin.shopName || '관리자 화면') +
+                        (currentAdmin.validUntil ? ' · ' + expiryLabel + ' ' + currentAdmin.validUntil : '');
+                }
+            }
             
             // 메인 화면이 표시된 경우에만 데이터 로드
             if (document.getElementById('mainScreen').style.display === 'block') {
