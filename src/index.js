@@ -44,7 +44,12 @@ async function requireSession(request, env) {
        a.username,
        a.role,
        a.status,
-       a.display_name
+       a.display_name,
+       a.email,
+       a.phone,
+       a.google_maps_url,
+       a.language,
+       a.valid_until
      FROM sessions s
      JOIN admins a ON a.id = s.admin_id
      WHERE s.token_hash = ?
@@ -458,7 +463,12 @@ export default {
           type: session.role === "super" ? "super" : "normal",
           role: session.role,
           shopName: session.display_name || session.username,
-          displayName: session.display_name || session.username
+          displayName: session.display_name || session.username,
+          email: session.email || "",
+          phone: session.phone || "",
+          googleMapsUrl: session.google_maps_url || "",
+          language: session.language || "ko",
+          validUntil: session.valid_until || null
         }
       }, 200, request);
     }
