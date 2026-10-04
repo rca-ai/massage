@@ -656,6 +656,24 @@
                 close: '닫기',
                 edit: '수정',
                 delete: '삭제',
+                newRegistration: '신규등록',
+                usernameLabel: '아이디',
+                passwordLabel: '비밀번호',
+                shopNameLabel: '상점명',
+                emailLabel: '이메일',
+                phoneLabel: '전화번호',
+                googleMapsLabel: '구글맵 주소',
+                languageLabel: '언어 설정',
+                registrationValidityNote: '가입일로부터 1주일 동안 사용할 수 있습니다.',
+                registerButton: '등록',
+                menuList: '메뉴 목록',
+                addMenu: '메뉴 추가',
+                selectMenu: '메뉴 선택',
+                selectTime: '시간 선택',
+                priceLabel: '가격:',
+                commissionLabel: '커미션:',
+                menuTimeSettings: '메뉴별 시간 설정',
+                editReservation: '예약 수정',
                 add: '추가',
                 save: '저장',
                 username: '아이디',
@@ -4741,9 +4759,9 @@ function translateLegacy(value) {
                 };
                 if (dynamicUi[lang] && dynamicUi[lang][0].test(s)) return s.replace(dynamicUi[lang][0], dynamicUi[lang][1]);
                 const uiTranslations = {
-                    en: {'직원별 현황판':'Staff Status Board','방번호별 현황판':'Room Status Board','마사지횟수':'Massage Count','DB 삭제':'Delete DB','엑셀데이타 업로드':'Upload Excel Data','업로드샘플 다운로드':'Download Upload Sample','삭제 대상 날짜':'Target Date','현황 보기':'View Status','선택 날짜 입금완료 데이터 전체 삭제':'Delete All Paid Data for Selected Date','선택 날짜':'Selected Date','전체':'Total','건':'records','입금완료':'Paid','입금완료 금액':'Paid Amount','미입금':'Unpaid','삭제 불가':'Cannot Delete','입금 완료':'Paid','만료일':'Expiration date','만료일:':'Expiration date:','날짜를 선택하고 현황 보기를 눌러주세요.':'Select a date and click View Status.','선택한 날짜의 데이터가 없습니다.':'No data for the selected date.'},
-                    th: {'직원별 현황판':'กระดานสถานะพนักงาน','방번호별 현황판':'กระดานสถานะตามหมายเลขห้อง','마사지횟수':'จำนวนครั้งนวด','DB 삭제':'ลบฐานข้อมูล','엑셀데이타 업로드':'อัปโหลดข้อมูล Excel','업로드샘플 다운로드':'ดาวน์โหลดตัวอย่างการอัปโหลด','삭제 대상 날짜':'วันที่ที่จะลบ','현황 보기':'ดูสถานะ','선택 날짜 입금완료 데이터 전체 삭제':'ลบข้อมูลที่ชำระเงินแล้วทั้งหมดของวันที่เลือก','선택 날짜':'วันที่เลือก','전체':'ทั้งหมด','건':'รายการ','입금완료':'ชำระเงินแล้ว','입금완료 금액':'ยอดเงินที่ชำระแล้ว','미입금':'ยังไม่ชำระ','삭제 불가':'ไม่สามารถลบได้','입금 완료':'ชำระเงินแล้ว','만료일':'วันหมดอายุ','만료일:':'วันหมดอายุ:','날짜를 선택하고 현황 보기를 눌러주세요.':'เลือกวันที่แล้วกดดูสถานะ','선택한 날짜의 데이터가 없습니다.':'ไม่มีข้อมูลสำหรับวันที่เลือก'},
-                    vi: {'직원별 현황판':'Bảng trạng thái nhân viên','방번호별 현황판':'Bảng trạng thái theo phòng','마사지횟수':'Số lần massage','DB 삭제':'Xóa DB','엑셀데이타 업로드':'Tải dữ liệu Excel lên','업로드샘플 다운로드':'Tải mẫu tải lên','삭제 대상 날짜':'Ngày cần xóa','현황 보기':'Xem trạng thái','선택 날짜 입금완료 데이터 전체 삭제':'Xóa toàn bộ dữ liệu đã thanh toán của ngày đã chọn','선택 날짜':'Ngày đã chọn','전체':'Tổng','건':'bản ghi','입금완료':'Đã thanh toán','입금완료 금액':'Số tiền đã thanh toán','미입금':'Chưa thanh toán','삭제 불가':'Không thể xóa','입금 완료':'Đã thanh toán','만료일':'Ngày hết hạn','만료일:':'Ngày hết hạn:','날짜를 선택하고 현황 보기를 눌러주세요.':'Chọn ngày và nhấn Xem trạng thái.','선택한 날짜의 데이터가 없습니다.':'Không có dữ liệu cho ngày đã chọn'}
+                    en: {'시간 선택':'Time Selection','가격:':'Price:','커미션:':'Commission:','메뉴 추가':'Add Menu','삭제':'Delete','마사지사':'Massage Therapist','만료일':'Expiration date','만료일:':'Expiration date:','메뉴별 시간 설정':'Menu Time Settings','메뉴 선택':'Select Menu','신규등록':'New Registration','이메일':'Email','구글맵 주소':'Google Maps Address','언어 설정':'Language','가입일로부터 1주일 동안 사용할 수 있습니다.':'Valid for 1 week from registration.','등록':'Register','아이디':'Username','비밀번호':'Password','상점명':'Shop Name','전화번호':'Phone Number','직원별 현황판':'Staff Status Board','방번호별 현황판':'Room Status Board','마사지횟수':'Massage Count','DB 삭제':'Delete DB','엑셀데이타 업로드':'Upload Excel Data','업로드샘플 다운로드':'Download Upload Sample','삭제 대상 날짜':'Target Date','현황 보기':'View Status','선택 날짜 입금완료 데이터 전체 삭제':'Delete All Paid Data for Selected Date','선택 날짜':'Selected Date','전체':'Total','건':'records','입금완료':'Paid','입금완료 금액':'Paid Amount','미입금':'Unpaid','삭제 불가':'Cannot Delete','입금 완료':'Paid','만료일':'Expiration date','만료일:':'Expiration date:','날짜를 선택하고 현황 보기를 눌러주세요.':'Select a date and click View Status.','선택한 날짜의 데이터가 없습니다.':'No data for the selected date.'},
+                    th: {'시간 선택':'เลือกเวลา','가격:':'ราคา:','커미션:':'คอมมิชชั่น:','메뉴 추가':'เพิ่มเมนู','삭제':'ลบ','마사지사':'พนักงานนวด','만료일':'วันหมดอายุ','만료일:':'วันหมดอายุ:','메뉴별 시간 설정':'ตั้งเวลาสำหรับแต่ละเมนู','메뉴 선택':'เลือกเมนู','신규등록':'สมัครใหม่','อีเมล':'อีเมล','이메일':'อีเมล','구글맵 주소':'ที่อยู่ Google Maps','언어 설정':'ภาษา','가입일로부터 1주일 동안 사용할 수 있습니다.':'ใช้งานได้ 1 สัปดาห์นับจากวันสมัคร','등록':'ลงทะเบียน','아이디':'ชื่อผู้ใช้','비밀번호':'รหัสผ่าน','상점명':'ชื่อร้าน','전화번호':'หมายเลขโทรศัพท์','직원별 현황판':'กระดานสถานะพนักงาน','방번호별 현황판':'กระดานสถานะตามหมายเลขห้อง','마사지횟수':'จำนวนครั้งนวด','DB 삭제':'ลบฐานข้อมูล','엑셀데이타 업로드':'อัปโหลดข้อมูล Excel','업로드샘플 다운로드':'ดาวน์โหลดตัวอย่างการอัปโหลด','삭제 대상 날짜':'วันที่ที่จะลบ','현황 보기':'ดูสถานะ','선택 날짜 입금완료 데이터 전체 삭제':'ลบข้อมูลที่ชำระเงินแล้วทั้งหมดของวันที่เลือก','선택 날짜':'วันที่เลือก','전체':'ทั้งหมด','건':'รายการ','입금완료':'ชำระเงินแล้ว','입금완료 금액':'ยอดเงินที่ชำระแล้ว','미입금':'ยังไม่ชำระ','삭제 불가':'ไม่สามารถลบได้','입금 완료':'ชำระเงินแล้ว','만료일':'วันหมดอายุ','만료일:':'วันหมดอายุ:','날짜를 선택하고 현황 보기를 눌러주세요.':'เลือกวันที่แล้วกดดูสถานะ','선택한 날짜의 데이터가 없습니다.':'ไม่มีข้อมูลสำหรับวันที่เลือก'},
+                    vi: {'시간 선택':'Chọn thời gian','가격:':'Giá:','커미션:':'Hoa hồng:','메뉴 추가':'Thêm menu','삭제':'Xóa','마사지사':'Nhân viên massage','만료일':'Ngày hết hạn','만료일:':'Ngày hết hạn:','메뉴별 시간 설정':'Cài đặt thời gian menu','메뉴 선택':'Chọn menu','신규등록':'Đăng ký mới','이메일':'Email','구글맵 주소':'Địa chỉ Google Maps','언어 설정':'Ngôn ngữ','가입일로부터 1주일 동안 사용할 수 있습니다.':'Có hiệu lực 1 tuần kể từ ngày đăng ký','등록':'Đăng ký','아이디':'Tên đăng nhập','비밀번호':'Mật khẩu','상점명':'Tên cửa hàng','전화번호':'Số điện thoại','직원별 현황판':'Bảng trạng thái nhân viên','방번호별 현황판':'Bảng trạng thái theo phòng','마사지횟수':'Số lần massage','DB 삭제':'Xóa DB','엑셀데이타 업로드':'Tải dữ liệu Excel lên','업로드샘플 다운로드':'Tải mẫu tải lên','삭제 대상 날짜':'Ngày cần xóa','현황 보기':'Xem trạng thái','선택 날짜 입금완료 데이터 전체 삭제':'Xóa toàn bộ dữ liệu đã thanh toán của ngày đã chọn','선택 날짜':'Ngày đã chọn','전체':'Tổng','건':'bản ghi','입금완료':'Đã thanh toán','입금완료 금액':'Số tiền đã thanh toán','미입금':'Chưa thanh toán','삭제 불가':'Không thể xóa','입금 완료':'Đã thanh toán','만료일':'Ngày hết hạn','만료일:':'Ngày hết hạn:','날짜를 선택하고 현황 보기를 눌러주세요.':'Chọn ngày và nhấn Xem trạng thái.','선택한 날짜의 데이터가 없습니다.':'Không có dữ liệu cho ngày đã chọn'}
                 };
                 if (uiTranslations[lang] && uiTranslations[lang][s] !== undefined) return uiTranslations[lang][s];
                 if (extra[lang] && extra[lang][s] !== undefined) return extra[lang][s];
