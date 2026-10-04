@@ -341,6 +341,59 @@ export default {
       }, 200, request);
     }
 
+    if (url.pathname === "/api/app-data" && (request.method === "GET" || request.method === "PUT" || request.method === "DELETE")) {
+      const session = await requireSession(request, env);
+      if (!session) return json({ ok: false, error: "unauthorized" }, 401, request);
+
+      try {
+        if (request.method === "GET") {
+          const result = await env.DB.prepare(
+            "SELECT data_key, data_json, updated_at FROM app_data WHERE shop_id = ? ORDER BY data_key"
+          ).bind(session.shop_id).all();
+
+          const data = {};
+          for (const row of (result.results || [])) {
+            data[row.data_key] = row.data_json;
+          }
+
+          return json({ ok: true, data }, 200, request);
+        }
+
+        const body = await request.json();
+        const dataKey = String(body?.key || "").trim();
+        if (!dataKey || dataKey.length > 200) {
+          return json({ ok: false, error: "invalid_data_key" }, 400, request);
+        }
+
+        if (request.method === "DELETE") {
+          await env.DB.prepare(
+            "DELETE FROM app_data WHERE shop_id = ? AND data_key = ?"
+          ).bind(session.shop_id, dataKey).run();
+          return json({ ok: true }, 200, request);
+        }
+
+        const dataJson = typeof body?.value === "string"
+          ? body.value
+          : JSON.stringify(body?.value ?? null);
+
+        if (dataJson.length > 1900000) {
+          return json({ ok: false, error: "data_too_large" }, 413, request);
+        }
+
+        await env.DB.prepare(
+          `INSERT INTO app_data (shop_id, data_key, data_json, updated_at)
+           VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+           ON CONFLICT(shop_id, data_key) DO UPDATE SET
+             data_json = excluded.data_json,
+             updated_at = CURRENT_TIMESTAMP`
+        ).bind(session.shop_id, dataKey, dataJson).run();
+
+        return json({ ok: true, key: dataKey }, 200, request);
+      } catch (error) {
+        return json({ ok: false, error: error instanceof Error ? error.message : String(error) }, 500, request);
+      }
+    }
+
     if (url.pathname === "/api/staff") {
       const session = await requireSession(request, env);
       if (!session) return json({ ok: false, error: "unauthorized" }, 401, request);
