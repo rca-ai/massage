@@ -1235,9 +1235,10 @@
         };
 
         // 초기화
-function initializeApp() {
+async function initializeApp() {
     try {
         // 전역 데이터 먼저 초기화
+        installD1StorageSync();
         initializeGlobalData();
         
         // 시간 업데이트 시작
@@ -1279,7 +1280,10 @@ function initializeApp() {
                         // 관리자 데이터 유효성 검사
                         if (currentAdmin && currentAdmin.username) {
                             initializeAdminData();
-                            if (currentAdmin.sessionToken) syncStaffToD1().catch(err => console.warn('D1 직원 동기화 오류:', err));
+                            if (currentAdmin.sessionToken) {
+                                await hydrateAdminDataFromD1();
+                                await loadStaffFromD1();
+                            }
 
                     document.getElementById('loginScreen').style.display = 'none';
                             document.getElementById('mainScreen').style.display = 'block';
@@ -1435,6 +1439,152 @@ function initializeApp() {
             // 로그인 전 초기화 과정에서도 관리자 키를 요청할 수 있으므로 null 접근을 방지합니다.
             const username = currentAdmin?.username;
             return username ? `${username}_${dataType}` : `__anonymous_${dataType}`;
+        }
+
+        // D1을 서버 원본 데이터로 사용하면서 기존 화면 코드는 localStorage 캐시를 계속 사용합니다.
+        let d1Hydrating = false;
+        const d1SyncTimers = new Map();
+
+        function isServerDataKey(key) {
+            const username = currentAdmin?.username;
+            if (!username || !key || !key.startsWith(username + '_')) return false;
+            // 직원 정보는 기존 전용 /api/staff를 원본으로 사용합니다.
+            return key !== getAdminKey('staff');
+        }
+
+        function queueD1DataSync(key, value) {
+            if (!currentAdmin?.sessionToken || !isServerDataKey(key) || d1Hydrating) return;
+            const previous = d1SyncTimers.get(key);
+            if (previous) clearTimeout(previous);
+            const timer = setTimeout(async () => {
+                d1SyncTimers.delete(key);
+                try {
+                    const response = await apiFetch('/api/app-data', {
+                        method: 'PUT',
+                        body: JSON.stringify({ key, value })
+                    });
+                    if (!response.ok) {
+                        const result = await response.json().catch(() => ({}));
+                        throw new Error(result?.error || 'D1 data save failed');
+                    }
+                } catch (error) {
+                    console.warn('D1 앱 데이터 저장 실패:', key, error);
+                }
+            }, 250);
+            d1SyncTimers.set(key, timer);
+        }
+
+        function installD1StorageSync() {
+            if (window.__d1StorageSyncInstalled) return;
+            window.__d1StorageSyncInstalled = true;
+            const originalSetItem = Storage.prototype.setItem;
+            const originalRemoveItem = Storage.prototype.removeItem;
+
+            Storage.prototype.setItem = function(key, value) {
+                originalSetItem.call(this, key, value);
+                try {
+                    if (this === localStorage && typeof value === 'string') {
+                        queueD1DataSync(String(key), value);
+                    }
+                } catch (error) {
+                    console.warn('D1 localStorage sync hook 오류:', error);
+                }
+            };
+
+            Storage.prototype.removeItem = function(key) {
+                originalRemoveItem.call(this, key);
+                try {
+                    if (this === localStorage && currentAdmin?.sessionToken && isServerDataKey(String(key)) && !d1Hydrating) {
+                        apiFetch('/api/app-data', {
+                            method: 'DELETE',
+                            body: JSON.stringify({ key: String(key) })
+                        }).catch(error => console.warn('D1 앱 데이터 삭제 실패:', key, error));
+                    }
+                } catch (error) {
+                    console.warn('D1 localStorage remove hook 오류:', error);
+                }
+            };
+        }
+
+        async function hydrateAdminDataFromD1() {
+            if (!currentAdmin?.sessionToken || !currentAdmin?.username) return false;
+            try {
+                d1Hydrating = true;
+                const response = await apiFetch('/api/app-data');
+                const result = await response.json();
+                if (!response.ok || !result.ok) throw new Error(result?.error || 'D1 app data load failed');
+
+                const serverData = result.data && typeof result.data === 'object' ? result.data : {};
+                const usernamePrefix = currentAdmin.username + '_';
+                const localKeys = [];
+
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith(usernamePrefix) && isServerDataKey(key)) localKeys.push(key);
+                }
+
+                // 서버에 이미 저장된 값은 서버 값을 우선 적용합니다.
+                Object.entries(serverData).forEach(([key, value]) => {
+                    if (!key.startsWith(usernamePrefix)) return;
+                    localStorage.setItem(key, String(value ?? ''));
+                });
+
+                // 기존 기기의 localStorage에만 존재하던 데이터는 최초 1회 D1로 올립니다.
+                const uploads = [];
+                for (const key of localKeys) {
+                    if (serverData[key] === undefined) {
+                        const value = localStorage.getItem(key);
+                        if (value !== null) uploads.push({ key, value });
+                    }
+                }
+
+                for (const item of uploads) {
+                    const uploadResponse = await apiFetch('/api/app-data', {
+                        method: 'PUT',
+                        body: JSON.stringify(item)
+                    });
+                    if (!uploadResponse.ok) {
+                        const uploadResult = await uploadResponse.json().catch(() => ({}));
+                        throw new Error(uploadResult?.error || 'D1 initial data sync failed');
+                    }
+                }
+
+                return true;
+            } catch (error) {
+                console.warn('D1 앱 데이터 동기화 실패. 현재 기기의 로컬 캐시를 사용합니다:', error);
+                return false;
+            } finally {
+                d1Hydrating = false;
+            }
+        }
+
+        async function loadStaffFromD1() {
+            if (!currentAdmin?.sessionToken) return false;
+            try {
+                const response = await apiFetch('/api/staff');
+                const result = await response.json();
+                if (!response.ok || !result.ok || !Array.isArray(result.staff)) {
+                    throw new Error(result?.error || 'D1 staff load failed');
+                }
+                const staff = result.staff.map(m => ({
+                    id: m.legacyId ?? m.id,
+                    name: m.name,
+                    phone: m.phone || '',
+                    bank: m.bank || '',
+                    account: m.account || '',
+                    status: m.status || '정직원',
+                    sequenceNo: m.sequenceNo ?? null,
+                    notes: m.notes || ''
+                }));
+                d1Hydrating = true;
+                localStorage.setItem(getAdminKey('staff'), JSON.stringify(staff));
+                d1Hydrating = false;
+                return true;
+            } catch (error) {
+                d1Hydrating = false;
+                console.warn('D1 직원 데이터 조회 실패:', error);
+                return false;
+            }
         }
 
         async function apiFetch(path, options = {}) {
@@ -1637,6 +1787,8 @@ function initializeApp() {
                     // 관리자별 초기화 오류가 로그인 전체를 중단시키지 않도록 분리 처리합니다.
                     try {
                         initializeAdminData();
+                        await hydrateAdminDataFromD1();
+                        await loadStaffFromD1();
                     } catch (initError) {
                         console.error('관리자 데이터 초기화 오류:', initError);
                         // 손상된 관리자별 데이터가 있더라도 필수 기본 데이터는 개별적으로 복구합니다.
