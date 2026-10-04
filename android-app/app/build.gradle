@@ -14,8 +14,18 @@ android {
         versionName "38.0"
     }
 
+    signingConfigs {
+        release {
+            storeFile file("../massage-upload-key.jks")
+            storePassword "massage2026"
+            keyAlias "massage-upload"
+            keyPassword "massage2026"
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
