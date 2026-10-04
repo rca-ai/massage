@@ -1458,6 +1458,10 @@ async function initializeApp() {
             if (previous) clearTimeout(previous);
             const timer = setTimeout(async () => {
                 d1SyncTimers.delete(key);
+                // Hydration has priority over queued local writes. This prevents
+                // a new device's temporary default local data from overwriting
+                // the server data that is being restored during login.
+                if (d1Hydrating || !currentAdmin?.sessionToken || !isServerDataKey(key)) return;
                 try {
                     const response = await apiFetch('/api/app-data', {
                         method: 'PUT',
@@ -1509,6 +1513,10 @@ async function initializeApp() {
         async function hydrateAdminDataFromD1() {
             if (!currentAdmin?.sessionToken || !currentAdmin?.username) return false;
             try {
+                // Cancel any writes queued while initializeAdminData() created
+                // temporary defaults on a new device. Server data must win.
+                for (const timer of d1SyncTimers.values()) clearTimeout(timer);
+                d1SyncTimers.clear();
                 d1Hydrating = true;
                 const response = await apiFetch('/api/app-data');
                 const result = await response.json();
@@ -1538,7 +1546,10 @@ async function initializeApp() {
                     }
                 }
 
+                // Upload only keys that truly exist locally but not on the server.
+                // This is the one-time migration path for the first device.
                 for (const item of uploads) {
+                    if (d1Hydrating !== true) break;
                     const uploadResponse = await apiFetch('/api/app-data', {
                         method: 'PUT',
                         body: JSON.stringify(item)
