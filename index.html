@@ -6912,6 +6912,269 @@ function translateLegacy(value) {
             }
         }
 
+
+        // 팝업(alert/confirm) 메시지 다국어 처리
+        // 브라우저/Windows의 시스템 언어가 팝업 본문을 번역해 주는 것이 아니라,
+        // 아래에서 앱의 현재 선택 언어(currentLanguage)에 따라 메시지를 번역합니다.
+        function translatePopupMessage(message) {
+            const text = String(message ?? '');
+            if (!text || currentLanguage === 'ko') return text;
+
+            const exact = {
+                en: {
+                    '아이디와 비밀번호를 입력해주세요.':'Please enter your username and password.',
+                    '사용 기간이 만료되었습니다.\\n관리자에게 문의하세요.\\n만료일: ':'Your usage period has expired.\\nPlease contact the administrator.\\nExpiration date: ',
+                    '아이디 또는 비밀번호가 잘못되었습니다.':'Incorrect username or password.',
+                    '서버 로그인 오류가 발생했습니다.\\n잠시 후 다시 시도해주세요.':'Server login error.\\nPlease try again later.',
+                    '로그인 처리에 실패했습니다.':'Login failed.',
+                    '아직 사용 가능한 기간이 아닙니다.':'The usage period has not started yet.',
+                    '로그인 처리 중 오류가 발생했습니다. 페이지를 새로고침 후 다시 시도해주세요.':'An error occurred while processing the login. Please refresh the page and try again.',
+                    '로그아웃 하시겠습니까?':'Do you want to log out?',
+                    '아이디, 비밀번호, 상점명은 필수입니다.':'Username, password, and shop name are required.',
+                    '이미 존재하는 아이디입니다.':'This username already exists.',
+                    '신규등록에 실패했습니다.':'Registration failed.',
+                    '신규등록 중 서버 연결 오류가 발생했습니다.':'Server connection error during registration.',
+                    '데이터를 찾을 수 없습니다.':'Data not found.',
+                    '입금 처리된 데이터만 삭제할 수 있습니다.':'Only paid data can be deleted.',
+                    '입금 처리된 데이터를 삭제하시겠습니까?\\n삭제 후에는 복구할 수 없습니다.':'Delete the paid data?\\nThis cannot be undone.',
+                    '삭제할 날짜를 선택해주세요.':'Please select a date to delete.',
+                    '선택한 날짜에 입금 처리된 데이터가 없습니다.':'There is no paid data for the selected date.',
+                    '입금 완료 데이터가 삭제되었습니다.':'Paid data has been deleted.',
+                    '직원을 선택해주세요.':'Please select a staff member.',
+                    '모든 메뉴의 선택을 완료해주세요.':'Please complete all menu selections.',
+                    '입금이 완료되었습니다.':'Payment completed.',
+                    '정말 삭제하시겠습니까?':'Are you sure you want to delete this?',
+                    '수정할 데이터를 확인해주세요.':'Please check the data to be edited.',
+                    '로컬 백업 파일이 다운로드되었습니다.':'The local backup file has been downloaded.',
+                    '먼저 로그인해주세요.':'Please log in first.',
+                    '백업 데이터 복원이 완료되었습니다.':'Backup data has been restored.',
+                    '직원명을 입력해주세요.':'Please enter the staff name.',
+                    '직원이 추가되었습니다.':'Staff member added.',
+                    '직원 정보가 수정되었습니다.':'Staff information updated.',
+                    '직원이 삭제되었습니다.':'Staff member deleted.',
+                    '방번호를 입력해주세요.':'Please enter the room number.',
+                    '올바른 수용인원을 입력해주세요.':'Please enter a valid capacity.',
+                    '방이 추가되었습니다.':'Room added.',
+                    '방 정보가 수정되었습니다.':'Room information updated.',
+                    '방이 삭제되었습니다.':'Room deleted.',
+                    '고객명을 입력해주세요.':'Please enter the customer name.',
+                    '고객이 추가되었습니다.':'Customer added.',
+                    '고객 정보가 수정되었습니다.':'Customer information updated.',
+                    '고객이 삭제되었습니다.':'Customer deleted.',
+                    '화폐 이름을 입력해주세요.':'Please enter the currency name.',
+                    '화폐 단위가 저장되었습니다.':'Currency settings saved.',
+                    '입금방식명을 입력해주세요.':'Please enter the payment method name.',
+                    '입금방식이 추가되었습니다.':'Payment method added.',
+                    '입금방식이 수정되었습니다.':'Payment method updated.',
+                    '입금방식이 삭제되었습니다.':'Payment method deleted.',
+                    '날짜, 직원명, 금액을 모두 입력해주세요.':'Please enter the date, staff name, and amount.',
+                    'Guarantee가 추가되었습니다.':'Guarantee added.',
+                    'Guarantee가 수정되었습니다.':'Guarantee updated.',
+                    'Guarantee가 삭제되었습니다.':'Guarantee deleted.',
+                    '유효기간을 입력해주세요.':'Please enter the validity period.',
+                    '종료일은 시작일보다 늦어야 합니다.':'The end date must be later than the start date.',
+                    '관리자가 추가되었습니다.\\n이제 새 관리자 계정으로 로그인할 수 있습니다.':'Administrator added.\\nYou can now log in with the new administrator account.',
+                    '관리자가 삭제되었습니다.':'Administrator deleted.',
+                    '관리자 정보가 수정되었습니다.':'Administrator information updated.',
+                    '기본 관리자는 삭제할 수 없습니다.':'The default administrator cannot be deleted.',
+                    '일반관리자는 유효기간을 입력해주세요.':'Please enter a validity period for a regular administrator.',
+                    '최고 관리자만 접근할 수 있습니다.':'Only the super administrator can access this.',
+                    '날짜를 선택해주세요.':'Please select a date.',
+                    '해당 기간에 데이터가 없습니다.':'There is no data for the selected period.',
+                    '파일명을 입력해주세요.':'Please enter a file name.',
+                    '내보내기 중 오류가 발생했습니다: ':'Export error: ',
+                    '백업 중 오류가 발생했습니다: ':'Backup error: ',
+                    '복사에 실패했습니다. 수동으로 텍스트를 선택하여 복사해주세요.':'Copy failed. Please select and copy the text manually.',
+                    '백업 데이터를 입력해주세요.':'Please enter the backup data.',
+                    '올바르지 않은 백업 데이터입니다.':'Invalid backup data.',
+                    '올바르지 않은 백업 파일입니다.':'Invalid backup file.',
+                    '내보낼 데이터가 없습니다.':'There is no data to export.',
+                    '데이터 내보내기 중 오류가 발생했습니다: ':'Data export error: ',
+                    '엑셀 기능을 불러오지 못했습니다. 인터넷 연결을 확인해주세요.':'Unable to load the Excel feature. Please check your internet connection.',
+                    '엑셀 업로드 중 오류가 발생했습니다: ':'Excel upload error: ',
+                    '메뉴명을 입력해주세요.':'Please enter the menu name.',
+                    '최소 하나의 시간대에 대한 가격과 커미션을 입력해주세요.':'Please enter price and commission for at least one duration.',
+                    '메뉴가 추가되었습니다.':'Menu added.',
+                    '메뉴가 수정되었습니다.':'Menu updated.',
+                    '메뉴가 삭제되었습니다.':'Menu deleted.'
+                },
+                th: {
+                    '아이디와 비밀번호를 입력해주세요.':'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน',
+                    '아이디 또는 비밀번호가 잘못되었습니다.':'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
+                    '로그아웃 하시겠습니까?':'ต้องการออกจากระบบหรือไม่?',
+                    '아이디, 비밀번호, 상점명은 필수입니다.':'กรุณากรอกชื่อผู้ใช้ รหัสผ่าน และชื่อร้าน',
+                    '이미 존재하는 아이디입니다.':'ชื่อผู้ใช้นี้มีอยู่แล้ว',
+                    '데이터를 찾을 수 없습니다.':'ไม่พบข้อมูล',
+                    '직원을 선택해주세요.':'กรุณาเลือกพนักงาน',
+                    '모든 메뉴의 선택을 완료해주세요.':'กรุณาเลือกเมนูให้ครบทั้งหมด',
+                    '입금이 완료되었습니다.':'ชำระเงินเรียบร้อยแล้ว',
+                    '정말 삭제하시겠습니까?':'คุณแน่ใจหรือไม่ว่าต้องการลบ?',
+                    '직원명을 입력해주세요.':'กรุณากรอกชื่อพนักงาน',
+                    '직원이 추가되었습니다.':'เพิ่มพนักงานแล้ว',
+                    '직원 정보가 수정되었습니다.':'แก้ไขข้อมูลพนักงานแล้ว',
+                    '직원이 삭제되었습니다.':'ลบพนักงานแล้ว',
+                    '방번호를 입력해주세요.':'กรุณากรอกหมายเลขห้อง',
+                    '올바른 수용인원을 입력해주세요.':'กรุณากรอกจำนวนผู้เข้าพักที่ถูกต้อง',
+                    '방이 추가되었습니다.':'เพิ่มห้องแล้ว',
+                    '방 정보가 수정되었습니다.':'แก้ไขข้อมูลห้องแล้ว',
+                    '방이 삭제되었습니다.':'ลบห้องแล้ว',
+                    '고객명을 입력해주세요.':'กรุณากรอกชื่อลูกค้า',
+                    '고객이 추가되었습니다.':'เพิ่มลูกค้าแล้ว',
+                    '고객 정보가 수정되었습니다.':'แก้ไขข้อมูลลูกค้าแล้ว',
+                    '고객이 삭제되었습니다.':'ลบลูกค้าแล้ว',
+                    '화폐 이름을 입력해주세요.':'กรุณากรอกชื่อสกุลเงิน',
+                    '화폐 단위가 저장되었습니다.':'บันทึกหน่วยเงินแล้ว',
+                    '입금방식명을 입력해주세요.':'กรุณากรอกชื่อวิธีชำระเงิน',
+                    '입금방식이 추가되었습니다.':'เพิ่มวิธีชำระเงินแล้ว',
+                    '입금방식이 수정되었습니다.':'แก้ไขวิธีชำระเงินแล้ว',
+                    '입금방식이 삭제되었습니다.':'ลบวิธีชำระเงินแล้ว',
+                    '날짜, 직원명, 금액을 모두 입력해주세요.':'กรุณากรอกวันที่ ชื่อพนักงาน และจำนวนเงินให้ครบ',
+                    'Guarantee가 추가되었습니다.':'เพิ่ม Guarantee แล้ว',
+                    'Guarantee가 수정되었습니다.':'แก้ไข Guarantee แล้ว',
+                    'Guarantee가 삭제되었습니다.':'ลบ Guarantee แล้ว',
+                    '유효기간을 입력해주세요.':'กรุณากรอกระยะเวลาใช้งาน',
+                    '종료일은 시작일보다 늦어야 합니다.':'วันสิ้นสุดต้องหลังวันเริ่มต้น',
+                    '관리자가 추가되었습니다.\\n이제 새 관리자 계정으로 로그인할 수 있습니다.':'เพิ่มผู้ดูแลระบบแล้ว\\nตอนนี้สามารถเข้าสู่ระบบด้วยบัญชีใหม่ได้',
+                    '관리자가 삭제되었습니다.':'ลบผู้ดูแลระบบแล้ว',
+                    '관리자 정보가 수정되었습니다.':'แก้ไขข้อมูลผู้ดูแลระบบแล้ว',
+                    '기본 관리자는 삭제할 수 없습니다.':'ไม่สามารถลบผู้ดูแลระบบเริ่มต้นได้',
+                    '최고 관리자만 접근할 수 있습니다.':'เฉพาะผู้ดูแลระบบสูงสุดเท่านั้นที่เข้าถึงได้',
+                    '날짜를 선택해주세요.':'กรุณาเลือกวันที่',
+                    '해당 기간에 데이터가 없습니다.':'ไม่มีข้อมูลในช่วงเวลาที่เลือก',
+                    '파일명을 입력해주세요.':'กรุณากรอกชื่อไฟล์',
+                    '백업 데이터를 입력해주세요.':'กรุณากรอกข้อมูลสำรอง',
+                    '올바르지 않은 백업 데이터입니다.':'ข้อมูลสำรองไม่ถูกต้อง',
+                    '올바르지 않은 백업 파일입니다.':'ไฟล์สำรองไม่ถูกต้อง',
+                    '내보낼 데이터가 없습니다.':'ไม่มีข้อมูลสำหรับส่งออก',
+                    '엑셀 기능을 불러오지 못했습니다. 인터넷 연결을 확인해주세요.':'ไม่สามารถโหลดฟังก์ชัน Excel ได้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต',
+                    '메뉴명을 입력해주세요.':'กรุณากรอกชื่อเมนู',
+                    '최소 하나의 시간대에 대한 가격과 커미션을 입력해주세요.':'กรุณากรอกราคาและคอมมิชชั่นอย่างน้อยหนึ่งช่วงเวลา',
+                    '메뉴가 추가되었습니다.':'เพิ่มเมนูแล้ว',
+                    '메뉴가 수정되었습니다.':'แก้ไขเมนูแล้ว',
+                    '메뉴가 삭제되었습니다.':'ลบเมนูแล้ว'
+                },
+                vi: {
+                    '아이디와 비밀번호를 입력해주세요.':'Vui lòng nhập tên đăng nhập và mật khẩu.',
+                    '아이디 또는 비밀번호가 잘못되었습니다.':'Tên đăng nhập hoặc mật khẩu không đúng.',
+                    '로그아웃 하시겠습니까?':'Bạn có muốn đăng xuất không?',
+                    '아이디, 비밀번호, 상점명은 필수입니다.':'Tên đăng nhập, mật khẩu và tên cửa hàng là bắt buộc.',
+                    '이미 존재하는 아이디입니다.':'Tên đăng nhập này đã tồn tại.',
+                    '데이터를 찾을 수 없습니다.':'Không tìm thấy dữ liệu.',
+                    '직원을 선택해주세요.':'Vui lòng chọn nhân viên.',
+                    '모든 메뉴의 선택을 완료해주세요.':'Vui lòng hoàn tất việc chọn tất cả menu.',
+                    '입금이 완료되었습니다.':'Thanh toán đã hoàn tất.',
+                    '정말 삭제하시겠습니까?':'Bạn có chắc muốn xóa không?',
+                    '직원명을 입력해주세요.':'Vui lòng nhập tên nhân viên.',
+                    '직원이 추가되었습니다.':'Đã thêm nhân viên.',
+                    '직원 정보가 수정되었습니다.':'Đã cập nhật thông tin nhân viên.',
+                    '직원이 삭제되었습니다.':'Đã xóa nhân viên.',
+                    '방번호를 입력해주세요.':'Vui lòng nhập số phòng.',
+                    '올바른 수용인원을 입력해주세요.':'Vui lòng nhập sức chứa hợp lệ.',
+                    '방이 추가되었습니다.':'Đã thêm phòng.',
+                    '방 정보가 수정되었습니다.':'Đã cập nhật thông tin phòng.',
+                    '방이 삭제되었습니다.':'Đã xóa phòng.',
+                    '고객명을 입력해주세요.':'Vui lòng nhập tên khách hàng.',
+                    '고객이 추가되었습니다.':'Đã thêm khách hàng.',
+                    '고객 정보가 수정되었습니다.':'Đã cập nhật thông tin khách hàng.',
+                    '고객이 삭제되었습니다.':'Đã xóa khách hàng.',
+                    '화폐 이름을 입력해주세요.':'Vui lòng nhập tên tiền tệ.',
+                    '화폐 단위가 저장되었습니다.':'Đã lưu đơn vị tiền tệ.',
+                    '입금방식명을 입력해주세요.':'Vui lòng nhập tên phương thức thanh toán.',
+                    '입금방식이 추가되었습니다.':'Đã thêm phương thức thanh toán.',
+                    '입금방식이 수정되었습니다.':'Đã cập nhật phương thức thanh toán.',
+                    '입금방식이 삭제되었습니다.':'Đã xóa phương thức thanh toán.',
+                    '날짜, 직원명, 금액을 모두 입력해주세요.':'Vui lòng nhập đầy đủ ngày, tên nhân viên và số tiền.',
+                    'Guarantee가 추가되었습니다.':'Đã thêm Guarantee.',
+                    'Guarantee가 수정되었습니다.':'Đã cập nhật Guarantee.',
+                    'Guarantee가 삭제되었습니다.':'Đã xóa Guarantee.',
+                    '유효기간을 입력해주세요.':'Vui lòng nhập thời hạn sử dụng.',
+                    '종료일은 시작일보다 늦어야 합니다.':'Ngày kết thúc phải sau ngày bắt đầu.',
+                    '관리자가 추가되었습니다.\\n이제 새 관리자 계정으로 로그인할 수 있습니다.':'Đã thêm quản trị viên.\\nBạn có thể đăng nhập bằng tài khoản quản trị viên mới.',
+                    '관리자가 삭제되었습니다.':'Đã xóa quản trị viên.',
+                    '관리자 정보가 수정되었습니다.':'Đã cập nhật thông tin quản trị viên.',
+                    '기본 관리자는 삭제할 수 없습니다.':'Không thể xóa quản trị viên mặc định.',
+                    '최고 관리자만 접근할 수 있습니다.':'Chỉ quản trị viên cấp cao mới có quyền truy cập.',
+                    '날짜를 선택해주세요.':'Vui lòng chọn ngày.',
+                    '해당 기간에 데이터가 없습니다.':'Không có dữ liệu trong khoảng thời gian đã chọn.',
+                    '파일명을 입력해주세요.':'Vui lòng nhập tên tệp.',
+                    '백업 데이터를 입력해주세요.':'Vui lòng nhập dữ liệu sao lưu.',
+                    '올바르지 않은 백업 데이터입니다.':'Dữ liệu sao lưu không hợp lệ.',
+                    '올바르지 않은 백업 파일입니다.':'Tệp sao lưu không hợp lệ.',
+                    '내보낼 데이터가 없습니다.':'Không có dữ liệu để xuất.',
+                    '엑셀 기능을 불러오지 못했습니다. 인터넷 연결을 확인해주세요.':'Không thể tải chức năng Excel. Vui lòng kiểm tra kết nối Internet.',
+                    '메뉴명을 입력해주세요.':'Vui lòng nhập tên menu.',
+                    '최소 하나의 시간대에 대한 가격과 커미션을 입력해주세요.':'Vui lòng nhập giá và hoa hồng cho ít nhất một khoảng thời gian.',
+                    '메뉴가 추가되었습니다.':'Đã thêm menu.',
+                    '메뉴가 수정되었습니다.':'Đã cập nhật menu.',
+                    '메뉴가 삭제되었습니다.':'Đã xóa menu.'
+                }
+            };
+
+            const dict = exact[currentLanguage] || {};
+            if (dict[text]) return dict[text];
+
+            const dynamic = {
+                en: [
+                    [/^사용 기간이 만료되었습니다\.\\n관리자에게 문의하세요\.\\n만료일: (.+)$/, 'Your usage period has expired.\\nPlease contact the administrator.\\nExpiration date: $1'],
+                    [/^아직 사용 가능한 기간이 아닙니다\.\\n사용 가능 기간: (.+) ~ (.+)$/, 'The usage period has not started yet.\\nAvailable period: $1 ~ $2'],
+                    [/^⚠️ 사용 기간 만료 알림\\n\\n(\\d+)일 후 사용 기간이 만료됩니다\.\\n만료일: (.+)\\n\\n관리자에게 연장을 요청하세요\.$/, '⚠️ Usage period expiration notice\\n\\nYour usage period expires in $1 days.\\nExpiration date: $2\\n\\nPlease ask the administrator to extend it.'],
+                    [/^(\\d+)개의 메뉴로 예약이 추가되었습니다\.$/, 'Reservation added with $1 menus.'],
+                    [/^(.+) 날짜의 순번이 저장되었습니다\.$/, 'The queue order for $1 has been saved.'],
+                    [/^입금 완료 데이터 (\\d+)건\\((.+)\\)을 모두 삭제하시겠습니까\?\\n삭제 후에는 복구할 수 없습니다\.$/, 'Delete all $1 paid records ($2)?\\nThis cannot be undone.'],
+                    [/^내보내기가 완료되었습니다\.\\n파일명: (.+)\\n위치: 기본 다운로드 폴더$/, 'Export completed.\\nFile: $1\\nLocation: default Downloads folder'],
+                    [/^백업이 완료되었습니다\.\\n파일명: (.+)\\n위치: 다운로드 폴더$/, 'Backup completed.\\nFile: $1\\nLocation: Downloads folder'],
+                    [/^텍스트 복원이 완료되었습니다!\\n백업 날짜: (.+)$/, 'Text restore completed!\\nBackup date: $1'],
+                    [/^구글 계정 로그인 성공!\\n계정: (.+)$/, 'Google account login successful!\\nAccount: $1'],
+                    [/^엑셀 데이터 업로드가 완료되었습니다\. (\\d+)건이 추가되었습니다\.(.*)$/, 'Excel upload completed. $1 records added.$2']
+                ],
+                th: [
+                    [/^사용 기간이 만료되었습니다\.\\n관리자에게 문의하세요\.\\n만료일: (.+)$/, 'หมดอายุการใช้งานแล้ว\\nกรุณาติดต่อผู้ดูแลระบบ\\nวันหมดอายุ: $1'],
+                    [/^아직 사용 가능한 기간이 아닙니다\.\\n사용 가능 기간: (.+) ~ (.+)$/, 'ยังไม่ถึงช่วงเวลาที่ใช้งานได้\\nช่วงเวลาที่ใช้งานได้: $1 ~ $2'],
+                    [/^⚠️ 사용 기간 만료 알림\\n\\n(\\d+)일 후 사용 기간이 만료됩니다\.\\n만료일: (.+)\\n\\n관리자에게 연장을 요청하세요\.$/, '⚠️ แจ้งเตือนวันหมดอายุ\\n\\nจะหมดอายุการใช้งานในอีก $1 วัน\\nวันหมดอายุ: $2\\n\\nกรุณาติดต่อผู้ดูแลระบบเพื่อขยายเวลา'],
+                    [/^(\\d+)개의 메뉴로 예약이 추가되었습니다\.$/, 'เพิ่มการจองจำนวน $1 เมนูแล้ว'],
+                    [/^(.+) 날짜의 순번이 저장되었습니다\.$/, 'บันทึกลำดับคิวของวันที่ $1 แล้ว'],
+                    [/^입금 완료 데이터 (\\d+)건\\((.+)\\)을 모두 삭제하시겠습니까\?\\n삭제 후에는 복구할 수 없습니다\.$/, 'ต้องการลบข้อมูลที่ชำระเงินแล้วทั้งหมด $1 รายการ ($2) หรือไม่?\\nไม่สามารถกู้คืนได้หลังจากลบ'],
+                    [/^내보내기가 완료되었습니다\.\\n파일명: (.+)\\n위치: 기본 다운로드 폴더$/, 'ส่งออกข้อมูลเรียบร้อยแล้ว\\nไฟล์: $1\\nตำแหน่ง: โฟลเดอร์ดาวน์โหลดเริ่มต้น'],
+                    [/^백업이 완료되었습니다\.\\n파일명: (.+)\\n위치: 다운로드 폴더$/, 'สำรองข้อมูลเรียบร้อยแล้ว\\nไฟล์: $1\\nตำแหน่ง: โฟลเดอร์ดาวน์โหลด'],
+                    [/^텍스트 복원이 완료되었습니다!\\n백업 날짜: (.+)$/, 'กู้คืนจากข้อความเรียบร้อยแล้ว!\\nวันที่สำรองข้อมูล: $1'],
+                    [/^구글 계정 로그인 성공!\\n계정: (.+)$/, 'เข้าสู่ระบบบัญชี Google สำเร็จ!\\nบัญชี: $1'],
+                    [/^엑셀 데이터 업로드가 완료되었습니다\. (\\d+)건이 추가되었습니다\.(.*)$/, 'อัปโหลด Excel เรียบร้อยแล้ว เพิ่ม $1 รายการ$2']
+                ],
+                vi: [
+                    [/^사용 기간이 만료되었습니다\.\\n관리자에게 문의하세요\.\\n만료일: (.+)$/, 'Thời hạn sử dụng đã hết.\\nVui lòng liên hệ quản trị viên.\\nNgày hết hạn: $1'],
+                    [/^아직 사용 가능한 기간이 아닙니다\.\\n사용 가능 기간: (.+) ~ (.+)$/, 'Chưa đến thời gian có thể sử dụng.\\nThời gian sử dụng: $1 ~ $2'],
+                    [/^⚠️ 사용 기간 만료 알림\\n\\n(\\d+)일 후 사용 기간이 만료됩니다\.\\n만료일: (.+)\\n\\n관리자에게 연장을 요청하세요\.$/, '⚠️ Thông báo hết hạn\\n\\nThời hạn sử dụng sẽ hết sau $1 ngày.\\nNgày hết hạn: $2\\n\\nVui lòng yêu cầu quản trị viên gia hạn.'],
+                    [/^(\\d+)개의 메뉴로 예약이 추가되었습니다\.$/, 'Đã thêm đặt chỗ với $1 menu.'],
+                    [/^(.+) 날짜의 순번이 저장되었습니다\.$/, 'Đã lưu thứ tự hàng đợi cho ngày $1.'],
+                    [/^입금 완료 데이터 (\\d+)건\\((.+)\\)을 모두 삭제하시겠습니까\?\\n삭제 후에는 복구할 수 없습니다\.$/, 'Bạn có muốn xóa tất cả $1 bản ghi đã thanh toán ($2) không?\\nKhông thể khôi phục sau khi xóa.'],
+                    [/^내보내기가 완료되었습니다\.\\n파일명: (.+)\\n위치: 기본 다운로드 폴더$/, 'Đã xuất dữ liệu.\\nTệp: $1\\nVị trí: thư mục Tải xuống mặc định'],
+                    [/^백업이 완료되었습니다\.\\n파일명: (.+)\\n위치: 다운로드 폴더$/, 'Đã sao lưu dữ liệu.\\nTệp: $1\\nVị trí: thư mục Tải xuống'],
+                    [/^텍스트 복원이 완료되었습니다!\\n백업 날짜: (.+)$/, 'Đã khôi phục từ văn bản!\\nNgày sao lưu: $1'],
+                    [/^구글 계정 로그인 성공!\\n계정: (.+)$/, 'Đăng nhập tài khoản Google thành công!\\nTài khoản: $1'],
+                    [/^엑셀 데이터 업로드가 완료되었습니다\. (\\d+)건이 추가되었습니다\.(.*)$/, 'Đã tải Excel lên. Đã thêm $1 bản ghi$2']
+                ]
+            };
+            const rules = dynamic[currentLanguage] || [];
+            for (const [pattern, replacement] of rules) {
+                if (pattern.test(text)) return text.replace(pattern, replacement);
+            }
+
+            // 이미 기존 레거시 번역표에 등록된 문구도 우선 활용합니다.
+            return window.translateLegacyText ? window.translateLegacyText(text) : text;
+        }
+
+        // 앱에서 사용하는 모든 native alert/confirm을 현재 선택 언어로 통일합니다.
+        (function installPopupLocalization() {
+            const nativeAlert = window.alert.bind(window);
+            const nativeConfirm = window.confirm.bind(window);
+            window.alert = function(message) {
+                return nativeAlert(translatePopupMessage(message));
+            };
+            window.confirm = function(message) {
+                return nativeConfirm(translatePopupMessage(message));
+            };
+        })();
+
         // 앱 초기화
         initializeApp();
         updateTranslations();
