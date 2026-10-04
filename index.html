@@ -1296,6 +1296,10 @@ async function initializeApp() {
                         
                         // 관리자 데이터 유효성 검사
                         if (currentAdmin && currentAdmin.username) {
+                            if (currentAdmin.language && translations[currentAdmin.language]) {
+                                currentLanguage = currentAdmin.language;
+                                updateTranslations();
+                            }
                             initializeAdminData();
                             if (currentAdmin.sessionToken) {
                                 await hydrateAdminDataFromD1();
@@ -1810,6 +1814,10 @@ async function initializeApp() {
                     }
                     
                     currentAdmin = admin;
+                    if (admin.language && translations[admin.language]) {
+                        currentLanguage = admin.language;
+                        updateTranslations();
+                    }
                     localStorage.setItem('currentAdmin', JSON.stringify(admin));
                     
                     // 관리자별 초기화 오류가 로그인 전체를 중단시키지 않도록 분리 처리합니다.
@@ -1982,6 +1990,51 @@ async function initializeApp() {
             currencyElements.forEach(element => {
                 element.textContent = currency.symbol;
             });
+        }
+
+        function showRegistrationModal() {
+            const modal = document.getElementById('registrationModal');
+            if (!modal) return;
+            document.getElementById('registerLanguage').value = currentLanguage || 'ko';
+            modal.style.display = 'flex';
+            updateTranslations();
+            if (window.localizeLegacyUI) window.localizeLegacyUI();
+        }
+
+        function closeRegistrationModal() {
+            const modal = document.getElementById('registrationModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        async function submitRegistration() {
+            const username = document.getElementById('registerUsername').value.trim();
+            const password = document.getElementById('registerPassword').value;
+            const shopName = document.getElementById('registerShopName').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+            const phone = document.getElementById('registerPhone').value.trim();
+            const googleMapsUrl = document.getElementById('registerGoogleMaps').value.trim();
+            const language = document.getElementById('registerLanguage').value || 'ko';
+            if (!username || !password || !shopName) { alert('아이디, 비밀번호, 상점명은 필수입니다.'); return; }
+            try {
+                const response = await fetch(API_BASE_URL + '/api/auth/register', {
+                    method:'POST', headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({username,password,shopName,email,phone,googleMapsUrl,language})
+                });
+                const result = await response.json();
+                if (!response.ok || !result.ok) {
+                    if (result?.error === 'username_exists') alert('이미 존재하는 아이디입니다.');
+                    else alert('신규등록에 실패했습니다.\n' + (result?.error || '서버 오류'));
+                    return;
+                }
+                closeRegistrationModal();
+                document.getElementById('loginUsername').value = username;
+                document.getElementById('loginPassword').value = '';
+                currentLanguage = language;
+                updateTranslations();
+                alert('신규등록이 완료되었습니다.\n가입일부터 1주일간 사용할 수 있습니다.\n만료일: ' + result.admin.validUntil);
+            } catch (error) {
+                alert('신규등록 중 서버 연결 오류가 발생했습니다.');
+            }
         }
 
         // 시간 업데이트
@@ -4234,8 +4287,20 @@ async function initializeApp() {
                         <input type="text" id="newAdminShopName" class="w-full border rounded px-3 py-2" placeholder="상점명을 입력하세요">
                     </div>
                     <div>
+                        <label class="block text-sm font-medium mb-2">이메일:</label>
+                        <input type="email" id="newAdminEmail" class="w-full border rounded px-3 py-2" placeholder="이메일을 입력하세요">
+                    </div>
+                    <div>
                         <label class="block text-sm font-medium mb-2">전화번호:</label>
                         <input type="text" id="newAdminPhone" class="w-full border rounded px-3 py-2" placeholder="전화번호를 입력하세요">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">구글맵 주소:</label>
+                        <input type="text" id="newAdminGoogleMaps" class="w-full border rounded px-3 py-2" placeholder="구글맵 주소를 입력하세요">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">언어 설정:</label>
+                        <select id="newAdminLanguage" class="w-full border rounded px-3 py-2"><option value="ko">한국어</option><option value="en">English</option><option value="th">ไทย</option><option value="vi">Tiếng Việt</option></select>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
@@ -4269,7 +4334,10 @@ async function initializeApp() {
             const password = document.getElementById('newAdminPassword').value;
             const type = document.getElementById('newAdminType').value;
             const shopName = document.getElementById('newAdminShopName').value.trim();
+            const email = document.getElementById('newAdminEmail').value.trim();
             const phone = document.getElementById('newAdminPhone').value.trim();
+            const googleMapsUrl = document.getElementById('newAdminGoogleMaps').value.trim();
+            const language = document.getElementById('newAdminLanguage').value;
             const startDate = document.getElementById('newAdminStartDate').value;
             const endDate = document.getElementById('newAdminEndDate').value;
 
@@ -4304,7 +4372,10 @@ async function initializeApp() {
                         password,
                         type,
                         shopName,
+                        email,
                         phone,
+                        googleMapsUrl,
+                        language,
                         validFrom: startDate,
                         validUntil: endDate
                     })
@@ -4330,7 +4401,10 @@ async function initializeApp() {
                     password,
                     type,
                     shopName,
+                    email,
                     phone,
+                    googleMapsUrl,
+                    language,
                     validFrom: startDate,
                     validUntil: endDate,
                     createdAt: created.createdAt || new Date().toISOString(),
@@ -4387,8 +4461,25 @@ async function initializeApp() {
                         <input type="text" id="editAdminShopName" value="${admin.shopName || ''}" class="w-full border rounded px-3 py-2">
                     </div>
                     <div>
+                        <label class="block text-sm font-medium mb-2">이메일:</label>
+                        <input type="email" id="editAdminEmail" value="${admin.email || ''}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
                         <label class="block text-sm font-medium mb-2">전화번호:</label>
                         <input type="text" id="editAdminPhone" value="${admin.phone || ''}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">구글맵 주소:</label>
+                        <input type="text" id="editAdminGoogleMaps" value="${admin.googleMapsUrl || ''}" class="w-full border rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">언어 설정:</label>
+                        <select id="editAdminLanguage" class="w-full border rounded px-3 py-2">
+                          <option value="ko" ${admin.language === 'ko' ? 'selected' : ''}>한국어</option>
+                          <option value="en" ${admin.language === 'en' ? 'selected' : ''}>English</option>
+                          <option value="th" ${admin.language === 'th' ? 'selected' : ''}>ไทย</option>
+                          <option value="vi" ${admin.language === 'vi' ? 'selected' : ''}>Tiếng Việt</option>
+                        </select>
                     </div>
                     <div id="validityFields" class="grid grid-cols-2 gap-4" style="display: ${admin.type === 'super' ? 'none' : 'grid'}">
                         <div>
@@ -4426,12 +4517,15 @@ async function initializeApp() {
             };
         }
 
-        function updateAdmin(id) {
-            const username = document.getElementById('editAdminUsername').value;
+        async function updateAdmin(id) {
+            const username = document.getElementById('editAdminUsername').value.trim();
             const password = document.getElementById('editAdminPassword').value;
             const type = document.getElementById('editAdminType').value;
             const shopName = document.getElementById('editAdminShopName').value;
-            const phone = document.getElementById('editAdminPhone').value;
+            const email = document.getElementById('editAdminEmail').value.trim();
+            const phone = document.getElementById('editAdminPhone').value.trim();
+            const googleMapsUrl = document.getElementById('editAdminGoogleMaps').value.trim();
+            const language = document.getElementById('editAdminLanguage').value;
 
             if (!username || !password) {
                 alert('아이디와 비밀번호를 입력해주세요.');
@@ -4477,23 +4571,42 @@ async function initializeApp() {
                 updatedAt: new Date().toISOString()
             };
 
-            localStorage.setItem('globalAdmins', JSON.stringify(admins));
-            alert('관리자 정보가 수정되었습니다.');
-            manageAdmins();
+            try {
+                const response = await apiFetch('/api/admins/item', {method:'PUT', body:JSON.stringify({id,username,password,type,shopName,email,phone,googleMapsUrl,language,validUntil:endDate})});
+                const result = await response.json();
+                if (!response.ok || !result.ok) throw new Error(result?.error || '관리자 수정 실패');
+                const updated = result.admin || {};
+                admins[adminIndex] = {...existingAdmin, username, password, type, shopName, email, phone, googleMapsUrl, language,
+                    validFrom:type === 'super' ? null : startDate, validUntil:type === 'super' ? null : endDate,
+                    updatedAt:updated.updatedAt || new Date().toISOString()};
+                localStorage.setItem('globalAdmins', JSON.stringify(admins));
+                alert('관리자 정보가 수정되었습니다.');
+                await manageAdmins();
+            } catch (error) {
+                console.error('D1 관리자 수정 오류:', error);
+                alert('관리자 수정 중 서버 오류가 발생했습니다.\n' + (error.message || ''));
+            }
         }
 
-        function deleteAdmin(id) {
+        async function deleteAdmin(id) {
             if (id === 1) {
                 alert('기본 관리자는 삭제할 수 없습니다.');
                 return;
             }
 
             if (confirm('정말 삭제하시겠습니까?')) {
-                const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
-                const filteredAdmins = admins.filter(a => a.id !== id);
-                localStorage.setItem('globalAdmins', JSON.stringify(filteredAdmins));
-                alert('관리자가 삭제되었습니다.');
-                manageAdmins();
+                try {
+                    const response = await apiFetch('/api/admins/item', {method:'DELETE', body:JSON.stringify({id})});
+                    const result = await response.json();
+                    if (!response.ok || !result.ok) throw new Error(result?.error || '관리자 삭제 실패');
+                    const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
+                    localStorage.setItem('globalAdmins', JSON.stringify(admins.filter(a => a.id !== id)));
+                    alert('관리자가 삭제되었습니다.');
+                    await manageAdmins();
+                } catch (error) {
+                    console.error('D1 관리자 삭제 오류:', error);
+                    alert('관리자 삭제 중 서버 오류가 발생했습니다.\n' + (error.message || ''));
+                }
             }
         }
 
@@ -4803,13 +4916,27 @@ function translateLegacy(value) {
             document.getElementById('managementModal').style.display = 'block';
         }
 
-        function manageAdmins() {
+        async function manageAdmins() {
             if (currentAdmin.type !== 'super') {
                 alert('최고 관리자만 접근할 수 있습니다.');
                 return;
             }
-            
-            const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
+            let admins = [];
+            try {
+                const response = await apiFetch('/api/admins');
+                const result = await response.json();
+                if (!response.ok || !result.ok) throw new Error(result?.error || '관리자 조회 실패');
+                admins = (result.admins || []).map(a => ({
+                    id:a.id, username:a.username, type:a.type, shopName:a.displayName || '',
+                    email:a.email || '', phone:a.phone || '', googleMapsUrl:a.googleMapsUrl || '',
+                    language:a.language || 'ko', validFrom:a.createdAt ? String(a.createdAt).slice(0,10) : '',
+                    validUntil:a.validUntil || null, status:a.status
+                }));
+                localStorage.setItem('globalAdmins', JSON.stringify(admins));
+            } catch (error) {
+                console.warn('D1 관리자 조회 실패:', error);
+                admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
+            }
             let content = `
                 <div class="mb-4">
                     <button onclick="addNewAdmin()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">새 관리자 추가</button>
@@ -4821,7 +4948,10 @@ function translateLegacy(value) {
                                 <th class="border border-gray-300 p-2">아이디</th>
                                 <th class="border border-gray-300 p-2">타입</th>
                                 <th class="border border-gray-300 p-2">상점명</th>
+                                <th class="border border-gray-300 p-2">이메일</th>
                                 <th class="border border-gray-300 p-2">전화번호</th>
+                                <th class="border border-gray-300 p-2">구글맵</th>
+                                <th class="border border-gray-300 p-2">언어</th>
                                 <th class="border border-gray-300 p-2">유효기간</th>
                                 <th class="border border-gray-300 p-2">작업</th>
                             </tr>
@@ -4842,7 +4972,10 @@ function translateLegacy(value) {
                         <td class="border border-gray-300 p-2">${admin.username}</td>
                         <td class="border border-gray-300 p-2">${admin.type === 'super' ? '최고관리자' : '일반관리자'}</td>
                         <td class="border border-gray-300 p-2">${admin.shopName || '-'}</td>
+                        <td class="border border-gray-300 p-2">${admin.email || '-'}</td>
                         <td class="border border-gray-300 p-2">${admin.phone || '-'}</td>
+                        <td class="border border-gray-300 p-2">${admin.googleMapsUrl ? '✓' : '-'}</td>
+                        <td class="border border-gray-300 p-2">${admin.language || 'ko'}</td>
                         <td class="border border-gray-300 p-2 ${isExpired ? 'text-red-600 font-bold' : ''}">${validityStatus}</td>
                         <td class="border border-gray-300 p-2">
                             <button onclick="editAdmin(${admin.id})" class="bg-blue-500 text-white px-2 py-1 rounded text-sm mr-1">수정</button>
