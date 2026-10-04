@@ -328,6 +328,73 @@ export default {
       }
     }
 
+    if (url.pathname === "/api/admins/item" && (request.method === "PUT" || request.method === "DELETE")) {
+      const session = await requireSession(request, env);
+      if (!session) return json({ ok:false, error:"unauthorized" }, 401, request);
+      if (session.role !== "super") return json({ ok:false, error:"forbidden" }, 403, request);
+      try {
+        const body = await request.json();
+        const id = Number(body?.id);
+        if (!Number.isFinite(id)) return json({ ok:false, error:"invalid_admin_id" }, 400, request);
+
+        const target = await env.DB.prepare(
+          "SELECT id, username, role FROM admins WHERE id = ? AND shop_id = ? LIMIT 1"
+        ).bind(id, session.shop_id).first();
+        if (!target) return json({ ok:false, error:"admin_not_found" }, 404, request);
+
+        if (request.method === "DELETE") {
+          if (target.id === session.admin_id) return json({ ok:false, error:"cannot_delete_current_admin" }, 400, request);
+          await env.DB.prepare("UPDATE admins SET status = 'inactive', updated_at = CURRENT_TIMESTAMP WHERE id = ? AND shop_id = ?")
+            .bind(id, session.shop_id).run();
+          await env.DB.prepare("DELETE FROM sessions WHERE admin_id = ?").bind(id).run();
+          return json({ ok:true }, 200, request);
+        }
+
+        const username = String(body?.username || "").trim();
+        const password = String(body?.password || "");
+        const type = body?.type === "super" ? "super" : "normal";
+        const shopName = String(body?.shopName || "").trim();
+        const email = String(body?.email || "").trim();
+        const phone = String(body?.phone || "").trim();
+        const googleMapsUrl = String(body?.googleMapsUrl || "").trim();
+        const language = ["ko","en","th","vi"].includes(String(body?.language || "")) ? String(body.language) : "ko";
+        const validUntil = type === "super" ? null : String(body?.validUntil || "").trim();
+        if (!username || !shopName) return json({ ok:false, error:"required_fields" }, 400, request);
+
+        const duplicate = await env.DB.prepare(
+          "SELECT id FROM admins WHERE username = ? AND id <> ? LIMIT 1"
+        ).bind(username, id).first();
+        if (duplicate) return json({ ok:false, error:"username_exists" }, 409, request);
+
+        let sql = `UPDATE admins SET username = ?, display_name = ?, role = ?, email = ?, phone = ?, google_maps_url = ?, language = ?, valid_until = ?, updated_at = CURRENT_TIMESTAMP`;
+        const binds = [username, shopName, type, email, phone, googleMapsUrl, language, validUntil];
+        if (password) {
+          const salt = crypto.randomUUID();
+          const passwordHash = await hashPassword(password, salt);
+          sql += ", password_hash = ?";
+          binds.push(salt + ":" + passwordHash);
+        }
+        sql += " WHERE id = ? AND shop_id = ?";
+        binds.push(id, session.shop_id);
+        await env.DB.prepare(sql).bind(...binds).run();
+
+        const updated = await env.DB.prepare(
+          `SELECT id, username, display_name, role, email, phone, google_maps_url, language, status, valid_until, created_at, updated_at
+           FROM admins WHERE id = ? AND shop_id = ? LIMIT 1`
+        ).bind(id, session.shop_id).first();
+
+        return json({ ok:true, admin:{
+          id:updated.id, username:updated.username, displayName:updated.display_name || "",
+          role:updated.role, type:updated.role === "super" ? "super" : "normal",
+          email:updated.email || "", phone:updated.phone || "", googleMapsUrl:updated.google_maps_url || "",
+          language:updated.language || "ko", status:updated.status, validUntil:updated.valid_until || null,
+          createdAt:updated.created_at, updatedAt:updated.updated_at
+        }}, 200, request);
+      } catch (error) {
+        return json({ ok:false, error:error instanceof Error ? error.message : String(error) }, 500, request);
+      }
+    }
+
     if (url.pathname === "/api/auth/register" && request.method === "POST") {
       try {
         const body = await request.json();
