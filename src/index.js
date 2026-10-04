@@ -235,18 +235,22 @@ export default {
       try {
         if (request.method === "GET") {
           const result = await env.DB.prepare(
-            `SELECT id, shop_id, username, display_name, role, email, phone, google_maps_url, language, status, valid_until, created_at, updated_at
-             FROM admins
-             WHERE shop_id = ?
-             ORDER BY id`
-          ).bind(session.shop_id).all();
+            `SELECT a.id, a.shop_id, a.username, a.display_name, a.role, a.email, a.phone, a.google_maps_url,
+                    a.language, a.status, a.valid_until, a.created_at, a.updated_at,
+                    s.shop_name
+             FROM admins a
+             LEFT JOIN shops s ON s.id = a.shop_id
+             ORDER BY a.id`
+          ).all();
 
           return json({
             ok: true,
             admins: (result.results || []).map(a => ({
               id: a.id,
+              shopId: a.shop_id,
               username: a.username,
               displayName: a.display_name || "",
+              shopName: a.shop_name || a.display_name || "",
               role: a.role,
               type: a.role === "super" ? "super" : "normal",
               email: a.email || "",
