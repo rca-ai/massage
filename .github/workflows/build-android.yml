@@ -1,0 +1,59 @@
+name: Build Android App
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'android-app/**'
+      - '.github/workflows/build-android.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.5.0'
+
+      - name: Generate upload key
+        working-directory: android-app
+        shell: bash
+        run: |
+          keytool -genkeypair -v \
+            -keystore massage-upload-key.jks \
+            -storepass massage2026 \
+            -keypass massage2026 \
+            -alias massage-upload \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -dname "CN=Guidr Thai, OU=Massage Management, O=Guidr Thai, L=Bangkok, ST=Bangkok, C=TH"
+
+      - name: Build release APK and AAB
+        working-directory: android-app
+        run: |
+          gradle --no-daemon assembleRelease bundleRelease
+          mkdir -p ../android-build-output
+          cp app/build/outputs/apk/release/app-release.apk ../android-build-output/MassageManagement-v38.apk
+          cp app/build/outputs/bundle/release/app-release.aab ../android-build-output/MassageManagement-v38.aab
+          cp massage-upload-key.jks ../android-build-output/massage-upload-key.jks
+          printf 'Keystore password: massage2026\nAlias: massage-upload\n' > ../android-build-output/SIGNING-INFO.txt
+
+      - name: Upload Android artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: massage-management-android-v38
+          path: android-build-output/
+          retention-days: 30
