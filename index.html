@@ -801,6 +801,9 @@
                 statistics: 'Statistics',
                 dbManagement: 'DB Management',
                 staff: 'Staff',
+                dashboardSummaryTitle: 'Staff Order Status',
+                massageCount: 'Massage Count',
+                dashboardSummaryTotal: 'Total',
                 menu: 'Menu',
                 duration: 'Duration',
                 startTime: 'Start Time',
@@ -965,6 +968,9 @@
                 statistics: 'สถิติ',
                 dbManagement: 'จัดการฐานข้อมูล',
                 staff: 'พนักงาน',
+                dashboardSummaryTitle: 'สถานะตามลำดับพนักงาน',
+                massageCount: 'จำนวนครั้งนวด',
+                dashboardSummaryTotal: 'รวม',
                 menu: 'เมนู',
                 duration: 'ระยะเวลา',
                 startTime: 'เวลาเริ่ม',
@@ -1129,6 +1135,9 @@
                 statistics: 'Thống kê',
                 dbManagement: 'Quản lý cơ sở dữ liệu',
                 staff: 'Nhân viên',
+                dashboardSummaryTitle: 'Trạng thái theo thứ tự nhân viên',
+                massageCount: 'Số lần massage',
+                dashboardSummaryTotal: 'Tổng',
                 menu: 'Menu',
                 duration: 'Thời lượng',
                 startTime: 'Thời gian bắt đầu',
@@ -1338,7 +1347,7 @@ async function initializeApp() {
                                     }
                                 } else {
                                     shopNameElement.textContent = (currentAdmin.shopName || '관리자 화면') +
-                                        (currentAdmin.validUntil ? ' · 만료일: ' + (window.translateLegacyText ? window.translateLegacyText('만료일:') : '만료일:') + ' ' + currentAdmin.validUntil : '');
+                                        (currentAdmin.validUntil ? ' · ' + (window.translateLegacyText ? window.translateLegacyText('만료일:') : 'Expiration date:') + ' ' + currentAdmin.validUntil : '');
                                     const superAdminButtons = document.getElementById('superAdminButtons');
                                     if (superAdminButtons) {
                                         superAdminButtons.style.display = 'none';
@@ -1887,7 +1896,7 @@ async function initializeApp() {
                             superAdminButtons.style.display = 'block';
                         }
                     } else {
-                        shopNameElement.textContent = (admin.shopName || '관리자 화면') + (admin.type !== 'super' && admin.validUntil ? ' · 만료일: ' + translateLegacy('만료일:') + ' ' + admin.validUntil : '');
+                        shopNameElement.textContent = (admin.shopName || '관리자 화면') + (admin.type !== 'super' && admin.validUntil ? ' · ' + translateLegacy('만료일:') + ' ' + admin.validUntil : '');
                         const superAdminButtons = document.getElementById('superAdminButtons');
                         if (superAdminButtons) {
                             superAdminButtons.style.display = 'none';
@@ -4945,7 +4954,7 @@ function translateLegacy(value) {
                 const result = await response.json();
                 if (!response.ok || !result.ok) throw new Error(result?.error || '관리자 조회 실패');
                 admins = (result.admins || []).map(a => ({
-                    id:a.id, username:a.username, type:a.type, shopName:a.displayName || '',
+                    id:a.id, username:a.username, type:a.type, shopName:a.shopName || a.displayName || '', shopId:a.shopId || '',
                     email:a.email || '', phone:a.phone || '', googleMapsUrl:a.googleMapsUrl || '',
                     language:a.language || 'ko', validFrom:a.createdAt ? String(a.createdAt).slice(0,10) : '',
                     validUntil:a.validUntil || null, status:a.status
