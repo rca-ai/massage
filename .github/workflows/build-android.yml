@@ -27,37 +27,37 @@ jobs:
         with:
           gradle-version: '9.5.0'
 
+      - name: Prepare MaShop icon and Play Store assets
+        working-directory: android-app
+        shell: bash
+        run: |
+          mkdir -p app/src/main/res/drawable ../android-build-output
+          convert assets/mashop-icon.svg -background white -alpha remove -alpha off app/src/main/res/drawable/ic_launcher.png
+          convert assets/mashop-icon.svg -background white -alpha remove -alpha off -resize 512x512 ../android-build-output/MaShop-Play-Icon-512.png
+          convert assets/mashop-feature.svg -background white -alpha remove -alpha off ../android-build-output/MaShop-Feature-Graphic-1024x500.png
+
       - name: Generate upload key
         working-directory: android-app
         shell: bash
         run: |
-          keytool -genkeypair -v \
-            -keystore massage-upload-key.jks \
-            -storepass massage2026 \
-            -keypass massage2026 \
-            -alias massage-upload \
-            -keyalg RSA \
-            -keysize 2048 \
-            -validity 10000 \
-            -dname "CN=Guidr Thai, OU=Massage Management, O=Guidr Thai, L=Bangkok, ST=Bangkok, C=TH"
+          keytool -genkeypair -v             -keystore massage-upload-key.jks             -storepass massage2026             -keypass massage2026             -alias massage-upload             -keyalg RSA             -keysize 2048             -validity 10000             -dname "CN=Guidr Thai, OU=Massage Management, O=Guidr Thai, L=Bangkok, ST=Bangkok, C=TH"
 
       - name: Build release APK and AAB
         working-directory: android-app
         run: |
           gradle --no-daemon assembleRelease bundleRelease
-          mkdir -p ../android-build-output
           APK_PATH="$(find app/build/outputs/apk/release -maxdepth 1 -type f -name '*.apk' | head -n 1)"
           AAB_PATH="$(find app/build/outputs/bundle/release -maxdepth 1 -type f -name '*.aab' | head -n 1)"
           test -n "$APK_PATH" && test -f "$APK_PATH"
           test -n "$AAB_PATH" && test -f "$AAB_PATH"
-          cp "$APK_PATH" ../android-build-output/MassageManagement-v38.apk
-          cp "$AAB_PATH" ../android-build-output/MassageManagement-v38.aab
-          cp massage-upload-key.jks ../android-build-output/massage-upload-key.jks
-          printf 'Keystore password: massage2026\nAlias: massage-upload\n' > ../android-build-output/SIGNING-INFO.txt
+          cp "$APK_PATH" ../android-build-output/MaShop-v39.apk
+          cp "$AAB_PATH" ../android-build-output/MaShop-v39.aab
+          cp massage-upload-key.jks ../android-build-output/MaShop-upload-key.jks
+          printf 'Keystore password: massage2026\nAlias: massage-upload\nApplication ID: com.guidrthai.massage\nVersion: 39.0 (39)\n' > ../android-build-output/MaShop-SIGNING-INFO.txt
 
       - name: Upload Android artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: massage-management-android-v38
+          name: mashop-android-v39
           path: android-build-output/
           retention-days: 30
