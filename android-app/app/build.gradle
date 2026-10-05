@@ -10,8 +10,8 @@ android {
         applicationId 'com.guidrthai.massage'
         minSdk 23
         targetSdk 36
-        versionCode 39
-        versionName "39.0"
+        versionCode 40
+        versionName "40.0"
     }
 
     signingConfigs {
