@@ -650,7 +650,7 @@
                 payment: '입금 처리',
                 totalAmount: '총 금액',
                 enteredAmount: '입력된 금액',
-                paymentMethodClickHint: '결제방식 이름을 클릭하면 남은 금액이 자동 입력됩니다. 입력 후 금액을 직접 수정할 수 있습니다.'
+                paymentMethodClickHint: '결제방식 이름을 클릭하면 남은 금액이 자동 입력됩니다. 입력 후 금액을 직접 수정할 수 있습니다.',
                 confirm: '확인',
                 cancel: '취소',
                 login: '로그인',
@@ -837,7 +837,7 @@
                 payment: 'Payment',
                 totalAmount: 'Total Amount',
                 enteredAmount: 'Entered Amount',
-                paymentMethodClickHint: 'Click a payment method name to automatically enter the remaining amount. You can edit the amount manually after it is entered.'
+                paymentMethodClickHint: 'Click a payment method name to automatically enter the remaining amount. You can edit the amount manually after it is entered.',
                 confirm: 'Confirm',
                 cancel: 'Cancel',
                 login: 'Login',
@@ -1006,7 +1006,7 @@
                 payment: 'การชำระเงิน',
                 totalAmount: 'จำนวนเงินรวม',
                 enteredAmount: 'จำนวนเงินที่ป้อน',
-                paymentMethodClickHint: 'คลิกชื่อวิธีชำระเงินเพื่อกรอกยอดเงินคงเหลือโดยอัตโนมัติ และสามารถแก้ไขจำนวนเงินได้ด้วยตนเองหลังจากกรอกแล้ว'
+                paymentMethodClickHint: 'คลิกชื่อวิธีชำระเงินเพื่อกรอกยอดเงินคงเหลือโดยอัตโนมัติ และสามารถแก้ไขจำนวนเงินได้ด้วยตนเองหลังจากกรอกแล้ว',
                 confirm: 'ยืนยัน',
                 cancel: 'ยกเลิก',
                 login: 'เข้าสู่ระบบ',
@@ -1175,7 +1175,7 @@
                 payment: 'Thanh toán',
                 totalAmount: 'Tổng số tiền',
                 enteredAmount: 'Số tiền đã nhập',
-                paymentMethodClickHint: 'Nhấn vào tên phương thức thanh toán để tự động nhập số tiền còn lại. Bạn có thể sửa số tiền trực tiếp sau đó.'
+                paymentMethodClickHint: 'Nhấn vào tên phương thức thanh toán để tự động nhập số tiền còn lại. Bạn có thể sửa số tiền trực tiếp sau đó.',
                 confirm: 'Xác nhận',
                 cancel: 'Hủy',
                 login: 'Đăng nhập',
@@ -3793,7 +3793,46 @@ async function initializeApp() {
             document.getElementById('managementTitle').textContent='직원 수정';document.getElementById('managementContent').innerHTML=content;
         }
 
-        // 기준정보 이름 변경 시 과거 스냅샷 데이터도 함께 갱신합니다.\n        // 직원명은 reservations/guarantees, 입금방식명은 reservations.paymentDetails에 저장된 기존 이름을 변경합니다.\n        function updateHistoricalReferences(referenceType, oldValue, newValue, referenceId) {\n            const reservationKey = getAdminKey('reservations');\n            const reservations = JSON.parse(localStorage.getItem(reservationKey) || '[]');\n            let reservationChanged = false;\n\n            reservations.forEach(r => {\n                if (referenceType === 'staff' && referenceId != null && Number(r.staffId) === Number(referenceId)) {\n                    if (r.staffName !== newValue) {\n                        r.staffName = newValue;\n                        reservationChanged = true;\n                    }\n                }\n\n                if (referenceType === 'paymentMethod' && r.paymentDetails && typeof r.paymentDetails === 'object' && Object.prototype.hasOwnProperty.call(r.paymentDetails, oldValue)) {\n                    const amount = Number(r.paymentDetails[oldValue]) || 0;\n                    delete r.paymentDetails[oldValue];\n                    r.paymentDetails[newValue] = (Number(r.paymentDetails[newValue]) || 0) + amount;\n                    reservationChanged = true;\n                }\n            });\n\n            if (reservationChanged) localStorage.setItem(reservationKey, JSON.stringify(reservations));\n\n            if (referenceType === 'staff') {\n                const guaranteeKey = getAdminKey('guarantees');\n                const guarantees = JSON.parse(localStorage.getItem(guaranteeKey) || '[]');\n                let guaranteeChanged = false;\n                guarantees.forEach(g => {\n                    if (g.staffName === oldValue) {\n                        g.staffName = newValue;\n                        guaranteeChanged = true;\n                    }\n                });\n                if (guaranteeChanged) localStorage.setItem(guaranteeKey, JSON.stringify(guarantees));\n            }\n        }\n\n        async function updateStaff(id) {\n            const name=document.getElementById('editStaffName').value.trim();\n            if(!name){alert('직원명을 입력해주세요.');return;}\n            const staff=JSON.parse(localStorage.getItem(getAdminKey('staff'))||'[]');\n            const idx=staff.findIndex(x=>Number(x.id)===Number(id));\n            if(idx===-1)return;\n            const oldName=staff[idx].name;\n            const member={id:Number(id),name,phone:document.getElementById('editStaffPhone').value,bank:document.getElementById('editStaffBank').value,account:document.getElementById('editStaffAccount').value,status:document.getElementById('editStaffStatus').value};\n            if(currentAdmin?.sessionToken){try{const response=await apiFetch('/api/staff/item',{method:'PUT',body:JSON.stringify({legacyId:member.id,...member})});const result=await response.json();if(!response.ok||!result.ok)throw new Error(result?.error||'D1 update failed');}catch(error){console.error('D1 직원 수정 실패:',error);alert('직원 수정 중 서버 오류가 발생했습니다. 다시 시도해주세요.');return;}}\n            staff[idx]=member;\n            localStorage.setItem(getAdminKey('staff'),JSON.stringify(staff));\n            if(oldName!==name) updateHistoricalReferences('staff',oldName,name,member.id);\n            alert('직원 정보가 수정되었습니다. 과거 입금 데이터의 직원명도 함께 변경되었습니다.');\n            manageStaff();\n        }\n\n        async function deleteStaff(id) {
+        // 기준정보 이름 변경 시 과거 스냅샷 데이터도 함께 갱신합니다.
+        // 직원명은 reservations/guarantees, 입금방식명은 reservations.paymentDetails에 저장된 기존 이름을 변경합니다.
+        function updateHistoricalReferences(referenceType, oldValue, newValue, referenceId) {
+            const reservationKey = getAdminKey('reservations');
+            const reservations = JSON.parse(localStorage.getItem(reservationKey) || '[]');
+            let reservationChanged = false;
+
+            reservations.forEach(r => {
+                if (referenceType === 'staff' && referenceId != null && Number(r.staffId) === Number(referenceId)) {
+                    if (r.staffName !== newValue) {
+                        r.staffName = newValue;
+                        reservationChanged = true;
+                    }
+                }
+
+                if (referenceType === 'paymentMethod' && r.paymentDetails && typeof r.paymentDetails === 'object' && Object.prototype.hasOwnProperty.call(r.paymentDetails, oldValue)) {
+                    const amount = Number(r.paymentDetails[oldValue]) || 0;
+                    delete r.paymentDetails[oldValue];
+                    r.paymentDetails[newValue] = (Number(r.paymentDetails[newValue]) || 0) + amount;
+                    reservationChanged = true;
+                }
+            });
+
+            if (reservationChanged) localStorage.setItem(reservationKey, JSON.stringify(reservations));
+
+            if (referenceType === 'staff') {
+                const guaranteeKey = getAdminKey('guarantees');
+                const guarantees = JSON.parse(localStorage.getItem(guaranteeKey) || '[]');
+                let guaranteeChanged = false;
+                guarantees.forEach(g => {
+                    if (g.staffName === oldValue) {
+                        g.staffName = newValue;
+                        guaranteeChanged = true;
+                    }
+                });
+                if (guaranteeChanged) localStorage.setItem(guaranteeKey, JSON.stringify(guarantees));
+            }
+        }
+
+        async function updateStaff(id) {\n            const name=document.getElementById('editStaffName').value.trim();\n            if(!name){alert('직원명을 입력해주세요.');return;}\n            const staff=JSON.parse(localStorage.getItem(getAdminKey('staff'))||'[]');\n            const idx=staff.findIndex(x=>Number(x.id)===Number(id));\n            if(idx===-1)return;\n            const oldName=staff[idx].name;\n            const member={id:Number(id),name,phone:document.getElementById('editStaffPhone').value,bank:document.getElementById('editStaffBank').value,account:document.getElementById('editStaffAccount').value,status:document.getElementById('editStaffStatus').value};\n            if(currentAdmin?.sessionToken){try{const response=await apiFetch('/api/staff/item',{method:'PUT',body:JSON.stringify({legacyId:member.id,...member})});const result=await response.json();if(!response.ok||!result.ok)throw new Error(result?.error||'D1 update failed');}catch(error){console.error('D1 직원 수정 실패:',error);alert('직원 수정 중 서버 오류가 발생했습니다. 다시 시도해주세요.');return;}}\n            staff[idx]=member;\n            localStorage.setItem(getAdminKey('staff'),JSON.stringify(staff));\n            if(oldName!==name) updateHistoricalReferences('staff',oldName,name,member.id);\n            alert('직원 정보가 수정되었습니다. 과거 입금 데이터의 직원명도 함께 변경되었습니다.');\n            manageStaff();\n        }\n\n        async function deleteStaff(id) {
             if(!confirm('정말 삭제하시겠습니까?'))return;
             if(currentAdmin?.sessionToken){try{const response=await apiFetch('/api/staff/item',{method:'DELETE',body:JSON.stringify({legacyId:id})});const result=await response.json();if(!response.ok||!result.ok)throw new Error(result?.error||'D1 delete failed');}catch(error){console.error('D1 직원 삭제 실패:',error);alert('직원 삭제 중 서버 오류가 발생했습니다. 다시 시도해주세요.');return;}}
             const staff=JSON.parse(localStorage.getItem(getAdminKey('staff'))||'[]');localStorage.setItem(getAdminKey('staff'),JSON.stringify(staff.filter(x=>Number(x.id)!==Number(id))));alert('직원이 삭제되었습니다.');manageStaff();
@@ -4115,7 +4154,27 @@ async function initializeApp() {
             document.getElementById('managementContent').innerHTML = content;
         }
 
-        function updatePaymentMethod(id) {\n            const name = document.getElementById('editPaymentMethodName').value.trim();\n            if (!name) {\n                alert('입금방식명을 입력해주세요.');\n                return;\n            }\n\n            const paymentMethods = JSON.parse(localStorage.getItem(getAdminKey('paymentMethods')) || '[]');\n            const methodIndex = paymentMethods.findIndex(p => Number(p.id) === Number(id));\n            if (methodIndex === -1) return;\n\n            const oldName = paymentMethods[methodIndex].name;\n            paymentMethods[methodIndex] = { id: Number(id), name: name };\n            localStorage.setItem(getAdminKey('paymentMethods'), JSON.stringify(paymentMethods));\n\n            if (oldName !== name) updateHistoricalReferences('paymentMethod', oldName, name);\n            alert('입금방식이 수정되었습니다. 과거 입금 데이터의 입금방식명도 함께 변경되었습니다.');\n            managePaymentMethods();\n        }\n\n        function deletePaymentMethod(id) {
+        function updatePaymentMethod(id) {
+            const name = document.getElementById('editPaymentMethodName').value.trim();
+            if (!name) {
+                alert('입금방식명을 입력해주세요.');
+                return;
+            }
+
+            const paymentMethods = JSON.parse(localStorage.getItem(getAdminKey('paymentMethods')) || '[]');
+            const methodIndex = paymentMethods.findIndex(p => Number(p.id) === Number(id));
+            if (methodIndex === -1) return;
+
+            const oldName = paymentMethods[methodIndex].name;
+            paymentMethods[methodIndex] = { id: Number(id), name: name };
+            localStorage.setItem(getAdminKey('paymentMethods'), JSON.stringify(paymentMethods));
+
+            if (oldName !== name) updateHistoricalReferences('paymentMethod', oldName, name);
+            alert('입금방식이 수정되었습니다. 과거 입금 데이터의 입금방식명도 함께 변경되었습니다.');
+            managePaymentMethods();
+        }
+
+        function deletePaymentMethod(id) {
             if (confirm('정말 삭제하시겠습니까?')) {
                 const paymentMethods = JSON.parse(localStorage.getItem(getAdminKey('paymentMethods')) || '[]');
                 const filteredMethods = paymentMethods.filter(p => p.id !== id);
@@ -5637,7 +5696,15 @@ function translateLegacy(value) {
                 return r.date >= startDate && r.date <= endDate;
             });
 
-            const dailySales = {};\n            // 선택 기간의 모든 날짜를 표시하여 매출이 없는 날도 0으로 확인할 수 있습니다.\n            const dailyCursor = new Date(startDate + 'T00:00:00');\n            const dailyEnd = new Date(endDate + 'T00:00:00');\n            while (dailyCursor <= dailyEnd) {\n                const key = dailyCursor.toISOString().slice(0, 10);\n                dailySales[key] = { price: 0, count: 0 };\n                dailyCursor.setDate(dailyCursor.getDate() + 1);\n            }
+            const dailySales = {};
+            // 선택 기간의 모든 날짜를 표시하여 매출이 없는 날도 0으로 확인할 수 있습니다.
+            const dailyCursor = new Date(startDate + 'T00:00:00');
+            const dailyEnd = new Date(endDate + 'T00:00:00');
+            while (dailyCursor <= dailyEnd) {
+                const key = dailyCursor.toISOString().slice(0, 10);
+                dailySales[key] = { price: 0, count: 0 };
+                dailyCursor.setDate(dailyCursor.getDate() + 1);
+            }
             const staffSales = {};
             const menuSales = {};
 
