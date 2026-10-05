@@ -5637,7 +5637,7 @@ function translateLegacy(value) {
                 return r.date >= startDate && r.date <= endDate;
             });
 
-            const dailySales = {};
+            const dailySales = {};\n            // 선택 기간의 모든 날짜를 표시하여 매출이 없는 날도 0으로 확인할 수 있습니다.\n            const dailyCursor = new Date(startDate + 'T00:00:00');\n            const dailyEnd = new Date(endDate + 'T00:00:00');\n            while (dailyCursor <= dailyEnd) {\n                const key = dailyCursor.toISOString().slice(0, 10);\n                dailySales[key] = { price: 0, count: 0 };\n                dailyCursor.setDate(dailyCursor.getDate() + 1);\n            }
             const staffSales = {};
             const menuSales = {};
 
