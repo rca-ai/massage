@@ -796,6 +796,7 @@
                 paymentMethodStatisticsTitle: '입금 방식별 통계',
                 paymentMethodColumn: '입금 방식',
                 amountColumn: '금액',
+                paymentTotal: '합계',
                 dataBackupRestoreTitle: '데이터 백업 및 복원',
                 backupButton: '백업',
                 restoreButton: '복원',
@@ -973,6 +974,7 @@
                 paymentMethodStatisticsTitle: 'Payment Method Statistics',
                 paymentMethodColumn: 'Payment Method',
                 amountColumn: 'Amount',
+                paymentTotal: 'Total',
                 dataBackupRestoreTitle: 'Data Backup & Restore',
                 backupButton: 'Backup',
                 restoreButton: 'Restore',
@@ -1150,6 +1152,7 @@
                 paymentMethodStatisticsTitle: 'สถิติวิธีการชำระเงิน',
                 paymentMethodColumn: 'วิธีการชำระเงิน',
                 amountColumn: 'จำนวนเงิน',
+                paymentTotal: 'รวม',
                 dataBackupRestoreTitle: 'สำรองและกู้คืนข้อมูล',
                 backupButton: 'สำรองข้อมูล',
                 restoreButton: 'กู้คืนข้อมูล',
@@ -1327,6 +1330,7 @@
                 paymentMethodStatisticsTitle: 'Thống kê phương thức thanh toán',
                 paymentMethodColumn: 'Phương thức thanh toán',
                 amountColumn: 'Số tiền',
+                paymentTotal: 'Tổng cộng',
                 dataBackupRestoreTitle: 'Sao lưu và khôi phục dữ liệu',
                 backupButton: 'Sao lưu',
                 restoreButton: 'Khôi phục',
@@ -5634,16 +5638,36 @@ function translateLegacy(value) {
             const tableBody = document.getElementById('paymentStatsTable');
             const currency = JSON.parse(localStorage.getItem(getAdminKey('currency')) || '{"symbol":"","name":"원"}');
             
+            if (!tableBody) return;
             tableBody.innerHTML = '';
             
+            let paymentTotal = 0;
             Object.entries(paymentStats).forEach(([method, amount]) => {
+                const numericAmount = Number(amount) || 0;
+                paymentTotal += numericAmount;
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td class="border border-gray-300 p-2">${method}</td>
-                    <td class="border border-gray-300 p-2">${amount.toLocaleString()}${currency.symbol}</td>
+                    <td class="border border-gray-300 p-2">${numericAmount.toLocaleString()}${currency.symbol}</td>
                 `;
                 tableBody.appendChild(row);
             });
+
+            const table = tableBody.closest('table');
+            let tableFoot = table ? table.querySelector('tfoot') : null;
+            if (!tableFoot && table) {
+                tableFoot = document.createElement('tfoot');
+                table.appendChild(tableFoot);
+            }
+            if (tableFoot) {
+                tableFoot.innerHTML = `
+                    <tr class="bg-gray-100 font-bold">
+                        <td class="border border-gray-300 p-2" data-translate="paymentTotal">합계</td>
+                        <td class="border border-gray-300 p-2">${paymentTotal.toLocaleString()}${currency.symbol}</td>
+                    </tr>
+                `;
+            }
+            if (window.localizeLegacyUI) window.localizeLegacyUI();
         }
 
         function displayTotalStatistics(reservations, staffStats) {
@@ -5897,7 +5921,11 @@ function translateLegacy(value) {
             const dailyCursor = new Date(startDate + 'T00:00:00');
             const dailyEnd = new Date(endDate + 'T00:00:00');
             while (dailyCursor <= dailyEnd) {
-                const key = dailyCursor.toISOString().slice(0, 10);
+                // toISOString()은 태국 시간대 자정에서 전날 UTC 날짜로 변환될 수 있으므로
+                // 반드시 로컬 날짜 기준으로 YYYY-MM-DD를 생성합니다.
+                const key = dailyCursor.getFullYear() + '-' +
+                    String(dailyCursor.getMonth() + 1).padStart(2, '0') + '-' +
+                    String(dailyCursor.getDate()).padStart(2, '0');
                 dailySales[key] = { price: 0, count: 0 };
                 dailyCursor.setDate(dailyCursor.getDate() + 1);
             }
