@@ -132,8 +132,8 @@
      <h1 class="text-3xl font-bold text-gray-800 mb-2" data-translate="title">마사지샵 관리 시스템</h1>
      <div class="w-20 h-1 bg-blue-500 mx-auto"></div>
     </div><!-- 언어 선택 -->
-    <div class="mb-6"><label class="block text-sm font-medium text-gray-700 mb-2">언어 선택 / Language / ภาษา / Ngôn ngữ</label>
-     <div class="grid grid-cols-4 gap-2"><button onclick="setLanguage('ko')" class="bg-blue-500 text-white py-2 px-3 rounded text-sm hover:bg-blue-600" id="langKo">한국어</button> <button onclick="setLanguage('en')" class="bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm hover:bg-gray-400" id="langEn">English</button> <button onclick="setLanguage('th')" class="bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm hover:bg-gray-400" id="langTh">ไทย</button> <button onclick="setLanguage('vi')" class="bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm hover:bg-gray-400" id="langVi">Tiếng Việt</button>
+    <div class="mb-6"><label class="block text-sm font-medium text-gray-700 mb-2">언어 선택 / Language / ภาษา / Ngôn ngữ / 简体中文 / 繁體中文 / Bahasa Indonesia</label>
+     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2"><button onclick="setLanguage('ko')" class="bg-blue-500 text-white py-2 px-3 rounded text-sm hover:bg-blue-600" id="langKo">한국어</button> <button onclick="setLanguage('en')" class="bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm hover:bg-gray-400" id="langEn">English</button> <button onclick="setLanguage('th')" class="bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm hover:bg-gray-400" id="langTh">ไทย</button> <button onclick="setLanguage('vi')" class="bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm hover:bg-gray-400" id="langVi">Tiếng Việt</button> <button onclick="setLanguage('zh-CN')" class="bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm hover:bg-gray-400" id="langZhCN">简体中文</button> <button onclick="setLanguage('zh-TW')" class="bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm hover:bg-gray-400" id="langZhTW">繁體中文</button> <button onclick="setLanguage('id')" class="bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm hover:bg-gray-400" id="langId">Bahasa Indonesia</button>
      </div>
     </div>
     <div class="space-y-4">
@@ -155,7 +155,7 @@
         <div><label class="block text-sm font-medium mb-1" data-translate="emailLabel">이메일</label><input id="registerEmail" type="email" class="w-full border rounded px-3 py-2"></div>
         <div><label class="block text-sm font-medium mb-1" data-translate="phoneLabel">전화번호</label><input id="registerPhone" class="w-full border rounded px-3 py-2"></div>
         <div><label class="block text-sm font-medium mb-1" data-translate="googleMapsLabel">구글맵 주소</label><input id="registerGoogleMaps" class="w-full border rounded px-3 py-2"></div>
-        <div><label class="block text-sm font-medium mb-1" data-translate="languageLabel">언어 설정</label><select id="registerLanguage" class="w-full border rounded px-3 py-2"><option value="ko">한국어</option><option value="en">English</option><option value="th">ไทย</option><option value="vi">Tiếng Việt</option></select></div>
+        <div><label class="block text-sm font-medium mb-1" data-translate="languageLabel">언어 설정</label><select id="registerLanguage" class="w-full border rounded px-3 py-2"><option value="ko">한국어</option><option value="en">English</option><option value="th">ไทย</option><option value="vi">Tiếng Việt</option><option value="zh-CN">简体中文</option><option value="zh-TW">繁體中文</option><option value="id">Bahasa Indonesia</option></select></div>
         <div class="bg-blue-50 border border-blue-200 rounded p-3 text-sm" data-translate="registrationValidityNote">가입일로부터 1주일 동안 사용할 수 있습니다.</div>
         <div class="flex gap-2 pt-2"><button onclick="submitRegistration()" class="bg-blue-500 text-white px-4 py-2 rounded" data-translate="registerButton">등록</button><button onclick="closeRegistrationModal()" class="bg-gray-500 text-white px-4 py-2 rounded" data-translate="cancel">취소</button></div>
       </div>
@@ -564,7 +564,7 @@
   <div id="languageModal" class="modal">
    <div class="modal-content">
     <h3 class="text-xl font-bold mb-4">언어 선택 / Language / ภาษา / Ngôn ngữ</h3>
-    <div class="grid grid-cols-2 gap-4"><button onclick="setLanguageAndClose('ko')" class="bg-blue-500 text-white py-3 px-4 rounded hover:bg-blue-600">한국어</button> <button onclick="setLanguageAndClose('en')" class="bg-blue-500 text-white py-3 px-4 rounded hover:bg-blue-600">English</button> <button onclick="setLanguageAndClose('th')" class="bg-blue-500 text-white py-3 px-4 rounded hover:bg-blue-600">ไทย</button> <button onclick="setLanguageAndClose('vi')" class="bg-blue-500 text-white py-3 px-4 rounded hover:bg-blue-600">Tiếng Việt</button>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-2"><button onclick="setLanguageAndClose('ko')" class="bg-blue-500 text-white py-3 px-4 rounded hover:bg-blue-600">한국어</button> <button onclick="setLanguageAndClose('en')" class="bg-blue-500 text-white py-3 px-4 rounded hover:bg-blue-600">English</button> <button onclick="setLanguageAndClose('th')" class="bg-blue-500 text-white py-3 px-4 rounded hover:bg-blue-600">ไทย</button> <button onclick="setLanguageAndClose('vi')" class="bg-blue-500 text-white py-3 px-4 rounded hover:bg-blue-600">Tiếng Việt</button> <button onclick="setLanguageAndClose('zh-CN')" class="bg-blue-500 text-white py-3 px-4 rounded hover:bg-blue-600">简体中文</button> <button onclick="setLanguageAndClose('zh-TW')" class="bg-blue-500 text-white py-3 px-4 rounded hover:bg-blue-600">繁體中文</button> <button onclick="setLanguageAndClose('id')" class="bg-blue-500 text-white py-3 px-4 rounded hover:bg-blue-600">Bahasa Indonesia</button>
     </div><button onclick="closeLanguageModal()" class="mt-4 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">닫기</button>
    </div>
   </div><!-- 폰트 변경 모달 -->
@@ -1353,6 +1353,113 @@
             }
         };
 
+        // 추가 언어: 중국어 간체 / 중국어 번체 / 인도네시아어
+        // 전체 번역 키는 영어를 기본값으로 사용하고 주요 화면은 각 언어로 번역합니다.
+        translations['zh-CN'] = Object.assign({}, translations.en, {
+            title:'按摩店管理系统', changeLanguage:'切换语言', changeFont:'更改字体', fontSelection:'选择字体',
+            fontSize:'字体大小', fontFamily:'字体类型', apply:'应用', logout:'退出登录', todayDate:'今天日期', currentTime:'当前时间',
+            dashboard:'状态面板', order:'顺序', reservation:'预约', statistics:'统计', dbManagement:'数据库管理', staff:'员工',
+            dashboardSummaryTitle:'按顺序统计', massageCount:'按摩次数', dashboardSummaryTotal:'合计', menu:'菜单', duration:'时长',
+            startTime:'开始时间', endTime:'结束时间', remainingTime:'剩余时间', price:'价格', commission:'佣金', roomNumber:'房间号',
+            actions:'操作', selectStaff:'选择员工', selectMenu:'选择菜单', customerName:'顾客姓名', addReservation:'添加预约',
+            daily:'每日', weekly:'每周', monthly:'每月', totalPrice:'总价格', totalCommission:'总佣金',
+            grandTotal:'总金额（不含QR小费）', grandTotalCommission:'总佣金', profit:'利润',
+            menuManagement:'菜单管理', staffManagement:'员工管理', roomManagement:'房间管理', customerManagement:'顾客管理',
+            adminManagement:'管理员管理', currencyManagement:'货币单位', paymentMethodManagement:'付款方式管理',
+            payment:'付款处理', totalAmount:'总金额', enteredAmount:'已输入金额',
+            paymentMethodClickHint:'点击付款方式名称可自动输入剩余金额。输入后可以手动修改金额。',
+            confirm:'确认', cancel:'取消', login:'登录', close:'关闭', edit:'修改', delete:'删除', newRegistration:'新注册',
+            usernameLabel:'用户名', passwordLabel:'密码', shopNameLabel:'店铺名称', emailLabel:'电子邮箱', phoneLabel:'电话号码',
+            googleMapsLabel:'Google地图地址', languageLabel:'语言设置', registrationValidityNote:'注册后可使用1周', registerButton:'注册',
+            menuList:'菜单列表', addMenu:'添加菜单', selectTime:'选择时间', priceLabel:'价格：', commissionLabel:'佣金：',
+            menuTimeSettings:'菜单时间设置', editReservation:'修改预约', add:'添加', save:'保存', username:'用户名', password:'密码',
+            usernameInput:'请输入用户名', passwordInput:'请输入密码', staffName:'员工姓名', phoneNumber:'电话号码', bankName:'银行名称',
+            accountNumber:'账号', status:'状态', roomNum:'房间号', customerNum:'顾客编号', paymentMethodName:'付款方式名称',
+            shopName:'店铺名称', adminType:'类型', orderManagement:'顺序管理', saveOrder:'保存顺序', orderNumber:'顺序号',
+            paymentComplete:'已付款', complete:'完成', fullTime:'正式员工', partTime:'临时员工', resigned:'离职', vacation:'休假',
+            minutes30:'30分钟', minutes60:'60分钟', minutes90:'90分钟', minutes120:'120分钟',
+            monthlyMenuSales:'月度销售', annualMenuSales:'年度销售', monthlySalesChart:'月度销售图表',
+            dailySalesChartTitle:'按日期收入图表', dailySalesProfitStatisticsTitle:'按日期销售及利润统计',
+            monthlySalesProfitStatisticsTitle:'按月销售及利润统计', dateColumn:'日期', monthColumn:'月份',
+            salesColumn:'销售额', netProfitColumn:'净利润', differenceColumn:'差额', annualMonthlySalesChartTitle:'月度收入图表',
+            staffSalesChartTitle:'员工统计图表', menuSalesChartTitle:'菜单统计图表', download:'下载', staffStats:'员工统计',
+            menuStatisticsTitle:'菜单统计', menuName:'菜单名称', salesCount:'销售次数', totalSales:'总销售额',
+            staffTotal:'员工合计', menuTotal:'菜单合计', paymentMethodStats:'付款方式统计', paymentMethod:'付款方式',
+            amount:'金额', paymentTotal:'合计', dataBackupRestore:'数据备份与恢复', backup:'备份', restore:'恢复',
+            downloadButton:'下载', staffStatisticsTitle:'员工统计', paymentMethodStatisticsTitle:'付款方式统计',
+            paymentMethodColumn:'付款方式', amountColumn:'金额'
+        });
+        translations['zh-TW'] = Object.assign({}, translations['zh-CN'], {
+            title:'按摩店管理系統', changeLanguage:'切換語言', changeFont:'更改字型', fontSelection:'選擇字型',
+            fontSize:'字型大小', fontFamily:'字型類型', dashboard:'狀態面板', statistics:'統計', dbManagement:'資料庫管理',
+            staff:'員工', dashboardSummaryTitle:'依順序統計', massageCount:'按摩次數', menu:'選單', duration:'時間',
+            startTime:'開始時間', endTime:'結束時間', remainingTime:'剩餘時間', price:'價格', commission:'佣金',
+            roomNumber:'房號', actions:'操作', selectStaff:'選擇員工', selectMenu:'選擇選單', customerName:'顧客姓名',
+            addReservation:'新增預約', daily:'每日', weekly:'每週', monthly:'每月', totalPrice:'總價格', totalCommission:'總佣金',
+            grandTotal:'總金額（不含QR小費）', profit:'利潤', menuManagement:'選單管理', staffManagement:'員工管理',
+            roomManagement:'房間管理', customerManagement:'顧客管理', adminManagement:'管理員管理', currencyManagement:'貨幣單位',
+            paymentMethodManagement:'付款方式管理', payment:'付款處理', totalAmount:'總金額', enteredAmount:'已輸入金額',
+            paymentMethodClickHint:'點擊付款方式名稱可自動輸入剩餘金額。輸入後可以手動修改金額。',
+            confirm:'確認', cancel:'取消', login:'登入', close:'關閉', edit:'修改', delete:'刪除', newRegistration:'新註冊',
+            usernameLabel:'帳號', passwordLabel:'密碼', shopNameLabel:'店鋪名稱', emailLabel:'電子郵件', phoneLabel:'電話號碼',
+            googleMapsLabel:'Google地圖地址', languageLabel:'語言設定', registrationValidityNote:'註冊後可使用1週', registerButton:'註冊',
+            menuList:'選單列表', addMenu:'新增選單', selectTime:'選擇時間', priceLabel:'價格：', commissionLabel:'佣金：',
+            menuTimeSettings:'選單時間設定', editReservation:'修改預約', add:'新增', save:'儲存', username:'帳號', password:'密碼',
+            usernameInput:'請輸入帳號', passwordInput:'請輸入密碼', staffName:'員工姓名', phoneNumber:'電話號碼', bankName:'銀行名稱',
+            accountNumber:'帳號', status:'狀態', roomNum:'房號', customerNum:'顧客編號', paymentMethodName:'付款方式名稱',
+            shopName:'店鋪名稱', adminType:'類型', orderManagement:'順序管理', saveOrder:'儲存順序', orderNumber:'順序號',
+            paymentComplete:'已付款', complete:'完成', fullTime:'正式員工', partTime:'臨時員工', resigned:'離職', vacation:'休假',
+            minutes30:'30分鐘', minutes60:'60分鐘', minutes90:'90分鐘', minutes120:'120分鐘',
+            monthlyMenuSales:'月度銷售', annualMenuSales:'年度銷售', monthlySalesChart:'月度銷售圖表',
+            dailySalesChartTitle:'按日期收入圖表', dailySalesProfitStatisticsTitle:'按日期銷售及利潤統計',
+            monthlySalesProfitStatisticsTitle:'按月銷售及利潤統計', dateColumn:'日期', monthColumn:'月份',
+            salesColumn:'銷售額', netProfitColumn:'淨利潤', differenceColumn:'差額', annualMonthlySalesChartTitle:'月度收入圖表',
+            staffSalesChartTitle:'員工統計圖表', menuSalesChartTitle:'選單統計圖表', download:'下載', staffStats:'員工統計',
+            menuStatisticsTitle:'選單統計', menuName:'選單名稱', salesCount:'銷售次數', totalSales:'總銷售額',
+            staffTotal:'員工合計', menuTotal:'選單合計', paymentMethodStats:'付款方式統計', paymentMethod:'付款方式',
+            amount:'金額', paymentTotal:'合計', dataBackupRestore:'資料備份與恢復', backup:'備份', restore:'恢復',
+            downloadButton:'下載', staffStatisticsTitle:'員工統計', paymentMethodStatisticsTitle:'付款方式統計',
+            paymentMethodColumn:'付款方式', amountColumn:'金額'
+        });
+        translations['id'] = Object.assign({}, translations.en, {
+            title:'Sistem Manajemen Pijat', changeLanguage:'Ganti Bahasa', changeFont:'Ganti Font', fontSelection:'Pilih Font',
+            fontSize:'Ukuran Font', fontFamily:'Jenis Font', apply:'Terapkan', logout:'Keluar', todayDate:'Tanggal Hari Ini',
+            currentTime:'Waktu Saat Ini', dashboard:'Dasbor', order:'Urutan', reservation:'Reservasi', statistics:'Statistik',
+            dbManagement:'Manajemen Database', staff:'Karyawan', dashboardSummaryTitle:'Status Berdasarkan Urutan',
+            massageCount:'Jumlah Pijat', dashboardSummaryTotal:'Total', menu:'Menu', duration:'Durasi', startTime:'Waktu Mulai',
+            endTime:'Waktu Selesai', remainingTime:'Waktu Tersisa', price:'Harga', commission:'Komisi', roomNumber:'Nomor Kamar',
+            actions:'Tindakan', selectStaff:'Pilih Karyawan', selectMenu:'Pilih Menu', customerName:'Nama Pelanggan',
+            addReservation:'Tambah Reservasi', daily:'Harian', weekly:'Mingguan', monthly:'Bulanan', totalPrice:'Total Harga',
+            totalCommission:'Total Komisi', grandTotal:'Total (tanpa QR Tip)', grandTotalCommission:'Total Komisi', profit:'Laba',
+            menuManagement:'Manajemen Menu', staffManagement:'Manajemen Karyawan', roomManagement:'Manajemen Kamar',
+            customerManagement:'Manajemen Pelanggan', adminManagement:'Manajemen Admin', currencyManagement:'Mata Uang',
+            paymentMethodManagement:'Metode Pembayaran', payment:'Proses Pembayaran', totalAmount:'Total Jumlah',
+            enteredAmount:'Jumlah yang Dimasukkan', paymentMethodClickHint:'Klik nama metode pembayaran untuk mengisi otomatis sisa jumlah. Setelah itu jumlah dapat diubah.',
+            confirm:'Konfirmasi', cancel:'Batal', login:'Masuk', close:'Tutup', edit:'Edit', delete:'Hapus', newRegistration:'Pendaftaran Baru',
+            usernameLabel:'Nama Pengguna', passwordLabel:'Kata Sandi', shopNameLabel:'Nama Toko', emailLabel:'Email',
+            phoneLabel:'Nomor Telepon', googleMapsLabel:'Alamat Google Maps', languageLabel:'Pengaturan Bahasa',
+            registrationValidityNote:'Dapat digunakan selama 1 minggu sejak pendaftaran.', registerButton:'Daftar',
+            menuList:'Daftar Menu', addMenu:'Tambah Menu', selectTime:'Pilih Waktu', priceLabel:'Harga:', commissionLabel:'Komisi:',
+            menuTimeSettings:'Pengaturan Waktu Menu', editReservation:'Edit Reservasi', add:'Tambah', save:'Simpan',
+            username:'Nama Pengguna', password:'Kata Sandi', usernameInput:'Masukkan nama pengguna', passwordInput:'Masukkan kata sandi',
+            staffName:'Nama Karyawan', phoneNumber:'Nomor Telepon', bankName:'Nama Bank', accountNumber:'Nomor Rekening',
+            status:'Status', roomNum:'Nomor Kamar', customerNum:'Nomor Pelanggan', paymentMethodName:'Nama Metode Pembayaran',
+            shopName:'Nama Toko', adminType:'Tipe', orderManagement:'Manajemen Urutan', saveOrder:'Simpan Urutan',
+            orderNumber:'Nomor Urutan', paymentComplete:'Pembayaran Selesai', complete:'Selesai', fullTime:'Karyawan Tetap',
+            partTime:'Karyawan Paruh Waktu', resigned:'Mengundurkan Diri', vacation:'Libur', minutes30:'30 menit', minutes60:'60 menit',
+            minutes90:'90 menit', minutes120:'120 menit', monthlyMenuSales:'Penjualan Bulanan', annualMenuSales:'Penjualan Tahunan',
+            monthlySalesChart:'Grafik Penjualan Bulanan', dailySalesChartTitle:'Grafik Pendapatan Harian',
+            dailySalesProfitStatisticsTitle:'Statistik Penjualan dan Laba Harian', monthlySalesProfitStatisticsTitle:'Statistik Penjualan dan Laba Bulanan',
+            dateColumn:'Tanggal', monthColumn:'Bulan', salesColumn:'Penjualan', netProfitColumn:'Laba Bersih', differenceColumn:'Selisih',
+            annualMonthlySalesChartTitle:'Grafik Pendapatan Bulanan', staffSalesChartTitle:'Grafik Statistik Karyawan',
+            menuSalesChartTitle:'Grafik Statistik Menu', download:'Unduh', staffStats:'Statistik Karyawan',
+            menuStatisticsTitle:'Statistik Menu', menuName:'Nama Menu', salesCount:'Jumlah Penjualan', totalSales:'Total Penjualan',
+            staffTotal:'Total Karyawan', menuTotal:'Total Menu', paymentMethodStats:'Statistik Metode Pembayaran',
+            paymentMethod:'Metode Pembayaran', amount:'Jumlah', paymentTotal:'Total', dataBackupRestore:'Cadangan dan Pemulihan Data',
+            backup:'Cadangkan', restore:'Pulihkan', downloadButton:'Unduh', staffStatisticsTitle:'Statistik Karyawan',
+            paymentMethodStatisticsTitle:'Statistik Metode Pembayaran', paymentMethodColumn:'Metode Pembayaran', amountColumn:'Jumlah'
+        });
+
         // 초기화
 async function initializeApp() {
     try {
@@ -2044,10 +2151,17 @@ async function initializeApp() {
             currentLanguage = lang;
             
             // 언어 버튼 스타일 업데이트
-            document.getElementById('langKo').className = lang === 'ko' ? 'bg-blue-500 text-white py-2 px-3 rounded text-sm hover:bg-blue-600' : 'bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm hover:bg-gray-400';
-            document.getElementById('langEn').className = lang === 'en' ? 'bg-blue-500 text-white py-2 px-3 rounded text-sm hover:bg-blue-600' : 'bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm hover:bg-gray-400';
-            document.getElementById('langTh').className = lang === 'th' ? 'bg-blue-500 text-white py-2 px-3 rounded text-sm hover:bg-blue-600' : 'bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm hover:bg-gray-400';
-            document.getElementById('langVi').className = lang === 'vi' ? 'bg-blue-500 text-white py-2 px-3 rounded text-sm hover:bg-blue-600' : 'bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm hover:bg-gray-400';
+            const languageButtons = {
+                ko: 'langKo', en: 'langEn', th: 'langTh', vi: 'langVi',
+                'zh-CN': 'langZhCN', 'zh-TW': 'langZhTW', id: 'langId'
+            };
+            Object.entries(languageButtons).forEach(([code, id]) => {
+                const button = document.getElementById(id);
+                if (!button) return;
+                button.className = lang === code
+                    ? 'bg-blue-500 text-white py-2 px-3 rounded text-sm hover:bg-blue-600'
+                    : 'bg-gray-300 text-gray-700 py-2 px-3 rounded text-sm hover:bg-gray-400';
+            });
             
             updateTranslations();
             if (window.localizeLegacyUI) window.localizeLegacyUI();
@@ -4463,7 +4577,7 @@ async function initializeApp() {
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2">언어 설정:</label>
-                        <select id="newAdminLanguage" class="w-full border rounded px-3 py-2"><option value="ko">한국어</option><option value="en">English</option><option value="th">ไทย</option><option value="vi">Tiếng Việt</option></select>
+                        <select id="newAdminLanguage" class="w-full border rounded px-3 py-2"><option value="ko">한국어</option><option value="en">English</option><option value="th">ไทย</option><option value="vi">Tiếng Việt</option><option value="zh-CN">简体中文</option><option value="zh-TW">繁體中文</option><option value="id">Bahasa Indonesia</option></select>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
@@ -4642,6 +4756,9 @@ async function initializeApp() {
                           <option value="en" ${admin.language === 'en' ? 'selected' : ''}>English</option>
                           <option value="th" ${admin.language === 'th' ? 'selected' : ''}>ไทย</option>
                           <option value="vi" ${admin.language === 'vi' ? 'selected' : ''}>Tiếng Việt</option>
+                          <option value="zh-CN" ${admin.language === 'zh-CN' ? 'selected' : ''}>简体中文</option>
+                          <option value="zh-TW" ${admin.language === 'zh-TW' ? 'selected' : ''}>繁體中文</option>
+                          <option value="id" ${admin.language === 'id' ? 'selected' : ''}>Bahasa Indonesia</option>
                         </select>
                     </div>
                     <div id="validityFields" class="grid grid-cols-2 gap-4" style="display: ${admin.type === 'super' ? 'none' : 'grid'}">
@@ -4906,13 +5023,16 @@ function translateLegacy(value) {
                 const uiTranslations = {
                     en: {'시간 선택':'Time Selection','가격:':'Price:','커미션:':'Commission:','메뉴 추가':'Add Menu','삭제':'Delete','마사지사':'Massage Therapist','만료일':'Expiration date','만료일:':'Expiration date:','메뉴별 시간 설정':'Menu Time Settings','메뉴 선택':'Select Menu','신규등록':'New Registration','이메일':'Email','구글맵 주소':'Google Maps Address','언어 설정':'Language','가입일로부터 1주일 동안 사용할 수 있습니다.':'Valid for 1 week from registration.','등록':'Register','아이디':'Username','비밀번호':'Password','상점명':'Shop Name','전화번호':'Phone Number','직원별 현황판':'Staff Status Board','방번호별 현황판':'Room Status Board','마사지횟수':'Massage Count','DB 삭제':'Delete DB','엑셀데이타 업로드':'Upload Excel Data','업로드샘플 다운로드':'Download Upload Sample','삭제 대상 날짜':'Target Date','현황 보기':'View Status','선택 날짜 입금완료 데이터 전체 삭제':'Delete All Paid Data for Selected Date','선택 날짜':'Selected Date','전체':'Total','건':'records','입금완료':'Paid','입금완료 금액':'Paid Amount','미입금':'Unpaid','삭제 불가':'Cannot Delete','입금 완료':'Paid','만료일':'Expiration date','만료일:':'Expiration date:','날짜를 선택하고 현황 보기를 눌러주세요.':'Select a date and click View Status.','선택한 날짜의 데이터가 없습니다.':'No data for the selected date.'},
                     th: {'시간 선택':'เลือกเวลา','가격:':'ราคา:','커미션:':'คอมมิชชั่น:','메뉴 추가':'เพิ่มเมนู','삭제':'ลบ','마사지사':'พนักงานนวด','만료일':'วันหมดอายุ','만료일:':'วันหมดอายุ:','메뉴별 시간 설정':'ตั้งเวลาสำหรับแต่ละเมนู','메뉴 선택':'เลือกเมนู','신규등록':'สมัครใหม่','อีเมล':'อีเมล','이메일':'อีเมล','구글맵 주소':'ที่อยู่ Google Maps','언어 설정':'ภาษา','가입일로부터 1주일 동안 사용할 수 있습니다.':'ใช้งานได้ 1 สัปดาห์นับจากวันสมัคร','등록':'ลงทะเบียน','아이디':'ชื่อผู้ใช้','비밀번호':'รหัสผ่าน','상점명':'ชื่อร้าน','전화번호':'หมายเลขโทรศัพท์','직원별 현황판':'กระดานสถานะพนักงาน','방번호별 현황판':'กระดานสถานะตามหมายเลขห้อง','마사지횟수':'จำนวนครั้งนวด','DB 삭제':'ลบฐานข้อมูล','엑셀데이타 업로드':'อัปโหลดข้อมูล Excel','업로드샘플 다운로드':'ดาวน์โหลดตัวอย่างการอัปโหลด','삭제 대상 날짜':'วันที่ที่จะลบ','현황 보기':'ดูสถานะ','선택 날짜 입금완료 데이터 전체 삭제':'ลบข้อมูลที่ชำระเงินแล้วทั้งหมดของวันที่เลือก','선택 날짜':'วันที่เลือก','전체':'ทั้งหมด','건':'รายการ','입금완료':'ชำระเงินแล้ว','입금완료 금액':'ยอดเงินที่ชำระแล้ว','미입금':'ยังไม่ชำระ','삭제 불가':'ไม่สามารถลบได้','입금 완료':'ชำระเงินแล้ว','만료일':'วันหมดอายุ','만료일:':'วันหมดอายุ:','날짜를 선택하고 현황 보기를 눌러주세요.':'เลือกวันที่แล้วกดดูสถานะ','선택한 날짜의 데이터가 없습니다.':'ไม่มีข้อมูลสำหรับวันที่เลือก'},
+                    'zh-CN': {'시간 선택':'选择时间','가격:':'价格：','커미션:':'佣金：','메뉴 추가':'添加菜单','삭제':'删除','마사지사':'按摩师','만료일':'到期日','만료일:':'到期日：','메뉴별 시간 설정':'菜单时间设置','메뉴 선택':'选择菜单','신규등록':'新注册','이메일':'电子邮箱','구글맵 주소':'Google地图地址','언어 설정':'语言','가입일로부터 1주일 동안 사용할 수 있습니다.':'注册后可使用1周','등록':'注册','아이디':'用户名','비밀번호':'密码','상점명':'店铺名称','전화번호':'电话号码','직원별 현황판':'员工状态面板','방번호별 현황판':'房间状态面板','마사지횟수':'按摩次数','DB 삭제':'删除数据库','엑셀데이타 업로드':'上传Excel数据','업로드샘플 다운로드':'下载上传样本','삭제 대상 날짜':'要删除的日期','현황 보기':'查看状态','선택 날짜':'选择日期','전체':'全部','건':'条','입금완료':'已付款','입금완료 금액':'已付款金额','미입금':'未付款','입금 완료':'付款完成'},
+                    'zh-TW': {'시간 선택':'選擇時間','가격:':'價格：','커미션:':'佣金：','메뉴 추가':'新增選單','삭제':'刪除','마사지사':'按摩師','만료일':'到期日','만료일:':'到期日：','메뉴별 시간 설정':'選單時間設定','메뉴 선택':'選擇選單','신규등록':'新註冊','이메일':'電子郵件','구글맵 주소':'Google地圖地址','언어 설정':'語言','가입일로부터 1주일 동안 사용할 수 있습니다.':'註冊後可使用1週','등록':'註冊','아이디':'帳號','비밀번호':'密碼','상점명':'店鋪名稱','전화번호':'電話號碼','직원별 현황판':'員工狀態面板','방번호별 현황판':'房間狀態面板','마사지횟수':'按摩次數','DB 삭제':'刪除資料庫','엑셀데이타 업로드':'上傳Excel資料','업로드샘플 다운로드':'下載上傳範本','삭제 대상 날짜':'要刪除的日期','현황 보기':'查看狀態','선택 날짜':'選擇日期','전체':'全部','건':'筆','입금완료':'已付款','입금완료 금액':'已付款金額','미입금':'未付款','입금 완료':'付款完成'},
+                    id: {'시간 선택':'Pilih Waktu','가격:':'Harga:','커미션:':'Komisi:','메뉴 추가':'Tambah Menu','삭제':'Hapus','마사지사':'Terapis Pijat','만료일':'Tanggal Kedaluwarsa','만료일:':'Tanggal Kedaluwarsa:','메뉴별 시간 설정':'Pengaturan Waktu Menu','메뉴 선택':'Pilih Menu','신규등록':'Pendaftaran Baru','이메일':'Email','구글맵 주소':'Alamat Google Maps','언어 설정':'Bahasa','가입일로부터 1주일 동안 사용할 수 있습니다.':'Berlaku selama 1 minggu sejak pendaftaran','등록':'Daftar','아이디':'Nama Pengguna','비밀번호':'Kata Sandi','상점명':'Nama Toko','전화번호':'Nomor Telepon','직원별 현황판':'Dasbor Karyawan','방번호별 현황판':'Dasbor Kamar','마사지횟수':'Jumlah Pijat','DB 삭제':'Hapus Database','엑셀데이타 업로드':'Unggah Data Excel','업로드샘플 다운로드':'Unduh Sampel Unggah','삭제 대상 날짜':'Tanggal yang Dihapus','현황 보기':'Lihat Status','선택 날짜':'Tanggal Dipilih','전체':'Semua','건':'data','입금완료':'Sudah Dibayar','입금완료 금액':'Jumlah Dibayar','미입금':'Belum Dibayar','입금 완료':'Pembayaran Selesai'},
                     vi: {'시간 선택':'Chọn thời gian','가격:':'Giá:','커미션:':'Hoa hồng:','메뉴 추가':'Thêm menu','삭제':'Xóa','마사지사':'Nhân viên massage','만료일':'Ngày hết hạn','만료일:':'Ngày hết hạn:','메뉴별 시간 설정':'Cài đặt thời gian menu','메뉴 선택':'Chọn menu','신규등록':'Đăng ký mới','이메일':'Email','구글맵 주소':'Địa chỉ Google Maps','언어 설정':'Ngôn ngữ','가입일로부터 1주일 동안 사용할 수 있습니다.':'Có hiệu lực 1 tuần kể từ ngày đăng ký','등록':'Đăng ký','아이디':'Tên đăng nhập','비밀번호':'Mật khẩu','상점명':'Tên cửa hàng','전화번호':'Số điện thoại','직원별 현황판':'Bảng trạng thái nhân viên','방번호별 현황판':'Bảng trạng thái theo phòng','마사지횟수':'Số lần massage','DB 삭제':'Xóa DB','엑셀데이타 업로드':'Tải dữ liệu Excel lên','업로드샘플 다운로드':'Tải mẫu tải lên','삭제 대상 날짜':'Ngày cần xóa','현황 보기':'Xem trạng thái','선택 날짜 입금완료 데이터 전체 삭제':'Xóa toàn bộ dữ liệu đã thanh toán của ngày đã chọn','선택 날짜':'Ngày đã chọn','전체':'Tổng','건':'bản ghi','입금완료':'Đã thanh toán','입금완료 금액':'Số tiền đã thanh toán','미입금':'Chưa thanh toán','삭제 불가':'Không thể xóa','입금 완료':'Đã thanh toán','만료일':'Ngày hết hạn','만료일:':'Ngày hết hạn:','날짜를 선택하고 현황 보기를 눌러주세요.':'Chọn ngày và nhấn Xem trạng thái.','선택한 날짜의 데이터가 없습니다.':'Không có dữ liệu cho ngày đã chọn'}
                 };
                 if (uiTranslations[lang] && uiTranslations[lang][s] !== undefined) return uiTranslations[lang][s];
                 if (extra[lang] && extra[lang][s] !== undefined) return extra[lang][s];
-                s = s.replace(/(\d+)\s*분/g, (_, n) => lang === 'en' ? n + ' min' : lang === 'th' ? n + ' นาที' : n + ' phút');
-                s = s.replace(/(\d+)\s*명/g, (_, n) => lang === 'en' ? n + ' people' : lang === 'th' ? n + ' คน' : n + ' người');
-                s = s.replace(/(\d+)\s*회/g, (_, n) => lang === 'en' ? n + ' times' : lang === 'th' ? n + ' ครั้ง' : n + ' lần');
+                s = s.replace(/(\d+)\s*분/g, (_, n) => lang === 'en' ? n + ' min' : lang === 'th' ? n + ' นาที' : lang === 'vi' ? n + ' phút' : lang === 'id' ? n + ' menit' : n + ' 分');
+                s = s.replace(/(\d+)\s*명/g, (_, n) => lang === 'en' ? n + ' people' : lang === 'th' ? n + ' คน' : lang === 'vi' ? n + ' người' : lang === 'id' ? n + ' orang' : n + ' 人');
+                s = s.replace(/(\d+)\s*회/g, (_, n) => lang === 'en' ? n + ' times' : lang === 'th' ? n + ' ครั้ง' : lang === 'vi' ? n + ' lần' : lang === 'id' ? n + ' kali' : n + ' 次');
                 s = s.replace(/메뉴\s+(\d+)/g, (_, n) => lang === 'en' ? 'Menu ' + n : lang === 'th' ? 'เมนู ' + n : 'Menu ' + n);
                 return s;
             }
@@ -5770,7 +5890,7 @@ function translateLegacy(value) {
             const last = new Date(endDate + 'T00:00:00');
             let totalSales = 0, totalProfit = 0, totalDifference = 0;
             while (cursor <= last) {
-                const key = cursor.toISOString().slice(0,10);
+                const key = getLocalDateISO(cursor);
                 const g = groups[key] || {sales:0, profit:0, difference:0};
                 totalSales += g.sales; totalProfit += g.profit; totalDifference += g.difference;
                 const row = document.createElement('tr');
