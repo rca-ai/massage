@@ -3832,7 +3832,23 @@ async function initializeApp() {
             }
         }
 
-        async function updateStaff(id) {\n            const name=document.getElementById('editStaffName').value.trim();\n            if(!name){alert('직원명을 입력해주세요.');return;}\n            const staff=JSON.parse(localStorage.getItem(getAdminKey('staff'))||'[]');\n            const idx=staff.findIndex(x=>Number(x.id)===Number(id));\n            if(idx===-1)return;\n            const oldName=staff[idx].name;\n            const member={id:Number(id),name,phone:document.getElementById('editStaffPhone').value,bank:document.getElementById('editStaffBank').value,account:document.getElementById('editStaffAccount').value,status:document.getElementById('editStaffStatus').value};\n            if(currentAdmin?.sessionToken){try{const response=await apiFetch('/api/staff/item',{method:'PUT',body:JSON.stringify({legacyId:member.id,...member})});const result=await response.json();if(!response.ok||!result.ok)throw new Error(result?.error||'D1 update failed');}catch(error){console.error('D1 직원 수정 실패:',error);alert('직원 수정 중 서버 오류가 발생했습니다. 다시 시도해주세요.');return;}}\n            staff[idx]=member;\n            localStorage.setItem(getAdminKey('staff'),JSON.stringify(staff));\n            if(oldName!==name) updateHistoricalReferences('staff',oldName,name,member.id);\n            alert('직원 정보가 수정되었습니다. 과거 입금 데이터의 직원명도 함께 변경되었습니다.');\n            manageStaff();\n        }\n\n        async function deleteStaff(id) {
+        async function updateStaff(id) {
+            const name=document.getElementById('editStaffName').value.trim();
+            if(!name){alert('직원명을 입력해주세요.');return;}
+            const staff=JSON.parse(localStorage.getItem(getAdminKey('staff'))||'[]');
+            const idx=staff.findIndex(x=>Number(x.id)===Number(id));
+            if(idx===-1)return;
+            const oldName=staff[idx].name;
+            const member={id:Number(id),name,phone:document.getElementById('editStaffPhone').value,bank:document.getElementById('editStaffBank').value,account:document.getElementById('editStaffAccount').value,status:document.getElementById('editStaffStatus').value};
+            if(currentAdmin?.sessionToken){try{const response=await apiFetch('/api/staff/item',{method:'PUT',body:JSON.stringify({legacyId:member.id,...member})});const result=await response.json();if(!response.ok||!result.ok)throw new Error(result?.error||'D1 update failed');}catch(error){console.error('D1 직원 수정 실패:',error);alert('직원 수정 중 서버 오류가 발생했습니다. 다시 시도해주세요.');return;}}
+            staff[idx]=member;
+            localStorage.setItem(getAdminKey('staff'),JSON.stringify(staff));
+            if(oldName!==name) updateHistoricalReferences('staff',oldName,name,member.id);
+            alert('직원 정보가 수정되었습니다. 과거 입금 데이터의 직원명도 함께 변경되었습니다.');
+            manageStaff();
+        }
+
+        async function deleteStaff(id) {
             if(!confirm('정말 삭제하시겠습니까?'))return;
             if(currentAdmin?.sessionToken){try{const response=await apiFetch('/api/staff/item',{method:'DELETE',body:JSON.stringify({legacyId:id})});const result=await response.json();if(!response.ok||!result.ok)throw new Error(result?.error||'D1 delete failed');}catch(error){console.error('D1 직원 삭제 실패:',error);alert('직원 삭제 중 서버 오류가 발생했습니다. 다시 시도해주세요.');return;}}
             const staff=JSON.parse(localStorage.getItem(getAdminKey('staff'))||'[]');localStorage.setItem(getAdminKey('staff'),JSON.stringify(staff.filter(x=>Number(x.id)!==Number(id))));alert('직원이 삭제되었습니다.');manageStaff();
