@@ -341,7 +341,7 @@
     <!-- 월간 매출 그래프: 날짜별/직원별/메뉴별 -->
     <div id="monthlySalesGraphsContainer" class="mb-6" style="display: none;">
      <div class="bg-white rounded-lg shadow-md p-4 mb-4">
-      <h3 class="text-lg font-bold mb-3" data-translate="dailySalesChartTitle">날짜별 통계 그래프</h3>
+      <h3 class="text-lg font-bold mb-3" data-translate="dailySalesChartTitle">날짜별 수익 그래프</h3>
       <div id="dailySalesGraph" class="space-y-2"></div>
      </div>
      <div class="bg-white rounded-lg shadow-md p-4 mb-4">
@@ -372,7 +372,7 @@
     <!-- 년간 매출 그래프 -->
     <div id="annualSalesGraphsContainer" class="mb-6" style="display: none;">
      <div class="bg-white rounded-lg shadow-md p-4 mb-4">
-      <h3 class="text-lg font-bold mb-3" data-translate="annualMonthlySalesChartTitle">월별 매출 그래프</h3>
+      <h3 class="text-lg font-bold mb-3" data-translate="annualMonthlySalesChartTitle">월간 수익 그래프</h3>
       <div id="annualMonthlySalesGraph" class="space-y-2"></div>
      </div>
      <div class="bg-white rounded-lg shadow-md p-4 mb-4">
@@ -518,7 +518,7 @@
       <span><span id="paymentEnteredAmount">0</span><span id="paymentEnteredCurrency"></span></span>
      </div>
     </div>
-    <div class="mb-3 text-sm text-gray-600">결제방식 이름을 클릭하면 남은 금액이 자동 입력됩니다. 입력 후 금액을 직접 수정할 수 있습니다.</div>
+    <div class="mb-3 text-sm text-gray-600" data-translate="paymentMethodClickHint">결제방식 이름을 클릭하면 남은 금액이 자동 입력됩니다. 입력 후 금액을 직접 수정할 수 있습니다.</div>
     <div id="paymentMethods" class="space-y-3 mb-4">
     </div>
     <div class="flex gap-2"><button onclick="processPayment()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600" data-translate="confirm">확인</button> <button onclick="closePaymentModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="cancel">취소</button>
@@ -650,6 +650,7 @@
                 payment: '입금 처리',
                 totalAmount: '총 금액',
                 enteredAmount: '입력된 금액',
+                paymentMethodClickHint: '결제방식 이름을 클릭하면 남은 금액이 자동 입력됩니다. 입력 후 금액을 직접 수정할 수 있습니다.'
                 confirm: '확인',
                 cancel: '취소',
                 login: '로그인',
@@ -708,7 +709,8 @@
                 enterCustomerName: '고객명 입력',
                 monthlyMenuSales: '월간 메뉴 매출',
                 monthlySalesChart: '월간 매출 그래프',
-                dailySalesChartTitle: '날짜별 통계 그래프',
+                dailySalesChartTitle: '날짜별 수익 그래프',
+                annualMonthlySalesChartTitle: '월간 수익 그래프',
                 staffSalesChartTitle: '직원별 통계 그래프',
                 menuSalesChartTitle: '메뉴별 통계 그래프',
                 download: '다운로드',
@@ -835,6 +837,7 @@
                 payment: 'Payment',
                 totalAmount: 'Total Amount',
                 enteredAmount: 'Entered Amount',
+                paymentMethodClickHint: 'Click a payment method name to automatically enter the remaining amount. You can edit the amount manually after it is entered.'
                 confirm: 'Confirm',
                 cancel: 'Cancel',
                 login: 'Login',
@@ -875,7 +878,8 @@
                 enterCustomerName: 'Enter customer name',
                 monthlyMenuSales: 'Monthly Menu Sales',
                 monthlySalesChart: 'Monthly Sales Chart',
-                dailySalesChartTitle: 'Daily Sales Graph',
+                dailySalesChartTitle: 'Daily Revenue Graph',
+                annualMonthlySalesChartTitle: 'Monthly Revenue Graph',
                 staffSalesChartTitle: 'Staff Sales Graph',
                 menuSalesChartTitle: 'Menu Sales Graph',
                 download: 'Download',
@@ -1002,6 +1006,7 @@
                 payment: 'การชำระเงิน',
                 totalAmount: 'จำนวนเงินรวม',
                 enteredAmount: 'จำนวนเงินที่ป้อน',
+                paymentMethodClickHint: 'คลิกชื่อวิธีชำระเงินเพื่อกรอกยอดเงินคงเหลือโดยอัตโนมัติ และสามารถแก้ไขจำนวนเงินได้ด้วยตนเองหลังจากกรอกแล้ว'
                 confirm: 'ยืนยัน',
                 cancel: 'ยกเลิก',
                 login: 'เข้าสู่ระบบ',
@@ -1042,7 +1047,8 @@
                 enterCustomerName: 'กรอกชื่อลูกค้า',
                 monthlyMenuSales: 'ยอดขายเมนูรายเดือน',
                 monthlySalesChart: 'กราฟยอดขายรายเดือน',
-                dailySalesChartTitle: 'กราฟสถิติรายวัน',
+                dailySalesChartTitle: 'กราฟรายได้รายวัน',
+                annualMonthlySalesChartTitle: 'กราฟรายได้รายเดือน',
                 staffSalesChartTitle: 'กราฟสถิติพนักงาน',
                 menuSalesChartTitle: 'กราฟสถิติเมนู',
                 download: 'ดาวน์โหลด',
@@ -1169,6 +1175,7 @@
                 payment: 'Thanh toán',
                 totalAmount: 'Tổng số tiền',
                 enteredAmount: 'Số tiền đã nhập',
+                paymentMethodClickHint: 'Nhấn vào tên phương thức thanh toán để tự động nhập số tiền còn lại. Bạn có thể sửa số tiền trực tiếp sau đó.'
                 confirm: 'Xác nhận',
                 cancel: 'Hủy',
                 login: 'Đăng nhập',
@@ -1209,7 +1216,8 @@
                 enterCustomerName: 'Nhập tên khách hàng',
                 monthlyMenuSales: 'Doanh số menu hàng tháng',
                 monthlySalesChart: 'Biểu đồ doanh số hàng tháng',
-                dailySalesChartTitle: 'Biểu đồ thống kê theo ngày',
+                dailySalesChartTitle: 'Biểu đồ doanh thu theo ngày',
+                annualMonthlySalesChartTitle: 'Biểu đồ doanh thu theo tháng',
                 staffSalesChartTitle: 'Biểu đồ thống kê theo nhân viên',
                 menuSalesChartTitle: 'Biểu đồ thống kê theo menu',
                 download: 'Tải xuống',
@@ -3785,15 +3793,7 @@ async function initializeApp() {
             document.getElementById('managementTitle').textContent='직원 수정';document.getElementById('managementContent').innerHTML=content;
         }
 
-        async function updateStaff(id) {
-            const name=document.getElementById('editStaffName').value;if(!name){alert('직원명을 입력해주세요.');return;}
-            const staff=JSON.parse(localStorage.getItem(getAdminKey('staff'))||'[]'), idx=staff.findIndex(x=>Number(x.id)===Number(id));if(idx===-1)return;
-            const member={id:Number(id),name,phone:document.getElementById('editStaffPhone').value,bank:document.getElementById('editStaffBank').value,account:document.getElementById('editStaffAccount').value,status:document.getElementById('editStaffStatus').value};
-            if(currentAdmin?.sessionToken){try{const response=await apiFetch('/api/staff/item',{method:'PUT',body:JSON.stringify({legacyId:member.id,...member})});const result=await response.json();if(!response.ok||!result.ok)throw new Error(result?.error||'D1 update failed');}catch(error){console.error('D1 직원 수정 실패:',error);alert('직원 수정 중 서버 오류가 발생했습니다. 다시 시도해주세요.');return;}}
-            staff[idx]=member;localStorage.setItem(getAdminKey('staff'),JSON.stringify(staff));alert('직원 정보가 수정되었습니다.');manageStaff();
-        }
-
-        async function deleteStaff(id) {
+        // 기준정보 이름 변경 시 과거 스냅샷 데이터도 함께 갱신합니다.\n        // 직원명은 reservations/guarantees, 입금방식명은 reservations.paymentDetails에 저장된 기존 이름을 변경합니다.\n        function updateHistoricalReferences(referenceType, oldValue, newValue, referenceId) {\n            const reservationKey = getAdminKey('reservations');\n            const reservations = JSON.parse(localStorage.getItem(reservationKey) || '[]');\n            let reservationChanged = false;\n\n            reservations.forEach(r => {\n                if (referenceType === 'staff' && referenceId != null && Number(r.staffId) === Number(referenceId)) {\n                    if (r.staffName !== newValue) {\n                        r.staffName = newValue;\n                        reservationChanged = true;\n                    }\n                }\n\n                if (referenceType === 'paymentMethod' && r.paymentDetails && typeof r.paymentDetails === 'object' && Object.prototype.hasOwnProperty.call(r.paymentDetails, oldValue)) {\n                    const amount = Number(r.paymentDetails[oldValue]) || 0;\n                    delete r.paymentDetails[oldValue];\n                    r.paymentDetails[newValue] = (Number(r.paymentDetails[newValue]) || 0) + amount;\n                    reservationChanged = true;\n                }\n            });\n\n            if (reservationChanged) localStorage.setItem(reservationKey, JSON.stringify(reservations));\n\n            if (referenceType === 'staff') {\n                const guaranteeKey = getAdminKey('guarantees');\n                const guarantees = JSON.parse(localStorage.getItem(guaranteeKey) || '[]');\n                let guaranteeChanged = false;\n                guarantees.forEach(g => {\n                    if (g.staffName === oldValue) {\n                        g.staffName = newValue;\n                        guaranteeChanged = true;\n                    }\n                });\n                if (guaranteeChanged) localStorage.setItem(guaranteeKey, JSON.stringify(guarantees));\n            }\n        }\n\n        async function updateStaff(id) {\n            const name=document.getElementById('editStaffName').value.trim();\n            if(!name){alert('직원명을 입력해주세요.');return;}\n            const staff=JSON.parse(localStorage.getItem(getAdminKey('staff'))||'[]');\n            const idx=staff.findIndex(x=>Number(x.id)===Number(id));\n            if(idx===-1)return;\n            const oldName=staff[idx].name;\n            const member={id:Number(id),name,phone:document.getElementById('editStaffPhone').value,bank:document.getElementById('editStaffBank').value,account:document.getElementById('editStaffAccount').value,status:document.getElementById('editStaffStatus').value};\n            if(currentAdmin?.sessionToken){try{const response=await apiFetch('/api/staff/item',{method:'PUT',body:JSON.stringify({legacyId:member.id,...member})});const result=await response.json();if(!response.ok||!result.ok)throw new Error(result?.error||'D1 update failed');}catch(error){console.error('D1 직원 수정 실패:',error);alert('직원 수정 중 서버 오류가 발생했습니다. 다시 시도해주세요.');return;}}\n            staff[idx]=member;\n            localStorage.setItem(getAdminKey('staff'),JSON.stringify(staff));\n            if(oldName!==name) updateHistoricalReferences('staff',oldName,name,member.id);\n            alert('직원 정보가 수정되었습니다. 과거 입금 데이터의 직원명도 함께 변경되었습니다.');\n            manageStaff();\n        }\n\n        async function deleteStaff(id) {
             if(!confirm('정말 삭제하시겠습니까?'))return;
             if(currentAdmin?.sessionToken){try{const response=await apiFetch('/api/staff/item',{method:'DELETE',body:JSON.stringify({legacyId:id})});const result=await response.json();if(!response.ok||!result.ok)throw new Error(result?.error||'D1 delete failed');}catch(error){console.error('D1 직원 삭제 실패:',error);alert('직원 삭제 중 서버 오류가 발생했습니다. 다시 시도해주세요.');return;}}
             const staff=JSON.parse(localStorage.getItem(getAdminKey('staff'))||'[]');localStorage.setItem(getAdminKey('staff'),JSON.stringify(staff.filter(x=>Number(x.id)!==Number(id))));alert('직원이 삭제되었습니다.');manageStaff();
@@ -4115,29 +4115,7 @@ async function initializeApp() {
             document.getElementById('managementContent').innerHTML = content;
         }
 
-        function updatePaymentMethod(id) {
-            const name = document.getElementById('editPaymentMethodName').value;
-            if (!name) {
-                alert('입금방식명을 입력해주세요.');
-                return;
-            }
-
-            const paymentMethods = JSON.parse(localStorage.getItem(getAdminKey('paymentMethods')) || '[]');
-            const methodIndex = paymentMethods.findIndex(p => p.id === id);
-            
-            if (methodIndex === -1) return;
-
-            paymentMethods[methodIndex] = {
-                id: id,
-                name: name
-            };
-
-            localStorage.setItem(getAdminKey('paymentMethods'), JSON.stringify(paymentMethods));
-            alert('입금방식이 수정되었습니다.');
-            managePaymentMethods();
-        }
-
-        function deletePaymentMethod(id) {
+        function updatePaymentMethod(id) {\n            const name = document.getElementById('editPaymentMethodName').value.trim();\n            if (!name) {\n                alert('입금방식명을 입력해주세요.');\n                return;\n            }\n\n            const paymentMethods = JSON.parse(localStorage.getItem(getAdminKey('paymentMethods')) || '[]');\n            const methodIndex = paymentMethods.findIndex(p => Number(p.id) === Number(id));\n            if (methodIndex === -1) return;\n\n            const oldName = paymentMethods[methodIndex].name;\n            paymentMethods[methodIndex] = { id: Number(id), name: name };\n            localStorage.setItem(getAdminKey('paymentMethods'), JSON.stringify(paymentMethods));\n\n            if (oldName !== name) updateHistoricalReferences('paymentMethod', oldName, name);\n            alert('입금방식이 수정되었습니다. 과거 입금 데이터의 입금방식명도 함께 변경되었습니다.');\n            managePaymentMethods();\n        }\n\n        function deletePaymentMethod(id) {
             if (confirm('정말 삭제하시겠습니까?')) {
                 const paymentMethods = JSON.parse(localStorage.getItem(getAdminKey('paymentMethods')) || '[]');
                 const filteredMethods = paymentMethods.filter(p => p.id !== id);
