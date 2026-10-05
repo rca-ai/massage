@@ -30,14 +30,13 @@ jobs:
         with:
           gradle-version: '9.5.0'
 
-      - name: Prepare MaShop icon and Play Store assets
+      - name: Prepare MaShop icon resources
         working-directory: android-app
         shell: bash
         run: |
-          mkdir -p app/src/main/res/drawable ../android-build-output
-          convert assets/mashop-icon.svg -background white -alpha remove -alpha off app/src/main/res/drawable/ic_launcher.png
-          convert assets/mashop-icon.svg -background white -alpha remove -alpha off -resize 512x512 ../android-build-output/MaShop-Play-Icon-512.png
-          convert assets/mashop-feature.svg -background white -alpha remove -alpha off ../android-build-output/MaShop-Feature-Graphic-1024x500.png
+          test -f app/src/main/res/drawable/ic_launcher.xml
+          mkdir -p ../android-build-output
+          printf 'MaShop icon source: android-app/assets/mashop-icon.svg\n' > ../android-build-output/MaShop-ICON-INFO.txt
 
       - name: Prepare upload key
         working-directory: android-app
