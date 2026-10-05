@@ -8,6 +8,9 @@ on:
       - 'android-app/**'
       - '.github/workflows/build-android.yml'
   workflow_dispatch:
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
