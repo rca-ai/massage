@@ -308,7 +308,7 @@
    </div><!-- 통계 섹션 -->
    <div id="statisticsSection" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
     <h2 class="text-2xl font-bold mb-4" data-translate="statistics">통계</h2>
-    <div class="mb-4 flex gap-4 flex-wrap"><button onclick="showDailyStats()" id="dailyStatsBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" data-translate="daily">일간</button> <button onclick="showWeeklyStats()" id="weeklyStatsBtn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400" data-translate="weekly">주간</button> <button onclick="showMonthlyStats()" id="monthlyStatsBtn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400" data-translate="monthly">월간</button> <button onclick="showMenuSales()" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600" data-translate="monthlyMenuSales">월간 메뉴 매출</button> <button onclick="showMonthlySalesChart()" class="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600" data-translate="monthlySalesChart">월간 매출 그래프</button> <button onclick="showAnnualMenuSales()" class="bg-teal-500 text-white px-4 py-2 rounded hover:bg-teal-600" data-translate="annualMenuSales">년간 메뉴 매출</button> <button onclick="showAnnualSalesChart()" class="bg-cyan-500 text-white px-4 py-2 rounded hover:bg-cyan-600" data-translate="annualSalesChart">년간 매출 그래프</button> <button onclick="downloadExcel()" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700" data-translate="download">다운로드</button>
+    <div class="mb-4 flex gap-4 flex-wrap"><button onclick="showDailyStats()" id="dailyStatsBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" data-translate="daily">일간</button> <button onclick="showWeeklyStats()" id="weeklyStatsBtn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400" data-translate="weekly">주간</button> <button onclick="showMonthlyStats()" id="monthlyStatsBtn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400" data-translate="monthly">월간</button> <button onclick="showMenuSales()" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600" data-translate="monthlyMenuSales">월간 매출</button> <button onclick="showMonthlySalesChart()" class="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600" data-translate="monthlySalesChart">월간 매출 그래프</button> <button onclick="showAnnualMenuSales()" class="bg-teal-500 text-white px-4 py-2 rounded hover:bg-teal-600" data-translate="annualMenuSales">년간 매출</button> <button onclick="showAnnualSalesChart()" class="bg-cyan-500 text-white px-4 py-2 rounded hover:bg-cyan-600" data-translate="annualSalesChart">년간 매출 그래프</button> <button onclick="downloadExcel()" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700" data-translate="download">다운로드</button>
     </div><!-- 날짜 선택 영역 -->
     <div class="mb-6 p-4 bg-gray-50 rounded"><!-- 일간 선택 -->
      <div id="dailyDateSelection" class="mb-4"><label class="block text-sm font-medium mb-2" data-translate="selectDate">날짜 선택</label> <input type="date" id="statsDate" class="border rounded px-3 py-2" onchange="updateStats()">
@@ -355,7 +355,7 @@
     </div>
     <!-- 년간 메뉴 매출 -->
     <div id="annualMenuSalesContainer" class="mb-6" style="display: none;">
-     <h3 class="text-lg font-bold mb-2" data-translate="annualMenuSalesTitle">년간 메뉴 매출</h3>
+     <h3 class="text-lg font-bold mb-2" data-translate="annualMenuSalesTitle">년간 매출</h3>
      <div class="overflow-x-auto">
       <table class="w-full border-collapse border border-gray-300">
        <thead><tr class="bg-gray-100">
@@ -367,6 +367,21 @@
        <tbody id="annualMenuStatsTable"></tbody>
        <tfoot id="annualMenuStatsTableFoot"></tfoot>
       </table>
+     </div>
+     <div class="mt-6">
+      <h4 class="text-lg font-bold mb-2" data-translate="monthlySalesProfitStatisticsTitle">월별 매출 및 수익 통계</h4>
+      <div class="overflow-x-auto">
+       <table class="w-full border-collapse border border-gray-300">
+        <thead><tr class="bg-gray-100">
+         <th class="border border-gray-300 p-2" data-translate="monthColumn">월별</th>
+         <th class="border border-gray-300 p-2" data-translate="salesColumn">매출</th>
+         <th class="border border-gray-300 p-2" data-translate="netProfitColumn">순익</th>
+         <th class="border border-gray-300 p-2" data-translate="differenceColumn">차이</th>
+        </tr></thead>
+        <tbody id="monthlySalesProfitStatsTable"></tbody>
+        <tfoot id="monthlySalesProfitStatsTableFoot"></tfoot>
+       </table>
+      </div>
      </div>
     </div>
     <!-- 년간 매출 그래프 -->
@@ -415,6 +430,21 @@
        <tbody id="menuStatsTable"></tbody>
        <tfoot id="menuStatsTableFoot"></tfoot>
       </table>
+     </div>
+     <div class="mt-6">
+      <h4 class="text-lg font-bold mb-2" data-translate="dailySalesProfitStatisticsTitle">날짜별 매출 및 수익 통계</h4>
+      <div class="overflow-x-auto">
+       <table class="w-full border-collapse border border-gray-300">
+        <thead><tr class="bg-gray-100">
+         <th class="border border-gray-300 p-2" data-translate="dateColumn">날짜</th>
+         <th class="border border-gray-300 p-2" data-translate="salesColumn">매출</th>
+         <th class="border border-gray-300 p-2" data-translate="netProfitColumn">순익</th>
+         <th class="border border-gray-300 p-2" data-translate="differenceColumn">차이</th>
+        </tr></thead>
+        <tbody id="dailySalesProfitStatsTable"></tbody>
+        <tfoot id="dailySalesProfitStatsTableFoot"></tfoot>
+       </table>
+      </div>
      </div>
     </div><!-- 입금방식별 통계 -->
     <div class="mb-6">
@@ -707,9 +737,18 @@
                 orderZeroNote: '* 순번 0은 휴가로 처리됩니다',
                 selectRoom: '방 선택',
                 enterCustomerName: '고객명 입력',
-                monthlyMenuSales: '월간 메뉴 매출',
+                monthlyMenuSales: '월간 매출',
+                annualMenuSales: '년간 매출',
                 monthlySalesChart: '월간 매출 그래프',
                 dailySalesChartTitle: '날짜별 수익 그래프',
+                dailySalesProfitStatisticsTitle: '날짜별 매출 및 수익 통계',
+                monthlySalesProfitStatisticsTitle: '월별 매출 및 수익 통계',
+                dateColumn: '날짜',
+                monthColumn: '월별',
+                salesColumn: '매출',
+                netProfitColumn: '순익',
+                differenceColumn: '차이',
+
                 annualMonthlySalesChartTitle: '월간 수익 그래프',
                 staffSalesChartTitle: '직원별 통계 그래프',
                 menuSalesChartTitle: '메뉴별 통계 그래프',
@@ -876,9 +915,17 @@
                 orderZeroNote: '* Order 0 is treated as vacation',
                 selectRoom: 'Select Room',
                 enterCustomerName: 'Enter customer name',
-                monthlyMenuSales: 'Monthly Menu Sales',
+                monthlyMenuSales: 'Monthly Sales',
+                annualMenuSales: 'Annual Sales',
                 monthlySalesChart: 'Monthly Sales Chart',
                 dailySalesChartTitle: 'Daily Revenue Graph',
+                dailySalesProfitStatisticsTitle: 'Daily Sales & Profit Statistics',
+                monthlySalesProfitStatisticsTitle: 'Monthly Sales & Profit Statistics',
+                dateColumn: 'Date',
+                monthColumn: 'Month',
+                salesColumn: 'Sales',
+                netProfitColumn: 'Net Profit',
+                differenceColumn: 'Difference',
                 annualMonthlySalesChartTitle: 'Monthly Revenue Graph',
                 staffSalesChartTitle: 'Staff Sales Graph',
                 menuSalesChartTitle: 'Menu Sales Graph',
@@ -1045,9 +1092,17 @@
                 orderZeroNote: '* ลำดับ 0 จะถือเป็นวันหยุด',
                 selectRoom: 'เลือกห้อง',
                 enterCustomerName: 'กรอกชื่อลูกค้า',
-                monthlyMenuSales: 'ยอดขายเมนูรายเดือน',
+                monthlyMenuSales: 'ยอดขายรายเดือน',
+                annualMenuSales: 'ยอดขายรายปี',
                 monthlySalesChart: 'กราฟยอดขายรายเดือน',
                 dailySalesChartTitle: 'กราฟรายได้รายวัน',
+                dailySalesProfitStatisticsTitle: 'สถิติยอดขายและกำไรรายวัน',
+                monthlySalesProfitStatisticsTitle: 'สถิติยอดขายและกำไรรายเดือน',
+                dateColumn: 'วันที่',
+                monthColumn: 'เดือน',
+                salesColumn: 'ยอดขาย',
+                netProfitColumn: 'กำไรสุทธิ',
+                differenceColumn: 'ส่วนต่าง',
                 annualMonthlySalesChartTitle: 'กราฟรายได้รายเดือน',
                 staffSalesChartTitle: 'กราฟสถิติพนักงาน',
                 menuSalesChartTitle: 'กราฟสถิติเมนู',
@@ -1214,9 +1269,17 @@
                 orderZeroNote: '* Thứ tự 0 được coi là nghỉ phép',
                 selectRoom: 'Chọn phòng',
                 enterCustomerName: 'Nhập tên khách hàng',
-                monthlyMenuSales: 'Doanh số menu hàng tháng',
+                monthlyMenuSales: 'Doanh số hàng tháng',
+                annualMenuSales: 'Doanh số hàng năm',
                 monthlySalesChart: 'Biểu đồ doanh số hàng tháng',
                 dailySalesChartTitle: 'Biểu đồ doanh thu theo ngày',
+                dailySalesProfitStatisticsTitle: 'Thống kê doanh số và lợi nhuận theo ngày',
+                monthlySalesProfitStatisticsTitle: 'Thống kê doanh số và lợi nhuận theo tháng',
+                dateColumn: 'Ngày',
+                monthColumn: 'Tháng',
+                salesColumn: 'Doanh số',
+                netProfitColumn: 'Lợi nhuận ròng',
+                differenceColumn: 'Chênh lệch',
                 annualMonthlySalesChartTitle: 'Biểu đồ doanh thu theo tháng',
                 staffSalesChartTitle: 'Biểu đồ thống kê theo nhân viên',
                 menuSalesChartTitle: 'Biểu đồ thống kê theo menu',
@@ -5615,6 +5678,122 @@ function translateLegacy(value) {
             document.getElementById('totalProfitCurrency').textContent = currency.symbol;
         }
 
+
+        // 기간별 매출/순익 상세표 계산. Guarantee 조정분을 직원별로 비례 배분하여
+        // 상단 총계와 상세표 합계가 일치하도록 합니다.
+        function buildAdjustedProfitRows(reservations, groupBy, startDate, endDate) {
+            const currency = JSON.parse(localStorage.getItem(getAdminKey('currency')) || '{"symbol":"","name":"원"}');
+            const guarantees = JSON.parse(localStorage.getItem(getAdminKey('guarantees')) || '[]');
+            const staffRaw = {};
+            reservations.forEach(r => {
+                const staff = r.staffName || 'Unknown';
+                if (!staffRaw[staff]) staffRaw[staff] = 0;
+                staffRaw[staff] += Number(r.commission) || 0;
+            });
+
+            const staffAdjusted = {};
+            Object.entries(staffRaw).forEach(([staff, raw]) => {
+                let adjusted = raw;
+                const applicable = guarantees.filter(g =>
+                    g.staffName === staff &&
+                    String(g.date || '') <= endDate &&
+                    String(g.date || '') <= startDate
+                );
+                if (applicable.length) {
+                    const latest = applicable.reduce((a,b) => String(b.date||'') > String(a.date||'') ? b : a);
+                    adjusted = Math.max(raw, Number(latest.amount) || 0);
+                }
+                staffAdjusted[staff] = adjusted;
+            });
+
+            const groups = {};
+            reservations.forEach(r => {
+                const key = groupBy === 'date'
+                    ? String(r.date || '')
+                    : String(r.date || '').slice(0,7);
+                if (!key) return;
+                if (!groups[key]) groups[key] = { sales: 0, rawCommission: 0, staffRaw: {} };
+                groups[key].sales += Number(r.price) || 0;
+                const commission = Number(r.commission) || 0;
+                groups[key].rawCommission += commission;
+                const staff = r.staffName || 'Unknown';
+                groups[key].staffRaw[staff] = (groups[key].staffRaw[staff] || 0) + commission;
+            });
+
+            Object.values(groups).forEach(g => {
+                let adjustedCommission = 0;
+                Object.entries(g.staffRaw).forEach(([staff, raw]) => {
+                    const periodRaw = staffRaw[staff] || 0;
+                    const staffAdjustment = (staffAdjusted[staff] || periodRaw) - periodRaw;
+                    adjustedCommission += raw + (periodRaw > 0 ? raw / periodRaw * staffAdjustment : 0);
+                });
+                g.commission = adjustedCommission;
+                g.profit = g.sales - adjustedCommission;
+                g.difference = adjustedCommission;
+            });
+
+            return { groups, currency };
+        }
+
+        function displayDailySalesProfitStatistics(reservations, startDate, endDate) {
+            const body = document.getElementById('dailySalesProfitStatsTable');
+            const foot = document.getElementById('dailySalesProfitStatsTableFoot');
+            if (!body) return;
+            const { groups, currency } = buildAdjustedProfitRows(reservations, 'date', startDate, endDate);
+            body.innerHTML = '';
+            if (foot) foot.innerHTML = '';
+            const cursor = new Date(startDate + 'T00:00:00');
+            const last = new Date(endDate + 'T00:00:00');
+            let totalSales = 0, totalProfit = 0, totalDifference = 0;
+            while (cursor <= last) {
+                const key = cursor.toISOString().slice(0,10);
+                const g = groups[key] || {sales:0, profit:0, difference:0};
+                totalSales += g.sales; totalProfit += g.profit; totalDifference += g.difference;
+                const row = document.createElement('tr');
+                row.innerHTML = '<td class="border border-gray-300 p-2">' + key + '</td>' +
+                    '<td class="border border-gray-300 p-2">' + g.sales.toLocaleString() + currency.symbol + '</td>' +
+                    '<td class="border border-gray-300 p-2">' + g.profit.toLocaleString() + currency.symbol + '</td>' +
+                    '<td class="border border-gray-300 p-2">' + g.difference.toLocaleString() + currency.symbol + '</td>';
+                body.appendChild(row);
+                cursor.setDate(cursor.getDate() + 1);
+            }
+            if (foot) foot.innerHTML = '<tr class="bg-gray-100 font-bold">' +
+                '<td class="border border-gray-300 p-2">합계</td>' +
+                '<td class="border border-gray-300 p-2">' + totalSales.toLocaleString() + currency.symbol + '</td>' +
+                '<td class="border border-gray-300 p-2">' + totalProfit.toLocaleString() + currency.symbol + '</td>' +
+                '<td class="border border-gray-300 p-2">' + totalDifference.toLocaleString() + currency.symbol + '</td></tr>';
+            if (window.localizeLegacyUI) window.localizeLegacyUI();
+        }
+
+        function displayMonthlySalesProfitStatistics(reservations, year) {
+            const body = document.getElementById('monthlySalesProfitStatsTable');
+            const foot = document.getElementById('monthlySalesProfitStatsTableFoot');
+            if (!body) return;
+            const startDate = String(year).padStart(4,'0') + '-01-01';
+            const endDate = String(year).padStart(4,'0') + '-12-31';
+            const { groups, currency } = buildAdjustedProfitRows(reservations, 'month', startDate, endDate);
+            body.innerHTML = '';
+            if (foot) foot.innerHTML = '';
+            let totalSales = 0, totalProfit = 0, totalDifference = 0;
+            for (let month = 1; month <= 12; month++) {
+                const key = String(year).padStart(4,'0') + '-' + String(month).padStart(2,'0');
+                const g = groups[key] || {sales:0, profit:0, difference:0};
+                totalSales += g.sales; totalProfit += g.profit; totalDifference += g.difference;
+                const row = document.createElement('tr');
+                row.innerHTML = '<td class="border border-gray-300 p-2">' + month + '월</td>' +
+                    '<td class="border border-gray-300 p-2">' + g.sales.toLocaleString() + currency.symbol + '</td>' +
+                    '<td class="border border-gray-300 p-2">' + g.profit.toLocaleString() + currency.symbol + '</td>' +
+                    '<td class="border border-gray-300 p-2">' + g.difference.toLocaleString() + currency.symbol + '</td>';
+                body.appendChild(row);
+            }
+            if (foot) foot.innerHTML = '<tr class="bg-gray-100 font-bold">' +
+                '<td class="border border-gray-300 p-2">합계</td>' +
+                '<td class="border border-gray-300 p-2">' + totalSales.toLocaleString() + currency.symbol + '</td>' +
+                '<td class="border border-gray-300 p-2">' + totalProfit.toLocaleString() + currency.symbol + '</td>' +
+                '<td class="border border-gray-300 p-2">' + totalDifference.toLocaleString() + currency.symbol + '</td></tr>';
+            if (window.localizeLegacyUI) window.localizeLegacyUI();
+        }
+
         function loadMenuSalesStatistics() {
             const reservations = JSON.parse(localStorage.getItem(getAdminKey('reservations')) || '[]');
             const startDate = document.getElementById('statsStartDate').value;
@@ -5650,6 +5829,7 @@ function translateLegacy(value) {
             const staffStats = calculateStaffStatistics(filteredReservations);
             displayStaffStatistics(staffStats);
             displayMenuSalesStatistics(menuSales);
+            displayDailySalesProfitStatistics(filteredReservations, startDate, endDate);
             
             // 입금방식별 통계도 함께 표시
             const paymentStats = calculatePaymentStatistics(filteredReservations);
@@ -5823,6 +6003,7 @@ function translateLegacy(value) {
             });
 
             displayAnnualMenuSalesStatistics(menuSales);
+            displayMonthlySalesProfitStatistics(filteredReservations, year);
             displayAnnualStatistics(filteredReservations);
         }
 
