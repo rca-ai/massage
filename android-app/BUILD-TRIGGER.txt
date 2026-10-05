@@ -1,1 +1,1 @@
-MaShop Android build verification trigger.
+MaShop Android build verification trigger v2.
