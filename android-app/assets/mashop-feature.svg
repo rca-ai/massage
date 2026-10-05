@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="500" viewBox="0 0 1024 500">
+<rect width="1024" height="500" fill="#f8fafc"/>
+<g transform="translate(60,35) scale(.84)">
+  <path d="M98 74 Q98 58 114 58 H398 Q414 58 414 74 V108 H98 Z" fill="#e50909"/>
+  <path d="M98 108 H414 L468 192 H44 Z" fill="#f01818"/>
+  <path d="M44 192 H468 V213 Q468 233 448 233 H414 Q394 233 394 213 V192 H348 V213 Q348 233 328 233 H294 Q274 233 274 213 V192 H238 V213 Q238 233 218 233 H184 Q164 233 164 213 V192 H118 V213 Q118 233 98 233 H64 Q44 233 44 213 Z" fill="#e00b0b"/>
+  <path d="M162 108 H206 L170 192 H126 Z" fill="#fff"/>
+  <path d="M306 108 H350 L386 192 H342 Z" fill="#fff"/>
+  <text x="58" y="344" font-family="DejaVu Sans, Arial, sans-serif" font-size="160" font-weight="900" letter-spacing="-12"><tspan fill="#1477f8">M</tspan><tspan fill="#13ad45">A</tspan></text>
+  <text x="50" y="455" font-family="DejaVu Sans, Arial, sans-serif" font-size="92" font-weight="900" fill="#ffb900">SHOP</text>
+</g>
+<text x="510" y="190" font-family="DejaVu Sans, Arial, sans-serif" font-size="76" font-weight="800" fill="#111827">MaShop</text>
+<text x="510" y="255" font-family="DejaVu Sans, Arial, sans-serif" font-size="30" fill="#374151">Massage shop management</text>
+<text x="510" y="300" font-family="DejaVu Sans, Arial, sans-serif" font-size="30" fill="#374151">sales, staff, payments and statistics</text>
+</svg>
