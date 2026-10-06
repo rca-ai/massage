@@ -1504,6 +1504,94 @@
             guaranteeManagement:'Kelola Guarantee', dbDelete:'Hapus DB', deleteTargetDate:'Tanggal Target', viewStatus:'Lihat Status', deletePaidAll:'Hapus semua data yang sudah dibayar untuk tanggal yang dipilih'
         });
 
+
+        // 중국어/인도네시아어도 메인 UI의 전체 번역 키를 갖도록 보강합니다.
+        // 기존 영어 키를 기본값으로 유지하되 실제 화면에서 사용하는 핵심 항목은 해당 언어로 덮어씁니다.
+        translations['zh-CN'] = Object.assign({}, translations.en, {
+            title:'按摩管理系统', languageSelection:'语言选择', username:'用户名', password:'密码',
+            usernameInput:'请输入用户名', passwordInput:'请输入密码', login:'登录', newRegistration:'新注册',
+            dbManagement:'数据库管理', dataBackupRestoreTitle:'数据备份与恢复', backupButton:'备份', restoreButton:'恢复',
+            localBackupButton:'本地备份', localRestoreButton:'本地恢复', googleBackupButton:'Google备份',
+            googleRestoreButton:'Google恢复', exportAllDataButton:'导出全部数据到Excel',
+            excelUploadButton:'上传Excel数据', downloadUploadSampleButton:'下载上传样本',
+            menuManagement:'菜单管理', staffManagement:'员工管理', roomManagement:'房间管理',
+            customerManagement:'客户管理', currencyManagement:'货币单位', paymentMethodManagement:'付款方式管理',
+            guaranteeManagement:'Guarantee管理', dbDelete:'删除数据库', adminManagement:'管理员管理',
+            dashboard:'状态面板', order:'顺序', reservation:'预约', statistics:'统计',
+            changeLanguage:'更改语言', changeFont:'更改字体', logout:'退出登录',
+            close:'关闭', cancel:'取消', confirm:'确认', save:'保存', edit:'修改', delete:'删除', add:'添加',
+            staff:'员工姓名', menu:'菜单', duration:'时间', startTime:'开始时间', endTime:'结束时间',
+            remainingTime:'剩余时间', price:'价格', commission:'佣金', roomNumber:'房间号', actions:'操作',
+            selectStaff:'选择员工', selectMenu:'选择菜单', customerName:'客户姓名',
+            totalPrice:'总价格', totalCommission:'总佣金', grandTotal:'总金额（不含QR Tip）', profit:'收益',
+            download:'下载', staffStats:'员工统计', menuStatisticsTitle:'菜单统计',
+            paymentMethodStats:'付款方式统计', paymentMethod:'付款方式', amount:'金额',
+            dataBackupRestore:'数据备份与恢复', backup:'备份', restore:'恢复',
+            localBackup:'本地备份', localRestore:'本地恢复', googleBackup:'Google备份', googleRestore:'Google恢复',
+            exportAllData:'导出全部数据到Excel', management:'管理',
+            dataBackupRestoreTitle:'数据备份与恢复', backupButton:'备份', restoreButton:'恢复',
+            localBackupButton:'本地备份', localRestoreButton:'本地恢复',
+            googleBackupButton:'Google备份', googleRestoreButton:'Google恢复',
+            exportAllDataButton:'导出全部数据到Excel', managementLabel:'管理',
+            selectDate:'选择日期', startDate:'开始日期', endDate:'结束日期'
+        });
+        translations['zh-TW'] = Object.assign({}, translations.en, {
+            title:'按摩管理系統', languageSelection:'語言選擇', username:'帳號', password:'密碼',
+            usernameInput:'請輸入帳號', passwordInput:'請輸入密碼', login:'登入', newRegistration:'新註冊',
+            dbManagement:'資料庫管理', dataBackupRestoreTitle:'資料備份與恢復', backupButton:'備份', restoreButton:'恢復',
+            localBackupButton:'本機備份', localRestoreButton:'本機恢復', googleBackupButton:'Google備份',
+            googleRestoreButton:'Google恢復', exportAllDataButton:'匯出全部資料到Excel',
+            excelUploadButton:'上傳Excel資料', downloadUploadSampleButton:'下載上傳範本',
+            menuManagement:'選單管理', staffManagement:'員工管理', roomManagement:'房間管理',
+            customerManagement:'客戶管理', currencyManagement:'貨幣單位', paymentMethodManagement:'付款方式管理',
+            guaranteeManagement:'Guarantee管理', dbDelete:'刪除資料庫', adminManagement:'管理員管理',
+            dashboard:'狀態面板', order:'順序', reservation:'預約', statistics:'統計',
+            changeLanguage:'變更語言', changeFont:'變更字型', logout:'登出',
+            close:'關閉', cancel:'取消', confirm:'確認', save:'儲存', edit:'修改', delete:'刪除', add:'新增',
+            staff:'員工姓名', menu:'選單', duration:'時間', startTime:'開始時間', endTime:'結束時間',
+            remainingTime:'剩餘時間', price:'價格', commission:'佣金', roomNumber:'房號', actions:'操作',
+            selectStaff:'選擇員工', selectMenu:'選擇選單', customerName:'客戶姓名',
+            totalPrice:'總價格', totalCommission:'總佣金', grandTotal:'總金額（不含QR Tip）', profit:'收益',
+            download:'下載', staffStats:'員工統計', menuStatisticsTitle:'選單統計',
+            paymentMethodStats:'付款方式統計', paymentMethod:'付款方式', amount:'金額',
+            dataBackupRestore:'資料備份與恢復', backup:'備份', restore:'恢復',
+            localBackup:'本機備份', localRestore:'本機恢復', googleBackup:'Google備份', googleRestore:'Google恢復',
+            exportAllData:'匯出全部資料到Excel', management:'管理',
+            dataBackupRestoreTitle:'資料備份與恢復', backupButton:'備份', restoreButton:'恢復',
+            localBackupButton:'本機備份', localRestoreButton:'本機恢復',
+            googleBackupButton:'Google備份', googleRestoreButton:'Google恢復',
+            exportAllDataButton:'匯出全部資料到Excel', managementLabel:'管理',
+            selectDate:'選擇日期', startDate:'開始日期', endDate:'結束日期'
+        });
+        translations.id = Object.assign({}, translations.en, {
+            title:'Sistem Manajemen Pijat', languageSelection:'Pilih Bahasa', username:'Nama Pengguna', password:'Kata Sandi',
+            usernameInput:'Masukkan nama pengguna', passwordInput:'Masukkan kata sandi', login:'Masuk', newRegistration:'Pendaftaran Baru',
+            dbManagement:'Manajemen Database', dataBackupRestoreTitle:'Cadangan & Pemulihan Data', backupButton:'Cadangkan', restoreButton:'Pulihkan',
+            localBackupButton:'Cadangan Lokal', localRestoreButton:'Pemulihan Lokal', googleBackupButton:'Cadangan Google',
+            googleRestoreButton:'Pemulihan Google', exportAllDataButton:'Ekspor Semua Data ke Excel',
+            excelUploadButton:'Unggah Data Excel', downloadUploadSampleButton:'Unduh Sampel Unggah',
+            menuManagement:'Manajemen Menu', staffManagement:'Manajemen Karyawan', roomManagement:'Manajemen Ruangan',
+            customerManagement:'Manajemen Pelanggan', currencyManagement:'Mata Uang', paymentMethodManagement:'Metode Pembayaran',
+            guaranteeManagement:'Manajemen Guarantee', dbDelete:'Hapus Database', adminManagement:'Manajemen Admin',
+            dashboard:'Dasbor', order:'Urutan', reservation:'Reservasi', statistics:'Statistik',
+            changeLanguage:'Ganti Bahasa', changeFont:'Ganti Font', logout:'Keluar',
+            close:'Tutup', cancel:'Batal', confirm:'Konfirmasi', save:'Simpan', edit:'Edit', delete:'Hapus', add:'Tambah',
+            staff:'Nama Karyawan', menu:'Menu', duration:'Durasi', startTime:'Waktu Mulai', endTime:'Waktu Selesai',
+            remainingTime:'Waktu Tersisa', price:'Harga', commission:'Komisi', roomNumber:'Nomor Ruangan', actions:'Tindakan',
+            selectStaff:'Pilih Karyawan', selectMenu:'Pilih Menu', customerName:'Nama Pelanggan',
+            totalPrice:'Total Harga', totalCommission:'Total Komisi', grandTotal:'Total (tanpa QR Tip)', profit:'Laba',
+            download:'Unduh', staffStats:'Statistik Karyawan', menuStatisticsTitle:'Statistik Menu',
+            paymentMethodStats:'Statistik Metode Pembayaran', paymentMethod:'Metode Pembayaran', amount:'Jumlah',
+            dataBackupRestore:'Cadangan & Pemulihan Data', backup:'Cadangkan', restore:'Pulihkan',
+            localBackup:'Cadangan Lokal', localRestore:'Pemulihan Lokal', googleBackup:'Cadangan Google', googleRestore:'Pemulihan Google',
+            exportAllData:'Ekspor Semua Data ke Excel', management:'Manajemen',
+            dataBackupRestoreTitle:'Cadangan & Pemulihan Data', backupButton:'Cadangkan', restoreButton:'Pulihkan',
+            localBackupButton:'Cadangan Lokal', localRestoreButton:'Pemulihan Lokal',
+            googleBackupButton:'Cadangan Google', googleRestoreButton:'Pemulihan Google',
+            exportAllDataButton:'Ekspor Semua Data ke Excel', managementLabel:'Manajemen',
+            selectDate:'Pilih Tanggal', startDate:'Tanggal Mulai', endDate:'Tanggal Selesai'
+        });
+
         // 초기화
 async function initializeApp() {
     try {
@@ -1995,6 +2083,10 @@ async function initializeApp() {
         // 로그인 처리
         async function processLogin() {
             try {
+                // 로그인 화면에서 사용자가 선택한 언어를 로그인 전체 과정에서 고정합니다.
+                const loginLanguage = document.getElementById('loginLanguageSelect')?.value || currentLanguage || 'en';
+                currentLanguage = translations[loginLanguage] ? loginLanguage : 'en';
+                try { localStorage.setItem('selectedLanguage', currentLanguage); } catch (e) {}
                 const username = document.getElementById('loginUsername').value;
                 const password = document.getElementById('loginPassword').value;
                 
@@ -2075,6 +2167,9 @@ async function initializeApp() {
                     }
                     
                     currentAdmin = admin;
+                    // 관리자 계정에 저장된 언어보다 로그인 화면에서 사용자가 직접 선택한 언어를 우선합니다.
+                    currentLanguage = translations[loginLanguage] ? loginLanguage : 'en';
+                    try { localStorage.setItem('selectedLanguage', currentLanguage); } catch (e) {}
                     // 로그인 화면에서 사용자가 선택한 언어를 현재 세션 언어로 유지합니다.
                     // 관리자 계정에 저장된 언어는 기본값으로만 사용하며, 명시적으로 선택한 언어를 덮어쓰지 않습니다.
                     if (!currentLanguage || !translations[currentLanguage]) {
@@ -2197,7 +2292,9 @@ async function initializeApp() {
                 document.getElementById('loginUsername').value = '';
                 document.getElementById('loginPassword').value = '';
                 hideAllSections();
-                setLanguage('ko');
+                // 로그아웃 후에도 마지막으로 선택한 언어를 유지합니다. 기본 언어는 English입니다.
+                const savedLanguage = localStorage.getItem('selectedLanguage') || 'en';
+                setLanguage(translations[savedLanguage] ? savedLanguage : 'en');
             }
         }
 
@@ -5086,6 +5183,167 @@ function translateLegacy(value) {
                     id: {'시간 선택':'Pilih Waktu','가격:':'Harga:','커미션:':'Komisi:','메뉴 추가':'Tambah Menu','삭제':'Hapus','마사지사':'Terapis Pijat','만료일':'Tanggal Kedaluwarsa','만료일:':'Tanggal Kedaluwarsa:','메뉴별 시간 설정':'Pengaturan Waktu Menu','메뉴 선택':'Pilih Menu','신규등록':'Pendaftaran Baru','이메일':'Email','구글맵 주소':'Alamat Google Maps','언어 설정':'Bahasa','가입일로부터 1주일 동안 사용할 수 있습니다.':'Berlaku selama 1 minggu sejak pendaftaran','등록':'Daftar','아이디':'Nama Pengguna','비밀번호':'Kata Sandi','상점명':'Nama Toko','전화번호':'Nomor Telepon','직원별 현황판':'Dasbor Karyawan','방번호별 현황판':'Dasbor Kamar','마사지횟수':'Jumlah Pijat','DB 삭제':'Hapus Database','엑셀데이타 업로드':'Unggah Data Excel','업로드샘플 다운로드':'Unduh Sampel Unggah','삭제 대상 날짜':'Tanggal yang Dihapus','현황 보기':'Lihat Status','선택 날짜':'Tanggal Dipilih','전체':'Semua','건':'data','입금완료':'Sudah Dibayar','입금완료 금액':'Jumlah Dibayar','미입금':'Belum Dibayar','입금 완료':'Pembayaran Selesai'},
                     vi: {'시간 선택':'Chọn thời gian','가격:':'Giá:','커미션:':'Hoa hồng:','메뉴 추가':'Thêm menu','삭제':'Xóa','마사지사':'Nhân viên massage','만료일':'Ngày hết hạn','만료일:':'Ngày hết hạn:','메뉴별 시간 설정':'Cài đặt thời gian menu','메뉴 선택':'Chọn menu','신규등록':'Đăng ký mới','이메일':'Email','구글맵 주소':'Địa chỉ Google Maps','언어 설정':'Ngôn ngữ','가입일로부터 1주일 동안 사용할 수 있습니다.':'Có hiệu lực 1 tuần kể từ ngày đăng ký','등록':'Đăng ký','아이디':'Tên đăng nhập','비밀번호':'Mật khẩu','상점명':'Tên cửa hàng','전화번호':'Số điện thoại','직원별 현황판':'Bảng trạng thái nhân viên','방번호별 현황판':'Bảng trạng thái theo phòng','마사지횟수':'Số lần massage','DB 삭제':'Xóa DB','엑셀데이타 업로드':'Tải dữ liệu Excel lên','업로드샘플 다운로드':'Tải mẫu tải lên','삭제 대상 날짜':'Ngày cần xóa','현황 보기':'Xem trạng thái','선택 날짜 입금완료 데이터 전체 삭제':'Xóa toàn bộ dữ liệu đã thanh toán của ngày đã chọn','선택 날짜':'Ngày đã chọn','전체':'Tổng','건':'bản ghi','입금완료':'Đã thanh toán','입금완료 금액':'Số tiền đã thanh toán','미입금':'Chưa thanh toán','삭제 불가':'Không thể xóa','입금 완료':'Đã thanh toán','만료일':'Ngày hết hạn','만료일:':'Ngày hết hạn:','날짜를 선택하고 현황 보기를 눌러주세요.':'Chọn ngày và nhấn Xem trạng thái.','선택한 날짜의 데이터가 없습니다.':'Không có dữ liệu cho ngày đã chọn'}
                 };
+
+                const dynamicPopupUi = {
+                    en: {
+                        '엑셀 내보내기':'Excel Export','데이터를 CSV 파일로 내보냅니다.':'Export the data as a CSV file.',
+                        '데이터 개수:':'Data Count:','기간:':'Period:','파일명:':'File Name:','내보낼 파일명을 입력하세요':'Enter the file name to export',
+                        '* .csv 확장자는 자동으로 추가됩니다':'* .csv extension will be added automatically',
+                        '참고:':'Note:','브라우저 보안상 저장 경로는 기본 다운로드 폴더로 설정됩니다.':'For browser security, files are saved to the default Downloads folder.',
+                        '다운로드 후 원하는 위치로 파일을 이동하실 수 있습니다.':'You can move the file to another location after downloading.',
+                        '내보내기 실행':'Export','구글 드라이브 백업':'Google Drive Backup','구글 드라이브에 데이터를 백업합니다.':'Back up data to Google Drive.',
+                        '구글 계정에 로그인하여 드라이브에 백업 파일을 저장합니다.':'Sign in to your Google account and save the backup file to Drive.',
+                        '백업 파일은 "massage_backup_[날짜].json" 형식으로 저장됩니다.':'The backup file is saved as "massage_backup_[date].json".',
+                        '백업 파일명을 입력하세요':'Enter the backup file name','* .json 확장자는 자동으로 추가됩니다':'* .json extension will be added automatically',
+                        '구글 로그인 후 백업':'Back Up After Google Login','구글 드라이브 복원':'Google Drive Restore',
+                        '구글 드라이브에서 백업 파일을 선택하여 복원합니다.':'Select a backup file from Google Drive to restore.',
+                        '현재 데이터가 모두 삭제되고 백업 데이터로 대체됩니다.':'All current data will be deleted and replaced with the backup data.',
+                        '복원 전에 현재 데이터를 백업하는 것을 권장합니다.':'We recommend backing up the current data before restoring.',
+                        '구글 계정에 로그인하여 드라이브에서 백업 파일을 선택합니다.':'Sign in to your Google account and select a backup file from Drive.',
+                        'JSON 형식의 백업 파일만 복원 가능합니다.':'Only JSON backup files can be restored.',
+                        '구글 로그인 후 복원':'Restore After Google Login','⚠️ 주의:':'⚠️ Warning:',
+                        '현재 데이터가 모두 삭제됩니다.':'All current data will be deleted.',
+                        '구글 계정 로그인 성공!':'Google account login successful!','계정:':'Account:',
+                        '구글 드라이브 백업이 완료되었습니다!':'Google Drive backup completed!',
+                        '구글 드라이브 복원이 완료되었습니다!':'Google Drive restore completed!',
+                        '현재는 로컬 다운로드로 제공됩니다.':'Currently provided as a local download.',
+                        '실제 구글 드라이브 연동은 추후 업데이트 예정입니다.':'Actual Google Drive integration will be added in a future update.',
+                        '현재는 로컬 파일 선택으로 제공됩니다.':'Currently provided by selecting a local file.',
+                        '백업이 완료되었습니다.':'Backup completed.','텍스트 복원이 완료되었습니다!':'Text restore completed!',
+                        '로컬 백업 파일이 다운로드되었습니다.':'Local backup file downloaded.'
+                    },
+                    th: {
+                        '엑셀 내보내기':'ส่งออก Excel','데이터를 CSV 파일로 내보냅니다.':'ส่งออกข้อมูลเป็นไฟล์ CSV',
+                        '데이터 개수:':'จำนวนข้อมูล:','기간:':'ช่วงเวลา:','파일명:':'ชื่อไฟล์:','내보낼 파일명을 입력하세요':'กรอกชื่อไฟล์ที่ต้องการส่งออก',
+                        '* .csv 확장자는 자동으로 추가됩니다':'* ระบบจะเพิ่มนามสกุล .csv อัตโนมัติ',
+                        '참고:':'หมายเหตุ:','브라우저 보안상 저장 경로는 기본 다운로드 폴더로 설정됩니다.':'เพื่อความปลอดภัยของเบราว์เซอร์ ไฟล์จะถูกบันทึกในโฟลเดอร์ดาวน์โหลดเริ่มต้น',
+                        '다운로드 후 원하는 위치로 파일을 이동하실 수 있습니다.':'หลังดาวน์โหลดสามารถย้ายไฟล์ไปยังตำแหน่งที่ต้องการได้',
+                        '내보내기 실행':'ส่งออก','구글 드라이브 백업':'สำรองข้อมูล Google Drive','구글 드라이브에 데이터를 백업합니다.':'สำรองข้อมูลไปยัง Google Drive',
+                        '구글 계정에 로그인하여 드라이브에 백업 파일을 저장합니다.':'เข้าสู่ระบบบัญชี Google และบันทึกไฟล์สำรองใน Drive',
+                        '백업 파일은 "massage_backup_[날짜].json" 형식으로 저장됩니다.':'ไฟล์สำรองจะบันทึกเป็นรูปแบบ "massage_backup_[วันที่].json"',
+                        '백업 파일명을 입력하세요':'กรอกชื่อไฟล์สำรอง','* .json 확장자는 자동으로 추가됩니다':'* ระบบจะเพิ่มนามสกุล .json อัตโนมัติ',
+                        '구글 로그인 후 백업':'สำรองหลังเข้าสู่ระบบ Google','구글 드라이브 복원':'กู้คืนจาก Google Drive',
+                        '구글 드라이브에서 백업 파일을 선택하여 복원합니다.':'เลือกไฟล์สำรองจาก Google Drive เพื่อกู้คืน',
+                        '현재 데이터가 모두 삭제되고 백업 데이터로 대체됩니다.':'ข้อมูลปัจจุบันทั้งหมดจะถูกลบและแทนที่ด้วยข้อมูลสำรอง',
+                        '복원 전에 현재 데이터를 백업하는 것을 권장합니다.':'แนะนำให้สำรองข้อมูลปัจจุบันก่อนกู้คืน',
+                        '구글 계정에 로그인하여 드라이브에서 백업 파일을 선택합니다.':'เข้าสู่ระบบ Google และเลือกไฟล์สำรองจาก Drive',
+                        'JSON 형식의 백업 파일만 복원 가능합니다.':'กู้คืนได้เฉพาะไฟล์สำรองรูปแบบ JSON',
+                        '구글 로그인 후 복원':'กู้คืนหลังเข้าสู่ระบบ Google','⚠️ 주의:':'⚠️ คำเตือน:',
+                        '구글 계정 로그인 성공!':'เข้าสู่ระบบบัญชี Google สำเร็จ!','계정:':'บัญชี:',
+                        '구글 드라이브 백업이 완료되었습니다!':'สำรองข้อมูล Google Drive เสร็จแล้ว!',
+                        '구글 드라이브 복원이 완료되었습니다!':'กู้คืน Google Drive เสร็จแล้ว!',
+                        '현재는 로컬 다운로드로 제공됩니다.':'ขณะนี้ให้ดาวน์โหลดแบบภายในเครื่อง',
+                        '실제 구글 드라이브 연동은 추후 업데이트 예정입니다.':'การเชื่อมต่อ Google Drive จริงจะเพิ่มในอนาคต',
+                        '현재는 로컬 파일 선택으로 제공됩니다.':'ขณะนี้กู้คืนโดยเลือกไฟล์ในเครื่อง',
+                        '백업이 완료되었습니다.':'สำรองข้อมูลเสร็จแล้ว','텍스트 복원이 완료되었습니다!':'กู้คืนจากข้อความเสร็จแล้ว!',
+                        '로컬 백업 파일이 다운로드되었습니다.':'ดาวน์โหลดไฟล์สำรองในเครื่องแล้ว'
+                    },
+                    vi: {
+                        '엑셀 내보내기':'Xuất Excel','데이터를 CSV 파일로 내보냅니다.':'Xuất dữ liệu thành tệp CSV',
+                        '데이터 개수:':'Số lượng dữ liệu:','기간:':'Khoảng thời gian:','파일명:':'Tên tệp:','내보낼 파일명을 입력하세요':'Nhập tên tệp cần xuất',
+                        '* .csv 확장자는 자동으로 추가됩니다':'* Phần mở rộng .csv sẽ được tự động thêm',
+                        '참고:':'Lưu ý:','브라우저 보안상 저장 경로는 기본 다운로드 폴더로 설정됩니다.':'Vì lý do bảo mật trình duyệt, tệp được lưu vào thư mục Tải xuống mặc định.',
+                        '다운로드 후 원하는 위치로 파일을 이동하실 수 있습니다.':'Bạn có thể di chuyển tệp đến vị trí mong muốn sau khi tải xuống.',
+                        '내보내기 실행':'Xuất','구글 드라이브 백업':'Sao lưu Google Drive','구글 드라이브에 데이터를 백업합니다.':'Sao lưu dữ liệu vào Google Drive.',
+                        '구글 계정에 로그인하여 드라이브에 백업 파일을 저장합니다.':'Đăng nhập tài khoản Google và lưu tệp sao lưu vào Drive.',
+                        '백업 파일은 "massage_backup_[날짜].json" 형식으로 저장됩니다.':'Tệp sao lưu được lưu theo dạng "massage_backup_[ngày].json".',
+                        '백업 파일명을 입력하세요':'Nhập tên tệp sao lưu','* .json 확장자는 자동으로 추가됩니다':'* Phần mở rộng .json sẽ được tự động thêm',
+                        '구글 로그인 후 백업':'Sao lưu sau khi đăng nhập Google','구글 드라이브 복원':'Khôi phục Google Drive',
+                        '구글 드라이브에서 백업 파일을 선택하여 복원합니다.':'Chọn tệp sao lưu từ Google Drive để khôi phục.',
+                        '현재 데이터가 모두 삭제되고 백업 데이터로 대체됩니다.':'Tất cả dữ liệu hiện tại sẽ bị xóa và thay thế bằng dữ liệu sao lưu.',
+                        '복원 전에 현재 데이터를 백업하는 것을 권장합니다.':'Nên sao lưu dữ liệu hiện tại trước khi khôi phục.',
+                        '구글 계정에 로그인하여 드라이브에서 백업 파일을 선택합니다.':'Đăng nhập Google và chọn tệp sao lưu từ Drive.',
+                        'JSON 형식의 백업 파일만 복원 가능합니다.':'Chỉ có thể khôi phục tệp sao lưu định dạng JSON.',
+                        '구글 로그인 후 복원':'Khôi phục sau khi đăng nhập Google','⚠️ 주의:':'⚠️ Cảnh báo:',
+                        '구글 계정 로그인 성공!':'Đăng nhập tài khoản Google thành công!','계정:':'Tài khoản:',
+                        '구글 드라이브 백업이 완료되었습니다!':'Sao lưu Google Drive hoàn tất!',
+                        '구글 드라이브 복원이 완료되었습니다!':'Khôi phục Google Drive hoàn tất!',
+                        '현재는 로컬 다운로드로 제공됩니다.':'Hiện tại được cung cấp dưới dạng tải xuống cục bộ.',
+                        '실제 구글 드라이브 연동은 추후 업데이트 예정입니다.':'Tích hợp Google Drive thực tế sẽ được bổ sung trong bản cập nhật sau.',
+                        '현재는 로컬 파일 선택으로 제공됩니다.':'Hiện tại khôi phục bằng cách chọn tệp cục bộ.',
+                        '백업이 완료되었습니다.':'Sao lưu hoàn tất','텍스트 복원이 완료되었습니다!':'Khôi phục từ văn bản hoàn tất!',
+                        '로컬 백업 파일이 다운로드되었습니다.':'Đã tải xuống tệp sao lưu cục bộ.'
+                    },
+                    'zh-CN': {
+                        '엑셀 내보내기':'Excel导出','데이터를 CSV 파일로 내보냅니다.':'将数据导出为CSV文件。',
+                        '데이터 개수:':'数据数量：','기간:':'期间：','파일명:':'文件名：','내보낼 파일명을 입력하세요':'请输入要导出的文件名',
+                        '* .csv 확장자는 자동으로 추가됩니다':'* 将自动添加.csv扩展名',
+                        '참고:':'注意：','브라우저 보안상 저장 경로는 기본 다운로드 폴더로 설정됩니다.':'出于浏览器安全原因，文件将保存到默认下载文件夹。',
+                        '다운로드 후 원하는 위치로 파일을 이동하실 수 있습니다.':'下载后可以将文件移动到其他位置。',
+                        '내보내기 실행':'执行导出','구글 드라이브 백업':'Google云端硬盘备份','구글 드라이브에 데이터를 백업합니다.':'将数据备份到Google云端硬盘。',
+                        '구글 계정에 로그인하여 드라이브에 백업 파일을 저장합니다.':'登录Google账号并将备份文件保存到云端硬盘。',
+                        '백업 파일은 "massage_backup_[날짜].json" 형식으로 저장됩니다.':'备份文件将保存为“massage_backup_[日期].json”格式。',
+                        '백업 파일명을 입력하세요':'请输入备份文件名','* .json 확장자는 자동으로 추가됩니다':'* 将自动添加.json扩展名',
+                        '구글 로그인 후 백업':'登录Google后备份','구글 드라이브 복원':'Google云端硬盘恢复',
+                        '구글 드라이브에서 백업 파일을 선택하여 복원합니다.':'从Google云端硬盘选择备份文件进行恢复。',
+                        '현재 데이터가 모두 삭제되고 백업 데이터로 대체됩니다.':'当前所有数据将被删除并替换为备份数据。',
+                        '복원 전에 현재 데이터를 백업하는 것을 권장합니다.':'建议在恢复前备份当前数据。',
+                        '구글 계정에 로그인하여 드라이브에서 백업 파일을 선택합니다.':'登录Google账号并从云端硬盘选择备份文件。',
+                        'JSON 형식의 백업 파일만 복원 가능합니다.':'只能恢复JSON格式的备份文件。',
+                        '구글 로그인 후 복원':'登录Google后恢复','⚠️ 주의:':'⚠️ 注意：',
+                        '구글 계정 로그인 성공!':'Google账号登录成功！','계정:':'账号：',
+                        '구글 드라이브 백업이 완료되었습니다!':'Google云端硬盘备份完成！',
+                        '구글 드라이브 복원이 완료되었습니다!':'Google云端硬盘恢复完成！',
+                        '현재는 로컬 다운로드로 제공됩니다.':'目前提供本地下载。',
+                        '실제 구글 드라이브 연동은 추후 업데이트 예정입니다.':'实际Google云端硬盘集成将在后续更新中提供。',
+                        '현재는 로컬 파일 선택으로 제공됩니다.':'目前通过选择本地文件进行恢复。',
+                        '백업이 완료되었습니다.':'备份完成。','텍스트 복원이 완료되었습니다!':'文本恢复完成！',
+                        '로컬 백업 파일이 다운로드되었습니다.':'本地备份文件已下载。'
+                    },
+                    'zh-TW': {
+                        '엑셀 내보내기':'Excel匯出','데이터를 CSV 파일로 내보냅니다.':'將資料匯出為CSV檔案。',
+                        '데이터 개수:':'資料數量：','기간:':'期間：','파일명:':'檔案名稱：','내보낼 파일명을 입력하세요':'請輸入要匯出的檔案名稱',
+                        '* .csv 확장자는 자동으로 추가됩니다':'* 將自動新增.csv副檔名',
+                        '참고:':'注意：','브라우저 보안상 저장 경로는 기본 다운로드 폴더로 설정됩니다.':'基於瀏覽器安全性，檔案將儲存到預設下載資料夾。',
+                        '다운로드 후 원하는 위치로 파일을 이동하실 수 있습니다.':'下載後可以將檔案移動到其他位置。',
+                        '내보내기 실행':'執行匯出','구글 드라이브 백업':'Google雲端硬碟備份','구글 드라이브에 데이터를 백업합니다.':'將資料備份到Google雲端硬碟。',
+                        '구글 계정에 로그인하여 드라이브에 백업 파일을 저장합니다.':'登入Google帳號並將備份檔案儲存到雲端硬碟。',
+                        '백업 파일은 "massage_backup_[날짜].json" 형식으로 저장됩니다.':'備份檔案將以「massage_backup_[日期].json」格式儲存。',
+                        '백업 파일명을 입력하세요':'請輸入備份檔案名稱','* .json 확장자는 자동으로 추가됩니다':'* 將自動新增.json副檔名',
+                        '구글 로그인 후 백업':'登入Google後備份','구글 드라이브 복원':'Google雲端硬碟恢復',
+                        '구글 드라이브에서 백업 파일을 선택하여 복원합니다.':'從Google雲端硬碟選擇備份檔案進行恢復。',
+                        '현재 데이터가 모두 삭제되고 백업 데이터로 대체됩니다.':'目前所有資料將被刪除並取代為備份資料。',
+                        '복원 전에 현재 데이터를 백업하는 것을 권장합니다.':'建議在恢復前先備份目前資料。',
+                        '구글 계정에 로그인하여 드라이브에서 백업 파일을 선택합니다.':'登入Google帳號並從雲端硬碟選擇備份檔案。',
+                        'JSON 형식의 백업 파일만 복원 가능합니다.':'只能恢復JSON格式的備份檔案。',
+                        '구글 로그인 후 복원':'登入Google後恢復','⚠️ 주의:':'⚠️ 注意：',
+                        '구글 계정 로그인 성공!':'Google帳號登入成功！','계정:':'帳號：',
+                        '구글 드라이브 백업이 완료되었습니다!':'Google雲端硬碟備份完成！',
+                        '구글 드라이브 복원이 완료되었습니다!':'Google雲端硬碟恢復完成！',
+                        '현재는 로컬 다운로드로 제공됩니다.':'目前提供本機下載。',
+                        '실제 구글 드라이브 연동은 추후更新 예정입니다.':'實際Google雲端硬碟整合將在後續更新中提供。',
+                        '현재는 로컬 파일 선택으로 제공됩니다.':'目前透過選擇本機檔案進行恢復。',
+                        '백업이 완료되었습니다.':'備份完成。','텍스트 복원이 완료되었습니다!':'文字恢復完成！',
+                        '로컬 백업 파일이 다운로드되었습니다.':'本機備份檔案已下載。'
+                    },
+                    id: {
+                        '엑셀 내보내기':'Ekspor Excel','데이터를 CSV 파일로 내보냅니다.':'Ekspor data sebagai file CSV.',
+                        '데이터 개수:':'Jumlah data:','기간:':'Periode:','파일명:':'Nama file:','내보낼 파일명을 입력하세요':'Masukkan nama file untuk diekspor',
+                        '* .csv 확장자는 자동으로 추가됩니다':'* Ekstensi .csv akan ditambahkan otomatis',
+                        '참고:':'Catatan:','브라우저 보안상 저장 경로는 기본 다운로드 폴더로 설정됩니다.':'Demi keamanan browser, file disimpan di folder Unduhan default.',
+                        '다운로드 후 원하는 위치로 파일을 이동하실 수 있습니다.':'Setelah diunduh, file dapat dipindahkan ke lokasi yang diinginkan.',
+                        '내보내기 실행':'Ekspor','구글 드라이브 백업':'Cadangan Google Drive','구글 드라이브에 데이터를 백업합니다.':'Cadangkan data ke Google Drive.',
+                        '구글 계정에 로그인하여 드라이브에 백업 파일을 저장합니다.':'Login ke akun Google dan simpan file cadangan di Drive.',
+                        '백업 파일은 "massage_backup_[날짜].json" 형식으로 저장됩니다.':'File cadangan disimpan dalam format "massage_backup_[tanggal].json".',
+                        '백업 파일명을 입력하세요':'Masukkan nama file cadangan','* .json 확장자는 자동으로 추가됩니다':'* Ekstensi .json akan ditambahkan otomatis',
+                        '구글 로그인 후 백업':'Cadangkan setelah Login Google','구글 드라이브 복원':'Pemulihan Google Drive',
+                        '구글 드라이브에서 백업 파일을 선택하여 복원합니다.':'Pilih file cadangan dari Google Drive untuk dipulihkan.',
+                        '현재 데이터가 모두 삭제되고 백업 데이터로 대체됩니다.':'Semua data saat ini akan dihapus dan diganti dengan data cadangan.',
+                        '복원 전에 현재 데이터를 백업하는 것을 권장합니다.':'Disarankan mencadangkan data saat ini sebelum memulihkan.',
+                        '구글 계정에 로그인하여 드라이브에서 백업 파일을 선택합니다.':'Login ke Google dan pilih file cadangan dari Drive.',
+                        'JSON 형식의 백업 파일만 복원 가능합니다.':'Hanya file cadangan berformat JSON yang dapat dipulihkan.',
+                        '구글 로그인 후 복원':'Pulihkan setelah Login Google','⚠️ 주의:':'⚠️ Peringatan:',
+                        '구글 계정 로그인 성공!':'Login akun Google berhasil!','계정:':'Akun:',
+                        '구글 드라이브 백업이 완료되었습니다!':'Cadangan Google Drive selesai!',
+                        '구글 드라이브 복원이 완료되었습니다!':'Pemulihan Google Drive selesai!',
+                        '현재는 로컬 다운로드로 제공됩니다.':'Saat ini tersedia sebagai unduhan lokal.',
+                        '실제 구글 드라이브 연동은 추후 업데이트 예정입니다.':'Integrasi Google Drive sebenarnya akan tersedia pada pembaruan mendatang.',
+                        '현재는 로컬 파일 선택으로 제공됩니다.':'Saat ini dipulihkan dengan memilih file lokal.',
+                        '백업이 완료되었습니다.':'Cadangan selesai.','텍스트 복원이 완료되었습니다!':'Pemulihan teks selesai!',
+                        '로컬 백업 파일이 다운로드되었습니다.':'File cadangan lokal telah diunduh.'
+                    }
+                };
+                if (dynamicPopupUi[lang] && dynamicPopupUi[lang][s] !== undefined) return dynamicPopupUi[lang][s];
                 if (uiTranslations[lang] && uiTranslations[lang][s] !== undefined) return uiTranslations[lang][s];
                 if (extra[lang] && extra[lang][s] !== undefined) return extra[lang][s];
                 s = s.replace(/(\d+)\s*분/g, (_, n) => lang === 'en' ? n + ' min' : lang === 'th' ? n + ' นาที' : lang === 'vi' ? n + ' phút' : lang === 'id' ? n + ' menit' : n + ' 分');
