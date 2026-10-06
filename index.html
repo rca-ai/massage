@@ -2323,6 +2323,8 @@ async function initializeApp() {
             if (loginLanguageSelect) loginLanguageSelect.value = lang;
             updateTranslations();
             if (window.localizeLegacyUI) window.localizeLegacyUI();
+            localizeNewSalesGraphLabels();
+            localizeDynamicManagementModal();
 
             // 로그인 후 상단 상점명/만료일 표시도 선택한 언어로 즉시 갱신합니다.
             const shopNameElement = document.getElementById('shopName');
@@ -8617,11 +8619,15 @@ function translateLegacy(value) {
                 const translated = translatePopupMessage(raw);
                 if (translated !== raw) n.nodeValue = translated;
             });
-            root.querySelectorAll('input[placeholder], textarea[placeholder]').forEach(el => {
+            root.querySelectorAll('input[placeholder], textarea[placeholder], input[type="text"]').forEach(el => {
                 const raw = el.getAttribute('placeholder');
                 if (raw) {
                     const translated = translatePopupMessage(raw);
                     if (translated !== raw) el.setAttribute('placeholder', translated);
+                }
+                if (el.tagName === 'INPUT' && el.type === 'text' && el.value) {
+                    const translatedValue = translatePopupMessage(el.value);
+                    if (translatedValue !== el.value) el.value = translatedValue;
                 }
             });
         }
@@ -8632,10 +8638,32 @@ function translateLegacy(value) {
         const managementModalRoot = document.getElementById('managementModal');
         if (managementModalRoot) managementModalObserver.observe(managementModalRoot, {childList:true,subtree:true});
 
+        function localizeNewSalesGraphLabels() {
+            const labels = {
+                en: {'날짜별 매출 및 수익 그래프':'Daily Sales & Profit','월별 매출 및 수익 그래프':'Monthly Sales & Profit','매출':'Sales','수익':'Profit'},
+                th: {'날짜별 매출 및 수익 그래프':'ยอดขายและกำไรรายวัน','월별 매출 및 수익 그래프':'ยอดขายและกำไรรายเดือน','매출':'ยอดขาย','수익':'กำไร'},
+                vi: {'날짜별 매출 및 수익 그래프':'Doanh thu và lợi nhuận theo ngày','월별 매출 및 수익 그래프':'Doanh thu và lợi nhuận theo tháng','매출':'Doanh thu','수익':'Lợi nhuận'},
+                'zh-CN': {'날짜별 매출 및 수익 그래프':'每日销售额与利润','월별 매출 및 수익 그래프':'每月销售额与利润','매출':'销售额','수익':'利润'},
+                'zh-TW': {'날짜별 매출 및 수익 그래프':'每日營收與利潤','월별 매출 및 수익 그래프':'每月營收與利潤','매출':'營收','수익':'利潤'},
+                id: {'날짜별 매출 및 수익 그래프':'Penjualan & Laba Harian','월별 매출 및 수익 그래프':'Penjualan & Laba Bulanan','매출':'Penjualan','수익':'Laba'}
+            };
+            const map = labels[currentLanguage] || {};
+            document.querySelectorAll('[data-translate="dailySalesChartTitle"],[data-translate="annualMonthlySalesChartTitle"]').forEach(el => {
+                const key = el.textContent.trim();
+                if (map[key]) el.textContent = map[key];
+            });
+            document.querySelectorAll('[data-translate="salesColumn"],[data-translate="netProfitColumn"]').forEach(el => {
+                const key = el.textContent.trim();
+                if (map[key]) el.textContent = map[key];
+            });
+        }
+
         // 앱 초기화
         initializeApp();
         updateTranslations();
         if (window.localizeLegacyUI) window.localizeLegacyUI();
+        localizeNewSalesGraphLabels();
+        localizeDynamicManagementModal();
     </script>
  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99a6c0c3942d55a1',t:'MTc2MjQ1NDc4MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
