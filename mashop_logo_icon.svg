@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+<rect width="512" height="512" rx="72" fill="#fff"/>
+<path d="M67 155 132 70h248l65 85c15 20 1 47-24 47h-43c-13 0-25-7-31-18l-51-88h-30l19 88c3 12-6 25-19 25h-67c-13 0-22-13-19-25l19-88h-30l-51 88c-6 11-18 18-31 18H91c-25 0-39-27-24-47z" fill="#f71920"/>
+<path d="M89 199h75l88 94 88-94h75v156H315V264l-63 69-63-69v91H89z" fill="#086df0"/>
+<path d="M288 230c0-18 15-33 33-33h82c18 0 33 15 33 33v124h-58v-55h-32v55h-58zm58 31v28h32v-28z" fill="#0aa34f"/>
+<text x="70" y="454" font-family="Arial,Helvetica,sans-serif" font-size="78" font-weight="800" letter-spacing="2" fill="#ffbd08">SHOP</text>
+</svg>
