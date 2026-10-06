@@ -7832,6 +7832,13 @@ function translateLegacy(value) {
             };
             const popupDynamicOverrides = {
                 en: [
+                    [/^백업이 완료되었습니다\.\n파일명: (.+)\n위치: 다운로드 폴더$/, 'Backup completed.\nFile: $1\nLocation: Downloads folder'],
+                    [/^텍스트 복원이 완료되었습니다!\n백업 날짜: (.+)$/, 'Text restore completed!\nBackup date: $1'],
+                    [/^구글 계정 로그인 성공!\n계정: (.+)$/, 'Google account login successful!\nAccount: $1'],
+                    [/^구글 드라이브 백업이 완료되었습니다!\n파일명: (.+)\n\n\* 현재는 로컬 다운로드로 제공됩니다\.\n실제 구글 드라이브 연동은 추후 업데이트 예정입니다\.$/, 'Google Drive backup completed!\nFile: $1\n\n* Currently provided as a local download.\nActual Google Drive integration will be added in a future update.'],
+                    [/^구글 드라이브 복원이 완료되었습니다!\n백업 날짜: (.+)\n\n\* 현재는 로컬 파일 선택으로 제공됩니다\.\n실제 구글 드라이브 연동은 추후 업데이트 예정입니다\.$/, 'Google Drive restore completed!\nBackup date: $1\n\n* Currently provided by selecting a local file.\nActual Google Drive integration will be added in a future update.'],
+                    [/^RCA 테스트 데이터 복원이 완료되었습니다\.\n가장 최근 백업 날짜[(](.+)[)]가 자동으로 선택되었습니다\.$/, 'RCA test data restored.\nThe latest backup date ($1) was selected automatically.'],
+
                     [/^아직 사용 가능한 기간이 아닙니다\.\\n사용 가능 기간: (.+) ~ (.+)$/, 'The usage period has not started yet.\\nAvailable period: $1 ~ $2'],
                     [/^사용 기간이 만료되었습니다\.\\n관리자에게 문의하세요\.\\n만료일: (.+)$/, 'Your usage period has expired.\\nPlease contact the administrator.\\nExpiration date: $1'],
                     [/^신규등록이 완료되었습니다\.\\n가입일부터 1주일간 사용할 수 있습니다\.\\n만료일: (.+)$/, 'Registration completed.\\nValid for 1 week from registration.\\nExpiration date: $1'],
@@ -7855,6 +7862,13 @@ function translateLegacy(value) {
                     [/^이 백업은 다른 관리자\\((.+)\\)의 데이터입니다\. 계속하시겠습니까\?$/, 'This backup belongs to another administrator ($1). Continue?']
                 ],
                 th: [
+                    [/^백업이 완료되었습니다\.\n파일명: (.+)\n위치: 다운로드 폴더$/, 'สำรองข้อมูลเรียบร้อยแล้ว\nไฟล์: $1\nตำแหน่ง: โฟลเดอร์ดาวน์โหลด'],
+                    [/^텍스트 복원이 완료되었습니다!\n백업 날짜: (.+)$/, 'กู้คืนจากข้อความเรียบร้อยแล้ว!\nวันที่สำรองข้อมูล: $1'],
+                    [/^구글 계정 로그인 성공!\n계정: (.+)$/, 'เข้าสู่ระบบบัญชี Google สำเร็จ!\nบัญชี: $1'],
+                    [/^구글 드라이브 백업이 완료되었습니다!\n파일명: (.+)\n\n\* 현재는 로컬 다운로드로 제공됩니다\.\n실제 구글 드라이브 연동은 추후 업데이트 예정입니다\.$/, 'สำรองข้อมูล Google Drive เรียบร้อยแล้ว!\nไฟล์: $1\n\n* ขณะนี้ให้บริการเป็นการดาวน์โหลดในเครื่อง\nการเชื่อมต่อ Google Drive จริงจะเพิ่มในอัปเดตภายหลัง'],
+                    [/^구글 드라이브 복원이 완료되었습니다!\n백업 날짜: (.+)\n\n\* 현재는 로컬 파일 선택으로 제공됩니다\.\n실제 구글 드라이브 연동은 추후 업데이트 예정입니다\.$/, 'กู้คืนข้อมูล Google Drive เรียบร้อยแล้ว!\nวันที่สำรองข้อมูล: $1\n\n* ขณะนี้ให้บริการโดยเลือกไฟล์ในเครื่อง\nการเชื่อมต่อ Google Drive จริงจะเพิ่มในอัปเดตภายหลัง'],
+                    [/^RCA 테스트 데이터 복원이 완료되었습니다\.\n가장 최근 백업 날짜[(](.+)[)]가 자동으로 선택되었습니다\.$/, 'กู้คืนข้อมูลทดสอบ RCA แล้ว\nเลือกวันที่สำรองข้อมูลล่าสุด ($1) โดยอัตโนมัติ'],
+
                     [/^아직 사용 가능한 기간이 아닙니다\.\\n사용 가능 기간: (.+) ~ (.+)$/, 'ยังไม่ถึงช่วงเวลาที่ใช้งานได้\\nช่วงเวลาที่ใช้งานได้: $1 ~ $2'],
                     [/^사용 기간이 만료되었습니다\.\\n관리자에게 문의하세요\.\\n만료일: (.+)$/, 'หมดอายุการใช้งานแล้ว\\nกรุณาติดต่อผู้ดูแลระบบ\\nวันหมดอายุ: $1'],
                     [/^신규등록이 완료되었습니다\.\\n가입일부터 1주일간 사용할 수 있습니다\.\\n만료일: (.+)$/, 'สมัครใหม่สำเร็จแล้ว\\nใช้งานได้ 1 สัปดาห์นับจากวันสมัคร\\nวันหมดอายุ: $1'],
@@ -7878,6 +7892,13 @@ function translateLegacy(value) {
                     [/^이 백업은 다른 관리자\\((.+)\\)의 데이터입니다\. 계속하시겠습니까\?$/, 'ข้อมูลสำรองนี้เป็นของผู้ดูแลระบบอื่น ($1) ต้องการดำเนินการต่อหรือไม่?']
                 ],
                 vi: [
+                    [/^백업이 완료되었습니다\.\n파일명: (.+)\n위치: 다운로드 폴더$/, 'Đã sao lưu dữ liệu.\nTệp: $1\nVị trí: thư mục Tải xuống'],
+                    [/^텍스트 복원이 완료되었습니다!\n백업 날짜: (.+)$/, 'Đã khôi phục từ văn bản!\nNgày sao lưu: $1'],
+                    [/^구글 계정 로그인 성공!\n계정: (.+)$/, 'Đăng nhập tài khoản Google thành công!\nTài khoản: $1'],
+                    [/^구글 드라이브 백업이 완료되었습니다!\n파일명: (.+)\n\n\* 현재는 로컬 다운로드로 제공됩니다\.\n실제 구글 드라이브 연동은 추후 업데이트 예정입니다\.$/, 'Đã sao lưu Google Drive thành công!\nTệp: $1\n\n* Hiện tại dữ liệu được cung cấp dưới dạng tải xuống cục bộ.\nTích hợp Google Drive thực tế sẽ được bổ sung trong bản cập nhật sau.'],
+                    [/^구글 드라이브 복원이 완료되었습니다!\n백업 날짜: (.+)\n\n\* 현재는 로컬 파일 선택으로 제공됩니다\.\n실제 구글 드라이브 연동은 추후 업데이트 예정입니다\.$/, 'Đã khôi phục Google Drive thành công!\nNgày sao lưu: $1\n\n* Hiện tại dữ liệu được khôi phục bằng cách chọn tệp cục bộ.\nTích hợp Google Drive thực tế sẽ được bổ sung trong bản cập nhật sau.'],
+                    [/^RCA 테스트 데이터 복원이 완료되었습니다\.\n가장 최근 백업 날짜[(](.+)[)]가 자동으로 선택되었습니다\.$/, 'Đã khôi phục dữ liệu thử nghiệm RCA.\nNgày sao lưu gần nhất ($1) đã được chọn tự động.'],
+
                     [/^아직 사용 가능한 기간이 아닙니다\.\\n사용 가능 기간: (.+) ~ (.+)$/, 'Chưa đến thời gian có thể sử dụng.\\nThời gian sử dụng: $1 ~ $2'],
                     [/^사용 기간이 만료되었습니다\.\\n관리자에게 문의하세요\.\\n만료일: (.+)$/, 'Thời hạn sử dụng đã hết.\\nVui lòng liên hệ quản trị viên.\\nNgày hết hạn: $1'],
                     [/^신규등록이 완료되었습니다\.\\n가입일부터 1주일간 사용할 수 있습니다\.\\n만료일: (.+)$/, 'Đăng ký mới thành công.\\nCó hiệu lực 1 tuần kể từ ngày đăng ký.\\nNgày hết hạn: $1'],
@@ -7901,6 +7922,13 @@ function translateLegacy(value) {
                     [/^이 백업은 다른 관리자\\((.+)\\)의 데이터입니다\. 계속하시겠습니까\?$/, 'Bản sao lưu này thuộc về quản trị viên khác ($1). Tiếp tục?']
                 ],
                 'zh-CN': [
+                    [/^백업이 완료되었습니다\.\n파일명: (.+)\n위치: 다운로드 폴더$/, '备份完成。\n文件：$1\n位置：下载文件夹'],
+                    [/^텍스트 복원이 완료되었습니다!\n백업 날짜: (.+)$/, '文本恢复完成！\n备份日期：$1'],
+                    [/^구글 계정 로그인 성공!\n계정: (.+)$/, 'Google 账号登录成功！\n账号：$1'],
+                    [/^구글 드라이브 백업이 완료되었습니다!\n파일명: (.+)\n\n\* 현재는 로컬 다운로드로 제공됩니다\.\n실제 구글 드라이브 연동은 추후 업데이트 예정입니다\.$/, 'Google Drive 备份完成！\n文件：$1\n\n* 当前提供本地下载。\n实际 Google Drive 集成将在后续更新中提供。'],
+                    [/^구글 드라이브 복원이 완료되었습니다!\n백업 날짜: (.+)\n\n\* 현재는 로컬 파일 선택으로 제공됩니다\.\n실제 구글 드라이브 연동은 추후 업데이트 예정입니다\.$/, 'Google Drive 恢复完成！\n备份日期：$1\n\n* 当前通过选择本地文件进行恢复。\n实际 Google Drive 集成将在后续更新中提供。'],
+                    [/^RCA 테스트 데이터 복원이 완료되었습니다\.\n가장 최근 백업 날짜[(](.+)[)]가 자동으로 선택되었습니다\.$/, 'RCA 测试数据恢复完成。\n已自动选择最近的备份日期（$1）。'],
+
                     [/^아직 사용 가능한 기간이 아닙니다\.\\n사용 가능 기간: (.+) ~ (.+)$/, '尚未到可使用期限。\\n可使用期间：$1 ~ $2'],
                     [/^사용 기간이 만료되었습니다\.\\n관리자에게 문의하세요\.\\n만료일: (.+)$/, '使用期限已到期。\\n请联系管理员。\\n到期日：$1'],
                     [/^신규등록이 완료되었습니다\.\\n가입일부터 1주일간 사용할 수 있습니다\.\\n만료일: (.+)$/, '注册成功。\\n注册日起可使用1周。\\n到期日：$1'],
@@ -7924,6 +7952,13 @@ function translateLegacy(value) {
                     [/^이 백업은 다른 관리자\\((.+)\\)의 데이터입니다\. 계속하시겠습니까\?$/, '此备份属于其他管理员（$1）。是否继续？']
                 ],
                 'zh-TW': [
+                    [/^백업이 완료되었습니다\.\n파일명: (.+)\n위치: 다운로드 폴더$/, '備份完成。\n檔案：$1\n位置：下載資料夾'],
+                    [/^텍스트 복원이 완료되었습니다!\n백업 날짜: (.+)$/, '文字恢復完成！\n備份日期：$1'],
+                    [/^구글 계정 로그인 성공!\n계정: (.+)$/, 'Google 帳號登入成功！\n帳號：$1'],
+                    [/^구글 드라이브 백업이 완료되었습니다!\n파일명: (.+)\n\n\* 현재는 로컬 다운로드로 제공됩니다\.\n실제 구글 드라이브 연동은 추후 업데이트 예정입니다\.$/, 'Google Drive 備份完成！\n檔案：$1\n\n* 目前提供本機下載。\n實際 Google Drive 整合將在後續更新中提供。'],
+                    [/^구글 드라이브 복원이 완료되었습니다!\n백업 날짜: (.+)\n\n\* 현재는 로컬 파일 선택으로 제공됩니다\.\n실제 구글 드라이브 연동은 추후 업데이트 예정입니다\.$/, 'Google Drive 恢復完成！\n備份日期：$1\n\n* 目前透過選擇本機檔案進行恢復。\n實際 Google Drive 整合將在後續更新中提供。'],
+                    [/^RCA 테스트 데이터 복원이 완료되었습니다\.\n가장 최근 백업 날짜[(](.+)[)]가 자동으로 선택되었습니다\.$/, 'RCA 測試資料恢復完成。\n已自動選擇最近的備份日期（$1）。'],
+
                     [/^아직 사용 가능한 기간이 아닙니다\.\\n사용 가능 기간: (.+) ~ (.+)$/, '尚未到可使用期限。\\n可使用期間：$1 ~ $2'],
                     [/^사용 기간이 만료되었습니다\.\\n관리자에게 문의하세요\.\\n만료일: (.+)$/, '使用期限已到期。\\n請聯絡管理員。\\n到期日：$1'],
                     [/^신규등록이 완료되었습니다\.\\n가입일부터 1주일간 사용할 수 있습니다\.\\n만료일: (.+)$/, '註冊成功。\\n註冊日起可使用1週。\\n到期日：$1'],
@@ -7947,6 +7982,13 @@ function translateLegacy(value) {
                     [/^이 백업은 다른 관리자\\((.+)\\)의 데이터입니다\. 계속하시겠습니까\?$/, '此備份屬於其他管理員（$1）。是否繼續？']
                 ],
                 id: [
+                    [/^백업이 완료되었습니다\.\n파일명: (.+)\n위치: 다운로드 폴더$/, 'Cadangan selesai.\nFile: $1\nLokasi: folder Unduhan'],
+                    [/^텍스트 복원이 완료되었습니다!\n백업 날짜: (.+)$/, 'Pemulihan dari teks selesai!\nTanggal cadangan: $1'],
+                    [/^구글 계정 로그인 성공!\n계정: (.+)$/, 'Login akun Google berhasil!\nAkun: $1'],
+                    [/^구글 드라이브 백업이 완료되었습니다!\n파일명: (.+)\n\n\* 현재는 로컬 다운로드로 제공됩니다\.\n실제 구글 드라이브 연동은 추후 업데이트 예정입니다\.$/, 'Cadangan Google Drive selesai!\nFile: $1\n\n* Saat ini tersedia sebagai unduhan lokal.\nIntegrasi Google Drive sebenarnya akan ditambahkan pada pembaruan mendatang.'],
+                    [/^구글 드라이브 복원이 완료되었습니다!\n백업 날짜: (.+)\n\n\* 현재는 로컬 파일 선택으로 제공됩니다\.\n실제 구글 드라이브 연동은 추후 업데이트 예정입니다\.$/, 'Pemulihan Google Drive selesai!\nTanggal cadangan: $1\n\n* Saat ini dipulihkan dengan memilih file lokal.\nIntegrasi Google Drive sebenarnya akan ditambahkan pada pembaruan mendatang.'],
+                    [/^RCA 테스트 데이터 복원이 완료되었습니다\.\n가장 최근 백업 날짜[(](.+)[)]가 자동으로 선택되었습니다\.$/, 'Pemulihan data uji RCA selesai.\nTanggal cadangan terbaru ($1) dipilih secara otomatis.'],
+
                     [/^아직 사용 가능한 기간이 아닙니다\.\\n사용 가능 기간: (.+) ~ (.+)$/, 'Masa penggunaan belum dimulai.\\nPeriode penggunaan: $1 ~ $2'],
                     [/^사용 기간이 만료되었습니다\.\\n관리자에게 문의하세요\.\\n만료일: (.+)$/, 'Masa penggunaan telah berakhir.\\nSilakan hubungi admin.\\nTanggal kedaluwarsa: $1'],
                     [/^신규등록이 완료되었습니다\.\\n가입일부터 1주일간 사용할 수 있습니다\.\\n만료일: (.+)$/, 'Pendaftaran berhasil.\\nDapat digunakan selama 1 minggu sejak pendaftaran.\\nTanggal kedaluwarsa: $1'],
