@@ -7314,8 +7314,8 @@ function translateLegacy(value) {
             if (!rawText || currentLanguage === 'ko') return rawText;
             // alert/confirm은 실제 줄바꿈과 "\\n" 문자열이 섞여 있을 수 있으므로
             // 내부 비교에서는 모두 "\\n" 형태로 통일하고, 최종 표시 때 실제 줄바꿈으로 복원합니다.
-            const text = rawText.replace(/\\r?\\n/g, '\\\\n');
-            const restoreNewlines = value => String(value ?? '').replace(/\\\\n/g, '\\n');
+            const text = rawText.replace(/\r?\n/g, '\\n');
+            const restoreNewlines = value => String(value ?? '').replace(/\\n/g, '\n');
 
             const exact = {
                 en: {
