@@ -350,7 +350,8 @@
     <!-- 월간 매출 그래프: 날짜별/직원별/메뉴별 -->
     <div id="monthlySalesGraphsContainer" class="mb-6" style="display: none;">
      <div class="bg-white rounded-lg shadow-md p-4 mb-4">
-      <h3 class="text-lg font-bold mb-3" data-translate="dailySalesChartTitle">날짜별 수익 그래프</h3>
+      <h3 class="text-lg font-bold mb-2" data-translate="dailySalesChartTitle">날짜별 매출 및 수익 그래프</h3>
+      <div class="flex gap-4 text-xs mb-3"><span><span class="inline-block w-3 h-3 rounded bg-blue-200 mr-1"></span><span data-translate="salesColumn">매출</span></span><span><span class="inline-block w-3 h-3 rounded bg-blue-700 mr-1"></span><span data-translate="netProfitColumn">수익</span></span></div>
       <div id="dailySalesGraph" class="space-y-2"></div>
      </div>
      <div class="bg-white rounded-lg shadow-md p-4 mb-4">
@@ -396,7 +397,8 @@
     <!-- 년간 매출 그래프 -->
     <div id="annualSalesGraphsContainer" class="mb-6" style="display: none;">
      <div class="bg-white rounded-lg shadow-md p-4 mb-4">
-      <h3 class="text-lg font-bold mb-3" data-translate="annualMonthlySalesChartTitle">월간 수익 그래프</h3>
+      <h3 class="text-lg font-bold mb-2" data-translate="annualMonthlySalesChartTitle">월별 매출 및 수익 그래프</h3>
+      <div class="flex gap-4 text-xs mb-3"><span><span class="inline-block w-3 h-3 rounded bg-blue-200 mr-1"></span><span data-translate="salesColumn">매출</span></span><span><span class="inline-block w-3 h-3 rounded bg-blue-700 mr-1"></span><span data-translate="netProfitColumn">수익</span></span></div>
       <div id="annualMonthlySalesGraph" class="space-y-2"></div>
      </div>
      <div class="bg-white rounded-lg shadow-md p-4 mb-4">
@@ -3169,10 +3171,9 @@ async function initializeApp() {
 
                 reservations.push(newReservation);
             });
-
-            localStorage.setItem(getAdminKey('reservations'), JSON.stringify(reservations));
-
             const menuCount = menuRows.length;
+            if (!confirm(`선택한 ${menuCount}개의 메뉴 예약을 추가하시겠습니까?`)) return;
+            localStorage.setItem(getAdminKey('reservations'), JSON.stringify(reservations));
             alert(`${menuCount}개의 메뉴로 예약이 추가되었습니다.`);
             
             // 폼 초기화
@@ -6396,6 +6397,12 @@ function translateLegacy(value) {
                 dailySales[key] = { price: 0, count: 0 };
                 dailyCursor.setDate(dailyCursor.getDate() + 1);
             }
+            const adjustedDaily = buildAdjustedProfitRows(filteredReservations, 'date', startDate, endDate).groups;
+            Object.keys(adjustedDaily).forEach(key => {
+                if (!dailySales[key]) dailySales[key] = { price: 0, count: 0 };
+                dailySales[key].profit = adjustedDaily[key].profit || 0;
+            });
+
             const staffSales = {};
             const menuSales = {};
 
@@ -6456,17 +6463,42 @@ function translateLegacy(value) {
             }
         }
 
+        function renderSalesProfitGraph(containerId, entries, currency) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            container.innerHTML = '';
+            const maxSales = Math.max(...entries.map(e => Number(e.sales) || 0), 0);
+            entries.forEach(e => {
+                const sales = Number(e.sales) || 0;
+                const profit = Math.max(0, Number(e.profit) || 0);
+                const salesPct = maxSales > 0 ? (sales / maxSales) * 100 : 0;
+                const profitPct = maxSales > 0 ? (profit / maxSales) * 100 : 0;
+                const row = document.createElement('div');
+                row.className = 'mb-3';
+                row.innerHTML =
+                    '<div class="flex items-center gap-2 mb-1">' +
+                    '<div class="w-28 md:w-36 text-sm font-medium truncate" title="' + e.label + '">' + e.label + '</div>' +
+                    '<div class="flex-1 text-left text-xs font-bold text-blue-800">' + profit.toLocaleString() + currency.symbol + '</div>' +
+                    '<div class="w-28 text-right text-xs text-blue-700">' + sales.toLocaleString() + currency.symbol + '</div>' +
+                    '</div>' +
+                    '<div class="ml-0 md:ml-36 relative h-7 bg-gray-100 rounded-full overflow-hidden border border-gray-200">' +
+                    '<div class="absolute inset-y-0 left-0 bg-blue-200 rounded-full" style="width:' + Math.max(salesPct, sales > 0 ? 2 : 0) + '%"></div>' +
+                    '<div class="absolute inset-y-0 left-0 bg-blue-700 rounded-full" style="width:' + Math.min(profitPct, 100) + '%"></div>' +
+                    '</div>';
+                container.appendChild(row);
+            });
+            if (!entries.length) container.innerHTML = '<div class="text-gray-500 text-sm">데이터가 없습니다.</div>';
+        }
+
         function displayMonthlySalesGraphs(dailySales, staffSales, menuSales) {
             const currency = JSON.parse(localStorage.getItem(getAdminKey('currency')) || '{"symbol":"","name":"원"}');
-
             const dailyEntries = Object.entries(dailySales).sort((a,b) => a[0].localeCompare(b[0]))
-                .map(([label, v]) => ({label, value:v.price}));
+                .map(([label, v]) => ({label, sales:v.price, profit:v.profit || 0}));
             const staffEntries = Object.entries(staffSales).sort((a,b) => b[1].price-a[1].price)
                 .map(([label, v]) => ({label, value:v.price}));
             const menuEntries = Object.entries(menuSales).sort((a,b) => b[1].price-a[1].price)
                 .map(([label, v]) => ({label, value:v.price}));
-
-            renderBarGraph('dailySalesGraph', dailyEntries, value => value.toLocaleString() + currency.symbol);
+            renderSalesProfitGraph('dailySalesGraph', dailyEntries, currency);
             renderBarGraph('staffSalesGraph', staffEntries, value => value.toLocaleString() + currency.symbol);
             renderBarGraph('menuSalesGraph', menuEntries, value => value.toLocaleString() + currency.symbol);
         }
@@ -6537,7 +6569,12 @@ function translateLegacy(value) {
             const filteredReservations = reservations.filter(r => r.paid && String(r.date || '').startsWith(prefix));
 
             const monthlySales = {};
-            for (let month = 1; month <= 12; month++) monthlySales[month] = { price: 0, count: 0 };
+            for (let month = 1; month <= 12; month++) monthlySales[month] = { price: 0, count: 0, profit: 0 };
+            const adjustedMonthly = buildAdjustedProfitRows(filteredReservations, 'month', prefix + '01', prefix + '12-31').groups;
+            for (let month = 1; month <= 12; month++) {
+                const key = prefix + String(month).padStart(2, '0');
+                monthlySales[month].profit = adjustedMonthly[key] ? (adjustedMonthly[key].profit || 0) : 0;
+            }
             const staffSales = {};
             const menuSales = {};
 
@@ -6557,11 +6594,11 @@ function translateLegacy(value) {
             });
 
             const currency = JSON.parse(localStorage.getItem(getAdminKey('currency')) || '{"symbol":"","name":"원"}');
-            const monthlyEntries = Object.entries(monthlySales).map(([m,v]) => ({label: m + '월', value: v.price}));
+            const monthlyEntries = Object.entries(monthlySales).map(([m,v]) => ({label: m + '월', sales: v.price, profit: v.profit || 0}));
             const staffEntries = Object.entries(staffSales).sort((a,b) => b[1].price-a[1].price).map(([label,v]) => ({label, value:v.price}));
             const menuEntries = Object.entries(menuSales).sort((a,b) => b[1].price-a[1].price).map(([label,v]) => ({label, value:v.price}));
 
-            renderBarGraph('annualMonthlySalesGraph', monthlyEntries, value => value.toLocaleString() + currency.symbol);
+            renderSalesProfitGraph('annualMonthlySalesGraph', monthlyEntries, currency);
             renderBarGraph('annualStaffSalesGraph', staffEntries, value => value.toLocaleString() + currency.symbol);
             renderBarGraph('annualMenuSalesGraph', menuEntries, value => value.toLocaleString() + currency.symbol);
 
@@ -7515,6 +7552,9 @@ function translateLegacy(value) {
                     staffOrder[member.id] = parseInt(orderSelect.value);
                 }
             });
+
+            if (!confirm('순번을 저장하시겠습니까?')) return;
+
 
             localStorage.setItem(getDailyStaffOrderKey(currentDate), JSON.stringify(staffOrder));
             alert(`${currentDate} 날짜의 순번이 저장되었습니다.`);
