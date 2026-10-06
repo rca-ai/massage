@@ -488,7 +488,7 @@
       </div>
       <div>
        <h4 class="font-semibold mb-2" data-translate="restoreButton">복원</h4>
-       <div class="flex gap-2 flex-wrap"><input type="file" id="restoreFile" accept=".json" style="display: none;" onchange="restoreData(event)"> <input type="file" id="excelUploadFile" accept=".xlsx,.xls" style="display: none;" onchange="uploadExcelData(event)"> <button onclick="showLocalRestoreDialog()" class="bg-orange-600 text-white px-3 py-2 rounded hover:bg-orange-700 text-sm" data-translate="localRestoreButton">로컬 복원</button> <button onclick="showGoogleRestoreDialog()" class="bg-indigo-600 text-white px-3 py-2 rounded hover:bg-indigo-700 text-sm" data-translate="googleRestoreButton">구글 복원</button> <button onclick="document.getElementById('excelUploadFile').click()" class="bg-green-700 text-white px-3 py-2 rounded hover:bg-green-800 text-sm">엑셀데이타 업로드</button> <button onclick="downloadExcelUploadSample()" class="bg-blue-700 text-white px-3 py-2 rounded hover:bg-blue-800 text-sm">업로드샘플 다운로드</button>
+       <div class="flex gap-2 flex-wrap"><input type="file" id="restoreFile" accept=".json" style="display: none;" onchange="restoreData(event)"> <input type="file" id="excelUploadFile" accept=".xlsx,.xls" style="display: none;" onchange="uploadExcelData(event)"> <button onclick="showLocalRestoreDialog()" class="bg-orange-600 text-white px-3 py-2 rounded hover:bg-orange-700 text-sm" data-translate="localRestoreButton">로컬 복원</button> <button onclick="showGoogleRestoreDialog()" class="bg-indigo-600 text-white px-3 py-2 rounded hover:bg-indigo-700 text-sm" data-translate="googleRestoreButton">구글 복원</button> <button onclick="document.getElementById('excelUploadFile').click()" class="bg-green-700 text-white px-3 py-2 rounded hover:bg-green-800 text-sm" data-translate="excelUploadButton">엑셀데이타 업로드</button> <button onclick="downloadExcelUploadSample()" class="bg-blue-700 text-white px-3 py-2 rounded hover:bg-blue-800 text-sm" data-translate="downloadUploadSampleButton">업로드샘플 다운로드</button>
        </div>
       </div>
      </div>
@@ -1356,6 +1356,7 @@
         // 추가 언어: 중국어 간체 / 중국어 번체 / 인도네시아어
         // 전체 번역 키는 영어를 기본값으로 사용하고 주요 화면은 각 언어로 번역합니다.
         translations['zh-CN'] = Object.assign({}, translations.en, {
+            excelUploadButton:'上传Excel数据', downloadUploadSampleButton:'下载上传样本',
             title:'按摩店管理系统', changeLanguage:'切换语言', changeFont:'更改字体', fontSelection:'选择字体',
             fontSize:'字体大小', fontFamily:'字体类型', apply:'应用', logout:'退出登录', todayDate:'今天日期', currentTime:'当前时间',
             dashboard:'状态面板', order:'顺序', reservation:'预约', statistics:'统计', dbManagement:'数据库管理', staff:'员工',
@@ -1390,6 +1391,7 @@
             paymentMethodColumn:'付款方式', amountColumn:'金额'
         });
         translations['zh-TW'] = Object.assign({}, translations['zh-CN'], {
+            excelUploadButton:'上傳Excel資料', downloadUploadSampleButton:'下載上傳範本',
             title:'按摩店管理系統', changeLanguage:'切換語言', changeFont:'更改字型', fontSelection:'選擇字型',
             fontSize:'字型大小', fontFamily:'字型類型', dashboard:'狀態面板', statistics:'統計', dbManagement:'資料庫管理',
             staff:'員工', dashboardSummaryTitle:'依順序統計', massageCount:'按摩次數', menu:'選單', duration:'時間',
@@ -1422,6 +1424,7 @@
             paymentMethodColumn:'付款方式', amountColumn:'金額'
         });
         translations['id'] = Object.assign({}, translations.en, {
+            excelUploadButton:'Unggah Data Excel', downloadUploadSampleButton:'Unduh Sampel Unggah',
             title:'Sistem Manajemen Pijat', changeLanguage:'Ganti Bahasa', changeFont:'Ganti Font', fontSelection:'Pilih Font',
             fontSize:'Ukuran Font', fontFamily:'Jenis Font', apply:'Terapkan', logout:'Keluar', todayDate:'Tanggal Hari Ini',
             currentTime:'Waktu Saat Ini', dashboard:'Dasbor', order:'Urutan', reservation:'Reservasi', statistics:'Statistik',
@@ -7307,8 +7310,12 @@ function translateLegacy(value) {
         // 브라우저/Windows의 시스템 언어가 팝업 본문을 번역해 주는 것이 아니라,
         // 아래에서 앱의 현재 선택 언어(currentLanguage)에 따라 메시지를 번역합니다.
         function translatePopupMessage(message) {
-            const text = String(message ?? '');
-            if (!text || currentLanguage === 'ko') return text;
+            const rawText = String(message ?? '');
+            if (!rawText || currentLanguage === 'ko') return rawText;
+            // alert/confirm은 실제 줄바꿈과 "\\n" 문자열이 섞여 있을 수 있으므로
+            // 내부 비교에서는 모두 "\\n" 형태로 통일하고, 최종 표시 때 실제 줄바꿈으로 복원합니다.
+            const text = rawText.replace(/\\r?\\n/g, '\\\\n');
+            const restoreNewlines = value => String(value ?? '').replace(/\\\\n/g, '\\n');
 
             const exact = {
                 en: {
@@ -7500,8 +7507,228 @@ function translateLegacy(value) {
                 }
             };
 
+            const popupExactOverrides = {
+                en: {
+                    '직원 정보가 수정되었습니다. 과거 입금 데이터의 직원명도 함께 변경되었습니다.':'Staff information updated. Historical paid records were updated with the new staff name.',
+                    '입금방식이 수정되었습니다. 과거 입금 데이터의 입금방식명도 함께 변경되었습니다.':'Payment method updated. Historical paid records were updated with the new payment method name.',
+                    'RCA 관리자 로그인 상태에서만 테스트 백업을 복원할 수 있습니다.':'Test backup restoration is available only when logged in as the RCA administrator.',
+                    '백업 파일 공유가 완료되었습니다.':'Backup file sharing completed.',
+                    '백업 데이터가 클립보드에 복사되었습니다.':'Backup data has been copied to the clipboard.',
+                    '파일이 선택되지 않았습니다. 텍스트로 백업 데이터를 입력하시겠습니까?':'No file was selected. Would you like to enter the backup data as text?',
+                    '이메일과 비밀번호를 입력해주세요.':'Please enter your email and password.',
+                    '올바른 이메일 형식을 입력해주세요.':'Please enter a valid email address.'
+                },
+                th: {
+                    '직원 정보가 수정되었습니다. 과거 입금 데이터의 직원명도 함께 변경되었습니다.':'แก้ไขข้อมูลพนักงานแล้ว และอัปเดตชื่อพนักงานในข้อมูลการชำระเงินย้อนหลังแล้ว',
+                    '입금방식이 수정되었습니다. 과거 입금 데이터의 입금방식명도 함께 변경되었습니다.':'แก้ไขวิธีชำระเงินแล้ว และอัปเดตชื่อวิธีชำระเงินในข้อมูลย้อนหลังแล้ว',
+                    'RCA 관리자 로그인 상태에서만 테스트 백업을 복원할 수 있습니다.':'สามารถกู้คืนข้อมูลสำรองทดสอบได้เฉพาะเมื่อเข้าสู่ระบบผู้ดูแล RCA',
+                    '백업 파일 공유가 완료되었습니다.':'แชร์ไฟล์สำรองข้อมูลเรียบร้อยแล้ว',
+                    '백업 데이터가 클립보드에 복사되었습니다.':'คัดลอกข้อมูลสำรองไปยังคลิปบอร์ดแล้ว',
+                    '파일이 선택되지 않았습니다. 텍스트로 백업 데이터를 입력하시겠습니까?':'ไม่ได้เลือกไฟล์ ต้องการป้อนข้อมูลสำรองเป็นข้อความหรือไม่?',
+                    '이메일과 비밀번호를 입력해주세요.':'กรุณากรอกอีเมลและรหัสผ่าน',
+                    '올바른 이메일 형식을 입력해주세요.':'กรุณากรอกอีเมลในรูปแบบที่ถูกต้อง'
+                },
+                vi: {
+                    '직원 정보가 수정되었습니다. 과거 입금 데이터의 직원명도 함께 변경되었습니다.':'Đã cập nhật thông tin nhân viên và tên nhân viên trong dữ liệu thanh toán trước đây.',
+                    '입금방식이 수정되었습니다. 과거 입금 데이터의 입금방식명도 함께 변경되었습니다.':'Đã cập nhật phương thức thanh toán và tên phương thức trong dữ liệu thanh toán trước đây.',
+                    'RCA 관리자 로그인 상태에서만 테스트 백업을 복원할 수 있습니다.':'Chỉ có thể khôi phục bản sao lưu thử nghiệm khi đăng nhập với quản trị viên RCA.',
+                    '백업 파일 공유가 완료되었습니다.':'Đã chia sẻ tệp sao lưu.',
+                    '백업 데이터가 클립보드에 복사되었습니다.':'Đã sao chép dữ liệu sao lưu vào bộ nhớ tạm.',
+                    '파일이 선택되지 않았습니다. 텍스트로 백업 데이터를 입력하시겠습니까?':'Chưa chọn tệp. Bạn có muốn nhập dữ liệu sao lưu dưới dạng văn bản không?',
+                    '이메일과 비밀번호를 입력해주세요.':'Vui lòng nhập email và mật khẩu.',
+                    '올바른 이메일 형식을 입력해주세요.':'Vui lòng nhập địa chỉ email hợp lệ.'
+                },
+                'zh-CN': {
+                    '아이디와 비밀번호를 입력해주세요.':'请输入用户名和密码。',
+                    '아이디 또는 비밀번호가 잘못되었습니다.':'用户名或密码错误。',
+                    '로그아웃 하시겠습니까?':'确定要退出登录吗？',
+                    '아이디, 비밀번호, 상점명은 필수입니다.':'用户名、密码和店铺名称为必填项。',
+                    '이미 존재하는 아이디입니다.':'该用户名已存在。',
+                    '데이터를 찾을 수 없습니다.':'找不到数据。',
+                    '직원을 선택해주세요.':'请选择员工。',
+                    '모든 메뉴의 선택을 완료해주세요.':'请完成所有菜单的选择。',
+                    '입금이 완료되었습니다.':'付款已完成。',
+                    '정말 삭제하시겠습니까?':'确定要删除吗？',
+                    '직원명을 입력해주세요.':'请输入员工姓名。',
+                    '직원이 추가되었습니다.':'员工已添加。',
+                    '직원 정보가 수정되었습니다.':'员工信息已更新。',
+                    '직원 정보가 수정되었습니다. 과거 입금 데이터의 직원명도 함께 변경되었습니다.':'员工信息已更新，历史付款数据中的员工姓名也已同步更新。',
+                    '직원이 삭제되었습니다.':'员工已删除。',
+                    '방번호를 입력해주세요.':'请输入房间号。',
+                    '올바른 수용인원을 입력해주세요.':'请输入正确的容纳人数。',
+                    '방이 추가되었습니다.':'房间已添加。',
+                    '방 정보가 수정되었습니다.':'房间信息已更新。',
+                    '방이 삭제되었습니다.':'房间已删除。',
+                    '고객명을 입력해주세요.':'请输入顾客姓名。',
+                    '고객이 추가되었습니다.':'顾客已添加。',
+                    '고객 정보가 수정되었습니다.':'顾客信息已更新。',
+                    '고객이 삭제되었습니다.':'顾客已删除。',
+                    '화폐 이름을 입력해주세요.':'请输入货币名称。',
+                    '화폐 단위가 저장되었습니다.':'货币单位已保存。',
+                    '입금방식명을 입력해주세요.':'请输入付款方式名称。',
+                    '입금방식이 추가되었습니다.':'付款方式已添加。',
+                    '입금방식이 수정되었습니다.':'付款方式已更新。',
+                    '입금방식이 수정되었습니다. 과거 입금 데이터의 입금방식명도 함께 변경되었습니다.':'付款方式已更新，历史付款数据中的付款方式名称也已同步更新。',
+                    '입금방식이 삭제되었습니다.':'付款方式已删除。',
+                    '날짜, 직원명, 금액을 모두 입력해주세요.':'请填写日期、员工姓名和金额。',
+                    'Guarantee가 추가되었습니다.':'Guarantee 已添加。',
+                    'Guarantee가 수정되었습니다.':'Guarantee 已更新。',
+                    'Guarantee가 삭제되었습니다.':'Guarantee 已删除。',
+                    '유효기간을 입력해주세요.':'请输入有效期。',
+                    '종료일은 시작일보다 늦어야 합니다.':'结束日期必须晚于开始日期。',
+                    '관리자가 삭제되었습니다.':'管理员已删除。',
+                    '관리자 정보가 수정되었습니다.':'管理员信息已更新。',
+                    '기본 관리자는 삭제할 수 없습니다.':'默认管理员无法删除。',
+                    '최고 관리자만 접근할 수 있습니다.':'只有超级管理员可以访问。',
+                    '날짜를 선택해주세요.':'请选择日期。',
+                    '해당 기간에 데이터가 없습니다.':'所选期间没有数据。',
+                    '파일명을 입력해주세요.':'请输入文件名。',
+                    '백업 데이터를 입력해주세요.':'请输入备份数据。',
+                    '올바르지 않은 백업 데이터입니다.':'备份数据无效。',
+                    '올바르지 않은 백업 파일입니다.':'备份文件无效。',
+                    '내보낼 데이터가 없습니다.':'没有可导出的数据。',
+                    '엑셀 기능을 불러오지 못했습니다. 인터넷 연결을 확인해주세요.':'无法加载 Excel 功能，请检查互联网连接。',
+                    '메뉴명을 입력해주세요.':'请输入菜单名称。',
+                    '최소 하나의 시간대에 대한 가격과 커미션을 입력해주세요.':'请至少输入一个时间段的价格和佣金。',
+                    '메뉴가 추가되었습니다.':'菜单已添加。',
+                    '메뉴가 수정되었습니다.':'菜单已更新。',
+                    '메뉴가 삭제되었습니다.':'菜单已删除。',
+                    'RCA 관리자 로그인 상태에서만 테스트 백업을 복원할 수 있습니다.':'只有登录 RCA 管理员账号后才能恢复测试备份。',
+                    '백업 파일 공유가 완료되었습니다.':'备份文件分享完成。',
+                    '백업 데이터가 클립보드에 복사되었습니다.':'备份数据已复制到剪贴板。',
+                    '파일이 선택되지 않았습니다. 텍스트로 백업 데이터를 입력하시겠습니까?':'未选择文件。是否要以文本方式输入备份数据？',
+                    '이메일과 비밀번호를 입력해주세요.':'请输入电子邮箱和密码。',
+                    '올바른 이메일 형식을 입력해주세요.':'请输入正确的电子邮箱格式。'
+                },
+                'zh-TW': {
+                    '아이디와 비밀번호를 입력해주세요.':'請輸入帳號和密碼。',
+                    '아이디 또는 비밀번호가 잘못되었습니다.':'帳號或密碼錯誤。',
+                    '로그아웃 하시겠습니까?':'確定要登出嗎？',
+                    '아이디, 비밀번호, 상점명은 필수입니다.':'帳號、密碼和店鋪名稱為必填項目。',
+                    '이미 존재하는 아이디입니다.':'此帳號已存在。',
+                    '데이터를 찾을 수 없습니다.':'找不到資料。',
+                    '직원을 선택해주세요.':'請選擇員工。',
+                    '모든 메뉴의 선택을 완료해주세요.':'請完成所有選單的選擇。',
+                    '입금이 완료되었습니다.':'付款已完成。',
+                    '정말 삭제하시겠습니까?':'確定要刪除嗎？',
+                    '직원명을 입력해주세요.':'請輸入員工姓名。',
+                    '직원이 추가되었습니다.':'員工已新增。',
+                    '직원 정보가 수정되었습니다.':'員工資料已更新。',
+                    '직원 정보가 수정되었습니다. 과거 입금 데이터의 직원명도 함께 변경되었습니다.':'員工資料已更新，歷史付款資料中的員工姓名也已同步更新。',
+                    '직원이 삭제되었습니다.':'員工已刪除。',
+                    '방번호를 입력해주세요.':'請輸入房號。',
+                    '올바른 수용인원을 입력해주세요.':'請輸入正確的容納人數。',
+                    '방이 추가되었습니다.':'房間已新增。',
+                    '방 정보가 수정되었습니다.':'房間資料已更新。',
+                    '방이 삭제되었습니다.':'房間已刪除。',
+                    '고객명을 입력해주세요.':'請輸入顧客姓名。',
+                    '고객이 추가되었습니다.':'顧客已新增。',
+                    '고객 정보가 수정되었습니다.':'顧客資料已更新。',
+                    '고객이 삭제되었습니다.':'顧客已刪除。',
+                    '화폐 이름을 입력해주세요.':'請輸入貨幣名稱。',
+                    '화폐 단위가 저장되었습니다.':'貨幣單位已儲存。',
+                    '입금방식명을 입력해주세요.':'請輸入付款方式名稱。',
+                    '입금방식이 추가되었습니다.':'付款方式已新增。',
+                    '입금방식이 수정되었습니다.':'付款方式已更新。',
+                    '입금방식이 수정되었습니다. 과거 입금 데이터의 입금방식명도 함께 변경되었습니다.':'付款方式已更新，歷史付款資料中的付款方式名稱也已同步更新。',
+                    '입금방식이 삭제되었습니다.':'付款方式已刪除。',
+                    '날짜, 직원명, 금액을 모두 입력해주세요.':'請填寫日期、員工姓名和金額。',
+                    'Guarantee가 추가되었습니다.':'Guarantee 已新增。',
+                    'Guarantee가 수정되었습니다.':'Guarantee 已更新。',
+                    'Guarantee가 삭제되었습니다.':'Guarantee 已刪除。',
+                    '유효기간을 입력해주세요.':'請輸入有效期限。',
+                    '종료일은 시작일보다 늦어야 합니다.':'結束日期必須晚於開始日期。',
+                    '관리자가 삭제되었습니다.':'管理員已刪除。',
+                    '관리자 정보가 수정되었습니다.':'管理員資料已更新。',
+                    '기본 관리자는 삭제할 수 없습니다.':'預設管理員無法刪除。',
+                    '최고 관리자만 접근할 수 있습니다.':'只有最高管理員可以存取。',
+                    '날짜를 선택해주세요.':'請選擇日期。',
+                    '해당 기간에 데이터가 없습니다.':'所選期間沒有資料。',
+                    '파일명을 입력해주세요.':'請輸入檔案名稱。',
+                    '백업 데이터를 입력해주세요.':'請輸入備份資料。',
+                    '올바르지 않은 백업 데이터입니다.':'備份資料無效。',
+                    '올바르지 않은 백업 파일입니다.':'備份檔案無效。',
+                    '내보낼 데이터가 없습니다.':'沒有可匯出的資料。',
+                    '엑셀 기능을 불러오지 못했습니다. 인터넷 연결을 확인해주세요.':'無法載入 Excel 功能，請檢查網路連線。',
+                    '메뉴명을 입력해주세요.':'請輸入選單名稱。',
+                    '최소 하나의 시간대에 대한 가격과 커미션을 입력해주세요.':'請至少輸入一個時間段的價格和佣金。',
+                    '메뉴가 추가되었습니다.':'選單已新增。',
+                    '메뉴가 수정되었습니다.':'選單已更新。',
+                    '메뉴가 삭제되었습니다.':'選單已刪除。',
+                    'RCA 관리자 로그인 상태에서만 테스트 백업을 복원할 수 있습니다.':'只有登入 RCA 管理員帳號後才能恢復測試備份。',
+                    '백업 파일 공유가 완료되었습니다.':'備份檔案分享完成。',
+                    '백업 데이터가 클립보드에 복사되었습니다.':'備份資料已複製到剪貼簿。',
+                    '파일이 선택되지 않았습니다. 텍스트로 백업 데이터를 입력하시겠습니까?':'未選擇檔案。是否要以文字方式輸入備份資料？',
+                    '이메일과 비밀번호를 입력해주세요.':'請輸入電子郵件和密碼。',
+                    '올바른 이메일 형식을 입력해주세요.':'請輸入正確的電子郵件格式。'
+                },
+                id: {
+                    '아이디와 비밀번호를 입력해주세요.':'Silakan masukkan nama pengguna dan kata sandi.',
+                    '아이디 또는 비밀번호가 잘못되었습니다.':'Nama pengguna atau kata sandi salah.',
+                    '로그아웃 하시겠습니까?':'Apakah Anda ingin keluar?',
+                    '아이디, 비밀번호, 상점명은 필수입니다.':'Nama pengguna, kata sandi, dan nama toko wajib diisi.',
+                    '이미 존재하는 아이디입니다.':'Nama pengguna sudah ada.',
+                    '데이터를 찾을 수 없습니다.':'Data tidak ditemukan.',
+                    '직원을 선택해주세요.':'Silakan pilih karyawan.',
+                    '모든 메뉴의 선택을 완료해주세요.':'Silakan selesaikan semua pilihan menu.',
+                    '입금이 완료되었습니다.':'Pembayaran selesai.',
+                    '정말 삭제하시겠습니까?':'Apakah Anda yakin ingin menghapusnya?',
+                    '직원명을 입력해주세요.':'Silakan masukkan nama karyawan.',
+                    '직원이 추가되었습니다.':'Karyawan berhasil ditambahkan.',
+                    '직원 정보가 수정되었습니다.':'Informasi karyawan diperbarui.',
+                    '직원 정보가 수정되었습니다. 과거 입금 데이터의 직원명도 함께 변경되었습니다.':'Informasi karyawan diperbarui dan nama karyawan pada data pembayaran lama juga disinkronkan.',
+                    '직원이 삭제되었습니다.':'Karyawan berhasil dihapus.',
+                    '방번호를 입력해주세요.':'Silakan masukkan nomor kamar.',
+                    '올바른 수용인원을 입력해주세요.':'Silakan masukkan kapasitas yang benar.',
+                    '방이 추가되었습니다.':'Kamar berhasil ditambahkan.',
+                    '방 정보가 수정되었습니다.':'Informasi kamar diperbarui.',
+                    '방이 삭제되었습니다.':'Kamar berhasil dihapus.',
+                    '고객명을 입력해주세요.':'Silakan masukkan nama pelanggan.',
+                    '고객이 추가되었습니다.':'Pelanggan berhasil ditambahkan.',
+                    '고객 정보가 수정되었습니다.':'Informasi pelanggan diperbarui.',
+                    '고객이 삭제되었습니다.':'Pelanggan berhasil dihapus.',
+                    '화폐 이름을 입력해주세요.':'Silakan masukkan nama mata uang.',
+                    '화폐 단위가 저장되었습니다.':'Satuan mata uang disimpan.',
+                    '입금방식명을 입력해주세요.':'Silakan masukkan nama metode pembayaran.',
+                    '입금방식이 추가되었습니다.':'Metode pembayaran ditambahkan.',
+                    '입금방식이 수정되었습니다.':'Metode pembayaran diperbarui.',
+                    '입금방식이 수정되었습니다. 과거 입금 데이터의 입금방식명도 함께 변경되었습니다.':'Metode pembayaran diperbarui dan nama metode pada data pembayaran lama juga disinkronkan.',
+                    '입금방식이 삭제되었습니다.':'Metode pembayaran dihapus.',
+                    '날짜, 직원명, 금액을 모두 입력해주세요.':'Silakan isi tanggal, nama karyawan, dan jumlah.',
+                    'Guarantee가 추가되었습니다.':'Guarantee ditambahkan.',
+                    'Guarantee가 수정되었습니다.':'Guarantee diperbarui.',
+                    'Guarantee가 삭제되었습니다.':'Guarantee dihapus.',
+                    '유효기간을 입력해주세요.':'Silakan masukkan masa berlaku.',
+                    '종료일은 시작일보다 늦어야 합니다.':'Tanggal akhir harus setelah tanggal mulai.',
+                    '관리자가 삭제되었습니다.':'Admin dihapus.',
+                    '관리자 정보가 수정되었습니다.':'Informasi admin diperbarui.',
+                    '기본 관리자는 삭제할 수 없습니다.':'Admin default tidak dapat dihapus.',
+                    '최고 관리자만 접근할 수 있습니다.':'Hanya admin utama yang dapat mengakses.',
+                    '날짜를 선택해주세요.':'Silakan pilih tanggal.',
+                    '해당 기간에 데이터가 없습니다.':'Tidak ada data pada periode yang dipilih.',
+                    '파일명을 입력해주세요.':'Silakan masukkan nama file.',
+                    '백업 데이터를 입력해주세요.':'Silakan masukkan data cadangan.',
+                    '올바르지 않은 백업 데이터입니다.':'Data cadangan tidak valid.',
+                    '올바르지 않은 백업 파일입니다.':'File cadangan tidak valid.',
+                    '내보낼 데이터가 없습니다.':'Tidak ada data untuk diekspor.',
+                    '엑셀 기능을 불러오지 못했습니다. 인터넷 연결을 확인해주세요.':'Tidak dapat memuat fungsi Excel. Periksa koneksi internet Anda.',
+                    '메뉴명을 입력해주세요.':'Silakan masukkan nama menu.',
+                    '최소 하나의 시간대에 대한 가격과 커미션을 입력해주세요.':'Silakan masukkan harga dan komisi untuk setidaknya satu durasi.',
+                    '메뉴가 추가되었습니다.':'Menu ditambahkan.',
+                    '메뉴가 수정되었습니다.':'Menu diperbarui.',
+                    '메뉴가 삭제되었습니다.':'Menu dihapus.',
+                    'RCA 관리자 로그인 상태에서만 테스트 백업을 복원할 수 있습니다.':'Pemulihan cadangan uji hanya tersedia saat masuk sebagai admin RCA.',
+                    '백업 파일 공유가 완료되었습니다.':'Berbagi file cadangan selesai.',
+                    '백업 데이터가 클립보드에 복사되었습니다.':'Data cadangan telah disalin ke clipboard.',
+                    '파일이 선택되지 않았습니다. 텍스트로 백업 데이터를 입력하시겠습니까?':'Tidak ada file yang dipilih. Apakah Anda ingin memasukkan data cadangan sebagai teks?',
+                    '이메일과 비밀번호를 입력해주세요.':'Silakan masukkan email dan kata sandi.',
+                    '올바른 이메일 형식을 입력해주세요.':'Silakan masukkan alamat email yang valid.'
+                }
+            };
+            const override = popupExactOverrides[currentLanguage] || {};
+            if (override[text]) return restoreNewlines(override[text]);
             const dict = exact[currentLanguage] || {};
-            if (dict[text]) return dict[text];
+            if (dict[text]) return restoreNewlines(dict[text]);
 
             const dynamic = {
                 en: [
@@ -7603,13 +7830,157 @@ function translateLegacy(value) {
                     [/^복원 중 오류가 발생했습니다\. JSON 형식이 올바른지 확인해주세요\.\\n오류: (.*)$/, 'Lỗi khôi phục. Vui lòng kiểm tra định dạng JSON.\\nLỗi: $1']
                 ]
             };
+            const popupDynamicOverrides = {
+                en: [
+                    [/^아직 사용 가능한 기간이 아닙니다\.\\n사용 가능 기간: (.+) ~ (.+)$/, 'The usage period has not started yet.\\nAvailable period: $1 ~ $2'],
+                    [/^사용 기간이 만료되었습니다\.\\n관리자에게 문의하세요\.\\n만료일: (.+)$/, 'Your usage period has expired.\\nPlease contact the administrator.\\nExpiration date: $1'],
+                    [/^신규등록이 완료되었습니다\.\\n가입일부터 1주일간 사용할 수 있습니다\.\\n만료일: (.+)$/, 'Registration completed.\\nValid for 1 week from registration.\\nExpiration date: $1'],
+                    [/^신규등록에 실패했습니다\.\\n(.+)$/, 'Registration failed.\\n$1'],
+                    [/^로컬 백업에 실패했습니다\.\\n(.+)$/, 'Local backup failed.\\n$1'],
+                    [/^로컬 복원에 실패했습니다\.\\n(.+)$/, 'Local restore failed.\\n$1'],
+                    [/^RCA 테스트 데이터 복원이 완료되었습니다\.\\n가장 최근 백업 날짜\\((.+)\\)가 자동으로 선택되었습니다\.$/, 'RCA test data restored.\\nThe latest backup date ($1) was selected automatically.'],
+                    [/^RCA 테스트 백업 복원에 실패했습니다\.\\n(.+)$/, 'RCA test backup restore failed.\\n$1'],
+                    [/^관리자 추가 중 오류가 발생했습니다\.\\n(.+)$/, 'Error adding administrator.\\n$1'],
+                    [/^관리자가 추가되었습니다\.\\n이제 새 관리자 계정으로 로그인할 수 있습니다\.$/, 'Administrator added.\\nYou can now log in with the new administrator account.'],
+                    [/^관리자 추가 중 서버 연결 오류가 발생했습니다\.\\n잠시 후 다시 시도해주세요\.$/, 'Server connection error while adding administrator.\\nPlease try again later.'],
+                    [/^관리자 수정 중 서버 오류가 발생했습니다\.\\n(.*)$/, 'Server error while updating administrator.\\n$1'],
+                    [/^관리자 삭제 중 서버 오류가 발생했습니다\.\\n(.*)$/, 'Server error while deleting administrator.\\n$1'],
+                    [/^백업 데이터가 클립보드에 복사되었습니다\.\\n메모장이나 텍스트 에디터에 붙여넣기하여 \.json 파일로 저장하세요\.$/, 'Backup data copied to clipboard.\\nPaste it into Notepad or a text editor and save it as a .json file.'],
+                    [/^클립보드 복사 중 오류가 발생했습니다: (.*)$/, 'Clipboard copy error: $1'],
+                    [/^복원 중 오류가 발생했습니다\. JSON 형식이 올바른지 확인해주세요\.\\n오류: (.*)$/, 'Restore error. Please check the JSON format.\\nError: $1'],
+                    [/^구글 드라이브에서 선택한 파일로 현재 데이터를 복원하시겠습니까\?\\n현재 데이터가 모두 삭제됩니다\.$/, 'Restore current data from the selected Google Drive file?\\nAll current data will be deleted.'],
+                    [/^구글 백업 중 오류가 발생했습니다: (.*)$/, 'Google backup error: $1'],
+                    [/^구글 복원 중 오류가 발생했습니다: (.*)$/, 'Google restore error: $1'],
+                    [/^현재 데이터가 모두 삭제되고 백업 데이터로 복원됩니다\. 계속하시겠습니까\?$/, 'All current data will be deleted and replaced by the backup data. Continue?'],
+                    [/^이 백업은 다른 관리자\\((.+)\\)의 데이터입니다\. 계속하시겠습니까\?$/, 'This backup belongs to another administrator ($1). Continue?']
+                ],
+                th: [
+                    [/^아직 사용 가능한 기간이 아닙니다\.\\n사용 가능 기간: (.+) ~ (.+)$/, 'ยังไม่ถึงช่วงเวลาที่ใช้งานได้\\nช่วงเวลาที่ใช้งานได้: $1 ~ $2'],
+                    [/^사용 기간이 만료되었습니다\.\\n관리자에게 문의하세요\.\\n만료일: (.+)$/, 'หมดอายุการใช้งานแล้ว\\nกรุณาติดต่อผู้ดูแลระบบ\\nวันหมดอายุ: $1'],
+                    [/^신규등록이 완료되었습니다\.\\n가입일부터 1주일간 사용할 수 있습니다\.\\n만료일: (.+)$/, 'สมัครใหม่สำเร็จแล้ว\\nใช้งานได้ 1 สัปดาห์นับจากวันสมัคร\\nวันหมดอายุ: $1'],
+                    [/^신규등록에 실패했습니다\.\\n(.+)$/, 'สมัครใหม่ไม่สำเร็จ\\n$1'],
+                    [/^로컬 백업에 실패했습니다\.\\n(.+)$/, 'สำรองข้อมูลในเครื่องไม่สำเร็จ\\n$1'],
+                    [/^로컬 복원에 실패했습니다\.\\n(.+)$/, 'กู้คืนข้อมูลในเครื่องไม่สำเร็จ\\n$1'],
+                    [/^RCA 테스트 데이터 복원이 완료되었습니다\.\\n가장 최근 백업 날짜\\((.+)\\)가 자동으로 선택되었습니다\.$/, 'กู้คืนข้อมูลทดสอบ RCA แล้ว\\nเลือกวันที่สำรองข้อมูลล่าสุด ($1) โดยอัตโนมัติ'],
+                    [/^RCA 테스트 백업 복원에 실패했습니다\.\\n(.+)$/, 'กู้คืนข้อมูลสำรองทดสอบ RCA ไม่สำเร็จ\\n$1'],
+                    [/^관리자 추가 중 오류가 발생했습니다\.\\n(.+)$/, 'เกิดข้อผิดพลาดขณะเพิ่มผู้ดูแลระบบ\\n$1'],
+                    [/^관리자가 추가되었습니다\.\\n이제 새 관리자 계정으로 로그인할 수 있습니다\.$/, 'เพิ่มผู้ดูแลระบบแล้ว\\nตอนนี้สามารถเข้าสู่ระบบด้วยบัญชีใหม่ได้'],
+                    [/^관리자 추가 중 서버 연결 오류가 발생했습니다\.\\n잠시 후 다시 시도해주세요\.$/, 'เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์ขณะเพิ่มผู้ดูแลระบบ\\nกรุณาลองอีกครั้งภายหลัง'],
+                    [/^관리자 수정 중 서버 오류가 발생했습니다\.\\n(.*)$/, 'เกิดข้อผิดพลาดของเซิร์ฟเวอร์ขณะแก้ไขผู้ดูแลระบบ\\n$1'],
+                    [/^관리자 삭제 중 서버 오류가 발생했습니다\.\\n(.*)$/, 'เกิดข้อผิดพลาดของเซิร์ฟเวอร์ขณะลบผู้ดูแลระบบ\\n$1'],
+                    [/^백업 데이터가 클립보드에 복사되었습니다\.\\n메모장이나 텍스트 에디터에 붙여넣기하여 \.json 파일로 저장하세요\.$/, 'คัดลอกข้อมูลสำรองไปยังคลิปบอร์ดแล้ว\\nวางใน Notepad หรือโปรแกรมแก้ไขข้อความแล้วบันทึกเป็นไฟล์ .json'],
+                    [/^클립보드 복사 중 오류가 발생했습니다: (.*)$/, 'เกิดข้อผิดพลาดในการคัดลอกไปยังคลิปบอร์ด: $1'],
+                    [/^복원 중 오류가 발생했습니다\. JSON 형식이 올바른지 확인해주세요\.\\n오류: (.*)$/, 'เกิดข้อผิดพลาดในการกู้คืน กรุณาตรวจสอบรูปแบบ JSON\\nข้อผิดพลาด: $1'],
+                    [/^구글 드라이브에서 선택한 파일로 현재 데이터를 복원하시겠습니까\?\\n현재 데이터가 모두 삭제됩니다\.$/, 'ต้องการกู้คืนข้อมูลปัจจุบันจากไฟล์ที่เลือกใน Google Drive หรือไม่?\\nข้อมูลปัจจุบันทั้งหมดจะถูกลบ'],
+                    [/^구글 백업 중 오류가 발생했습니다: (.*)$/, 'เกิดข้อผิดพลาดในการสำรองข้อมูล Google: $1'],
+                    [/^구글 복원 중 오류가 발생했습니다: (.*)$/, 'เกิดข้อผิดพลาดในการกู้คืนข้อมูล Google: $1'],
+                    [/^현재 데이터가 모두 삭제되고 백업 데이터로 복원됩니다\. 계속하시겠습니까\?$/, 'ข้อมูลปัจจุบันทั้งหมดจะถูกลบและแทนที่ด้วยข้อมูลสำรอง ต้องการดำเนินการต่อหรือไม่?'],
+                    [/^이 백업은 다른 관리자\\((.+)\\)의 데이터입니다\. 계속하시겠습니까\?$/, 'ข้อมูลสำรองนี้เป็นของผู้ดูแลระบบอื่น ($1) ต้องการดำเนินการต่อหรือไม่?']
+                ],
+                vi: [
+                    [/^아직 사용 가능한 기간이 아닙니다\.\\n사용 가능 기간: (.+) ~ (.+)$/, 'Chưa đến thời gian có thể sử dụng.\\nThời gian sử dụng: $1 ~ $2'],
+                    [/^사용 기간이 만료되었습니다\.\\n관리자에게 문의하세요\.\\n만료일: (.+)$/, 'Thời hạn sử dụng đã hết.\\nVui lòng liên hệ quản trị viên.\\nNgày hết hạn: $1'],
+                    [/^신규등록이 완료되었습니다\.\\n가입일부터 1주일간 사용할 수 있습니다\.\\n만료일: (.+)$/, 'Đăng ký mới thành công.\\nCó hiệu lực 1 tuần kể từ ngày đăng ký.\\nNgày hết hạn: $1'],
+                    [/^신규등록에 실패했습니다\.\\n(.+)$/, 'Đăng ký mới thất bại.\\n$1'],
+                    [/^로컬 백업에 실패했습니다\.\\n(.+)$/, 'Sao lưu cục bộ thất bại.\\n$1'],
+                    [/^로컬 복원에 실패했습니다\.\\n(.+)$/, 'Khôi phục cục bộ thất bại.\\n$1'],
+                    [/^RCA 테스트 데이터 복원이 완료되었습니다\.\\n가장 최근 백업 날짜\\((.+)\\)가 자동으로 선택되었습니다\.$/, 'Đã khôi phục dữ liệu thử nghiệm RCA.\\nNgày sao lưu gần nhất ($1) đã được chọn tự động.'],
+                    [/^RCA 테스트 백업 복원에 실패했습니다\.\\n(.+)$/, 'Khôi phục bản sao lưu thử nghiệm RCA thất bại.\\n$1'],
+                    [/^관리자 추가 중 오류가 발생했습니다\.\\n(.+)$/, 'Lỗi khi thêm quản trị viên.\\n$1'],
+                    [/^관리자가 추가되었습니다\.\\n이제 새 관리자 계정으로 로그인할 수 있습니다\.$/, 'Đã thêm quản trị viên.\\nBạn có thể đăng nhập bằng tài khoản quản trị viên mới.'],
+                    [/^관리자 추가 중 서버 연결 오류가 발생했습니다\.\\n잠시 후 다시 시도해주세요\.$/, 'Lỗi kết nối máy chủ khi thêm quản trị viên.\\nVui lòng thử lại sau.'],
+                    [/^관리자 수정 중 서버 오류가 발생했습니다\.\\n(.*)$/, 'Lỗi máy chủ khi cập nhật quản trị viên.\\n$1'],
+                    [/^관리자 삭제 중 서버 오류가 발생했습니다\.\\n(.*)$/, 'Lỗi máy chủ khi xóa quản trị viên.\\n$1'],
+                    [/^백업 데이터가 클립보드에 복사되었습니다\.\\n메모장이나 텍스트 에디터에 붙여넣기하여 \.json 파일로 저장하세요\.$/, 'Đã sao chép dữ liệu sao lưu vào bộ nhớ tạm.\\nDán vào Notepad hoặc trình soạn thảo văn bản và lưu thành tệp .json.'],
+                    [/^클립보드 복사 중 오류가 발생했습니다: (.*)$/, 'Lỗi sao chép vào bộ nhớ tạm: $1'],
+                    [/^복원 중 오류가 발생했습니다\. JSON 형식이 올바른지 확인해주세요\.\\n오류: (.*)$/, 'Lỗi khôi phục. Vui lòng kiểm tra định dạng JSON.\\nLỗi: $1'],
+                    [/^구글 드라이브에서 선택한 파일로 현재 데이터를 복원하시겠습니까\?\\n현재 데이터가 모두 삭제됩니다\.$/, 'Bạn có muốn khôi phục dữ liệu hiện tại từ tệp đã chọn trên Google Drive không?\\nToàn bộ dữ liệu hiện tại sẽ bị xóa.'],
+                    [/^구글 백업 중 오류가 발생했습니다: (.*)$/, 'Lỗi sao lưu Google: $1'],
+                    [/^구글 복원 중 오류가 발생했습니다: (.*)$/, 'Lỗi khôi phục Google: $1'],
+                    [/^현재 데이터가 모두 삭제되고 백업 데이터로 복원됩니다\. 계속하시겠습니까\?$/, 'Toàn bộ dữ liệu hiện tại sẽ bị xóa và thay thế bằng dữ liệu sao lưu. Tiếp tục?'],
+                    [/^이 백업은 다른 관리자\\((.+)\\)의 데이터입니다\. 계속하시겠습니까\?$/, 'Bản sao lưu này thuộc về quản trị viên khác ($1). Tiếp tục?']
+                ],
+                'zh-CN': [
+                    [/^아직 사용 가능한 기간이 아닙니다\.\\n사용 가능 기간: (.+) ~ (.+)$/, '尚未到可使用期限。\\n可使用期间：$1 ~ $2'],
+                    [/^사용 기간이 만료되었습니다\.\\n관리자에게 문의하세요\.\\n만료일: (.+)$/, '使用期限已到期。\\n请联系管理员。\\n到期日：$1'],
+                    [/^신규등록이 완료되었습니다\.\\n가입일부터 1주일간 사용할 수 있습니다\.\\n만료일: (.+)$/, '注册成功。\\n注册日起可使用1周。\\n到期日：$1'],
+                    [/^신규등록에 실패했습니다\.\\n(.+)$/, '注册失败。\\n$1'],
+                    [/^로컬 백업에 실패했습니다\.\\n(.+)$/, '本地备份失败。\\n$1'],
+                    [/^로컬 복원에 실패했습니다\.\\n(.+)$/, '本地恢复失败。\\n$1'],
+                    [/^RCA 테스트 데이터 복원이 완료되었습니다\.\\n가장 최근 백업 날짜\\((.+)\\)가 자동으로 선택되었습니다\.$/, 'RCA 测试数据恢复完成。\\n已自动选择最近的备份日期（$1）。'],
+                    [/^RCA 테스트 백업 복원에 실패했습니다\.\\n(.+)$/, 'RCA 测试备份恢复失败。\\n$1'],
+                    [/^관리자 추가 중 오류가 발생했습니다\.\\n(.+)$/, '添加管理员时发生错误。\\n$1'],
+                    [/^관리자가 추가되었습니다\.\\n이제 새 관리자 계정으로 로그인할 수 있습니다\.$/, '管理员已添加。\\n现在可以使用新管理员账号登录。'],
+                    [/^관리자 추가 중 서버 연결 오류가 발생했습니다\.\\n잠시 후 다시 시도해주세요\.$/, '添加管理员时服务器连接错误。\\n请稍后再试。'],
+                    [/^관리자 수정 중 서버 오류가 발생했습니다\.\\n(.*)$/, '更新管理员时发生服务器错误。\\n$1'],
+                    [/^관리자 삭제 중 서버 오류가 발생했습니다\.\\n(.*)$/, '删除管理员时发生服务器错误。\\n$1'],
+                    [/^백업 데이터가 클립보드에 복사되었습니다\.\\n메모장이나 텍스트 에디터에 붙여넣기하여 \.json 파일로 저장하세요\.$/, '备份数据已复制到剪贴板。\\n请粘贴到记事本或文本编辑器并保存为 .json 文件。'],
+                    [/^클립보드 복사 중 오류가 발생했습니다: (.*)$/, '复制到剪贴板时发生错误：$1'],
+                    [/^복원 중 오류가 발생했습니다\. JSON 형식이 올바른지 확인해주세요\.\\n오류: (.*)$/, '恢复时发生错误。请检查 JSON 格式是否正确。\\n错误：$1'],
+                    [/^구글 드라이브에서 선택한 파일로 현재 데이터를 복원하시겠습니까\?\\n현재 데이터가 모두 삭제됩니다\.$/, '确定要使用 Google Drive 中选择的文件恢复当前数据吗？\\n当前所有数据将被删除。'],
+                    [/^구글 백업 중 오류가 발생했습니다: (.*)$/, 'Google 备份时发生错误：$1'],
+                    [/^구글 복원 중 오류가 발생했습니다: (.*)$/, 'Google 恢复时发生错误：$1'],
+                    [/^현재 데이터가 모두 삭제되고 백업 데이터로 복원됩니다\. 계속하시겠습니까\?$/, '当前所有数据将被删除并替换为备份数据。是否继续？'],
+                    [/^이 백업은 다른 관리자\\((.+)\\)의 데이터입니다\. 계속하시겠습니까\?$/, '此备份属于其他管理员（$1）。是否继续？']
+                ],
+                'zh-TW': [
+                    [/^아직 사용 가능한 기간이 아닙니다\.\\n사용 가능 기간: (.+) ~ (.+)$/, '尚未到可使用期限。\\n可使用期間：$1 ~ $2'],
+                    [/^사용 기간이 만료되었습니다\.\\n관리자에게 문의하세요\.\\n만료일: (.+)$/, '使用期限已到期。\\n請聯絡管理員。\\n到期日：$1'],
+                    [/^신규등록이 완료되었습니다\.\\n가입일부터 1주일간 사용할 수 있습니다\.\\n만료일: (.+)$/, '註冊成功。\\n註冊日起可使用1週。\\n到期日：$1'],
+                    [/^신규등록에 실패했습니다\.\\n(.+)$/, '註冊失敗。\\n$1'],
+                    [/^로컬 백업에 실패했습니다\.\\n(.+)$/, '本機備份失敗。\\n$1'],
+                    [/^로컬 복원에 실패했습니다\.\\n(.+)$/, '本機恢復失敗。\\n$1'],
+                    [/^RCA 테스트 데이터 복원이 완료되었습니다\.\\n가장 최근 백업 날짜\\((.+)\\)가 자동으로 선택되었습니다\.$/, 'RCA 測試資料恢復完成。\\n已自動選擇最近的備份日期（$1）。'],
+                    [/^RCA 테스트 백업 복원에 실패했습니다\.\\n(.+)$/, 'RCA 測試備份恢復失敗。\\n$1'],
+                    [/^관리자 추가 중 오류가 발생했습니다\.\\n(.+)$/, '新增管理員時發生錯誤。\\n$1'],
+                    [/^관리자가 추가되었습니다\.\\n이제 새 관리자 계정으로 로그인할 수 있습니다\.$/, '管理員已新增。\\n現在可以使用新的管理員帳號登入。'],
+                    [/^관리자 추가 중 서버 연결 오류가 발생했습니다\.\\n잠시 후 다시 시도해주세요\.$/, '新增管理員時發生伺服器連線錯誤。\\n請稍後再試。'],
+                    [/^관리자 수정 중 서버 오류가 발생했습니다\.\\n(.*)$/, '更新管理員時發生伺服器錯誤。\\n$1'],
+                    [/^관리자 삭제 중 서버 오류가 발생했습니다\.\\n(.*)$/, '刪除管理員時發生伺服器錯誤。\\n$1'],
+                    [/^백업 데이터가 클립보드에 복사되었습니다\.\\n메모장이나 텍스트 에디터에 붙여넣기하여 \.json 파일로 저장하세요\.$/, '備份資料已複製到剪貼簿。\\n請貼到記事本或文字編輯器並儲存為 .json 檔案。'],
+                    [/^클립보드 복사 중 오류가 발생했습니다: (.*)$/, '複製到剪貼簿時發生錯誤：$1'],
+                    [/^복원 중 오류가 발생했습니다\. JSON 형식이 올바른지 확인해주세요\.\\n오류: (.*)$/, '恢復時發生錯誤。請檢查 JSON 格式是否正確。\\n錯誤：$1'],
+                    [/^구글 드라이브에서 선택한 파일로 현재 데이터를 복원하시겠습니까\?\\n현재 데이터가 모두 삭제됩니다\.$/, '確定要使用 Google Drive 中選擇的檔案恢復目前資料嗎？\\n目前所有資料將被刪除。'],
+                    [/^구글 백업 중 오류가 발생했습니다: (.*)$/, 'Google 備份時發生錯誤：$1'],
+                    [/^구글 복원 중 오류가 발생했습니다: (.*)$/, 'Google 恢復時發生錯誤：$1'],
+                    [/^현재 데이터가 모두 삭제되고 백업 데이터로 복원됩니다\. 계속하시겠습니까\?$/, '目前所有資料將被刪除並替換為備份資料。是否繼續？'],
+                    [/^이 백업은 다른 관리자\\((.+)\\)의 데이터입니다\. 계속하시겠습니까\?$/, '此備份屬於其他管理員（$1）。是否繼續？']
+                ],
+                id: [
+                    [/^아직 사용 가능한 기간이 아닙니다\.\\n사용 가능 기간: (.+) ~ (.+)$/, 'Masa penggunaan belum dimulai.\\nPeriode penggunaan: $1 ~ $2'],
+                    [/^사용 기간이 만료되었습니다\.\\n관리자에게 문의하세요\.\\n만료일: (.+)$/, 'Masa penggunaan telah berakhir.\\nSilakan hubungi admin.\\nTanggal kedaluwarsa: $1'],
+                    [/^신규등록이 완료되었습니다\.\\n가입일부터 1주일간 사용할 수 있습니다\.\\n만료일: (.+)$/, 'Pendaftaran berhasil.\\nDapat digunakan selama 1 minggu sejak pendaftaran.\\nTanggal kedaluwarsa: $1'],
+                    [/^신규등록에 실패했습니다\.\\n(.+)$/, 'Pendaftaran gagal.\\n$1'],
+                    [/^로컬 백업에 실패했습니다\.\\n(.+)$/, 'Cadangan lokal gagal.\\n$1'],
+                    [/^로컬 복원에 실패했습니다\.\\n(.+)$/, 'Pemulihan lokal gagal.\\n$1'],
+                    [/^RCA 테스트 데이터 복원이 완료되었습니다\.\\n가장 최근 백업 날짜\\((.+)\\)가 자동으로 선택되었습니다\.$/, 'Pemulihan data uji RCA selesai.\\nTanggal cadangan terbaru ($1) dipilih secara otomatis.'],
+                    [/^RCA 테스트 백업 복원에 실패했습니다\.\\n(.+)$/, 'Pemulihan cadangan uji RCA gagal.\\n$1'],
+                    [/^관리자 추가 중 오류가 발생했습니다\.\\n(.+)$/, 'Terjadi kesalahan saat menambahkan admin.\\n$1'],
+                    [/^관리자가 추가되었습니다\.\\n이제 새 관리자 계정으로 로그인할 수 있습니다\.$/, 'Admin berhasil ditambahkan.\\nAnda sekarang dapat masuk dengan akun admin baru.'],
+                    [/^관리자 추가 중 서버 연결 오류가 발생했습니다\.\\n잠시 후 다시 시도해주세요\.$/, 'Terjadi kesalahan koneksi server saat menambahkan admin.\\nSilakan coba lagi nanti.'],
+                    [/^관리자 수정 중 서버 오류가 발생했습니다\.\\n(.*)$/, 'Terjadi kesalahan server saat memperbarui admin.\\n$1'],
+                    [/^관리자 삭제 중 서버 오류가 발생했습니다\.\\n(.*)$/, 'Terjadi kesalahan server saat menghapus admin.\\n$1'],
+                    [/^백업 데이터가 클립보드에 복사되었습니다\.\\n메모장이나 텍스트 에디터에 붙여넣기하여 \.json 파일로 저장하세요\.$/, 'Data cadangan telah disalin ke clipboard.\\nTempelkan ke Notepad atau editor teks lalu simpan sebagai file .json.'],
+                    [/^클립보드 복사 중 오류가 발생했습니다: (.*)$/, 'Terjadi kesalahan saat menyalin ke clipboard: $1'],
+                    [/^복원 중 오류가 발생했습니다\. JSON 형식이 올바른지 확인해주세요\.\\n오류: (.*)$/, 'Terjadi kesalahan pemulihan. Periksa format JSON.\\nKesalahan: $1'],
+                    [/^구글 드라이브에서 선택한 파일로 현재 데이터를 복원하시겠습니까\?\\n현재 데이터가 모두 삭제됩니다\.$/, 'Apakah Anda ingin memulihkan data saat ini dari file yang dipilih di Google Drive?\\nSemua data saat ini akan dihapus.'],
+                    [/^구글 백업 중 오류가 발생했습니다: (.*)$/, 'Terjadi kesalahan saat mencadangkan ke Google: $1'],
+                    [/^구글 복원 중 오류가 발생했습니다: (.*)$/, 'Terjadi kesalahan saat memulihkan dari Google: $1'],
+                    [/^현재 데이터가 모두 삭제되고 백업 데이터로 복원됩니다\. 계속하시겠습니까\?$/, 'Semua data saat ini akan dihapus dan diganti dengan data cadangan. Lanjutkan?'],
+                    [/^이 백업은 다른 관리자\\((.+)\\)의 데이터입니다\. 계속하시겠습니까\?$/, 'Cadangan ini milik admin lain ($1). Lanjutkan?']
+                ]
+            };
+            const extraRules = popupDynamicOverrides[currentLanguage] || [];
+            for (const [pattern, replacement] of extraRules) {
+                if (pattern.test(text)) return restoreNewlines(text.replace(pattern, replacement));
+            }
             const rules = dynamic[currentLanguage] || [];
             for (const [pattern, replacement] of rules) {
-                if (pattern.test(text)) return text.replace(pattern, replacement);
+                if (pattern.test(text)) return restoreNewlines(text.replace(pattern, replacement));
             }
 
             // 이미 기존 레거시 번역표에 등록된 문구도 우선 활용합니다.
-            return window.translateLegacyText ? window.translateLegacyText(text) : text;
+            return window.translateLegacyText ? window.translateLegacyText(rawText) : rawText;
         }
 
         // 앱에서 사용하는 모든 native alert/confirm을 현재 선택 언어로 통일합니다.
