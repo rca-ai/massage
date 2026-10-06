@@ -7725,7 +7725,99 @@ function translateLegacy(value) {
                     '올바른 이메일 형식을 입력해주세요.':'Silakan masukkan alamat email yang valid.'
                 }
             };
-            const override = popupExactOverrides[currentLanguage] || {};
+            const universalPopupOverrides = {
+                en: {
+                    '서버 로그인 오류가 발생했습니다.\\n잠시 후 다시 시도해주세요.':'Server login error.\\nPlease try again later.',
+                    '로그인 처리에 실패했습니다.':'Login failed.',
+                    '로그인 처리 중 오류가 발생했습니다. 페이지를 새로고침 후 다시 시도해주세요.':'An error occurred while processing the login. Please refresh the page and try again.',
+                    '신규등록 중 서버 연결 오류가 발생했습니다.':'Server connection error during registration.',
+                    '입금 처리된 데이터만 삭제할 수 있습니다.':'Only paid data can be deleted.',
+                    '삭제할 날짜를 선택해주세요.':'Please select a date to delete.',
+                    '선택한 날짜에 입금 처리된 데이터가 없습니다.':'There is no paid data for the selected date.',
+                    '입금 완료 데이터가 삭제되었습니다.':'Paid data has been deleted.',
+                    '수정할 데이터를 확인해주세요.':'Please check the data to be edited.',
+                    '로컬 백업 파일이 다운로드되었습니다.':'The local backup file has been downloaded.',
+                    '먼저 로그인해주세요.':'Please log in first.',
+                    '백업 데이터 복원이 완료되었습니다.':'Backup data has been restored.',
+                    'QR TIP을 제외한 입력된 금액이 총 금액과 일치하지 않습니다.':'The entered amount excluding QR TIP does not match the total amount.'
+                },
+                th: {
+                    '서버 로그인 오류가 발생했습니다.\\n잠시 후 다시 시도해주세요.':'เกิดข้อผิดพลาดในการเข้าสู่ระบบเซิร์ฟเวอร์\\nกรุณาลองอีกครั้งภายหลัง',
+                    '로그인 처리에 실패했습니다.':'เข้าสู่ระบบไม่สำเร็จ',
+                    '로그인 처리 중 오류가 발생했습니다. 페이지를 새로고침 후 다시 시도해주세요.':'เกิดข้อผิดพลาดขณะเข้าสู่ระบบ กรุณารีเฟรชหน้าแล้วลองอีกครั้ง',
+                    '신규등록 중 서버 연결 오류가 발생했습니다.':'เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์ขณะสมัครใหม่',
+                    '입금 처리된 데이터만 삭제할 수 있습니다.':'สามารถลบได้เฉพาะข้อมูลที่ชำระเงินแล้ว',
+                    '삭제할 날짜를 선택해주세요.':'กรุณาเลือกวันที่ต้องการลบ',
+                    '선택한 날짜에 입금 처리된 데이터가 없습니다.':'ไม่มีข้อมูลที่ชำระเงินแล้วในวันที่เลือก',
+                    '입금 완료 데이터가 삭제되었습니다.':'ลบข้อมูลที่ชำระเงินแล้วเรียบร้อย',
+                    '수정할 데이터를 확인해주세요.':'กรุณาตรวจสอบข้อมูลที่ต้องการแก้ไข',
+                    '로컬 백업 파일이 다운로드되었습니다.':'ดาวน์โหลดไฟล์สำรองในเครื่องแล้ว',
+                    '먼저 로그인해주세요.':'กรุณาเข้าสู่ระบบก่อน',
+                    '백업 데이터 복원이 완료되었습니다.':'กู้คืนข้อมูลสำรองเรียบร้อยแล้ว',
+                    'QR TIP을 제외한 입력된 금액이 총 금액과 일치하지 않습니다.':'จำนวนเงินที่กรอกโดยไม่รวม QR TIP ไม่ตรงกับยอดรวม'
+                },
+                vi: {
+                    '서버 로그인 오류가 발생했습니다.\\n잠시 후 다시 시도해주세요.':'Lỗi đăng nhập máy chủ.\\nVui lòng thử lại sau.',
+                    '로그인 처리에 실패했습니다.':'Đăng nhập thất bại.',
+                    '로그인 처리 중 오류가 발생했습니다. 페이지를 새로고침 후 다시 시도해주세요.':'Đã xảy ra lỗi khi đăng nhập. Vui lòng tải lại trang và thử lại.',
+                    '신규등록 중 서버 연결 오류가 발생했습니다.':'Lỗi kết nối máy chủ khi đăng ký mới.',
+                    '입금 처리된 데이터만 삭제할 수 있습니다.':'Chỉ có thể xóa dữ liệu đã thanh toán.',
+                    '삭제할 날짜를 선택해주세요.':'Vui lòng chọn ngày cần xóa.',
+                    '선택한 날짜에 입금 처리된 데이터가 없습니다.':'Không có dữ liệu đã thanh toán trong ngày đã chọn.',
+                    '입금 완료 데이터가 삭제되었습니다.':'Đã xóa dữ liệu đã thanh toán.',
+                    '수정할 데이터를 확인해주세요.':'Vui lòng kiểm tra dữ liệu cần chỉnh sửa.',
+                    '로컬 백업 파일이 다운로드되었습니다.':'Đã tải tệp sao lưu cục bộ.',
+                    '먼저 로그인해주세요.':'Vui lòng đăng nhập trước.',
+                    '백업 데이터 복원이 완료되었습니다.':'Đã khôi phục dữ liệu sao lưu.',
+                    'QR TIP을 제외한 입력된 금액이 총 금액과 일치하지 않습니다.':'Số tiền đã nhập không bao gồm QR TIP không khớp với tổng tiền.'
+                },
+                'zh-CN': {
+                    '서버 로그인 오류가 발생했습니다.\\n잠시 후 다시 시도해주세요.':'服务器登录错误。\\n请稍后再试。',
+                    '로그인 처리에 실패했습니다.':'登录失败。',
+                    '로그인 처리 중 오류가 발생했습니다. 페이지를 새로고침 후 다시 시도해주세요.':'登录处理时发生错误，请刷新页面后重试。',
+                    '신규등록 중 서버 연결 오류가 발생했습니다.':'注册时发生服务器连接错误。',
+                    '입금 처리된 데이터만 삭제할 수 있습니다.':'只能删除已付款的数据。',
+                    '삭제할 날짜를 선택해주세요.':'请选择要删除的日期。',
+                    '선택한 날짜에 입금 처리된 데이터가 없습니다.':'所选日期没有已付款的数据。',
+                    '입금 완료 데이터가 삭제되었습니다.':'已删除已付款数据。',
+                    '수정할 데이터를 확인해주세요.':'请检查要修改的数据。',
+                    '로컬 백업 파일이 다운로드되었습니다.':'本地备份文件已下载。',
+                    '먼저 로그인해주세요.':'请先登录。',
+                    '백업 데이터 복원이 완료되었습니다.':'备份数据恢复完成。',
+                    'QR TIP을 제외한 입력된 금액이 총 금액과 일치하지 않습니다.':'不含 QR TIP 的输入金额与总金额不一致。'
+                },
+                'zh-TW': {
+                    '서버 로그인 오류가 발생했습니다.\\n잠시 후 다시 시도해주세요.':'伺服器登入錯誤。\\n請稍後再試。',
+                    '로그인 처리에 실패했습니다.':'登入失敗。',
+                    '로그인 처리 중 오류가 발생했습니다. 페이지를 새로고침 후 다시 시도해주세요.':'登入處理時發生錯誤，請重新整理頁面後再試。',
+                    '신규등록 중 서버 연결 오류가 발생했습니다.':'註冊時發生伺服器連線錯誤。',
+                    '입금 처리된 데이터만 삭제할 수 있습니다.':'只能刪除已付款資料。',
+                    '삭제할 날짜를 선택해주세요.':'請選擇要刪除的日期。',
+                    '선택한 날짜에 입금 처리된 데이터가 없습니다.':'所選日期沒有已付款資料。',
+                    '입금 완료 데이터가 삭제되었습니다.':'已刪除已付款資料。',
+                    '수정할 데이터를 확인해주세요.':'請檢查要修改的資料。',
+                    '로컬 백업 파일이 다운로드되었습니다.':'本機備份檔案已下載。',
+                    '먼저 로그인해주세요.':'請先登入。',
+                    '백업 데이터 복원이 완료되었습니다.':'備份資料恢復完成。',
+                    'QR TIP을 제외한 입력된 금액이 총 금액과 일치하지 않습니다.':'不含 QR TIP 的輸入金額與總金額不一致。'
+                },
+                id: {
+                    '서버 로그인 오류가 발생했습니다.\\n잠시 후 다시 시도해주세요.':'Terjadi kesalahan login server.\\nSilakan coba lagi nanti.',
+                    '로그인 처리에 실패했습니다.':'Login gagal.',
+                    '로그인 처리 중 오류가 발생했습니다. 페이지를 새로고침 후 다시 시도해주세요.':'Terjadi kesalahan saat memproses login. Muat ulang halaman dan coba lagi.',
+                    '신규등록 중 서버 연결 오류가 발생했습니다.':'Terjadi kesalahan koneksi server saat pendaftaran.',
+                    '입금 처리된 데이터만 삭제할 수 있습니다.':'Hanya data yang sudah dibayar yang dapat dihapus.',
+                    '삭제할 날짜를 선택해주세요.':'Silakan pilih tanggal yang akan dihapus.',
+                    '선택한 날짜에 입금 처리된 데이터가 없습니다.':'Tidak ada data yang sudah dibayar pada tanggal yang dipilih.',
+                    '입금 완료 데이터가 삭제되었습니다.':'Data yang sudah dibayar telah dihapus.',
+                    '수정할 데이터를 확인해주세요.':'Silakan periksa data yang akan diedit.',
+                    '로컬 백업 파일이 다운로드되었습니다.':'File cadangan lokal telah diunduh.',
+                    '먼저 로그인해주세요.':'Silakan login terlebih dahulu.',
+                    '백업 데이터 복원이 완료되었습니다.':'Data cadangan berhasil dipulihkan.',
+                    'QR TIP을 제외한 입력된 금액이 총 금액과 일치하지 않습니다.':'Jumlah yang dimasukkan tanpa QR TIP tidak sesuai dengan total.'
+                }
+            };
+            const override = Object.assign({}, universalPopupOverrides[currentLanguage] || {}, popupExactOverrides[currentLanguage] || {});
             if (override[text]) return restoreNewlines(override[text]);
             const dict = exact[currentLanguage] || {};
             if (dict[text]) return restoreNewlines(dict[text]);
@@ -7922,6 +8014,11 @@ function translateLegacy(value) {
                     [/^이 백업은 다른 관리자\\((.+)\\)의 데이터입니다\. 계속하시겠습니까\?$/, 'Bản sao lưu này thuộc về quản trị viên khác ($1). Tiếp tục?']
                 ],
                 'zh-CN': [
+                    [/^입금 처리된 데이터를 삭제하시겠습니까\?\n삭제 후에는 복구할 수 없습니다\.$/, '确定要删除已付款的数据吗？\n删除后无法恢复。'],
+                    [/^선택한 백업을 현재 로그인한 관리자 데이터에 복원하시겠습니까\?\n현재 데이터가 백업 데이터로 교체됩니다\.$/, '确定要将所选备份恢复到当前登录管理员的数据吗？\n当前数据将被备份数据替换。'],
+                    [/^현재 RCA 관리자 데이터에 테스트 백업을 덮어쓰시겠습니까\?\n기존 RCA 로컬 테스트 데이터는 백업 데이터로 교체됩니다\.$/, '确定要用测试备份覆盖当前 RCA 管理员数据吗？\n现有 RCA 本地测试数据将被备份数据替换。'],
+                    [/^파일 다운로드에 실패했습니다\. 클립보드에 백업 데이터를 복사하시겠습니까\?$/, '文件下载失败。是否要将备份数据复制到剪贴板？'],
+
                     [/^내보내기가 완료되었습니다\.\\n파일명: (.+)\\n위치: 기본 다운로드 폴더$/, '导出完成。\n文件：$1\n位置：默认下载文件夹'],
                     [/^입금 완료 데이터 (\d+)건\((.+)\)을 모두 삭제하시겠습니까\?\n삭제 후에는 복구할 수 없습니다\.$/, '确定要删除全部 $1 条已付款记录（$2）吗？\n删除后无法恢复。'],
                     [/^(\d+)개의 메뉴로 예약이 추가되었습니다\.$/, '已添加包含 $1 个菜单的预约。'],
@@ -7959,6 +8056,11 @@ function translateLegacy(value) {
                     [/^이 백업은 다른 관리자\\((.+)\\)의 데이터입니다\. 계속하시겠습니까\?$/, '此备份属于其他管理员（$1）。是否继续？']
                 ],
                 'zh-TW': [
+                    [/^입금 처리된 데이터를 삭제하시겠습니까\?\n삭제 후에는 복구할 수 없습니다\.$/, '確定要刪除已付款資料嗎？\n刪除後無法恢復。'],
+                    [/^선택한 백업을 현재 로그인한 관리자 데이터에 복원하시겠습니까\?\n현재 데이터가 백업 데이터로 교체됩니다\.$/, '確定要將所選備份恢復到目前登入管理員的資料嗎？\n目前資料將被備份資料取代。'],
+                    [/^현재 RCA 관리자 데이터에 테스트 백업을 덮어쓰시겠습니까\?\n기존 RCA 로컬 테스트 데이터는 백업 데이터로 교체됩니다\.$/, '確定要用測試備份覆蓋目前 RCA 管理員資料嗎？\n現有 RCA 本機測試資料將被備份資料取代。'],
+                    [/^파일 다운로드에 실패했습니다\. 클립보드에 백업 데이터를 복사하시겠습니까\?$/, '檔案下載失敗。是否要將備份資料複製到剪貼簿？'],
+
                     [/^내보내기가 완료되었습니다\.\\n파일명: (.+)\\n위치: 기본 다운로드 폴더$/, '匯出完成。\n檔案：$1\n位置：預設下載資料夾'],
                     [/^입금 완료 데이터 (\d+)건\((.+)\)을 모두 삭제하시겠습니까\?\n삭제 후에는 복구할 수 없습니다\.$/, '確定要刪除全部 $1 筆已付款資料（$2）嗎？\n刪除後無法恢復。'],
                     [/^(\d+)개의 메뉴로 예약이 추가되었습니다\.$/, '已新增包含 $1 個選單的預約。'],
@@ -7996,6 +8098,11 @@ function translateLegacy(value) {
                     [/^이 백업은 다른 관리자\\((.+)\\)의 데이터입니다\. 계속하시겠습니까\?$/, '此備份屬於其他管理員（$1）。是否繼續？']
                 ],
                 id: [
+                    [/^입금 처리된 데이터를 삭제하시겠습니까\?\n삭제 후에는 복구할 수 없습니다\.$/, 'Hapus data yang sudah dibayar?\nData tidak dapat dipulihkan setelah dihapus.'],
+                    [/^선택한 백업을 현재 로그인한 관리자 데이터에 복원하시겠습니까\?\n현재 데이터가 백업 데이터로 교체됩니다\.$/, 'Pulihkan cadangan yang dipilih ke data admin yang sedang login?\nData saat ini akan diganti dengan data cadangan.'],
+                    [/^현재 RCA 관리자 데이터에 테스트 백업을 덮어쓰시겠습니까\?\n기존 RCA 로컬 테스트 데이터는 백업 데이터로 교체됩니다\.$/, 'Timpa data admin RCA saat ini dengan cadangan uji?\nData lokal RCA yang ada akan diganti dengan data cadangan.'],
+                    [/^파일 다운로드에 실패했습니다\. 클립보드에 백업 데이터를 복사하시겠습니까\?$/, 'Unduhan file gagal. Apakah Anda ingin menyalin data cadangan ke clipboard?'],
+
                     [/^내보내기가 완료되었습니다\.\\n파일명: (.+)\\n위치: 기본 다운로드 폴더$/, 'Ekspor selesai.\nFile: $1\nLokasi: folder Unduhan default'],
                     [/^입금 완료 데이터 (\d+)건\((.+)\)을 모두 삭제하시겠습니까\?\n삭제 후에는 복구할 수 없습니다\.$/, 'Hapus semua $1 data pembayaran ($2)?\nData tidak dapat dipulihkan setelah dihapus.'],
                     [/^(\d+)개의 메뉴로 예약이 추가되었습니다\.$/, 'Reservasi dengan $1 menu telah ditambahkan.'],
