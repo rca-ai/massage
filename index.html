@@ -5343,6 +5343,16 @@ function translateLegacy(value) {
                         '로컬 백업 파일이 다운로드되었습니다.':'File cadangan lokal telah diunduh.'
                     }
                 };
+                const popupResidualFragments = {
+                    en: {'개':'records','통계':'Total','Note :':'Note:','note:':'Note:','warning:':'Warning:','주의:':'Warning:','브라우저 보안상':'For browser security,','현재 데이터가':'Current data','모두 삭제됩니다.':'will all be deleted.'},
+                    th: {'개':'รายการ','통계':'รวม','Note :':'หมายเหตุ:','note:':'หมายเหตุ:','warning:':'คำเตือน:','주의:':'คำเตือน:','브라우저 보안상':'เพื่อความปลอดภัยของเบราว์เซอร์','현재 데이터가':'ข้อมูลปัจจุบัน','모두 삭제됩니다.':'ทั้งหมดจะถูกลบ'},
+                    vi: {'개':'bản ghi','통계':'Tổng','Note :':'Lưu ý:','note:':'Lưu ý:','warning:':'Cảnh báo:','주의:':'Cảnh báo:','브라우저 보안상':'Vì lý do bảo mật trình duyệt,','현재 데이터가':'Dữ liệu hiện tại','모두 삭제됩니다.':'sẽ bị xóa.'},
+                    'zh-CN': {'개':'条','통계':'总计','Note :':'注意：','note:':'注意：','warning:':'警告：','주의:':'警告：','브라우저 보안상':'出于浏览器安全原因，','현재 데이터가':'当前数据','모두 삭제됩니다.':'将全部删除。'},
+                    'zh-TW': {'개':'筆','통계':'總計','Note :':'注意：','note:':'注意：','warning:':'警告：','주의:':'警告：','브라우저 보안상':'基於瀏覽器安全性，','현재 데이터가':'目前資料','모두 삭제됩니다.':'將全部刪除。'},
+                    id: {'개':'data','통계':'Total','Note :':'Catatan:','note:':'Catatan:','warning:':'Peringatan:','주의:':'Peringatan:','브라우저 보안상':'Demi keamanan browser,','현재 데이터가':'Data saat ini','모두 삭제됩니다.':'akan dihapus.'}
+                };
+                const residual = popupResidualFragments[lang] || {};
+                Object.keys(residual).sort((a,b)=>b.length-a.length).forEach(k => { s = s.split(k).join(residual[k]); });
                 if (dynamicPopupUi[lang] && dynamicPopupUi[lang][s] !== undefined) return dynamicPopupUi[lang][s];
                 if (uiTranslations[lang] && uiTranslations[lang][s] !== undefined) return uiTranslations[lang][s];
                 if (extra[lang] && extra[lang][s] !== undefined) return extra[lang][s];
