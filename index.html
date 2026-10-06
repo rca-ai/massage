@@ -1507,6 +1507,14 @@
         // 초기화
 async function initializeApp() {
     try {
+        // 마지막으로 선택한 언어를 세션/새로고침 후에도 유지합니다.
+        try {
+            const savedLanguage = localStorage.getItem('selectedLanguage');
+            if (savedLanguage && translations[savedLanguage]) currentLanguage = savedLanguage;
+        } catch (languageError) {
+            console.log('언어 설정 복원 오류:', languageError);
+        }
+
         // 전역 데이터 먼저 초기화
         installD1StorageSync();
         initializeGlobalData();
@@ -2196,6 +2204,7 @@ async function initializeApp() {
         // 언어 설정
         function setLanguage(lang) {
             currentLanguage = lang;
+            try { localStorage.setItem('selectedLanguage', lang); } catch (e) {}
             
             // 언어 버튼 스타일 업데이트
             const languageButtons = {
