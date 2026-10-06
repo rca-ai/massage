@@ -5353,6 +5353,27 @@ function translateLegacy(value) {
                 };
                 const residual = popupResidualFragments[lang] || {};
                 Object.keys(residual).sort((a,b)=>b.length-a.length).forEach(k => { s = s.split(k).join(residual[k]); });
+                const confirmationPopupTranslations = {
+                    en: {'순번을 저장하시겠습니까?':'Save the staff order?'},
+                    th: {'순번을 저장하시겠습니까?':'ต้องการบันทึกลำดับพนักงานหรือไม่?'},
+                    vi: {'순번을 저장하시겠습니까?':'Bạn có muốn lưu thứ tự nhân viên không?'},
+                    'zh-CN': {'순번을 저장하시겠습니까?':'确定要保存员工顺序吗？'},
+                    'zh-TW': {'순번을 저장하시겠습니까?':'確定要儲存員工順序嗎？'},
+                    id: {'순번을 저장하시겠습니까?':'Simpan urutan karyawan?'}
+                };
+                if (confirmationPopupTranslations[lang] && confirmationPopupTranslations[lang][s] !== undefined) return confirmationPopupTranslations[lang][s];
+                if (/^선택한 \d+개의 메뉴 예약을 추가하시겠습니까\?$/.test(s)) {
+                    const n = s.match(/^선택한 (\d+)개의 메뉴 예약을 추가하시겠습니까\?$/)[1];
+                    const confirmationByLang = {
+                        en: 'Add the selected ' + n + ' menu reservation(s)?',
+                        th: 'ต้องการเพิ่มรายการจองที่เลือก ' + n + ' รายการหรือไม่?',
+                        vi: 'Bạn có muốn thêm ' + n + ' đặt chỗ menu đã chọn không?',
+                        'zh-CN': '确定要添加所选的 ' + n + ' 个菜单预约吗？',
+                        'zh-TW': '確定要新增所選的 ' + n + ' 個選單預約嗎？',
+                        id: 'Tambahkan ' + n + ' reservasi menu yang dipilih?'
+                    };
+                    if (confirmationByLang[lang]) return confirmationByLang[lang];
+                }
                 if (dynamicPopupUi[lang] && dynamicPopupUi[lang][s] !== undefined) return dynamicPopupUi[lang][s];
                 if (uiTranslations[lang] && uiTranslations[lang][s] !== undefined) return uiTranslations[lang][s];
                 if (extra[lang] && extra[lang][s] !== undefined) return extra[lang][s];
