@@ -129,7 +129,7 @@
   <div id="loginScreen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
    <div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-md">
     <div class="text-center mb-8">
-     <img src="/mashop_logo_icon.svg" alt="MaShop" class="mx-auto mb-3 w-24 h-24 object-contain" style="background:transparent;">
+     <div class="mx-auto mb-3 text-center" aria-label="MaShop"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:42px;letter-spacing:-2px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div>
      <h1 class="text-3xl font-bold text-gray-800 mb-2" data-translate="title">마사지샵 관리 시스템</h1>
      <div class="w-20 h-1 bg-blue-500 mx-auto"></div>
     </div><!-- 언어 선택 -->
@@ -174,7 +174,7 @@
    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
      <div>
-      <div class="flex items-center gap-3"><img src="/mashop_logo_icon.svg" alt="MaShop" class="w-12 h-12 object-contain" style="background:transparent;"><h1 class="text-3xl font-bold text-gray-800" data-translate="title">마사지 관리 프로그램</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v38</span></div>
+      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">마사지 관리 프로그램</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v38</span></div>
       <p id="shopName" class="text-lg text-gray-600 mt-1"></p>
      </div>
      <div class="flex gap-2"><button onclick="showLanguageModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="changeLanguage">언어 변경</button> <button onclick="showFontModal()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600" data-translate="changeFont">폰트 변경</button> <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" data-translate="logout">로그아웃</button>
@@ -2179,6 +2179,7 @@ async function initializeApp() {
                     }
                     updateTranslations();
                     if (window.localizeLegacyUI) window.localizeLegacyUI();
+        localizeDynamicManagementModal();
                     localStorage.setItem('currentAdmin', JSON.stringify(admin));
                     
                     // 관리자별 초기화 오류가 로그인 전체를 중단시키지 않도록 분리 처리합니다.
@@ -5345,12 +5346,12 @@ function translateLegacy(value) {
                     }
                 };
                 const popupResidualFragments = {
-                    en: {'개':'records','통계':'Total','Note :':'Note:','note:':'Note:','warning:':'Warning:','주의:':'Warning:','브라우저 보안상':'For browser security,','현재 데이터가':'Current data','모두 삭제됩니다.':'will all be deleted.'},
-                    th: {'개':'รายการ','통계':'รวม','Note :':'หมายเหตุ:','note:':'หมายเหตุ:','warning:':'คำเตือน:','주의:':'คำเตือน:','브라우저 보안상':'เพื่อความปลอดภัยของเบราว์เซอร์','현재 데이터가':'ข้อมูลปัจจุบัน','모두 삭제됩니다.':'ทั้งหมดจะถูกลบ'},
-                    vi: {'개':'bản ghi','통계':'Tổng','Note :':'Lưu ý:','note:':'Lưu ý:','warning:':'Cảnh báo:','주의:':'Cảnh báo:','브라우저 보안상':'Vì lý do bảo mật trình duyệt,','현재 데이터가':'Dữ liệu hiện tại','모두 삭제됩니다.':'sẽ bị xóa.'},
-                    'zh-CN': {'개':'条','통계':'总计','Note :':'注意：','note:':'注意：','warning:':'警告：','주의:':'警告：','브라우저 보안상':'出于浏览器安全原因，','현재 데이터가':'当前数据','모두 삭제됩니다.':'将全部删除。'},
-                    'zh-TW': {'개':'筆','통계':'總計','Note :':'注意：','note:':'注意：','warning:':'警告：','주의:':'警告：','브라우저 보안상':'基於瀏覽器安全性，','현재 데이터가':'目前資料','모두 삭제됩니다.':'將全部刪除。'},
-                    id: {'개':'data','통계':'Total','Note :':'Catatan:','note:':'Catatan:','warning:':'Peringatan:','주의:':'Peringatan:','브라우저 보안상':'Demi keamanan browser,','현재 데이터가':'Data saat ini','모두 삭제됩니다.':'akan dihapus.'}
+                    en: {'개':'records','통계':'Total','데이터 개수:':'Total Records:','기간:':'Period:','파일명:':'File Name:','내보낼 파일명을 입력하세요':'Enter file name to export','Note :':'Note:','note:':'Note:','warning:':'Warning:','주의:':'Warning:','참고:':'Note:','브라우저 보안상':'For browser security,','다운로드 후 원하는 위치로 파일을 이동하실 수 있습니다.':'You can move the file to your preferred location after downloading.','현재 데이터가':'Current data','모두 삭제됩니다.':'will all be deleted.','복원 전에 현재 데이터를 백업하는 것을 권장합니다.':'We recommend backing up current data before restoring.','구글 계정에':'Sign in to your Google account and','JSON 형식의 백업 파일만 복원 가능합니다.':'Only JSON backup files can be restored.','파일명:':'File Name:'},
+                    th: {'개':'รายการ','통계':'รวม','데이터 개수:':'จำนวนข้อมูล:','기간:':'ช่วงเวลา:','파일명:':'ชื่อไฟล์:','내보낼 파일명을 입력하세요':'กรอกชื่อไฟล์ที่จะส่งออก','Note :':'หมายเหตุ:','note:':'หมายเหตุ:','warning:':'คำเตือน:','주의:':'คำเตือน:','참고:':'หมายเหตุ:','브라우저 보안상':'เพื่อความปลอดภัยของเบราว์เซอร์','다운로드 후 원하는 위치로 파일을 이동하실 수 있습니다.':'คุณสามารถย้ายไฟล์ไปยังตำแหน่งที่ต้องการได้หลังดาวน์โหลด','현재 데이터가':'ข้อมูลปัจจุบัน','모두 삭제됩니다.':'ทั้งหมดจะถูกลบ','복원 전에 현재 데이터를 백업하는 것을 권장합니다.':'แนะนำให้สำรองข้อมูลปัจจุบันก่อนกู้คืน','구글 계정에':'เข้าสู่ระบบบัญชี Google และ','JSON 형식의 백업 파일만 복원 가능합니다.':'กู้คืนได้เฉพาะไฟล์สำรองรูปแบบ JSON','파일명:':'ชื่อไฟล์:'},
+                    vi: {'개':'bản ghi','통계':'Tổng','데이터 개수:':'Số lượng dữ liệu:','기간:':'Khoảng thời gian:','파일명:':'Tên tệp:','내보낼 파일명을 입력하세요':'Nhập tên tệp cần xuất','Note :':'Lưu ý:','note:':'Lưu ý:','warning:':'Cảnh báo:','주의:':'Cảnh báo:','참고:':'Lưu ý:','브라우저 보안상':'Vì lý do bảo mật trình duyệt','다운로드 후 원하는 위치로 파일을 이동하실 수 있습니다.':'Bạn có thể di chuyển tệp đến vị trí mong muốn sau khi tải xuống','현재 데이터가':'Dữ liệu hiện tại','모두 삭제됩니다.':'sẽ bị xóa','복원 전에 현재 데이터를 백업하는 것을 권장합니다.':'Nên sao lưu dữ liệu hiện tại trước khi khôi phục','구글 계정에':'Đăng nhập tài khoản Google và','JSON 형식의 백업 파일만 복원 가능합니다.':'Chỉ có thể khôi phục tệp sao lưu định dạng JSON','파일명:':'Tên tệp:'},
+                    'zh-CN': {'개':'条','통계':'总计','데이터 개수:':'数据数量：','기간:':'期间：','파일명:':'文件名：','내보낼 파일명을 입력하세요':'请输入要导出的文件名','Note :':'注意：','note:':'注意：','warning:':'警告：','주의:':'警告：','참고:':'注意：','브라우저 보안상':'出于浏览器安全原因','다운로드 후 원하는 위치로 파일을 이동하실 수 있습니다.':'下载后可以将文件移动到所需位置','현재 데이터가':'当前数据','모두 삭제됩니다.':'将全部删除','복원 전에 현재 데이터를 백업하는 것을 권장합니다.':'建议在恢复前备份当前数据','구글 계정에':'登录Google账号并','JSON 형식의 백업 파일만 복원 가능합니다.':'只能恢复JSON格式的备份文件','파일명:':'文件名：'},
+                    'zh-TW': {'개':'筆','통계':'總計','데이터 개수:':'資料數量：','기간:':'期間：','파일명:':'檔案名稱：','내보낼 파일명을 입력하세요':'請輸入要匯出的檔案名稱','Note :':'注意：','note:':'注意：','warning:':'警告：','주의:':'警告：','참고:':'注意：','브라우저 보안상':'基於瀏覽器安全性','下載後可以將檔案':'下載後可以將檔案移動到所需位置','현재 데이터가':'目前資料','모두 삭제됩니다.':'將全部刪除','복원 전에 현재 데이터를 백업하는 것을 권장합니다.':'建議在恢復前先備份目前資料','구글 계정에':'登入Google帳號並','JSON 형식의 백업 파일만 복원 가능합니다.':'只能恢復JSON格式的備份檔案','파일명:':'檔案名稱：'},
+                    id: {'개':'data','통계':'Total','데이터 개수:':'Jumlah data:','기간:':'Periode:','파일명:':'Nama file:','내보낼 파일명을 입력하세요':'Masukkan nama file untuk diekspor','Note :':'Catatan:','note:':'Catatan:','warning:':'Peringatan:','주의:':'Peringatan:','참고:':'Catatan:','브라우저 보안상':'Demi keamanan browser','다운로드 후 원하는 위치로 ':'Anda dapat memindahkan file ke lokasi yang diinginkan setelah mengunduh.','현재 데이터가':'Data saat ini','모두 삭제됩니다.':'akan dihapus','복원 전에 현재 데이터를 백업하는 것을 권장합니다.':'Disarankan mencadangkan data saat ini sebelum memulihkan','구글 계정에':'Login ke akun Google dan','JSON 형식의 백업 파일만 복원 가능합니다.':'Hanya file cadangan berformat JSON yang dapat dipulihkan.','파일명:':'Nama file:'}
                 };
                 const residual = popupResidualFragments[lang] || {};
                 Object.keys(residual).sort((a,b)=>b.length-a.length).forEach(k => { s = s.split(k).join(residual[k]); });
@@ -6478,12 +6479,12 @@ function translateLegacy(value) {
                 row.innerHTML =
                     '<div class="flex items-center gap-2 mb-1">' +
                     '<div class="w-28 md:w-36 text-sm font-medium truncate" title="' + e.label + '">' + e.label + '</div>' +
-                    '<div class="flex-1 text-left text-xs font-bold text-blue-800">' + profit.toLocaleString() + currency.symbol + '</div>' +
-                    '<div class="w-28 text-right text-xs text-blue-700">' + sales.toLocaleString() + currency.symbol + '</div>' +
                     '</div>' +
-                    '<div class="ml-0 md:ml-36 relative h-7 bg-gray-100 rounded-full overflow-hidden border border-gray-200">' +
-                    '<div class="absolute inset-y-0 left-0 bg-blue-200 rounded-full" style="width:' + Math.max(salesPct, sales > 0 ? 2 : 0) + '%"></div>' +
-                    '<div class="absolute inset-y-0 left-0 bg-blue-700 rounded-full" style="width:' + Math.min(profitPct, 100) + '%"></div>' +
+                    '<div class="ml-0 md:ml-36 relative h-9 bg-gray-100 rounded-full overflow-hidden border border-gray-200">' +
+                    '<div class="absolute inset-y-0 left-0 bg-blue-200 rounded-full flex items-center justify-end pr-2" style="width:' + Math.max(salesPct, sales > 0 ? 4 : 0) + '%">' +
+                    '<span class="text-xs font-bold text-blue-800 whitespace-nowrap">' + sales.toLocaleString() + currency.symbol + '</span></div>' +
+                    '<div class="absolute inset-y-0 left-0 bg-blue-700 rounded-full flex items-center justify-center" style="width:' + Math.min(profitPct, 100) + '%">' +
+                    '<span class="text-xs font-bold text-white whitespace-nowrap">' + profit.toLocaleString() + currency.symbol + '</span></div>' +
                     '</div>';
                 container.appendChild(row);
             });
@@ -8601,6 +8602,35 @@ function translateLegacy(value) {
                 return nativeConfirm(translatePopupMessage(message));
             };
         })();
+
+        // 동적으로 생성되는 관리 팝업의 텍스트 노드/placeholder/value까지 다국어 처리합니다.
+        function localizeDynamicManagementModal() {
+            const root = document.getElementById('managementModal');
+            if (!root) return;
+            const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+            const nodes = [];
+            let node;
+            while ((node = walker.nextNode())) nodes.push(node);
+            nodes.forEach(n => {
+                const raw = n.nodeValue;
+                if (!raw || !raw.trim()) return;
+                const translated = translatePopupMessage(raw);
+                if (translated !== raw) n.nodeValue = translated;
+            });
+            root.querySelectorAll('input[placeholder], textarea[placeholder]').forEach(el => {
+                const raw = el.getAttribute('placeholder');
+                if (raw) {
+                    const translated = translatePopupMessage(raw);
+                    if (translated !== raw) el.setAttribute('placeholder', translated);
+                }
+            });
+        }
+        const managementModalObserver = new MutationObserver(() => {
+            clearTimeout(window.__maShopModalLocalizationTimer);
+            window.__maShopModalLocalizationTimer = setTimeout(localizeDynamicManagementModal, 0);
+        });
+        const managementModalRoot = document.getElementById('managementModal');
+        if (managementModalRoot) managementModalObserver.observe(managementModalRoot, {childList:true,subtree:true});
 
         // 앱 초기화
         initializeApp();
