@@ -7829,6 +7829,43 @@ function translateLegacy(value) {
                     '선택한 백업을 현재 로그인한 관리자 데이터에 복원하시겠습니까?\\n현재 데이터가 백업 데이터로 교체됩니다.':'Pulihkan cadangan yang dipilih ke data admin yang sedang login?\\nData saat ini akan diganti dengan data cadangan.'
                 }
             };
+            const popupSpecialExact = {
+                en: {
+                    '현재 RCA 관리자 데이터에 테스트 백업을 덮어쓰시겠습니까?\\n기존 RCA 로컬 테스트 데이터는 백업 데이터로 교체됩니다.':'Overwrite the current RCA administrator data with the test backup?\\nExisting RCA local test data will be replaced by the backup data.'
+                },
+                th: {
+                    '현재 RCA 관리자 데이터에 테스트 백업을 덮어쓰시겠습니까?\\n기존 RCA 로컬 테스트 데이터는 백업 데이터로 교체됩니다.':'ต้องการเขียนทับข้อมูลผู้ดูแล RCA ปัจจุบันด้วยข้อมูลสำรองทดสอบหรือไม่?\\nข้อมูล RCA ในเครื่องเดิมจะถูกแทนที่ด้วยข้อมูลสำรอง'
+                },
+                vi: {
+                    '현재 RCA 관리자 데이터에 테스트 백업을 덮어쓰시겠습니까?\\n기존 RCA 로컬 테스트 데이터는 백업 데이터로 교체됩니다.':'Bạn có muốn ghi đè dữ liệu quản trị RCA hiện tại bằng bản sao lưu thử nghiệm không?\\nDữ liệu RCA cục bộ hiện tại sẽ được thay thế bằng dữ liệu sao lưu.'
+                },
+                'zh-CN': {
+                    '현재 RCA 관리자 데이터에 테스트 백업을 덮어쓰시겠습니까?\\n기존 RCA 로컬 테스트 데이터는 백업 데이터로 교체됩니다.':'确定要用测试备份覆盖当前 RCA 管理员数据吗？\\n现有 RCA 本地测试数据将被备份数据替换。'
+                },
+                'zh-TW': {
+                    '현재 RCA 관리자 데이터에 테스트 백업을 덮어쓰시겠습니까?\\n기존 RCA 로컬 테스트 데이터는 백업 데이터로 교체됩니다.':'確定要用測試備份覆蓋目前 RCA 管理員資料嗎？\\n現有 RCA 本機測試資料將被備份資料取代。'
+                },
+                id: {
+                    '현재 RCA 관리자 데이터에 테스트 백업을 덮어쓰시겠습니까?\\n기존 RCA 로컬 테스트 데이터는 백업 데이터로 교체됩니다.':'Timpa data admin RCA saat ini dengan cadangan uji?\\nData lokal RCA yang ada akan diganti dengan data cadangan.'
+                }
+            };
+            const popupSpecialDynamic = {
+                'zh-CN': [
+                    [/^⚠️ 사용 기간 만료 알림\\n\\n(\d+)일 후 사용 기간이 만료됩니다\.\\n만료일: (.+)\\n\\n관리자에게 연장을 요청하세요\.$/, '⚠️ 使用期限到期提醒\\n\\n使用期限将在 $1 天后到期。\\n到期日：$2\\n\\n请联系管理员延长使用期限。']
+                ],
+                'zh-TW': [
+                    [/^⚠️ 사용 기간 만료 알림\\n\\n(\d+)일 후 사용 기간이 만료됩니다\.\\n만료일: (.+)\\n\\n관리자에게 연장을 요청하세요\.$/, '⚠️ 使用期限到期提醒\\n\\n使用期限將在 $1 天後到期。\\n到期日：$2\\n\\n請聯絡管理員延長使用期限。']
+                ],
+                id: [
+                    [/^⚠️ 사용 기간 만료 알림\\n\\n(\d+)일 후 사용 기간이 만료됩니다\.\\n만료일: (.+)\\n\\n관리자에게 연장을 요청하세요\.$/, '⚠️ Pemberitahuan masa berlaku\\n\\nMasa penggunaan berakhir dalam $1 hari.\\nTanggal kedaluwarsa: $2\\n\\nSilakan minta admin memperpanjang masa berlaku.']
+                ]
+            };
+            const specialExact = popupSpecialExact[currentLanguage] || {};
+            if (specialExact[text]) return restoreNewlines(specialExact[text]);
+            const specialRules = popupSpecialDynamic[currentLanguage] || [];
+            for (const [pattern, replacement] of specialRules) {
+                if (pattern.test(text)) return restoreNewlines(text.replace(pattern, replacement));
+            }
             const override = Object.assign({}, universalPopupOverrides[currentLanguage] || {}, popupExactOverrides[currentLanguage] || {});
             if (override[text]) return restoreNewlines(override[text]);
             const dict = exact[currentLanguage] || {};
