@@ -1362,49 +1362,6 @@
             }
         }
 
-        // 새로 추가된 DB/로그인 UI 키는 모든 언어에서 직접 보강합니다.
-        Object.assign(translations['en'], {
-            languageSelection:'Language',
-            dataBackupRestoreTitle:'Data Backup & Restore', backupButton:'Backup', restoreButton:'Restore',
-            localBackupButton:'Local Backup', googleBackupButton:'Google Backup', localRestoreButton:'Local Restore', googleRestoreButton:'Google Restore',
-            excelUploadButton:'Upload Excel Data', downloadUploadSampleButton:'Download Upload Sample', exportAllDataButton:'Export All Data to Excel',
-            guaranteeManagement:'Guarantee Management', dbDelete:'Delete DB', deleteTargetDate:'Target Date', viewStatus:'View Status',
-            deletePaidAll:'Delete All Paid Data for Selected Date'
-        });
-        Object.assign(translations['ko'], {
-            languageSelection:'언어 선택', guaranteeManagement:'Guarantee 관리'
-        });
-        Object.assign(translations['th'], {
-            languageSelection:'เลือกภาษา', dataBackupRestoreTitle:'สำรองและกู้คืนข้อมูล', backupButton:'สำรองข้อมูล', restoreButton:'กู้คืนข้อมูล',
-            localBackupButton:'สำรองข้อมูลในเครื่อง', googleBackupButton:'สำรองข้อมูล Google', localRestoreButton:'กู้คืนข้อมูลในเครื่อง', googleRestoreButton:'กู้คืนข้อมูล Google',
-            excelUploadButton:'อัปโหลดข้อมูล Excel', downloadUploadSampleButton:'ดาวน์โหลดตัวอย่างอัปโหลด', exportAllDataButton:'ส่งออกข้อมูลทั้งหมดเป็น Excel',
-            guaranteeManagement:'จัดการ Guarantee', dbDelete:'ลบฐานข้อมูล', deleteTargetDate:'วันที่เป้าหมาย', viewStatus:'ดูสถานะ', deletePaidAll:'ลบข้อมูลที่ชำระแล้วทั้งหมดของวันที่เลือก'
-        });
-        Object.assign(translations['vi'], {
-            languageSelection:'Chọn ngôn ngữ', dataBackupRestoreTitle:'Sao lưu & Khôi phục dữ liệu', backupButton:'Sao lưu', restoreButton:'Khôi phục',
-            localBackupButton:'Sao lưu cục bộ', googleBackupButton:'Sao lưu Google', localRestoreButton:'Khôi phục cục bộ', googleRestoreButton:'Khôi phục Google',
-            excelUploadButton:'Tải dữ liệu Excel lên', downloadUploadSampleButton:'Tải mẫu lên xuống', exportAllDataButton:'Xuất toàn bộ dữ liệu sang Excel',
-            guaranteeManagement:'Quản lý Guarantee', dbDelete:'Xóa DB', deleteTargetDate:'Ngày mục tiêu', viewStatus:'Xem trạng thái', deletePaidAll:'Xóa toàn bộ dữ liệu đã thanh toán của ngày đã chọn'
-        });
-        Object.assign(translations['zh-CN'], {
-            languageSelection:'语言选择', dataBackupRestoreTitle:'数据备份与恢复', backupButton:'备份', restoreButton:'恢复',
-            localBackupButton:'本地备份', googleBackupButton:'Google 备份', localRestoreButton:'本地恢复', googleRestoreButton:'Google 恢复',
-            excelUploadButton:'上传 Excel 数据', downloadUploadSampleButton:'下载上传模板', exportAllDataButton:'导出全部数据到 Excel',
-            guaranteeManagement:'保证金管理', dbDelete:'删除数据库', deleteTargetDate:'删除日期', viewStatus:'查看状态', deletePaidAll:'删除所选日期的全部已付款数据'
-        });
-        Object.assign(translations['zh-TW'], {
-            languageSelection:'語言選擇', dataBackupRestoreTitle:'資料備份與恢復', backupButton:'備份', restoreButton:'恢復',
-            localBackupButton:'本機備份', googleBackupButton:'Google 備份', localRestoreButton:'本機恢復', googleRestoreButton:'Google 恢復',
-            excelUploadButton:'上傳 Excel 資料', downloadUploadSampleButton:'下載上傳範本', exportAllDataButton:'匯出全部資料到 Excel',
-            guaranteeManagement:'保證金管理', dbDelete:'刪除資料庫', deleteTargetDate:'刪除日期', viewStatus:'查看狀態', deletePaidAll:'刪除所選日期的全部已付款資料'
-        });
-        Object.assign(translations['id'], {
-            languageSelection:'Pilih Bahasa', dataBackupRestoreTitle:'Cadangkan & Pulihkan Data', backupButton:'Cadangkan', restoreButton:'Pulihkan',
-            localBackupButton:'Cadangan Lokal', googleBackupButton:'Cadangan Google', localRestoreButton:'Pemulihan Lokal', googleRestoreButton:'Pemulihan Google',
-            excelUploadButton:'Unggah Data Excel', downloadUploadSampleButton:'Unduh Sampel Unggah', exportAllDataButton:'Ekspor Semua Data ke Excel',
-            guaranteeManagement:'Kelola Guarantee', dbDelete:'Hapus DB', deleteTargetDate:'Tanggal Target', viewStatus:'Lihat Status', deletePaidAll:'Hapus semua data yang sudah dibayar untuk tanggal yang dipilih'
-        });;
-
         // 추가 언어: 중국어 간체 / 중국어 번체 / 인도네시아어
         // 전체 번역 키는 영어를 기본값으로 사용하고 주요 화면은 각 언어로 번역합니다.
         translations['zh-CN'] = Object.assign({}, translations.en, {
@@ -1513,6 +1470,38 @@
             paymentMethod:'Metode Pembayaran', amount:'Jumlah', paymentTotal:'Total', dataBackupRestore:'Cadangan dan Pemulihan Data',
             backup:'Cadangkan', restore:'Pulihkan', downloadButton:'Unduh', staffStatisticsTitle:'Statistik Karyawan',
             paymentMethodStatisticsTitle:'Statistik Metode Pembayaran', paymentMethodColumn:'Metode Pembayaran', amountColumn:'Jumlah'
+        });
+
+        // 새로 추가된 로그인/DB 관리 UI 키를 7개 언어에 보강합니다.
+        Object.assign(translations['en'], {
+            languageSelection:'Language', guaranteeManagement:'Guarantee Management', dbDelete:'Delete DB', deleteTargetDate:'Target Date', viewStatus:'View Status', deletePaidAll:'Delete All Paid Data for Selected Date'
+        });
+        Object.assign(translations['ko'], {
+            languageSelection:'언어 선택', guaranteeManagement:'Guarantee 관리'
+        });
+        Object.assign(translations['th'], {
+            languageSelection:'เลือกภาษา', guaranteeManagement:'จัดการ Guarantee', dbDelete:'ลบฐานข้อมูล', deleteTargetDate:'วันที่เป้าหมาย', viewStatus:'ดูสถานะ', deletePaidAll:'ลบข้อมูลที่ชำระแล้วทั้งหมดของวันที่เลือก'
+        });
+        Object.assign(translations['vi'], {
+            languageSelection:'Chọn ngôn ngữ', guaranteeManagement:'Quản lý Guarantee', dbDelete:'Xóa DB', deleteTargetDate:'Ngày mục tiêu', viewStatus:'Xem trạng thái', deletePaidAll:'Xóa toàn bộ dữ liệu đã thanh toán của ngày đã chọn'
+        });
+        Object.assign(translations['zh-CN'], {
+            languageSelection:'语言选择', dataBackupRestoreTitle:'数据备份与恢复', backupButton:'备份', restoreButton:'恢复',
+            localBackupButton:'本地备份', googleBackupButton:'Google 备份', localRestoreButton:'本地恢复', googleRestoreButton:'Google 恢复',
+            excelUploadButton:'上传 Excel 数据', downloadUploadSampleButton:'下载上传模板', exportAllDataButton:'导出全部数据到 Excel',
+            guaranteeManagement:'保证金管理', dbDelete:'删除数据库', deleteTargetDate:'删除日期', viewStatus:'查看状态', deletePaidAll:'删除所选日期的全部已付款数据'
+        });
+        Object.assign(translations['zh-TW'], {
+            languageSelection:'語言選擇', dataBackupRestoreTitle:'資料備份與恢復', backupButton:'備份', restoreButton:'恢復',
+            localBackupButton:'本機備份', googleBackupButton:'Google 備份', localRestoreButton:'本機恢復', googleRestoreButton:'Google 恢復',
+            excelUploadButton:'上傳 Excel 資料', downloadUploadSampleButton:'下載上傳範本', exportAllDataButton:'匯出全部資料到 Excel',
+            guaranteeManagement:'保證金管理', dbDelete:'刪除資料庫', deleteTargetDate:'刪除日期', viewStatus:'查看狀態', deletePaidAll:'刪除所選日期的全部已付款資料'
+        });
+        Object.assign(translations['id'], {
+            languageSelection:'Pilih Bahasa', dataBackupRestoreTitle:'Cadangkan & Pulihkan Data', backupButton:'Cadangkan', restoreButton:'Pulihkan',
+            localBackupButton:'Cadangan Lokal', googleBackupButton:'Cadangan Google', localRestoreButton:'Pemulihan Lokal', googleRestoreButton:'Pemulihan Google',
+            excelUploadButton:'Unggah Data Excel', downloadUploadSampleButton:'Unduh Sampel Unggah', exportAllDataButton:'Ekspor Semua Data ke Excel',
+            guaranteeManagement:'Kelola Guarantee', dbDelete:'Hapus DB', deleteTargetDate:'Tanggal Target', viewStatus:'Lihat Status', deletePaidAll:'Hapus semua data yang sudah dibayar untuk tanggal yang dipilih'
         });
 
         // 초기화
