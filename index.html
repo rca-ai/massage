@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Report v3.14</title>
+  <title>Daily Report v3.15</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -174,7 +174,7 @@
    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
      <div>
-      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.14</span></div>
+      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.15</span></div>
       <p id="shopName" class="text-lg text-gray-600 mt-1"></p>
      </div>
      <div class="flex gap-2"><button onclick="showLanguageModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="changeLanguage">언어 변경</button> <button onclick="showFontModal()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600" data-translate="changeFont">폰트 변경</button> <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" data-translate="logout">로그아웃</button>
@@ -625,8 +625,8 @@
         // D1/Cloudflare Worker API endpoint. This keeps GitHub-hosted test.html connected to the same backend.
         const API_BASE_URL = 'https://massage.guidrthai.workers.dev';
         // 앱 버전: 기능/화면이 변경될 때마다 0.01씩 증가시킵니다.
-        // 현재 버전은 v3.14입니다.
-        const APP_VERSION = 'v3.14';
+        // 현재 버전은 v3.15입니다.
+        const APP_VERSION = 'v3.15';
         let currentPaymentReservationId = null;
         let selectedStaff = null;
         let menuRowCounter = 0;
@@ -7386,123 +7386,137 @@ function translateLegacy(value) {
             });
         }
 
-        async function downloadExcelUploadSample() {
-            try {
-                await loadExcelLibrary();
-            } catch (error) {
+        function downloadExcelUploadSample() {
+            if (typeof XLSX === 'undefined') {
                 alert(translatePopupMessage('엑셀 기능을 불러오지 못했습니다. 인터넷 연결을 확인해주세요.'));
                 return;
             }
-            const excelSampleByLanguage = {
-                ko:{sheet:'예약데이터',headers:['날짜','직원명','메뉴명','시간(분)','시작시간','방번호','고객명','가격','커미션','입금상태','입금방식','입금액','메뉴순서','다중메뉴'],paid:'입금완료',cash:'현금',multi:'아니오',file:'마사지샵_엑셀업로드_샘플.xlsx'},
-                en:{sheet:'Reservations',headers:['Date','Staff','Menu','Duration (min)','Start Time','Room Number','Customer','Price','Commission','Payment Status','Payment Method','Payment Amount','Menu Order','Multi Menu'],paid:'Paid',cash:'Cash',multi:'No',file:'MaShop_Excel_Upload_Sample.xlsx'},
-                th:{sheet:'ข้อมูลการจอง',headers:['วันที่','พนักงาน','เมนู','ระยะเวลา (นาที)','เวลาเริ่ม','หมายเลขห้อง','ลูกค้า','ราคา','คอมมิชชั่น','สถานะการชำระเงิน','วิธีชำระเงิน','จำนวนเงินที่ชำระ','ลำดับเมนู','หลายเมนู'],paid:'ชำระแล้ว',cash:'เงินสด',multi:'ไม่',file:'MaShop_ตัวอย่าง_อัปโหลด_Excel.xlsx'},
-                vi:{sheet:'Dữ liệu đặt chỗ',headers:['Ngày','Nhân viên','Menu','Thời lượng (phút)','Giờ bắt đầu','Số phòng','Khách hàng','Giá','Hoa hồng','Trạng thái thanh toán','Phương thức thanh toán','Số tiền thanh toán','Thứ tự menu','Nhiều menu'],paid:'Đã thanh toán',cash:'Tiền mặt',multi:'Không',file:'MaShop_Mau_Tai_Excel.xlsx'},
-                'zh-CN':{sheet:'预约数据',headers:['日期','员工姓名','菜单名称','时长（分钟）','开始时间','房间号','客户姓名','价格','佣金','付款状态','付款方式','付款金额','菜单顺序','多菜单'],paid:'已付款',cash:'现金',multi:'否',file:'MaShop_Excel上传模板.xlsx'},
-                'zh-TW':{sheet:'預約資料',headers:['日期','員工姓名','選單名稱','時間（分鐘）','開始時間','房號','顧客姓名','價格','佣金','付款狀態','付款方式','付款金額','選單順序','多選單'],paid:'已付款',cash:'現金',multi:'否',file:'MaShop_Excel上傳範本.xlsx'},
-                id:{sheet:'Data Reservasi',headers:['Tanggal','Karyawan','Menu','Durasi (menit)','Waktu Mulai','Nomor Kamar','Pelanggan','Harga','Komisi','Status Pembayaran','Metode Pembayaran','Jumlah Pembayaran','Urutan Menu','Multi Menu'],paid:'Sudah Dibayar',cash:'Tunai',multi:'Tidak',file:'MaShop_Sampel_Unggah_Excel.xlsx'}
+            // async/await 없이 클릭 이벤트 안에서 즉시 다운로드하여 브라우저의 사용자 클릭 권한을 유지합니다.
+            const samples = {
+                ko:{sheet:'예약데이터',h:['날짜','직원명','메뉴명','시간(분)','시작시간','방번호','고객명','가격','커미션','입금상태','입금방식','입금액','메뉴순서','다중메뉴'],r:['2026-09-20','Ting','Thai',90,'15:20','','',500,225,'입금완료','현금',500,1,'아니오'],file:'마사지샵_엑셀업로드_샘플.xlsx'},
+                en:{sheet:'Reservations',h:['Date','Staff','Menu','Duration (min)','Start Time','Room Number','Customer','Price','Commission','Payment Status','Payment Method','Payment Amount','Menu Order','Multi Menu'],r:['2026-09-20','Ting','Thai',90,'15:20','','',500,225,'Paid','Cash',500,1,'No'],file:'MaShop_Excel_Upload_Sample.xlsx'},
+                th:{sheet:'ข้อมูลการจอง',h:['วันที่','พนักงาน','เมนู','ระยะเวลา (นาที)','เวลาเริ่ม','หมายเลขห้อง','ลูกค้า','ราคา','คอมมิชชั่น','สถานะการชำระเงิน','วิธีชำระเงิน','จำนวนเงินที่ชำระ','ลำดับเมนู','หลายเมนู'],r:['2026-09-20','Ting','Thai',90,'15:20','','',500,225,'ชำระแล้ว','เงินสด',500,1,'ไม่'],file:'MaShop_ตัวอย่าง_อัปโหลด_Excel.xlsx'},
+                vi:{sheet:'Dữ liệu đặt chỗ',h:['Ngày','Nhân viên','Menu','Thời lượng (phút)','Giờ bắt đầu','Số phòng','Khách hàng','Giá','Hoa hồng','Trạng thái thanh toán','Phương thức thanh toán','Số tiền thanh toán','Thứ tự menu','Nhiều menu'],r:['2026-09-20','Ting','Thai',90,'15:20','','',500,225,'Đã thanh toán','Tiền mặt',500,1,'Không'],file:'MaShop_Mau_Tai_Excel.xlsx'},
+                'zh-CN':{sheet:'预约数据',h:['日期','员工姓名','菜单名称','时长（分钟）','开始时间','房间号','客户姓名','价格','佣金','付款状态','付款方式','付款金额','菜单顺序','多菜单'],r:['2026-09-20','Ting','Thai',90,'15:20','','',500,225,'已付款','现金',500,1,'否'],file:'MaShop_Excel上传模板.xlsx'},
+                'zh-TW':{sheet:'預約資料',h:['日期','員工姓名','選單名稱','時間（分鐘）','開始時間','房號','顧客姓名','價格','佣金','付款狀態','付款方式','付款金額','選單順序','多選單'],r:['2026-09-20','Ting','Thai',90,'15:20','','',500,225,'已付款','現金',500,1,'否'],file:'MaShop_Excel上傳範本.xlsx'},
+                id:{sheet:'Data Reservasi',h:['Tanggal','Karyawan','Menu','Durasi (menit)','Waktu Mulai','Nomor Kamar','Pelanggan','Harga','Komisi','Status Pembayaran','Metode Pembayaran','Jumlah Pembayaran','Urutan Menu','Multi Menu'],r:['2026-09-20','Ting','Thai',90,'15:20','','',500,225,'Sudah Dibayar','Tunai',500,1,'Tidak'],file:'MaShop_Sampel_Unggah_Excel.xlsx'}
             };
-            const cfg = excelSampleByLanguage[currentLanguage] || excelSampleByLanguage.en;
-            const sample = [['2026-09-22','Rung','타이마사지',60,'10:00','101','홍길동',450,180,cfg.paid,cfg.cash,450,1,cfg.multi]];
-            const ws = XLSX.utils.aoa_to_sheet([cfg.headers, ...sample]);
-            ws['!cols'] = [
-                {wch:14},{wch:14},{wch:18},{wch:16},{wch:12},{wch:12},{wch:16},
-                {wch:12},{wch:12},{wch:18},{wch:18},{wch:16},{wch:12},{wch:12}
-            ];
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, cfg.sheet);
-
-            // XLSX.writeFile은 일부 브라우저/Cloudflare 환경에서
-            // "다운로드를 열 수 없습니다"가 발생할 수 있으므로 Blob 방식으로 직접 다운로드합니다.
-            const xlsxArray = XLSX.write(wb, {bookType:'xlsx', type:'array'});
-            const blob = new Blob([xlsxArray], {
-                type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-            });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = cfg.file;
-            link.style.display = 'none';
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            setTimeout(() => URL.revokeObjectURL(url), 1500);
+            const cfg=samples[currentLanguage]||samples.en;
+            const ws=XLSX.utils.aoa_to_sheet([cfg.h,cfg.r]);
+            ws['!cols']=[14,14,18,16,12,12,16,12,12,18,18,16,12,12].map(w=>({wch:w}));
+            const wb=XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb,ws,cfg.sheet);
+            const bytes=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+            const blob=new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+            const url=URL.createObjectURL(blob);
+            const link=document.createElement('a');
+            link.href=url; link.download=cfg.file; link.style.display='none';
+            document.body.appendChild(link); link.click(); link.remove();
+            setTimeout(()=>URL.revokeObjectURL(url),2000);
         }
 
         function parseExcelPaidStatus(value) {
-            const textValue = String(value ?? '').trim().toLowerCase();
-            return ['입금완료','완료','입금','paid','paid complete','true','yes','y','1','ชำระแล้ว','đã thanh toán','已付款','付款完成','sudah dibayar'].includes(textValue) || value === true;
+            const textValue=String(value??'').trim().toLowerCase();
+            return ['입금완료','완료','입금','paid','paid complete','true','yes','y','1','ชำระแล้ว','đã thanh toán','đã thanh toán','已付款','付款完成','sudah dibayar'].includes(textValue)||value===true;
         }
 
-        function parseExcelPaymentDetails(methodValue, amountValue, legacyValue) {
-            const result = {};
-            const method = String(methodValue ?? '').trim();
-            const amount = Number(String(amountValue ?? '').replace(/,/g,'')) || 0;
-            if (method && amount > 0) {
-                result[method] = amount;
-                return result;
-            }
-            const value = legacyValue;
-            if (!value) return result;
-            if (typeof value === 'object') return value;
-            const textValue = String(value).trim();
-            if (!textValue) return result;
-            try {
-                const parsed = JSON.parse(textValue);
-                if (parsed && typeof parsed === 'object') return parsed;
-            } catch (e) {}
-            textValue.split(',').forEach(part => {
-                const m = part.trim().match(/^(.+?)\s*[:=]\s*([\d,]+)$/);
-                if (m) result[m[1].trim()] = Number(m[2].replace(/,/g,'')) || 0;
-            });
+        function parseExcelPaymentDetails(methodValue,amountValue,legacyValue) {
+            const result={};
+            const method=String(methodValue??'').trim();
+            const amount=Number(String(amountValue??'').replace(/,/g,''))||0;
+            if(method&&amount>0){result[method]=amount;return result;}
+            if(!legacyValue)return result;
+            if(typeof legacyValue==='object')return legacyValue;
+            const textValue=String(legacyValue).trim();
+            try{const parsed=JSON.parse(textValue);if(parsed&&typeof parsed==='object')return parsed;}catch(e){}
+            textValue.split(',').forEach(part=>{const m=part.trim().match(/^(.+?)\s*[:=]\s*([\d,]+)$/);if(m)result[m[1].trim()]=Number(m[2].replace(/,/g,''))||0;});
             return result;
         }
 
         function excelDateToISO(value) {
-            if (value instanceof Date && !isNaN(value)) return value.toISOString().split('T')[0];
-            if (typeof value === 'number' && typeof XLSX !== 'undefined' && XLSX.SSF) {
-                const d = XLSX.SSF.parse_date_code(value);
-                if (d) return String(d.y).padStart(4,'0') + '-' + String(d.m).padStart(2,'0') + '-' + String(d.d).padStart(2,'0');
-            }
-            const textValue = String(value ?? '').trim();
-            if (!textValue) return '';
-            const normalized = textValue.replace(/[.\/]/g,'-');
-            const m = normalized.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
-            return m ? m[1] + '-' + String(m[2]).padStart(2,'0') + '-' + String(m[3]).padStart(2,'0') : textValue;
+            if(value instanceof Date&&!isNaN(value))return value.toISOString().split('T')[0];
+            if(typeof value==='number'&&typeof XLSX!=='undefined'&&XLSX.SSF){const d=XLSX.SSF.parse_date_code(value);if(d)return String(d.y).padStart(4,'0')+'-'+String(d.m).padStart(2,'0')+'-'+String(d.d).padStart(2,'0');}
+            const textValue=String(value??'').trim();if(!textValue)return '';
+            const m=textValue.replace(/[.\/]/g,'-').match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+            return m?m[1]+'-'+String(m[2]).padStart(2,'0')+'-'+String(m[3]).padStart(2,'0'):textValue;
         }
 
         function normalizeExcelTime(value) {
-            if (value instanceof Date && !isNaN(value)) return value.toTimeString().slice(0,5);
-            if (typeof value === 'number') {
-                const total = Math.round(value * 24 * 60);
-                return String(Math.floor(total / 60) % 24).padStart(2,'0') + ':' + String(total % 60).padStart(2,'0');
-            }
-            const textValue = String(value ?? '').trim();
-            if (!textValue) return '';
-            const m = textValue.match(/^(\d{1,2}):(\d{1,2})/);
-            return m ? String(m[1]).padStart(2,'0') + ':' + String(m[2]).padStart(2,'0') : textValue;
+            if(value instanceof Date&&!isNaN(value))return value.toTimeString().slice(0,5);
+            if(typeof value==='number'){const total=Math.round(value*24*60);return String(Math.floor(total/60)%24).padStart(2,'0')+':'+String(total%60).padStart(2,'0');}
+            const textValue=String(value??'').trim();if(!textValue)return '';
+            const m=textValue.match(/^(\d{1,2}):(\d{1,2})/);
+            return m?String(m[1]).padStart(2,'0')+':'+String(m[2]).padStart(2,'0'):textValue;
+        }
+
+        function buildExcelReferenceData(rows) {
+            const staff=JSON.parse(localStorage.getItem(getAdminKey('staff'))||'[]');
+            const menus=JSON.parse(localStorage.getItem(getAdminKey('menus'))||'[]');
+            const customers=JSON.parse(localStorage.getItem(getAdminKey('customers'))||'[]');
+            const paymentMethods=JSON.parse(localStorage.getItem(getAdminKey('paymentMethods'))||'[]');
+            let nextStaffId=Math.max(...staff.map(x=>Number(x.id)||0),0)+1;
+            let nextMenuId=Math.max(...menus.map(x=>Number(x.id)||0),0)+1;
+            let nextCustomerId=Math.max(...customers.map(x=>Number(x.id)||0),0)+1;
+            let nextPaymentId=Math.max(...paymentMethods.map(x=>Number(x.id)||0),0)+1;
+            const added={staff:0,menus:0,menuDurations:0,customers:0,paymentMethods:0};
+            const staffByName=new Map(staff.map(x=>[String(x.name||'').trim(),x]));
+            const menuByName=new Map(menus.map(x=>[String(x.name||'').trim(),x]));
+            const customerByName=new Map(customers.map(x=>[String(x.name||'').trim(),x]).filter(x=>x[0]));
+            const paymentByName=new Map(paymentMethods.map(x=>[String(x.name||'').trim(),x]).filter(x=>x[0]));
+
+            rows.forEach(row=>{
+                const staffName=String(row['직원명']??'').trim();
+                const menuName=String(row['메뉴명']??'').trim();
+                const customerName=String(row['고객명']??'').trim();
+                const paymentMethod=String(row['입금방식']??'').trim();
+                const duration=Number(row['시간(분)']??row['시간']??0)||0;
+                const price=Number(String(row['가격']??0).replace(/,/g,''))||0;
+                const commission=Number(String(row['커미션']??0).replace(/,/g,''))||0;
+
+                if(staffName&&!staffByName.has(staffName)){
+                    const item={id:nextStaffId++,name:staffName,phone:'',bank:'',account:'',status:'정직원'};
+                    staff.push(item);staffByName.set(staffName,item);added.staff++;
+                }
+                if(menuName){
+                    let menu=menuByName.get(menuName);
+                    if(!menu){menu={id:nextMenuId++,name:menuName,prices:{}};menus.push(menu);menuByName.set(menuName,menu);added.menus++;}
+                    if(duration>0){
+                        if(!menu.prices)menu.prices={};
+                        const p=menu.prices[duration];
+                        if(!p||p.price==null||p.commission==null){
+                            menu.prices[duration]={price,commission:{value:commission,type:'amount'}};
+                            added.menuDurations++;
+                        }
+                    }
+                }
+                if(customerName&&!customerByName.has(customerName)){
+                    const item={id:nextCustomerId++,name:customerName,phone:'',customerNumber:''};
+                    customers.push(item);customerByName.set(customerName,item);added.customers++;
+                }
+                if(paymentMethod&&!paymentByName.has(paymentMethod)){
+                    const item={id:nextPaymentId++,name:paymentMethod};
+                    paymentMethods.push(item);paymentByName.set(paymentMethod,item);added.paymentMethods++;
+                }
+            });
+            return {staff,menus,customers,paymentMethods,added};
         }
 
         async function uploadExcelData(event) {
-            const file = event.target.files && event.target.files[0];
-            if (!file) return;
-            try {
-                await loadExcelLibrary();
-            } catch (error) {
+            const file=event.target.files&&event.target.files[0];
+            if(!file)return;
+            try{await loadExcelLibrary();}catch(error){
                 alert(translatePopupMessage('엑셀 기능을 불러오지 못했습니다. 인터넷 연결을 확인해주세요.'));
-                event.target.value = '';
-                return;
+                event.target.value='';return;
             }
+            const reader=new FileReader();
+            reader.onload=async function(e){
+                try{
+                    const workbook=XLSX.read(e.target.result,{type:'array',cellDates:true});
+                    const sheet=workbook.Sheets[workbook.SheetNames[0]];
+                    let rows=XLSX.utils.sheet_to_json(sheet,{defval:''});
+                    if(!rows.length)throw new Error('엑셀 파일에 데이터가 없습니다.');
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const workbook = XLSX.read(e.target.result, {type:'array', cellDates:true});
-                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                    let rows = XLSX.utils.sheet_to_json(sheet, {defval:''});
-                    if (!rows.length) throw new Error('엑셀 파일에 데이터가 없습니다.');
-
-                    const excelHeaderAliases = {
+                    const aliases={
                         '날짜':['날짜','Date','วันที่','Ngày','日期','Tanggal'],
                         '직원명':['직원명','Staff','พนักงาน','Nhân viên','员工姓名','員工姓名','Karyawan'],
                         '메뉴명':['메뉴명','Menu','เมนู','菜单名称','選單名稱'],
@@ -7518,92 +7532,75 @@ function translateLegacy(value) {
                         '메뉴순서':['메뉴순서','Menu Order','ลำดับเมนู','Thứ tự menu','菜单顺序','選單順序','Urutan Menu'],
                         '다중메뉴':['다중메뉴','Multi Menu','หลายเมนู','Nhiều menu','多菜单','多選單','Multi Menu']
                     };
-                    const first = rows[0];
-                    const headerMap = {};
-                    Object.keys(excelHeaderAliases).forEach(canonical => {
-                        const alias = excelHeaderAliases[canonical].find(a => Object.prototype.hasOwnProperty.call(first,a));
-                        if (alias) headerMap[alias] = canonical;
-                    });
-                    rows = rows.map(row => {
-                        const normalized = {};
-                        Object.keys(row).forEach(key => normalized[headerMap[key] || key] = row[key]);
-                        return normalized;
-                    });
+                    const first=rows[0],headerMap={};
+                    Object.keys(aliases).forEach(canonical=>{const alias=aliases[canonical].find(a=>Object.prototype.hasOwnProperty.call(first,a));if(alias)headerMap[alias]=canonical;});
+                    rows=rows.map(row=>{const normalized={};Object.keys(row).forEach(key=>normalized[headerMap[key]||key]=row[key]);return normalized;});
 
-                    const required = ['날짜','직원명','메뉴명','가격'];
-                    const missing = required.filter(h => !Object.prototype.hasOwnProperty.call(rows[0], h));
-                    if (missing.length) throw new Error('필수 열이 없습니다: ' + missing.join(', '));
+                    const required=['날짜','직원명','메뉴명','가격'];
+                    const missing=required.filter(h=>!Object.prototype.hasOwnProperty.call(rows[0],h));
+                    if(missing.length)throw new Error('필수 열이 없습니다: '+missing.join(', '));
 
-                    const staff = JSON.parse(localStorage.getItem(getAdminKey('staff')) || '[]');
-                    const menus = JSON.parse(localStorage.getItem(getAdminKey('menus')) || '[]');
-                    const rooms = JSON.parse(localStorage.getItem(getAdminKey('rooms')) || '[]');
-                    const reservations = JSON.parse(localStorage.getItem(getAdminKey('reservations')) || '[]');
-                    const existingIds = new Set(reservations.map(r => Number(r.id)));
-                    let nextId = Date.now();
-                    let imported = 0;
-                    const errors = [];
+                    const referenceData=buildExcelReferenceData(rows);
+                    const reservations=JSON.parse(localStorage.getItem(getAdminKey('reservations'))||'[]');
+                    const rooms=JSON.parse(localStorage.getItem(getAdminKey('rooms'))||'[]');
+                    const existingIds=new Set(reservations.map(r=>Number(r.id)));
+                    let nextId=Date.now(),imported=0;
+                    const errors=[];
 
-                    rows.forEach((row,index) => {
-                        const date = excelDateToISO(row['날짜']);
-                        const staffName = String(row['직원명'] ?? '').trim();
-                        const menuName = String(row['메뉴명'] ?? '').trim();
-                        const price = Number(String(row['가격'] ?? 0).replace(/,/g,'')) || 0;
-                        if (!date || !staffName || !menuName) {
-                            errors.push((index + 2) + '행: 날짜/직원명/메뉴명이 없습니다.');
-                            return;
-                        }
-
-                        const staffMember = staff.find(x => String(x.name).trim() === staffName);
-                        const menu = menus.find(x => String(x.name).trim() === menuName);
-                        const roomNumber = String(row['방번호'] ?? '').trim();
-                        const room = rooms.find(x => String(x.roomNumber).trim() === roomNumber);
-                        const duration = Number(row['시간(분)'] ?? row['시간'] ?? 0) || 0;
-                        const commission = Number(String(row['커미션'] ?? 0).replace(/,/g,'')) || 0;
-                        const paid = parseExcelPaidStatus(row['입금상태']);
-                        let id = nextId++;
-                        while (existingIds.has(id)) id = nextId++;
-                        existingIds.add(id);
-
+                    rows.forEach((row,index)=>{
+                        const date=excelDateToISO(row['날짜']);
+                        const staffName=String(row['직원명']??'').trim();
+                        const menuName=String(row['메뉴명']??'').trim();
+                        const price=Number(String(row['가격']??0).replace(/,/g,''))||0;
+                        if(!date||!staffName||!menuName){errors.push((index+2)+'행: 날짜/직원명/메뉴명이 없습니다.');return;}
+                        const staffMember=referenceData.staff.find(x=>String(x.name).trim()===staffName);
+                        const menu=referenceData.menus.find(x=>String(x.name).trim()===menuName);
+                        const roomNumber=String(row['방번호']??'').trim();
+                        const room=rooms.find(x=>String(x.roomNumber).trim()===roomNumber);
+                        const customerName=String(row['고객명']??'').trim();
+                        const duration=Number(row['시간(분)']??row['시간']??0)||0;
+                        const commission=Number(String(row['커미션']??0).replace(/,/g,''))||0;
+                        const paid=parseExcelPaidStatus(row['입금상태']);
+                        let id=nextId++;while(existingIds.has(id))id=nextId++;existingIds.add(id);
                         reservations.push({
-                            id,
-                            date,
-                            staffId: staffMember ? staffMember.id : '',
-                            staffName,
-                            menuId: menu ? menu.id : '',
-                            menuName,
-                            duration,
-                            startTime: normalizeExcelTime(row['시작시간']),
-                            roomId: room ? room.id : '',
-                            roomNumber,
-                            customerName: String(row['고객명'] ?? '').trim(),
-                            price,
-                            commission,
-                            paid,
-                            paymentDetails: paid ? parseExcelPaymentDetails(row['입금방식'], row['입금액'], row['입금방식상세']) : {},
-                            menuOrder: Number(row['메뉴순서'] || 1) || 1,
-                            isMultiMenu: ['예','yes','true','1','y','ใช่','có','是','有','ya'].includes(String(row['다중메뉴'] ?? '').trim().toLowerCase())
+                            id,date,staffId:staffMember?staffMember.id:'',staffName,
+                            menuId:menu?menu.id:'',menuName,duration,startTime:normalizeExcelTime(row['시작시간']),
+                            roomId:room?room.id:'',roomNumber,customerName,price,commission,paid,
+                            paymentDetails:paid?parseExcelPaymentDetails(row['입금방식'],row['입금액'],row['입금방식상세']):{},
+                            menuOrder:Number(row['메뉴순서']||1)||1,
+                            isMultiMenu:['예','yes','true','1','y','ใช่','có','是','有','ya'].includes(String(row['다중메뉴']??'').trim().toLowerCase())
                         });
                         imported++;
                     });
 
-                    if (!imported) throw new Error('가져올 수 있는 데이터가 없습니다.');
-                    const message = '엑셀 데이터 ' + imported + '건을 추가합니다.' +
-                        (errors.length ? '\n\n오류 ' + errors.length + '건은 제외됩니다:\n' + errors.slice(0,10).join('\n') : '') +
-                        '\n\n기존 데이터는 삭제되지 않습니다. 계속하시겠습니까?';
-                    if (!confirm(message)) return;
+                    if(!imported)throw new Error('가져올 수 있는 데이터가 없습니다.');
+                    const added=referenceData.added;
+                    const addedText=[
+                        added.staff?'직원 '+added.staff+'명':'',
+                        added.menus?'메뉴 '+added.menus+'개':'',
+                        added.menuDurations?'메뉴 시간/가격/커미션 '+added.menuDurations+'건':'',
+                        added.customers?'고객 '+added.customers+'명':'',
+                        added.paymentMethods?'입금방식 '+added.paymentMethods+'개':''
+                    ].filter(Boolean).join(', ');
+                    const message='엑셀 데이터 '+imported+'건을 추가합니다.'+
+                        (addedText?'\\n\\nDB에 새로 추가될 기준정보: '+addedText:'')+
+                        (errors.length?'\\n\\n오류 '+errors.length+'건은 제외됩니다:\\n'+errors.slice(0,10).join('\\n'):'')+
+                        '\\n\\n기존 데이터는 삭제되지 않습니다. 계속하시겠습니까?';
+                    if(!confirm(message))return;
 
-                    localStorage.setItem(getAdminKey('reservations'), JSON.stringify(reservations));
-                    alert('엑셀 데이터 업로드가 완료되었습니다. ' + imported + '건이 추가되었습니다.' +
-                        (errors.length ? '\n제외된 행: ' + errors.length + '건' : ''));
+                    localStorage.setItem(getAdminKey('staff'),JSON.stringify(referenceData.staff));
+                    localStorage.setItem(getAdminKey('menus'),JSON.stringify(referenceData.menus));
+                    localStorage.setItem(getAdminKey('customers'),JSON.stringify(referenceData.customers));
+                    localStorage.setItem(getAdminKey('paymentMethods'),JSON.stringify(referenceData.paymentMethods));
+                    localStorage.setItem(getAdminKey('reservations'),JSON.stringify(reservations));
+
+                    if(added.staff&&currentAdmin?.sessionToken)await syncStaffToD1();
+                    alert('엑셀 데이터 업로드가 완료되었습니다. '+imported+'건이 추가되었습니다.'+
+                        (addedText?'\\n추가된 기준정보: '+addedText:'')+
+                        (errors.length?'\\n제외된 행: '+errors.length+'건':''));
                     loadReservationData();
-                    if (document.getElementById('dbManagementSection').style.display === 'block') {
-                        // DB 관리 화면 유지
-                    }
-                } catch (error) {
-                    alert('엑셀 업로드 중 오류가 발생했습니다: ' + error.message);
-                } finally {
-                    event.target.value = '';
-                }
+                }catch(error){alert('엑셀 업로드 중 오류가 발생했습니다: '+error.message);}
+                finally{event.target.value='';}
             };
             reader.readAsArrayBuffer(file);
         }
