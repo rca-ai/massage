@@ -8680,14 +8680,19 @@ function translateLegacy(value) {
             nodes.forEach(n => {
                 const raw = n.nodeValue || '';
                 if (!raw.trim()) return;
-                if (n.__maShopSource === undefined && /[가-힣]/.test(raw)) n.__maShopSource = raw;
+                if (n.__maShopSource === undefined) {
+                    // legacy 번역기가 먼저 중국어/영어로 바꿔 놓은 경우에도 보관된 한국어 원문을 사용합니다.
+                    n.__maShopSource = n.__koOriginal !== undefined ? n.__koOriginal : raw;
+                }
                 const source = n.__maShopSource !== undefined ? n.__maShopSource : raw;
                 const translated = translateFromSource(source);
                 if (n.nodeValue !== translated) n.nodeValue = translated;
             });
             root.querySelectorAll('input[placeholder], textarea[placeholder]').forEach(el => {
                 const raw = el.getAttribute('placeholder') || '';
-                if (el.dataset.maShopPlaceholderSource === undefined) el.dataset.maShopPlaceholderSource = raw;
+                if (el.dataset.maShopPlaceholderSource === undefined) {
+                    el.dataset.maShopPlaceholderSource = el.dataset.koplaceholder || raw;
+                }
                 const source = el.dataset.maShopPlaceholderSource || '';
                 if (blankPlaceholders.has(source)) el.setAttribute('placeholder','');
                 else if (source) el.setAttribute('placeholder',translateFromSource(source));
