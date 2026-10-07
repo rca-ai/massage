@@ -2310,8 +2310,8 @@ async function initializeApp() {
 
         // 언어 설정
         function setLanguage(lang) {
-            updateCurrentTime();
             currentLanguage = lang;
+            updateCurrentTime();
             try { localStorage.setItem('selectedLanguage', lang); } catch (e) {}
             
             // 언어 버튼 스타일 업데이트
