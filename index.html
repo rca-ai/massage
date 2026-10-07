@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>일일 레프트 v38</title>
+  <title>Daily Report v38</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -130,7 +130,7 @@
    <div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-md">
     <div class="text-center mb-8">
      <div class="mx-auto mb-3 text-center" aria-label="MaShop"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:42px;letter-spacing:-2px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div>
-     <h1 class="text-3xl font-bold text-gray-800 mb-2" data-translate="title">일일 레프트</h1>
+     <h1 class="text-3xl font-bold text-gray-800 mb-2" data-translate="title">Daily Report</h1>
      <div class="w-20 h-1 bg-blue-500 mx-auto"></div>
     </div><!-- 언어 선택 -->
     <div class="mb-6">
@@ -174,7 +174,7 @@
    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
      <div>
-      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">일일 레프트</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v38</span></div>
+      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v38</span></div>
       <p id="shopName" class="text-lg text-gray-600 mt-1"></p>
      </div>
      <div class="flex gap-2"><button onclick="showLanguageModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="changeLanguage">언어 변경</button> <button onclick="showFontModal()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600" data-translate="changeFont">폰트 변경</button> <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" data-translate="logout">로그아웃</button>
@@ -635,7 +635,7 @@
         // 번역 데이터
         const translations = {
             ko: {
-                title: '일일 레프트',
+                title: 'Daily Report',
                 changeLanguage: '언어 변경',
                 changeFont: '폰트 변경',
                 fontSelection: '폰트 선택',
@@ -833,7 +833,7 @@
                     '순번별현황': 'Staff Order Status', '합계': 'Total', '마사지사': 'Massage Therapist', '선택날짜': 'Selected Date',
                     '전체': 'Total', '입금완료 0건': 'Paid 0 records', '입금완료 금액': 'Paid Amount',
 
-                title: '일일 레프트',
+                title: 'Daily Report',
                 changeLanguage: 'Change Language',
                 changeFont: 'Change Font',
                 fontSelection: 'Font Selection',
@@ -1012,7 +1012,7 @@
                     '순번별현황': 'สถานะตามลำดับพนักงาน', '합계': 'รวม', '마사지사': 'พนักงานนวด', '선택날짜': 'วันที่เลือก',
                     '전체': 'ทั้งหมด', '입금완료 0건': 'ชำระแล้ว 0 รายการ', '입금완료 금액': 'ยอดเงินที่ชำระแล้ว',
 
-                title: '일일 레프트',
+                title: 'รายงานประจำวัน',
                 changeLanguage: 'เปลี่ยนภาษา',
                 changeFont: 'เปลี่ยนฟอนต์',
                 fontSelection: 'เลือกฟอนต์',
@@ -1191,7 +1191,7 @@
                     '순번별현황': 'Trạng thái theo thứ tự nhân viên', '합계': 'Tổng', '마사지사': 'Nhân viên massage', '선택날짜': 'Ngày đã chọn',
                     '전체': 'Tổng', '입금완료 0건': 'Đã thanh toán 0 bản ghi', '입금완료 금액': 'Số tiền đã thanh toán',
 
-                title: '일일 레프트',
+                title: 'Báo cáo hàng ngày',
                 changeLanguage: 'Đổi ngôn ngữ',
                 changeFont: 'Đổi phông chữ',
                 fontSelection: 'Chọn phông chữ',
@@ -1372,7 +1372,7 @@
         // 전체 번역 키는 영어를 기본값으로 사용하고 주요 화면은 각 언어로 번역합니다.
         translations['zh-CN'] = Object.assign({}, translations.en, {
             excelUploadButton:'上传Excel数据', downloadUploadSampleButton:'下载上传样本',
-            title: '일일 레프트', changeLanguage:'切换语言', changeFont:'更改字体', fontSelection:'选择字体',
+            title: '日报', changeLanguage:'切换语言', changeFont:'更改字体', fontSelection:'选择字体',
             fontSize:'字体大小', fontFamily:'字体类型', apply:'应用', logout:'退出登录', todayDate:'今天日期', currentTime:'当前时间',
             dashboard:'状态面板', order:'顺序', reservation:'预约', statistics:'统计', dbManagement:'数据库管理', staff:'员工',
             dashboardSummaryTitle:'按顺序统计', massageCount:'按摩次数', dashboardSummaryTotal:'合计', menu:'菜单', duration:'时长',
@@ -1407,7 +1407,7 @@
         });
         translations['zh-TW'] = Object.assign({}, translations['zh-CN'], {
             excelUploadButton:'上傳Excel資料', downloadUploadSampleButton:'下載上傳範本',
-            title: '일일 레프트', changeLanguage:'切換語言', changeFont:'更改字型', fontSelection:'選擇字型',
+            title: '日報', changeLanguage:'切換語言', changeFont:'更改字型', fontSelection:'選擇字型',
             fontSize:'字型大小', fontFamily:'字型類型', dashboard:'狀態面板', statistics:'統計', dbManagement:'資料庫管理',
             staff:'員工', dashboardSummaryTitle:'依順序統計', massageCount:'按摩次數', menu:'選單', duration:'時間',
             startTime:'開始時間', endTime:'結束時間', remainingTime:'剩餘時間', price:'價格', commission:'佣金',
@@ -1440,7 +1440,7 @@
         });
         translations['id'] = Object.assign({}, translations.en, {
             excelUploadButton:'Unggah Data Excel', downloadUploadSampleButton:'Unduh Sampel Unggah',
-            title: '일일 레프트', changeLanguage:'Ganti Bahasa', changeFont:'Ganti Font', fontSelection:'Pilih Font',
+            title: 'Laporan Harian', changeLanguage:'Ganti Bahasa', changeFont:'Ganti Font', fontSelection:'Pilih Font',
             fontSize:'Ukuran Font', fontFamily:'Jenis Font', apply:'Terapkan', logout:'Keluar', todayDate:'Tanggal Hari Ini',
             currentTime:'Waktu Saat Ini', dashboard:'Dasbor', order:'Urutan', reservation:'Reservasi', statistics:'Statistik',
             dbManagement:'Manajemen Database', staff:'Karyawan', dashboardSummaryTitle:'Status Berdasarkan Urutan',
@@ -1514,7 +1514,7 @@
         // 중국어/인도네시아어도 메인 UI의 전체 번역 키를 갖도록 보강합니다.
         // 기존 영어 키를 기본값으로 유지하되 실제 화면에서 사용하는 핵심 항목은 해당 언어로 덮어씁니다.
         translations['zh-CN'] = Object.assign({}, translations.en, {
-            title: '일일 레프트', languageSelection:'语言选择', username:'用户名', password:'密码',
+            title: '日报', languageSelection:'语言选择', username:'用户名', password:'密码',
             usernameInput:'请输入用户名', passwordInput:'请输入密码', login:'登录', newRegistration:'新注册',
             dbManagement:'数据库管理', dataBackupRestoreTitle:'数据备份与恢复', backupButton:'备份', restoreButton:'恢复',
             localBackupButton:'本地备份', localRestoreButton:'本地恢复', googleBackupButton:'Google备份',
@@ -1542,7 +1542,7 @@
             selectDate:'选择日期', startDate:'开始日期', endDate:'结束日期'
         });
         translations['zh-TW'] = Object.assign({}, translations.en, {
-            title: '일일 레프트', languageSelection:'語言選擇', username:'帳號', password:'密碼',
+            title: '日報', languageSelection:'語言選擇', username:'帳號', password:'密碼',
             usernameInput:'請輸入帳號', passwordInput:'請輸入密碼', login:'登入', newRegistration:'新註冊',
             dbManagement:'資料庫管理', dataBackupRestoreTitle:'資料備份與恢復', backupButton:'備份', restoreButton:'恢復',
             localBackupButton:'本機備份', localRestoreButton:'本機恢復', googleBackupButton:'Google備份',
@@ -1570,7 +1570,7 @@
             selectDate:'選擇日期', startDate:'開始日期', endDate:'結束日期'
         });
         translations.id = Object.assign({}, translations.en, {
-            title: '일일 레프트', languageSelection:'Pilih Bahasa', username:'Nama Pengguna', password:'Kata Sandi',
+            title: 'Laporan Harian', languageSelection:'Pilih Bahasa', username:'Nama Pengguna', password:'Kata Sandi',
             usernameInput:'Masukkan nama pengguna', passwordInput:'Masukkan kata sandi', login:'Masuk', newRegistration:'Pendaftaran Baru',
             dbManagement:'Manajemen Database', dataBackupRestoreTitle:'Cadangan & Pemulihan Data', backupButton:'Cadangkan', restoreButton:'Pulihkan',
             localBackupButton:'Cadangan Lokal', localRestoreButton:'Pemulihan Lokal', googleBackupButton:'Cadangan Google',
