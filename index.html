@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Report v3.10</title>
+  <title>Daily Report v3.11</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -174,7 +174,7 @@
    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
      <div>
-      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.10</span></div>
+      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.11</span></div>
       <p id="shopName" class="text-lg text-gray-600 mt-1"></p>
      </div>
      <div class="flex gap-2"><button onclick="showLanguageModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="changeLanguage">언어 변경</button> <button onclick="showFontModal()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600" data-translate="changeFont">폰트 변경</button> <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" data-translate="logout">로그아웃</button>
@@ -499,7 +499,7 @@
       </div>
       <div>
        <h4 class="font-semibold mb-2" data-translate="restoreButton">복원</h4>
-       <div class="flex gap-2 flex-wrap"><input type="file" id="restoreFile" accept=".json" style="display: none;" onchange="restoreData(event)"> <input type="file" id="excelUploadFile" accept=".xlsx,.xls" style="display: none;" onchange="uploadExcelData(event)"> <button onclick="showLocalRestoreDialog()" class="bg-orange-600 text-white px-3 py-2 rounded hover:bg-orange-700 text-sm" data-translate="localRestoreButton">로컬 복원</button> <button id="dbGoogleRestoreButton" onclick="showGoogleRestoreDialog()" class="bg-indigo-600 text-white px-3 py-2 rounded hover:bg-indigo-700 text-sm" data-translate="googleRestoreButton">구글 복원</button> <button onclick="document.getElementById('excelUploadFile').click()" class="bg-green-700 text-white px-3 py-2 rounded hover:bg-green-800 text-sm" data-translate="excelUploadButton">엑셀데이타 업로드</button> <button id="dbExcelSampleButton" onclick="downloadExcelUploadSample()" class="bg-blue-700 text-white px-3 py-2 rounded hover:bg-blue-800 text-sm" data-translate="downloadUploadSampleButton">업로드샘플 다운로드</button>
+       <div class="flex gap-2 flex-wrap"><input type="file" id="restoreFile" accept=".json" style="display: none;" onchange="restoreData(event)"> <input type="file" id="excelUploadFile" accept=".xlsx,.xls" style="display: none;" onchange="uploadExcelData(event)"> <button onclick="showLocalRestoreDialog()" class="bg-orange-600 text-white px-3 py-2 rounded hover:bg-orange-700 text-sm" data-translate="localRestoreButton">로컬 복원</button> <button type="button" id="dbGoogleRestoreButton" class="bg-indigo-600 text-white px-3 py-2 rounded hover:bg-indigo-700 text-sm" data-translate="googleRestoreButton">구글 복원</button> <button onclick="document.getElementById('excelUploadFile').click()" class="bg-green-700 text-white px-3 py-2 rounded hover:bg-green-800 text-sm" data-translate="excelUploadButton">엑셀데이타 업로드</button> <button type="button" id="dbExcelSampleButton" class="bg-blue-700 text-white px-3 py-2 rounded hover:bg-blue-800 text-sm" data-translate="downloadUploadSampleButton">업로드샘플 다운로드</button>
        </div>
       </div>
      </div>
@@ -625,8 +625,8 @@
         // D1/Cloudflare Worker API endpoint. This keeps GitHub-hosted test.html connected to the same backend.
         const API_BASE_URL = 'https://massage.guidrthai.workers.dev';
         // 앱 버전: 기능/화면이 변경될 때마다 0.01씩 증가시킵니다.
-        // 현재 버전은 v3.10입니다.
-        const APP_VERSION = 'v3.10';
+        // 현재 버전은 v3.11입니다.
+        const APP_VERSION = 'v3.11';
         let currentPaymentReservationId = null;
         let selectedStaff = null;
         let menuRowCounter = 0;
@@ -788,6 +788,8 @@
                 localRestore: '로컬 복원',
                 googleBackup: '구글 백업',
                 googleRestore: '구글 복원',
+                googleDriveRestoreTitle: '구글 드라이브 복원',
+                googleDriveRestoreDescription: '구글 드라이브에서 백업 파일을 선택하여 복원합니다.',
                 exportAllData: '전체 데이터 엑셀 내보내기',
                 management: '관리',
                 confirmDate: '확인',
@@ -967,6 +969,8 @@
                 localRestore: 'Local Restore',
                 googleBackup: 'Google Backup',
                 googleRestore: 'Google Restore',
+                googleDriveRestoreTitle: 'Google Drive Restore',
+                googleDriveRestoreDescription: 'Select a backup file from Google Drive to restore.',
                 exportAllData: 'Export All Data to Excel',
                 management: 'Management',
                 confirmDate: 'Confirm',
@@ -6497,7 +6501,7 @@ function translateLegacy(value) {
                 row.innerHTML =
                     '<div style="min-width:0;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px;font-weight:500" title="' + e.label + '">' + e.label + '</div>' +
                     '<div style="min-width:0;position:relative;height:36px;background:#f3f4f6;border-radius:9999px;overflow:hidden;border:1px solid #e5e7eb">' +
-                    '<div style="position:absolute;top:0;bottom:0;left:0;background:#bfdbfe;border-radius:9999px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;width:' + Math.max(salesPct, sales > 0 ? 4 : 0) + '%">' +
+                    '<div style="position:absolute;top:0;bottom:0;left:0;background:#bfdbfe;border-radius:9999px;display:flex;align-items:center;justify-content:flex-start;padding-left:8px;width:' + Math.max(salesPct, sales > 0 ? 4 : 0) + '%">' +
                     '<span style="font-size:12px;font-weight:700;color:#1e3a8a;white-space:nowrap">' + sales.toLocaleString() + currency.symbol + '</span></div>' +
                     '<div style="position:absolute;top:0;bottom:0;left:0;background:#1d4ed8;border-radius:9999px;display:flex;align-items:center;justify-content:flex-start;padding-left:8px;width:' + Math.min(profitPct, 100) + '%">' +
                     '<span style="font-size:12px;font-weight:700;color:white;white-space:nowrap">' + profit.toLocaleString() + currency.symbol + '</span></div>' +
@@ -7104,11 +7108,12 @@ function translateLegacy(value) {
                 alert(translatePopupMessage('복원 창을 열 수 없습니다. 페이지를 새로고침한 후 다시 시도해주세요.'));
                 return;
             }
+            const popupDict = translations[currentLanguage] || translations.en || {};
             const content = `
                 <div class="space-y-4">
                     <div class="text-center">
-                        <h3 class="text-lg font-bold mb-4">구글 드라이브 복원</h3>
-                        <p class="text-gray-600 mb-4">구글 드라이브에서 백업 파일을 선택하여 복원합니다.</p>
+                        <h3 class="text-lg font-bold mb-4">${popupDict.googleDriveRestoreTitle || translatePopupMessage('구글 드라이브 복원')}</h3>
+                        <p class="text-gray-600 mb-4">${popupDict.googleDriveRestoreDescription || translatePopupMessage('구글 드라이브에서 백업 파일을 선택하여 복원합니다.')}</p>
                     </div>
                     
                     <div class="bg-red-50 border border-red-200 rounded p-3">
@@ -8787,10 +8792,29 @@ function translateLegacy(value) {
         }
 
         function bindDBManagementActions() {
-            const restore=document.getElementById('dbGoogleRestoreButton');
-            const sample=document.getElementById('dbExcelSampleButton');
-            if(restore) restore.onclick=e=>{e.preventDefault();showGoogleRestoreDialog();};
-            if(sample) sample.onclick=e=>{e.preventDefault();Promise.resolve(downloadExcelUploadSample()).catch(err=>{console.error(err);alert(translatePopupMessage('엑셀 업로드 샘플 다운로드 중 오류가 발생했습니다.'));});};
+            const restore = document.getElementById('dbGoogleRestoreButton');
+            const sample = document.getElementById('dbExcelSampleButton');
+
+            if (restore) {
+                restore.onclick = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    showGoogleRestoreDialog();
+                };
+            }
+
+            if (sample) {
+                sample.onclick = async function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    try {
+                        await downloadExcelUploadSample();
+                    } catch (err) {
+                        console.error(err);
+                        alert(translatePopupMessage('엑셀 업로드 샘플 다운로드 중 오류가 발생했습니다.'));
+                    }
+                };
+            }
         }
 
         const managementModalObserver = new MutationObserver(() => {
