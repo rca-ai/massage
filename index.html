@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Report v3.08</title>
+  <title>Daily Report v3.09</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -174,7 +174,7 @@
    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
      <div>
-      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.08</span></div>
+      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.09</span></div>
       <p id="shopName" class="text-lg text-gray-600 mt-1"></p>
      </div>
      <div class="flex gap-2"><button onclick="showLanguageModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="changeLanguage">언어 변경</button> <button onclick="showFontModal()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600" data-translate="changeFont">폰트 변경</button> <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" data-translate="logout">로그아웃</button>
@@ -625,8 +625,8 @@
         // D1/Cloudflare Worker API endpoint. This keeps GitHub-hosted test.html connected to the same backend.
         const API_BASE_URL = 'https://massage.guidrthai.workers.dev';
         // 앱 버전: 기능/화면이 변경될 때마다 0.01씩 증가시킵니다.
-        // 현재 버전은 v3.08입니다.
-        const APP_VERSION = 'v3.08';
+        // 현재 버전은 v3.09입니다.
+        const APP_VERSION = 'v3.09';
         let currentPaymentReservationId = null;
         let selectedStaff = null;
         let menuRowCounter = 0;
@@ -1601,6 +1601,14 @@
             selectDate:'Pilih Tanggal', startDate:'Tanggal Mulai', endDate:'Tanggal Selesai'
         });
 
+        Object.assign(translations.ko,{expirationDateLabel:'만료일:',superAdminScreen:'최고 관리자 화면',adminScreen:'관리자 화면'});
+        Object.assign(translations.en,{expirationDateLabel:'Expiration date:',superAdminScreen:'Super Admin Screen',adminScreen:'Admin Screen'});
+        Object.assign(translations.th,{expirationDateLabel:'วันหมดอายุ:',superAdminScreen:'หน้าจอผู้ดูแลระบบระดับสูง',adminScreen:'หน้าจอผู้ดูแลระบบ'});
+        Object.assign(translations.vi,{expirationDateLabel:'Ngày hết hạn:',superAdminScreen:'Màn hình quản trị viên cấp cao',adminScreen:'Màn hình quản trị viên'});
+        Object.assign(translations['zh-CN'],{expirationDateLabel:'到期日：',superAdminScreen:'超级管理员界面',adminScreen:'管理员界面'});
+        Object.assign(translations['zh-TW'],{expirationDateLabel:'到期日：',superAdminScreen:'超級管理員畫面',adminScreen:'管理員畫面'});
+        Object.assign(translations.id,{expirationDateLabel:'Tanggal Kedaluwarsa:',superAdminScreen:'Layar Admin Utama',adminScreen:'Layar Admin'});
+
         // 초기화
 async function initializeApp() {
     try {
@@ -1671,14 +1679,13 @@ async function initializeApp() {
                             const shopNameElement = document.getElementById('shopName');
                             if (shopNameElement) {
                                 if (currentAdmin.type === 'super') {
-                                    shopNameElement.textContent = '최고 관리자 화면';
+                                    refreshShopNameHeader();
                                     const superAdminButtons = document.getElementById('superAdminButtons');
                                     if (superAdminButtons) {
                                         superAdminButtons.style.display = 'block';
                                     }
                                 } else {
-                                    shopNameElement.textContent = (currentAdmin.shopName || '관리자 화면') +
-                                        (currentAdmin.validUntil ? ' · ' + (window.translatePopupMessage ? window.translatePopupMessage('만료일:') : (window.translateLegacyText ? window.translateLegacyText('만료일:') : 'Expiration date:')) + ' ' + currentAdmin.validUntil : '');
+                                    refreshShopNameHeader();
                                     const superAdminButtons = document.getElementById('superAdminButtons');
                                     if (superAdminButtons) {
                                         superAdminButtons.style.display = 'none';
@@ -2329,27 +2336,12 @@ async function initializeApp() {
             
             const loginLanguageSelect = document.getElementById('loginLanguageSelect');
             if (loginLanguageSelect) loginLanguageSelect.value = lang;
-            updateTranslations();
             if (window.localizeLegacyUI) window.localizeLegacyUI();
+            updateTranslations();
             localizeNewSalesGraphLabels();
             localizeDynamicManagementModal();
+            refreshShopNameHeader();
 
-            // 로그인 후 상단 상점명/만료일 표시도 선택한 언어로 즉시 갱신합니다.
-            const shopNameElement = document.getElementById('shopName');
-            if (shopNameElement && currentAdmin && currentAdmin.username) {
-                if (currentAdmin.type === 'super') {
-                    shopNameElement.textContent = window.translateLegacyText
-                        ? window.translateLegacyText('최고 관리자 화면')
-                        : '최고 관리자 화면';
-                } else {
-                    const expiryLabel = window.translateLegacyText
-                        ? window.translateLegacyText('만료일:')
-                        : 'Expiration date:';
-                    shopNameElement.textContent = (currentAdmin.shopName || '관리자 화면') +
-                        (currentAdmin.validUntil ? ' · ' + expiryLabel + ' ' + currentAdmin.validUntil : '');
-                }
-            }
-            
             // 메인 화면이 표시된 경우에만 데이터 로드
             if (document.getElementById('mainScreen').style.display === 'block') {
                 loadReservationData();
@@ -2358,28 +2350,43 @@ async function initializeApp() {
         }
 
         function updateTranslations() {
-            const elements = document.querySelectorAll('[data-translate]');
-            elements.forEach(element => {
+            const langDict = translations[currentLanguage] || translations.en || {};
+            document.querySelectorAll('[data-translate]').forEach(element => {
                 const key = element.getAttribute('data-translate');
-                if (translations[currentLanguage] && translations[currentLanguage][key]) {
+                if (langDict[key] !== undefined) {
                     if (element.tagName === 'INPUT' && (element.type === 'text' || element.type === 'password')) {
-                        element.placeholder = translations[currentLanguage][key];
+                        element.placeholder = langDict[key];
                     } else {
-                        element.textContent = translations[currentLanguage][key];
+                        element.textContent = langDict[key];
                     }
                 }
             });
-            
-            // placeholder 전용 번역 처리
-            const placeholderElements = document.querySelectorAll('[data-translate-placeholder]');
-            placeholderElements.forEach(element => {
+            document.querySelectorAll('[data-translate-placeholder]').forEach(element => {
                 const key = element.getAttribute('data-translate-placeholder');
-                if (translations[currentLanguage] && translations[currentLanguage][key]) {
-                    element.placeholder = translations[currentLanguage][key];
-                }
+                if (langDict[key] !== undefined) element.placeholder = langDict[key];
             });
-            
             updateCurrencyDisplay();
+            updateCurrentTime();
+        }
+
+        function refreshShopNameHeader() {
+            const el = document.getElementById('shopName');
+            if (!el || !currentAdmin?.username) return;
+            const dict = translations[currentLanguage] || translations.en || {};
+            el.replaceChildren();
+            if (currentAdmin.type === 'super') {
+                el.appendChild(document.createTextNode(dict.superAdminScreen || 'Super Admin Screen'));
+                return;
+            }
+            el.appendChild(document.createTextNode(currentAdmin.shopName || dict.adminScreen || 'Admin Screen'));
+            if (currentAdmin.validUntil) {
+                el.appendChild(document.createTextNode(' · '));
+                const label = document.createElement('span');
+                label.setAttribute('data-translate', 'expirationDateLabel');
+                label.textContent = dict.expirationDateLabel || 'Expiration date:';
+                el.appendChild(label);
+                el.appendChild(document.createTextNode(' ' + currentAdmin.validUntil));
+            }
         }
 
         // 화폐 단위 표시 업데이트
@@ -7342,23 +7349,30 @@ function translateLegacy(value) {
                 alert('엑셀 기능을 불러오지 못했습니다. 인터넷 연결을 확인해주세요.');
                 return;
             }
-            const headers = ['날짜','직원명','메뉴명','시간(분)','시작시간','방번호','고객명','가격','커미션','입금상태','입금방식','입금액','메뉴순서','다중메뉴'];
-            const sample = [
-                ['2026-09-22','Rung','타이마사지',60,'10:00','101','홍길동',450,180,'입금완료','현금',450,1,'아니오']
-            ];
-            const ws = XLSX.utils.aoa_to_sheet([headers, ...sample]);
+            const excelSampleByLanguage = {
+                ko:{sheet:'예약데이터',headers:['날짜','직원명','메뉴명','시간(분)','시작시간','방번호','고객명','가격','커미션','입금상태','입금방식','입금액','메뉴순서','다중메뉴'],paid:'입금완료',cash:'현금',multi:'아니오',file:'마사지샵_엑셀업로드_샘플.xlsx'},
+                en:{sheet:'Reservations',headers:['Date','Staff','Menu','Duration (min)','Start Time','Room Number','Customer','Price','Commission','Payment Status','Payment Method','Payment Amount','Menu Order','Multi Menu'],paid:'Paid',cash:'Cash',multi:'No',file:'MaShop_Excel_Upload_Sample.xlsx'},
+                th:{sheet:'ข้อมูลการจอง',headers:['วันที่','พนักงาน','เมนู','ระยะเวลา (นาที)','เวลาเริ่ม','หมายเลขห้อง','ลูกค้า','ราคา','คอมมิชชั่น','สถานะการชำระเงิน','วิธีชำระเงิน','จำนวนเงินที่ชำระ','ลำดับเมนู','หลายเมนู'],paid:'ชำระแล้ว',cash:'เงินสด',multi:'ไม่',file:'MaShop_ตัวอย่าง_อัปโหลด_Excel.xlsx'},
+                vi:{sheet:'Dữ liệu đặt chỗ',headers:['Ngày','Nhân viên','Menu','Thời lượng (phút)','Giờ bắt đầu','Số phòng','Khách hàng','Giá','Hoa hồng','Trạng thái thanh toán','Phương thức thanh toán','Số tiền thanh toán','Thứ tự menu','Nhiều menu'],paid:'Đã thanh toán',cash:'Tiền mặt',multi:'Không',file:'MaShop_Mau_Tai_Excel.xlsx'},
+                'zh-CN':{sheet:'预约数据',headers:['日期','员工姓名','菜单名称','时长（分钟）','开始时间','房间号','客户姓名','价格','佣金','付款状态','付款方式','付款金额','菜单顺序','多菜单'],paid:'已付款',cash:'现金',multi:'否',file:'MaShop_Excel上传模板.xlsx'},
+                'zh-TW':{sheet:'預約資料',headers:['日期','員工姓名','選單名稱','時間（分鐘）','開始時間','房號','顧客姓名','價格','佣金','付款狀態','付款方式','付款金額','選單順序','多選單'],paid:'已付款',cash:'現金',multi:'否',file:'MaShop_Excel上傳範本.xlsx'},
+                id:{sheet:'Data Reservasi',headers:['Tanggal','Karyawan','Menu','Durasi (menit)','Waktu Mulai','Nomor Kamar','Pelanggan','Harga','Komisi','Status Pembayaran','Metode Pembayaran','Jumlah Pembayaran','Urutan Menu','Multi Menu'],paid:'Sudah Dibayar',cash:'Tunai',multi:'Tidak',file:'MaShop_Sampel_Unggah_Excel.xlsx'}
+            };
+            const cfg = excelSampleByLanguage[currentLanguage] || excelSampleByLanguage.en;
+            const sample = [['2026-09-22','Rung','타이마사지',60,'10:00','101','홍길동',450,180,cfg.paid,cfg.cash,450,1,cfg.multi]];
+            const ws = XLSX.utils.aoa_to_sheet([cfg.headers, ...sample]);
             ws['!cols'] = [
-                {wch:14},{wch:14},{wch:18},{wch:10},{wch:10},{wch:10},{wch:16},
-                {wch:12},{wch:12},{wch:12},{wch:14},{wch:10},{wch:10},{wch:12}
+                {wch:14},{wch:14},{wch:18},{wch:16},{wch:12},{wch:12},{wch:16},
+                {wch:12},{wch:12},{wch:18},{wch:18},{wch:16},{wch:12},{wch:12}
             ];
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, '예약데이터');
-            XLSX.writeFile(wb, '마사지샵_엑셀업로드_샘플.xlsx');
+            XLSX.utils.book_append_sheet(wb, ws, cfg.sheet);
+            XLSX.writeFile(wb, cfg.file);
         }
 
         function parseExcelPaidStatus(value) {
             const textValue = String(value ?? '').trim().toLowerCase();
-            return ['입금완료','완료','입금','paid','true','yes','y','1'].includes(textValue) || value === true;
+            return ['입금완료','완료','입금','paid','paid complete','true','yes','y','1','ชำระแล้ว','đã thanh toán','已付款','付款完成','sudah dibayar'].includes(textValue) || value === true;
         }
 
         function parseExcelPaymentDetails(methodValue, amountValue, legacyValue) {
@@ -7424,8 +7438,36 @@ function translateLegacy(value) {
                 try {
                     const workbook = XLSX.read(e.target.result, {type:'array', cellDates:true});
                     const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const rows = XLSX.utils.sheet_to_json(sheet, {defval:''});
+                    let rows = XLSX.utils.sheet_to_json(sheet, {defval:''});
                     if (!rows.length) throw new Error('엑셀 파일에 데이터가 없습니다.');
+
+                    const excelHeaderAliases = {
+                        '날짜':['날짜','Date','วันที่','Ngày','日期','Tanggal'],
+                        '직원명':['직원명','Staff','พนักงาน','Nhân viên','员工姓名','員工姓名','Karyawan'],
+                        '메뉴명':['메뉴명','Menu','เมนู','菜单名称','選單名稱'],
+                        '시간(분)':['시간(분)','시간','Duration (min)','ระยะเวลา (นาที)','Thời lượng (phút)','时长（分钟）','時間（分鐘）','Durasi (menit)'],
+                        '시작시간':['시작시간','Start Time','เวลาเริ่ม','Giờ bắt đầu','开始时间','開始時間','Waktu Mulai'],
+                        '방번호':['방번호','Room Number','หมายเลขห้อง','Số phòng','房间号','房號','Nomor Kamar'],
+                        '고객명':['고객명','Customer','ลูกค้า','Khách hàng','客户姓名','顧客姓名','Pelanggan'],
+                        '가격':['가격','Price','ราคา','Giá','价格','價格','Harga'],
+                        '커미션':['커미션','Commission','คอมมิชชั่น','Hoa hồng','佣金','Komisi'],
+                        '입금상태':['입금상태','Payment Status','สถานะการชำระเงิน','Trạng thái thanh toán','付款状态','付款狀態','Status Pembayaran'],
+                        '입금방식':['입금방식','Payment Method','วิธีชำระเงิน','Phương thức thanh toán','付款方式','Metode Pembayaran'],
+                        '입금액':['입금액','Payment Amount','จำนวนเงินที่ชำระ','Số tiền thanh toán','付款金额','付款金額','Jumlah Pembayaran'],
+                        '메뉴순서':['메뉴순서','Menu Order','ลำดับเมนู','Thứ tự menu','菜单顺序','選單順序','Urutan Menu'],
+                        '다중메뉴':['다중메뉴','Multi Menu','หลายเมนู','Nhiều menu','多菜单','多選單','Multi Menu']
+                    };
+                    const first = rows[0];
+                    const headerMap = {};
+                    Object.keys(excelHeaderAliases).forEach(canonical => {
+                        const alias = excelHeaderAliases[canonical].find(a => Object.prototype.hasOwnProperty.call(first,a));
+                        if (alias) headerMap[alias] = canonical;
+                    });
+                    rows = rows.map(row => {
+                        const normalized = {};
+                        Object.keys(row).forEach(key => normalized[headerMap[key] || key] = row[key]);
+                        return normalized;
+                    });
 
                     const required = ['날짜','직원명','메뉴명','가격'];
                     const missing = required.filter(h => !Object.prototype.hasOwnProperty.call(rows[0], h));
@@ -8615,17 +8657,20 @@ function translateLegacy(value) {
             const root = document.getElementById('managementModal');
             if (!root) return;
             const managementFragments = {
-                en:{'메뉴명:':'Menu Name:','가격/커미션:':'Price/Commission:','메뉴명을 입력하세요':'Enter menu name','직원명:':'Staff Name:','전화번호:':'Phone Number:','은행명:':'Bank Name:','계좌번호:':'Account Number:','방번호:':'Room Number:','수용인원:':'Capacity:','고객명:':'Customer Name:','고객번호:':'Customer Number:','입금방식명:':'Payment Method Name:','금액:':'Amount:','메모:':'Memo:'},
-                th:{'메뉴명:':'ชื่อเมนู:','가격/커미션:':'ราคา/คอมมิชชั่น:','메뉴명을 입력하세요':'กรอกชื่อเมนู','직원명:':'ชื่อพนักงาน:','전화번호:':'หมายเลขโทรศัพท์:','은행명:':'ชื่อธนาคาร:','계좌번호:':'เลขที่บัญชี:','방번호:':'หมายเลขห้อง:','수용인원:':'ความจุ:','고객명:':'ชื่อลูกค้า:','고객번호:':'หมายเลขลูกค้า:','입금방식명:':'ชื่อวิธีชำระเงิน:','금액:':'จำนวนเงิน:','메모:':'หมายเหตุ:'},
-                vi:{'메뉴명:':'Tên menu:','가격/커미션:':'Giá/Hoa hồng:','메뉴명을 입력하세요':'Nhập tên menu','직원명:':'Tên nhân viên:','전화번호:':'Số điện thoại:','은행명:':'Tên ngân hàng:','계좌번호:':'Số tài khoản:','방번호:':'Số phòng:','수용인원:':'Sức chứa:','고객명:':'Tên khách hàng:','고객번호:':'Số khách hàng:','입금방식명:':'Tên phương thức thanh toán:','금액:':'Số tiền:','메모:':'Ghi chú:'},
-                'zh-CN':{'메뉴명:':'菜单名称：','가격/커미션:':'价格/佣金：','메뉴명을 입력하세요':'请输入菜单名称','직원명:':'员工姓名：','전화번호:':'电话号码：','은행명:':'银行名称：','계좌번호:':'账户号码：','방번호:':'房间号：','수용인원:':'容纳人数：','고객명:':'客户姓名：','고객번호:':'客户编号：','입금방식명:':'付款方式名称：','금액:':'金额：','메모:':'备注：'},
-                'zh-TW':{'메뉴명:':'選單名稱：','가격/커미션:':'價格/佣金：','메뉴명을 입력하세요':'請輸入選單名稱','직원명:':'員工姓名：','전화번호:':'電話號碼：','은행명:':'銀行名稱：','계좌번호:':'帳戶號碼：','방번호:':'房號：','수용인원:':'容納人數：','고객명:':'顧客姓名：','고객번호:':'顧客編號：','입금방식명:':'付款方式名稱：','금액:':'金額：','메모:':'備註：'},
-                id:{'메뉴명:':'Nama Menu:','가격/커미션:':'Harga/Komisi:','메뉴명을 입력하세요':'Masukkan nama menu','직원명:':'Nama Karyawan:','전화번호:':'Nomor Telepon:','은행명:':'Nama Bank:','계좌번호:':'Nomor Rekening:','방번호:':'Nomor Kamar:','수용인원:':'Kapasitas:','고객명:':'Nama Pelanggan:','고객번호:':'Nomor Pelanggan:','입금방식명:':'Nama Metode Pembayaran:','금액:':'Jumlah:','메모:':'Catatan:'}
+                en:{'메뉴명:':'Menu Name:','가격/커미션:':'Price/Commission:','메뉴명을 입력하세요':'Enter menu name','가격':'Price','커미션':'Commission','직원명:':'Staff Name:','전화번호:':'Phone Number:','은행명:':'Bank Name:','계좌번호:':'Account Number:','방번호:':'Room Number:','수용인원:':'Capacity:','고객명:':'Customer Name:','고객번호:':'Customer Number:','입금방식명:':'Payment Method Name:','금액:':'Amount:','메모:':'Memo:'},
+                th:{'메뉴명:':'ชื่อเมนู:','가격/커미션:':'ราคา/คอมมิชชั่น:','메뉴명을 입력하세요':'กรอกชื่อเมนู','가격':'ราคา','커미션':'คอมมิชชั่น','직원명:':'ชื่อพนักงาน:','전화번호:':'หมายเลขโทรศัพท์:','은행명:':'ชื่อธนาคาร:','계좌번호:':'เลขที่บัญชี:','방번호:':'หมายเลขห้อง:','수용인원:':'ความจุ:','고객명:':'ชื่อลูกค้า:','고객번호:':'หมายเลขลูกค้า:','입금방식명:':'ชื่อวิธีชำระเงิน:','금액:':'จำนวนเงิน:','메모:':'หมายเหตุ:'},
+                vi:{'메뉴명:':'Tên menu:','가격/커미션:':'Giá/Hoa hồng:','메뉴명을 입력하세요':'Nhập tên menu','가격':'Giá','커미션':'Hoa hồng','직원명:':'Tên nhân viên:','전화번호:':'Số điện thoại:','은행명:':'Tên ngân hàng:','계좌번호:':'Số tài khoản:','방번호:':'Số phòng:','수용인원:':'Sức chứa:','고객명:':'Tên khách hàng:','고객번호:':'Số khách hàng:','입금방식명:':'Tên phương thức thanh toán:','금액:':'Số tiền:','메모:':'Ghi chú:'},
+                'zh-CN':{'메뉴명:':'菜单名称：','가격/커미션:':'价格/佣金：','메뉴명을 입력하세요':'请输入菜单名称','가격':'价格','커미션':'佣金','직원명:':'员工姓名：','전화번호:':'电话号码：','은행명:':'银行名称：','계좌번호:':'账户号码：','방번호:':'房间号：','수용인원:':'容纳人数：','고객명:':'客户姓名：','고객번호:':'客户编号：','입금방식명:':'付款方式名称：','금액:':'金额：','메모:':'备注：'},
+                'zh-TW':{'메뉴명:':'選單名稱：','가격/커미션:':'價格/佣金：','메뉴명을 입력하세요':'請輸入選單名稱','가격':'價格','커미션':'佣金','직원명:':'員工姓名：','전화번호:':'電話號碼：','은행명:':'銀行名稱：','계좌번호:':'帳戶號碼：','방번호:':'房號：','수용인원:':'容納人數：','고객명:':'顧客姓名：','고객번호:':'顧客編號：','입금방식명:':'付款方式名稱：','금액:':'金額：','메모:':'備註：'},
+                id:{'메뉴명:':'Nama Menu:','가격/커미션:':'Harga/Komisi:','메뉴명을 입력하세요':'Masukkan nama menu','가격':'Harga','커미션':'Komisi','직원명:':'Nama Karyawan:','전화번호:':'Nomor Telepon:','은행명:':'Nama Bank:','계좌번호:':'Nomor Rekening:','방번호:':'Nomor Kamar:','수용인원:':'Kapasitas:','고객명:':'Nama Pelanggan:','고객번호:':'Nomor Pelanggan:','입금방식명:':'Nama Metode Pembayaran:','금액:':'Jumlah:','메모:':'Catatan:'}
             };
             const fragments = managementFragments[currentLanguage] || {};
-            const applyFragments = function(text) {
-                let result = translatePopupMessage(text);
-                Object.keys(fragments).sort((a,b)=>b.length-a.length).forEach(source => { result = result.split(source).join(fragments[source]); });
+            const blankPlaceholders = new Set(['직원명을 입력하세요','전화번호를 입력하세요','은행명을 입력하세요','계좌번호를 입력하세요','방번호를 입력하세요','수용인원을 입력하세요','고객명을 입력하세요','고객번호를 입력하세요','입금방식명을 입력하세요','금액을 입력하세요','메모를 입력하세요 (선택사항)']);
+            const translateFromSource = source => {
+                if (!source) return source;
+                let result = source;
+                Object.keys(fragments).sort((a,b)=>b.length-a.length).forEach(key => { result = result.split(key).join(fragments[key]); });
+                if (currentLanguage !== 'ko' && result === source && window.translateLegacyText) result = window.translateLegacyText(source);
                 return result;
             };
             const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
@@ -8633,23 +8678,19 @@ function translateLegacy(value) {
             let node;
             while ((node = walker.nextNode())) nodes.push(node);
             nodes.forEach(n => {
-                const raw = n.nodeValue;
-                if (!raw || !raw.trim()) return;
-                const translated = applyFragments(raw);
-                if (translated !== raw) n.nodeValue = translated;
+                const raw = n.nodeValue || '';
+                if (!raw.trim()) return;
+                if (n.__maShopSource === undefined && /[가-힣]/.test(raw)) n.__maShopSource = raw;
+                const source = n.__maShopSource !== undefined ? n.__maShopSource : raw;
+                const translated = translateFromSource(source);
+                if (n.nodeValue !== translated) n.nodeValue = translated;
             });
-            const blankPlaceholders = new Set(['직원명을 입력하세요','전화번호를 입력하세요','은행명을 입력하세요','계좌번호를 입력하세요','방번호를 입력하세요','수용인원을 입력하세요','고객명을 입력하세요','고객번호를 입력하세요','입금방식명을 입력하세요','금액을 입력하세요','메모를 입력하세요 (선택사항)']);
             root.querySelectorAll('input[placeholder], textarea[placeholder]').forEach(el => {
                 const raw = el.getAttribute('placeholder') || '';
-                if (blankPlaceholders.has(raw)) el.setAttribute('placeholder','');
-                else if (raw) {
-                    const translated = applyFragments(raw);
-                    if (translated !== raw) el.setAttribute('placeholder', translated);
-                }
-                if (el.tagName === 'INPUT' && el.type === 'text' && el.value) {
-                    const translatedValue = applyFragments(el.value);
-                    if (translatedValue !== el.value) el.value = translatedValue;
-                }
+                if (el.dataset.maShopPlaceholderSource === undefined) el.dataset.maShopPlaceholderSource = raw;
+                const source = el.dataset.maShopPlaceholderSource || '';
+                if (blankPlaceholders.has(source)) el.setAttribute('placeholder','');
+                else if (source) el.setAttribute('placeholder',translateFromSource(source));
             });
         }
         const managementModalObserver = new MutationObserver(() => {
@@ -8685,6 +8726,7 @@ function translateLegacy(value) {
         if (window.localizeLegacyUI) window.localizeLegacyUI();
         localizeNewSalesGraphLabels();
         localizeDynamicManagementModal();
+        refreshShopNameHeader();
     </script>
  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99a6c0c3942d55a1',t:'MTc2MjQ1NDc4MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
