@@ -499,7 +499,7 @@
       </div>
       <div>
        <h4 class="font-semibold mb-2" data-translate="restoreButton">복원</h4>
-       <div class="flex gap-2 flex-wrap"><input type="file" id="restoreFile" accept=".json" style="display: none;" onchange="restoreData(event)"> <input type="file" id="excelUploadFile" accept=".xlsx,.xls" style="display: none;" onchange="uploadExcelData(event)"> <button onclick="showLocalRestoreDialog()" class="bg-orange-600 text-white px-3 py-2 rounded hover:bg-orange-700 text-sm" data-translate="localRestoreButton">로컬 복원</button> <button onclick="showGoogleRestoreDialog()" class="bg-indigo-600 text-white px-3 py-2 rounded hover:bg-indigo-700 text-sm" data-translate="googleRestoreButton">구글 복원</button> <button onclick="document.getElementById('excelUploadFile').click()" class="bg-green-700 text-white px-3 py-2 rounded hover:bg-green-800 text-sm" data-translate="excelUploadButton">엑셀데이타 업로드</button> <button onclick="downloadExcelUploadSample()" class="bg-blue-700 text-white px-3 py-2 rounded hover:bg-blue-800 text-sm" data-translate="downloadUploadSampleButton">업로드샘플 다운로드</button>
+       <div class="flex gap-2 flex-wrap"><input type="file" id="restoreFile" accept=".json" style="display: none;" onchange="restoreData(event)"> <input type="file" id="excelUploadFile" accept=".xlsx,.xls" style="display: none;" onchange="uploadExcelData(event)"> <button onclick="showLocalRestoreDialog()" class="bg-orange-600 text-white px-3 py-2 rounded hover:bg-orange-700 text-sm" data-translate="localRestoreButton">로컬 복원</button> <button id="dbGoogleRestoreButton" onclick="showGoogleRestoreDialog()" class="bg-indigo-600 text-white px-3 py-2 rounded hover:bg-indigo-700 text-sm" data-translate="googleRestoreButton">구글 복원</button> <button onclick="document.getElementById('excelUploadFile').click()" class="bg-green-700 text-white px-3 py-2 rounded hover:bg-green-800 text-sm" data-translate="excelUploadButton">엑셀데이타 업로드</button> <button id="dbExcelSampleButton" onclick="downloadExcelUploadSample()" class="bg-blue-700 text-white px-3 py-2 rounded hover:bg-blue-800 text-sm" data-translate="downloadUploadSampleButton">업로드샘플 다운로드</button>
        </div>
       </div>
      </div>
@@ -2340,6 +2340,8 @@ async function initializeApp() {
             updateTranslations();
             localizeNewSalesGraphLabels();
             localizeDynamicManagementModal();
+            localizeManagementFormFields();
+            bindDBManagementActions();
             refreshShopNameHeader();
 
             // 메인 화면이 표시된 경우에만 데이터 로드
@@ -6490,14 +6492,15 @@ function translateLegacy(value) {
                 const salesPct = maxSales > 0 ? (sales / maxSales) * 100 : 0;
                 const profitPct = maxSales > 0 ? (profit / maxSales) * 100 : 0;
                 const row = document.createElement('div');
-                row.className = 'mb-3 flex items-center gap-2 w-full';
+                row.className = 'mb-3 w-full';
+                row.style.cssText = 'display:grid;grid-template-columns:minmax(96px,132px) minmax(0,1fr);align-items:center;column-gap:8px;width:100%;';
                 row.innerHTML =
-                    '<div class="w-24 md:w-32 flex-none text-sm font-medium truncate" title="' + e.label + '">' + e.label + '</div>' +
-                    '<div class="flex-1 min-w-0 relative h-9 bg-gray-100 rounded-full overflow-hidden border border-gray-200">' +
-                    '<div class="absolute inset-y-0 left-0 bg-blue-200 rounded-full flex items-center justify-end pr-2" style="width:' + Math.max(salesPct, sales > 0 ? 4 : 0) + '%">' +
-                    '<span class="text-xs font-bold text-blue-800 whitespace-nowrap">' + sales.toLocaleString() + currency.symbol + '</span></div>' +
-                    '<div class="absolute inset-y-0 left-0 bg-blue-700 rounded-full flex items-center justify-start pl-2" style="width:' + Math.min(profitPct, 100) + '%">' +
-                    '<span class="text-xs font-bold text-white whitespace-nowrap">' + profit.toLocaleString() + currency.symbol + '</span></div>' +
+                    '<div style="min-width:0;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px;font-weight:500" title="' + e.label + '">' + e.label + '</div>' +
+                    '<div style="min-width:0;position:relative;height:36px;background:#f3f4f6;border-radius:9999px;overflow:hidden;border:1px solid #e5e7eb">' +
+                    '<div style="position:absolute;top:0;bottom:0;left:0;background:#bfdbfe;border-radius:9999px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;width:' + Math.max(salesPct, sales > 0 ? 4 : 0) + '%">' +
+                    '<span style="font-size:12px;font-weight:700;color:#1e3a8a;white-space:nowrap">' + sales.toLocaleString() + currency.symbol + '</span></div>' +
+                    '<div style="position:absolute;top:0;bottom:0;left:0;background:#1d4ed8;border-radius:9999px;display:flex;align-items:center;justify-content:flex-start;padding-left:8px;width:' + Math.min(profitPct, 100) + '%">' +
+                    '<span style="font-size:12px;font-weight:700;color:white;white-space:nowrap">' + profit.toLocaleString() + currency.symbol + '</span></div>' +
                     '</div>';
                 container.appendChild(row);
             });
@@ -7554,7 +7557,7 @@ function translateLegacy(value) {
                             paid,
                             paymentDetails: paid ? parseExcelPaymentDetails(row['입금방식'], row['입금액'], row['입금방식상세']) : {},
                             menuOrder: Number(row['메뉴순서'] || 1) || 1,
-                            isMultiMenu: ['예','yes','true','1','y'].includes(String(row['다중메뉴'] ?? '').trim().toLowerCase())
+                            isMultiMenu: ['예','yes','true','1','y','ใช่','có','是','有','ya'].includes(String(row['다중메뉴'] ?? '').trim().toLowerCase())
                         });
                         imported++;
                     });
@@ -8765,6 +8768,31 @@ function translateLegacy(value) {
                 else if (source) el.setAttribute('placeholder',translateFromSource(source));
             });
         }
+        function localizeManagementFormFields() {
+            const root=document.getElementById('managementModal'); if(!root) return;
+            const d={
+                en:{menu:'Menu Name:',pc:'Price/Commission:',staff:'Staff Name:',bank:'Bank Name:',customer:'Customer Name:',payment:'Payment Method Name:'},
+                th:{menu:'ชื่อเมนู:',pc:'ราคา/คอมมิชชั่น:',staff:'ชื่อพนักงาน:',bank:'ชื่อธนาคาร:',customer:'ชื่อลูกค้า:',payment:'ชื่อวิธีชำระเงิน:'},
+                vi:{menu:'Tên menu:',pc:'Giá/Hoa hồng:',staff:'Tên nhân viên:',bank:'Tên ngân hàng:',customer:'Tên khách hàng:',payment:'Tên phương thức thanh toán:'},
+                'zh-CN':{menu:'菜单名称：',pc:'价格/佣金：',staff:'员工姓名：',bank:'银行名称：',customer:'客户姓名：',payment:'付款方式名称：'},
+                'zh-TW':{menu:'選單名稱：',pc:'價格/佣金：',staff:'員工姓名：',bank:'銀行名稱：',customer:'顧客姓名：',payment:'付款方式名稱：'},
+                id:{menu:'Nama Menu:',pc:'Harga/Komisi:',staff:'Nama Karyawan:',bank:'Nama Bank:',customer:'Nama Pelanggan:',payment:'Nama Metode Pembayaran:'}
+            }[currentLanguage]; if(!d)return;
+            const labels={newMenuName:d.menu,editMenuName:d.menu,newStaffName:d.staff,editStaffName:d.staff,newStaffBank:d.bank,editStaffBank:d.bank,newCustomerName:d.customer,editCustomerName:d.customer,newPaymentMethodName:d.payment,editPaymentMethodName:d.payment};
+            Object.entries(labels).forEach(([id,t])=>{const el=root.querySelector('#'+id);if(el){const l=el.closest('div')?.querySelector('label');if(l)l.textContent=t;}});
+            const minute={en:'min',th:'นาที',vi:'phút','zh-CN':'分钟','zh-TW':'分鐘',id:'menit'}[currentLanguage]||'분';
+            [30,60,90,120].forEach(n=>['new','edit'].forEach(p=>{const el=root.querySelector('#'+p+'Menu'+n+'Price');if(!el)return;const l=el.closest('.menu-duration-fields')?.parentElement?.querySelector('label');if(l)l.textContent=n+' '+minute+' '+d.pc;}));
+            ['newStaffName','newStaffPhone','newStaffBank','newStaffAccount','newRoomNumber','newRoomCapacity','newCustomerName','newCustomerPhone','newCustomerNumber','newPaymentMethodName','newGuaranteeAmount','newGuaranteeMemo'].forEach(id=>{const el=root.querySelector('#'+id);if(el)el.placeholder='';});
+            const menu=root.querySelector('#newMenuName');if(menu)menu.placeholder={en:'Enter menu name',th:'กรอกชื่อเมนู',vi:'Nhập tên menu','zh-CN':'请输入菜单名称','zh-TW':'請輸入選單名稱',id:'Masukkan nama menu'}[currentLanguage]||'메뉴명을 입력하세요';
+        }
+
+        function bindDBManagementActions() {
+            const restore=document.getElementById('dbGoogleRestoreButton');
+            const sample=document.getElementById('dbExcelSampleButton');
+            if(restore) restore.onclick=e=>{e.preventDefault();showGoogleRestoreDialog();};
+            if(sample) sample.onclick=e=>{e.preventDefault();Promise.resolve(downloadExcelUploadSample()).catch(err=>{console.error(err);alert(translatePopupMessage('엑셀 업로드 샘플 다운로드 중 오류가 발생했습니다.'));});};
+        }
+
         const managementModalObserver = new MutationObserver(() => {
             clearTimeout(window.__maShopModalLocalizationTimer);
             window.__maShopModalLocalizationTimer = setTimeout(localizeDynamicManagementModal, 0);
@@ -8798,6 +8826,8 @@ function translateLegacy(value) {
         if (window.localizeLegacyUI) window.localizeLegacyUI();
         localizeNewSalesGraphLabels();
         localizeDynamicManagementModal();
+        localizeManagementFormFields();
+        bindDBManagementActions();
         refreshShopNameHeader();
     </script>
  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99a6c0c3942d55a1',t:'MTc2MjQ1NDc4MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
