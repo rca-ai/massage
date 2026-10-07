@@ -6099,13 +6099,13 @@ function translateLegacy(value) {
                 row.innerHTML = `
                     <td class="border border-gray-300 p-2">${staffName}</td>
                     <td class="border border-gray-300 p-2">${(Number(stats.totalPrice) || 0).toLocaleString()}${currency.symbol}</td>
-                    <td class="border border-gray-300 p-2">${(Number(stats.totalPrice) > 0 ? ((Number(stats.totalCommission) || 0) / Number(stats.totalPrice) * 100).toFixed(2) : '0.00')}%</td>
+                    <td class="border border-gray-300 p-2">${(Number(stats.totalCommission) || 0).toLocaleString()}${currency.symbol} (${(Number(stats.totalPrice) > 0 ? ((Number(stats.totalCommission) || 0) / Number(stats.totalPrice) * 100).toFixed(2) : '0.00')}%)</td>
                 `;
                 tableBody.appendChild(row);
             });
             const totalPrice=Object.values(staffStats).reduce((s,x)=>s+(Number(x.totalPrice)||0),0);
             const totalCommission=Object.values(staffStats).reduce((s,x)=>s+(Number(x.totalCommission)||0),0);
-            if(staffFooter) staffFooter.innerHTML=`<tr class="bg-gray-100 font-bold"><td class="border border-gray-300 p-2">직원별 합계</td><td class="border border-gray-300 p-2">${totalPrice.toLocaleString()}${currency.symbol}</td><td class="border border-gray-300 p-2">${totalPrice > 0 ? (totalCommission / totalPrice * 100).toFixed(2) : '0.00'}%</td></tr>`;
+            if(staffFooter) staffFooter.innerHTML=`<tr class="bg-gray-100 font-bold"><td class="border border-gray-300 p-2">직원별 합계</td><td class="border border-gray-300 p-2">${totalPrice.toLocaleString()}${currency.symbol}</td><td class="border border-gray-300 p-2">${totalCommission.toLocaleString()}${currency.symbol} (${totalPrice > 0 ? (totalCommission / totalPrice * 100).toFixed(2) : '0.00'}%)</td></tr>`;
             if(window.localizeLegacyUI) window.localizeLegacyUI();
         }
 
@@ -6251,7 +6251,7 @@ function translateLegacy(value) {
                 const row = document.createElement('tr');
                 row.innerHTML = '<td class="border border-gray-300 p-2">' + key + '</td>' +
                     '<td class="border border-gray-300 p-2">' + g.sales.toLocaleString() + currency.symbol + '</td>' +
-                    '<td class="border border-gray-300 p-2">' + (g.sales > 0 ? (g.profit / g.sales * 100).toFixed(2) : '0.00') + '%</td>' +
+                    '<td class="border border-gray-300 p-2">' + g.profit.toLocaleString() + currency.symbol + ' (' + (g.sales > 0 ? (g.profit / g.sales * 100).toFixed(2) : '0.00') + '%)</td>' +
                     '<td class="border border-gray-300 p-2">' + g.difference.toLocaleString() + currency.symbol + '</td>';
                 body.appendChild(row);
                 cursor.setDate(cursor.getDate() + 1);
@@ -6259,7 +6259,7 @@ function translateLegacy(value) {
             if (foot) foot.innerHTML = '<tr class="bg-gray-100 font-bold">' +
                 '<td class="border border-gray-300 p-2">합계</td>' +
                 '<td class="border border-gray-300 p-2">' + totalSales.toLocaleString() + currency.symbol + '</td>' +
-                '<td class="border border-gray-300 p-2">' + (totalSales > 0 ? (totalProfit / totalSales * 100).toFixed(2) : '0.00') + '%</td>' +
+                '<td class="border border-gray-300 p-2">' + totalProfit.toLocaleString() + currency.symbol + ' (' + (totalSales > 0 ? (totalProfit / totalSales * 100).toFixed(2) : '0.00') + '%)</td>' +
                 '<td class="border border-gray-300 p-2">' + totalDifference.toLocaleString() + currency.symbol + '</td></tr>';
             if (window.localizeLegacyUI) window.localizeLegacyUI();
         }
@@ -6554,7 +6554,7 @@ function translateLegacy(value) {
                 row.innerHTML = '<td class="border border-gray-300 p-2">' + menuName + '</td>' +
                     '<td class="border border-gray-300 p-2">' + stats.count.toLocaleString() + '</td>' +
                     '<td class="border border-gray-300 p-2">' + stats.totalPrice.toLocaleString() + currency.symbol + '</td>' +
-                    '<td class="border border-gray-300 p-2">' + (stats.totalPrice > 0 ? (stats.totalCommission / stats.totalPrice * 100).toFixed(2) : '0.00') + '%</td>';
+                    '<td class="border border-gray-300 p-2">' + stats.totalCommission.toLocaleString() + currency.symbol + ' (' + (stats.totalPrice > 0 ? (stats.totalCommission / stats.totalPrice * 100).toFixed(2) : '0.00') + '%)</td>';
                 body.appendChild(row);
             });
 
@@ -6565,7 +6565,7 @@ function translateLegacy(value) {
                 '<td class="border border-gray-300 p-2">합계</td>' +
                 '<td class="border border-gray-300 p-2">' + totalCount.toLocaleString() + '</td>' +
                 '<td class="border border-gray-300 p-2">' + totalPrice.toLocaleString() + currency.symbol + '</td>' +
-                '<td class="border border-gray-300 p-2">' + (totalPrice > 0 ? (totalCommission / totalPrice * 100).toFixed(2) : '0.00') + '%</td></tr>';
+                '<td class="border border-gray-300 p-2">' + totalCommission.toLocaleString() + currency.symbol + ' (' + (totalPrice > 0 ? (totalCommission / totalPrice * 100).toFixed(2) : '0.00') + '%)</td></tr>';
             if (window.localizeLegacyUI) window.localizeLegacyUI();
         }
 
