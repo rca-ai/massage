@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Report v3.16</title>
+  <title>Daily Report v3.17</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -174,7 +174,7 @@
    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
      <div>
-      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.16</span></div>
+      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.17</span></div>
       <p id="shopName" class="text-lg text-gray-600 mt-1"></p>
      </div>
      <div class="flex gap-2"><button onclick="showLanguageModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="changeLanguage">언어 변경</button> <button onclick="showFontModal()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600" data-translate="changeFont">폰트 변경</button> <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" data-translate="logout">로그아웃</button>
@@ -625,8 +625,8 @@
         // D1/Cloudflare Worker API endpoint. This keeps GitHub-hosted test.html connected to the same backend.
         const API_BASE_URL = 'https://massage.guidrthai.workers.dev';
         // 앱 버전: 기능/화면이 변경될 때마다 0.01씩 증가시킵니다.
-        // 현재 버전은 v3.16입니다.
-        const APP_VERSION = 'v3.16';
+        // 현재 버전은 v3.17입니다.
+        const APP_VERSION = 'v3.17';
         let currentPaymentReservationId = null;
         let selectedStaff = null;
         let menuRowCounter = 0;
@@ -7434,9 +7434,9 @@ function translateLegacy(value) {
         }
 
         function excelDateToISO(value) {
-            // XLSX의 cellDates:true는 날짜 셀을 Date 객체로 만들 수 있습니다.
-            // toISOString()은 UTC로 변환하면서 태국/한국 등 UTC+ 지역에서 날짜가 전날로 밀릴 수 있으므로
-            // 날짜 셀은 로컬 날짜 구성요소를 그대로 사용합니다.
+            // Excel 날짜는 Date 객체로 먼저 변환하지 않고 Excel serial number 원본을 기준으로 처리합니다.
+            // Date/toISOString() 경로를 거치면 UTC 변환 때문에 태국/한국 등 UTC+ 지역에서 날짜가 전날로 밀릴 수 있습니다.
+            // 따라서 XLSX.read()도 cellDates:false로 읽고, serial number는 XLSX.SSF.parse_date_code()로 달력 날짜를 복원합니다.
             if(value instanceof Date&&!isNaN(value)){
                 return String(value.getFullYear()).padStart(4,'0')+'-'+
                     String(value.getMonth()+1).padStart(2,'0')+'-'+
@@ -7521,7 +7521,7 @@ function translateLegacy(value) {
             const reader=new FileReader();
             reader.onload=async function(e){
                 try{
-                    const workbook=XLSX.read(e.target.result,{type:'array',cellDates:true});
+                    const workbook=XLSX.read(e.target.result,{type:'array',cellDates:false,cellNF:true});
                     const sheet=workbook.Sheets[workbook.SheetNames[0]];
                     let rows=XLSX.utils.sheet_to_json(sheet,{defval:''});
                     if(!rows.length)throw new Error('엑셀 파일에 데이터가 없습니다.');
