@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Report v3.12</title>
+  <title>Daily Report v3.13</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -174,7 +174,7 @@
    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
      <div>
-      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.12</span></div>
+      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.13</span></div>
       <p id="shopName" class="text-lg text-gray-600 mt-1"></p>
      </div>
      <div class="flex gap-2"><button onclick="showLanguageModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="changeLanguage">언어 변경</button> <button onclick="showFontModal()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600" data-translate="changeFont">폰트 변경</button> <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" data-translate="logout">로그아웃</button>
@@ -625,8 +625,8 @@
         // D1/Cloudflare Worker API endpoint. This keeps GitHub-hosted test.html connected to the same backend.
         const API_BASE_URL = 'https://massage.guidrthai.workers.dev';
         // 앱 버전: 기능/화면이 변경될 때마다 0.01씩 증가시킵니다.
-        // 현재 버전은 v3.12입니다.
-        const APP_VERSION = 'v3.12';
+        // 현재 버전은 v3.13입니다.
+        const APP_VERSION = 'v3.13';
         let currentPaymentReservationId = null;
         let selectedStaff = null;
         let menuRowCounter = 0;
@@ -1330,7 +1330,7 @@
                 localBackup: 'Sao lưu cục bộ',
                 localRestore: 'Khôi phục cục bộ',
                 googleBackup: 'Sao lưu Google',
-                googleRestore: 'Khôi phục Google',
+                googleRestore: 'Khôi phục Google', googleDriveRestoreTitle:'Khôi phục từ Google Drive', googleDriveRestoreDescription:'Chọn tệp sao lưu từ Google Drive để khôi phục.'
                 googleDriveRestoreTitle: 'Khôi phục từ Google Drive',
                 googleDriveRestoreDescription: 'Chọn tệp sao lưu từ Google Drive để khôi phục.',
                 exportAllData: 'Xuất tất cả dữ liệu ra Excel',
@@ -1544,7 +1544,7 @@
             download:'下载', staffStats:'员工统计', menuStatisticsTitle:'菜单统计',
             paymentMethodStats:'付款方式统计', paymentMethod:'付款方式', amount:'金额',
             dataBackupRestore:'数据备份与恢复', backup:'备份', restore:'恢复',
-            localBackup:'本地备份', localRestore:'本地恢复', googleBackup:'Google备份', googleRestore:'Google恢复', googleDriveRestoreTitle:'从 Google Drive 恢复', googleDriveRestoreDescription:'从 Google Drive 选择备份文件进行恢复。',
+            localBackup:'本地备份', localRestore:'本地恢复', googleBackup:'Google备份', googleRestore:'Google恢复', googleDriveRestoreTitle:'从 Google Drive 恢复', googleDriveRestoreDescription:'从 Google Drive 选择备份文件进行恢复。' googleDriveRestoreTitle:'从 Google Drive 恢复', googleDriveRestoreDescription:'从 Google Drive 选择备份文件进行恢复。',
             exportAllData:'导出全部数据到Excel', management:'管理',
             dataBackupRestoreTitle:'数据备份与恢复', backupButton:'备份', restoreButton:'恢复',
             localBackupButton:'本地备份', localRestoreButton:'本地恢复',
@@ -1572,7 +1572,7 @@
             download:'下載', staffStats:'員工統計', menuStatisticsTitle:'選單統計',
             paymentMethodStats:'付款方式統計', paymentMethod:'付款方式', amount:'金額',
             dataBackupRestore:'資料備份與恢復', backup:'備份', restore:'恢復',
-            localBackup:'本機備份', localRestore:'本機恢復', googleBackup:'Google備份', googleRestore:'Google恢復', googleDriveRestoreTitle:'從 Google Drive 還原', googleDriveRestoreDescription:'從 Google Drive 選擇備份檔案進行還原。',
+            localBackup:'本機備份', localRestore:'本機恢復', googleBackup:'Google備份', googleRestore:'Google恢復', googleDriveRestoreTitle:'從 Google Drive 還原', googleDriveRestoreDescription:'從 Google Drive 選擇備份檔案進行還原。' googleDriveRestoreTitle:'從 Google Drive 還原', googleDriveRestoreDescription:'從 Google Drive 選擇備份檔案進行還原。',
             exportAllData:'匯出全部資料到Excel', management:'管理',
             dataBackupRestoreTitle:'資料備份與恢復', backupButton:'備份', restoreButton:'恢復',
             localBackupButton:'本機備份', localRestoreButton:'本機恢復',
@@ -1600,7 +1600,7 @@
             download:'Unduh', staffStats:'Statistik Karyawan', menuStatisticsTitle:'Statistik Menu',
             paymentMethodStats:'Statistik Metode Pembayaran', paymentMethod:'Metode Pembayaran', amount:'Jumlah',
             dataBackupRestore:'Cadangan & Pemulihan Data', backup:'Cadangkan', restore:'Pulihkan',
-            localBackup:'Cadangan Lokal', localRestore:'Pemulihan Lokal', googleBackup:'Cadangan Google', googleRestore:'Pemulihan Google', googleDriveRestoreTitle:'Pemulihan dari Google Drive', googleDriveRestoreDescription:'Pilih file cadangan dari Google Drive untuk memulihkan data.',
+            localBackup:'Cadangan Lokal', localRestore:'Pemulihan Lokal', googleBackup:'Cadangan Google', googleRestore:'Pemulihan Google', googleDriveRestoreTitle:'Pemulihan dari Google Drive', googleDriveRestoreDescription:'Pilih file cadangan dari Google Drive untuk memulihkan data.' googleDriveRestoreTitle:'Pemulihan dari Google Drive', googleDriveRestoreDescription:'Pilih file cadangan dari Google Drive untuk memulihkan data.',
             exportAllData:'Ekspor Semua Data ke Excel', management:'Manajemen',
             dataBackupRestoreTitle:'Cadangan & Pemulihan Data', backupButton:'Cadangkan', restoreButton:'Pulihkan',
             localBackupButton:'Cadangan Lokal', localRestoreButton:'Pemulihan Lokal',
@@ -7411,7 +7411,22 @@ function translateLegacy(value) {
             ];
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, cfg.sheet);
-            XLSX.writeFile(wb, cfg.file);
+
+            // XLSX.writeFile은 일부 브라우저/Cloudflare 환경에서
+            // "다운로드를 열 수 없습니다"가 발생할 수 있으므로 Blob 방식으로 직접 다운로드합니다.
+            const xlsxArray = XLSX.write(wb, {bookType:'xlsx', type:'array'});
+            const blob = new Blob([xlsxArray], {
+                type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = cfg.file;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1500);
         }
 
         function parseExcelPaidStatus(value) {
@@ -8788,37 +8803,56 @@ function translateLegacy(value) {
                 id:{menu:'Nama Menu:',pc:'Harga/Komisi:',staff:'Nama Karyawan:',bank:'Nama Bank:',customer:'Nama Pelanggan:',payment:'Nama Metode Pembayaran:'}
             }[currentLanguage]; if(!d)return;
             const labels={newMenuName:d.menu,editMenuName:d.menu,newStaffName:d.staff,editStaffName:d.staff,newStaffBank:d.bank,editStaffBank:d.bank,newCustomerName:d.customer,editCustomerName:d.customer,newPaymentMethodName:d.payment,editPaymentMethodName:d.payment};
-            Object.entries(labels).forEach(([id,t])=>{const el=root.querySelector('#'+id);if(el){const l=el.closest('div')?.querySelector('label');if(l)l.textContent=t;}});
+            Object.entries(labels).forEach(([id,t])=>{
+                const el=root.querySelector('#'+id);
+                if(!el) return;
+                const field=el.closest('div');
+                const l=field?.querySelector('label');
+                if(l) l.textContent=t;
+            });
             const minute={en:'min',th:'นาที',vi:'phút','zh-CN':'分钟','zh-TW':'分鐘',id:'menit'}[currentLanguage]||'분';
-            [30,60,90,120].forEach(n=>['new','edit'].forEach(p=>{const el=root.querySelector('#'+p+'Menu'+n+'Price');if(!el)return;const l=el.closest('.menu-duration-fields')?.parentElement?.querySelector('label');if(l)l.textContent=n+' '+minute+' '+d.pc;}));
+            [30,60,90,120].forEach(n=>{
+                const selectors = ['#menu'+n+'Price','#newMenu'+n+'Price','#editMenu'+n+'Price'];
+                selectors.forEach(selector=>{
+                    const el=root.querySelector(selector);
+                    if(!el) return;
+                    const wrapper=el.closest('.menu-duration-fields')?.parentElement;
+                    const l=wrapper?.querySelector('label');
+                    if(l) l.textContent=n+' '+minute+' '+d.pc;
+                });
+            });
             ['newStaffName','newStaffPhone','newStaffBank','newStaffAccount','newRoomNumber','newRoomCapacity','newCustomerName','newCustomerPhone','newCustomerNumber','newPaymentMethodName','newGuaranteeAmount','newGuaranteeMemo'].forEach(id=>{const el=root.querySelector('#'+id);if(el)el.placeholder='';});
             const menu=root.querySelector('#newMenuName');if(menu)menu.placeholder={en:'Enter menu name',th:'กรอกชื่อเมนู',vi:'Nhập tên menu','zh-CN':'请输入菜单名称','zh-TW':'請輸入選單名稱',id:'Masukkan nama menu'}[currentLanguage]||'메뉴명을 입력하세요';
         }
 
         function bindDBManagementActions() {
-            const restore = document.getElementById('dbGoogleRestoreButton');
-            const sample = document.getElementById('dbExcelSampleButton');
+            const root = document.getElementById('dbManagementSection') || document.getElementById('managementModal');
+            if (!root || root.dataset.maShopDbActionsBound === '1') return;
+            root.dataset.maShopDbActionsBound = '1';
 
-            if (restore) {
-                restore.onclick = function(e) {
+            // DB 관리 DOM이 언어 변경/렌더링 과정에서 다시 만들어져도
+            // 버튼 자체의 onclick에 의존하지 않고 상위 요소에서 이벤트를 처리합니다.
+            root.addEventListener('click', async function(e) {
+                const restore = e.target.closest('#dbGoogleRestoreButton');
+                if (restore) {
                     e.preventDefault();
                     e.stopPropagation();
                     showGoogleRestoreDialog();
-                };
-            }
+                    return;
+                }
 
-            if (sample) {
-                sample.onclick = async function(e) {
+                const sample = e.target.closest('#dbExcelSampleButton');
+                if (sample) {
                     e.preventDefault();
                     e.stopPropagation();
                     try {
                         await downloadExcelUploadSample();
                     } catch (err) {
-                        console.error(err);
+                        console.error('Excel sample download error:', err);
                         alert(translatePopupMessage('엑셀 업로드 샘플 다운로드 중 오류가 발생했습니다.'));
                     }
-                };
-            }
+                }
+            });
         }
 
         const managementModalObserver = new MutationObserver(() => {
