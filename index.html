@@ -174,7 +174,7 @@
    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
      <div>
-      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">마사지 관리 프로그램</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v38</span></div>
+      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">일일 레프트</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v38</span></div>
       <p id="shopName" class="text-lg text-gray-600 mt-1"></p>
      </div>
      <div class="flex gap-2"><button onclick="showLanguageModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="changeLanguage">언어 변경</button> <button onclick="showFontModal()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600" data-translate="changeFont">폰트 변경</button> <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" data-translate="logout">로그아웃</button>
@@ -372,7 +372,7 @@
         <th class="border border-gray-300 p-2" data-translate="menuName">메뉴명</th>
         <th class="border border-gray-300 p-2" data-translate="salesCount">판매 횟수</th>
         <th class="border border-gray-300 p-2" data-translate="totalSales">총 매출</th>
-        <th class="border border-gray-300 p-2" data-translate="totalCommission">총 커미션</th>
+        <th class="border border-gray-300 p-2" data-translate="totalCommissionRatio">총커미션(비율)</th>
        </tr></thead>
        <tbody id="annualMenuStatsTable"></tbody>
        <tfoot id="annualMenuStatsTableFoot"></tfoot>
@@ -385,7 +385,7 @@
         <thead><tr class="bg-gray-100">
          <th class="border border-gray-300 p-2" data-translate="monthColumn">월별</th>
          <th class="border border-gray-300 p-2" data-translate="salesColumn">매출</th>
-         <th class="border border-gray-300 p-2" data-translate="netProfitColumn">순익</th>
+         <th class="border border-gray-300 p-2" data-translate="netProfitColumn">순익(비율)</th>
          <th class="border border-gray-300 p-2" data-translate="differenceColumn">차이</th>
         </tr></thead>
         <tbody id="monthlySalesProfitStatsTable"></tbody>
@@ -435,7 +435,7 @@
          <th class="border border-gray-300 p-2" data-translate="menuName">메뉴명</th>
          <th class="border border-gray-300 p-2" data-translate="salesCount">판매 횟수</th>
          <th class="border border-gray-300 p-2" data-translate="totalSales">총 매출</th>
-         <th class="border border-gray-300 p-2" data-translate="totalCommission">총 커미션</th>
+         <th class="border border-gray-300 p-2" data-translate="totalCommissionRatio">총커미션(비율)</th>
         </tr>
        </thead>
        <tbody id="menuStatsTable"></tbody>
@@ -449,7 +449,7 @@
         <thead><tr class="bg-gray-100">
          <th class="border border-gray-300 p-2" data-translate="dateColumn">날짜</th>
          <th class="border border-gray-300 p-2" data-translate="salesColumn">매출</th>
-         <th class="border border-gray-300 p-2" data-translate="netProfitColumn">순익</th>
+         <th class="border border-gray-300 p-2" data-translate="netProfitColumn">순익(비율)</th>
          <th class="border border-gray-300 p-2" data-translate="differenceColumn">차이</th>
         </tr></thead>
         <tbody id="dailySalesProfitStatsTable"></tbody>
@@ -635,7 +635,7 @@
         // 번역 데이터
         const translations = {
             ko: {
-                title: '마사지 관리 프로그램',
+                title: '일일 레프트',
                 changeLanguage: '언어 변경',
                 changeFont: '폰트 변경',
                 fontSelection: '폰트 선택',
@@ -678,6 +678,7 @@
                 monthly: '월간',
                 totalPrice: '총 가격',
                 totalCommission: '총 커미션',
+                totalCommissionRatio: '총커미션(비율)',
                 grandTotal: '총 금액(QR팁 제외)',
                 grandTotalCommission: '총 커미션',
                 profit: '수익',
@@ -757,7 +758,7 @@
                 dateColumn: '날짜',
                 monthColumn: '월별',
                 salesColumn: '매출',
-                netProfitColumn: '순익',
+                netProfitColumn: '순익(비율)',
                 differenceColumn: '차이',
 
                 annualMonthlySalesChartTitle: '월간 수익 그래프',
@@ -936,7 +937,7 @@
                 dateColumn: 'Date',
                 monthColumn: 'Month',
                 salesColumn: 'Sales',
-                netProfitColumn: 'Net Profit',
+                netProfitColumn: 'Net Profit (Ratio)',
                 differenceColumn: 'Difference',
                 annualMonthlySalesChartTitle: 'Monthly Revenue Graph',
                 staffSalesChartTitle: 'Staff Sales Graph',
@@ -2265,7 +2266,7 @@ async function initializeApp() {
                         const shopEl = document.getElementById('shopName');
                         if (shopEl) shopEl.textContent = currentAdmin.type === 'super'
                             ? '최고 관리자 화면'
-                            : (currentAdmin.shopName || '관리자 화면') + (currentAdmin.validUntil ? ' · 만료일: ' + currentAdmin.validUntil : '');
+                            : (currentAdmin.shopName || '관리자 화면') + (currentAdmin.validUntil ? ' · ' + (window.translateLegacyText ? window.translateLegacyText('만료일:') : 'Expiration date:') + ' ' + currentAdmin.validUntil : '');
                         return;
                     }
                 } catch (recoveryError) {
@@ -6087,7 +6088,7 @@ function translateLegacy(value) {
             headerRow.innerHTML = `
                 <th class="border border-gray-300 p-2" data-translate="staff">마사지사</th>
                 <th class="border border-gray-300 p-2" data-translate="totalPrice">총 가격</th>
-                <th class="border border-gray-300 p-2" data-translate="totalCommission">총 커미션</th>
+                <th class="border border-gray-300 p-2" data-translate="totalCommissionRatio">총커미션(비율)</th>
             `;
             
             Object.entries(staffStats).forEach(([staffName, stats]) => {
@@ -6095,13 +6096,13 @@ function translateLegacy(value) {
                 row.innerHTML = `
                     <td class="border border-gray-300 p-2">${staffName}</td>
                     <td class="border border-gray-300 p-2">${(Number(stats.totalPrice) || 0).toLocaleString()}${currency.symbol}</td>
-                    <td class="border border-gray-300 p-2">${(Number(stats.totalCommission) || 0).toLocaleString()}${currency.symbol}</td>
+                    <td class="border border-gray-300 p-2">${(Number(stats.totalPrice) > 0 ? ((Number(stats.totalCommission) || 0) / Number(stats.totalPrice) * 100).toFixed(2) : '0.00')}%</td>
                 `;
                 tableBody.appendChild(row);
             });
             const totalPrice=Object.values(staffStats).reduce((s,x)=>s+(Number(x.totalPrice)||0),0);
             const totalCommission=Object.values(staffStats).reduce((s,x)=>s+(Number(x.totalCommission)||0),0);
-            if(staffFooter) staffFooter.innerHTML=`<tr class="bg-gray-100 font-bold"><td class="border border-gray-300 p-2">직원별 합계</td><td class="border border-gray-300 p-2">${totalPrice.toLocaleString()}${currency.symbol}</td><td class="border border-gray-300 p-2">${totalCommission.toLocaleString()}${currency.symbol}</td></tr>`;
+            if(staffFooter) staffFooter.innerHTML=`<tr class="bg-gray-100 font-bold"><td class="border border-gray-300 p-2">직원별 합계</td><td class="border border-gray-300 p-2">${totalPrice.toLocaleString()}${currency.symbol}</td><td class="border border-gray-300 p-2">${totalPrice > 0 ? (totalCommission / totalPrice * 100).toFixed(2) : '0.00'}%</td></tr>`;
             if(window.localizeLegacyUI) window.localizeLegacyUI();
         }
 
@@ -6247,7 +6248,7 @@ function translateLegacy(value) {
                 const row = document.createElement('tr');
                 row.innerHTML = '<td class="border border-gray-300 p-2">' + key + '</td>' +
                     '<td class="border border-gray-300 p-2">' + g.sales.toLocaleString() + currency.symbol + '</td>' +
-                    '<td class="border border-gray-300 p-2">' + g.profit.toLocaleString() + currency.symbol + '</td>' +
+                    '<td class="border border-gray-300 p-2">' + (g.sales > 0 ? (g.profit / g.sales * 100).toFixed(2) : '0.00') + '%</td>' +
                     '<td class="border border-gray-300 p-2">' + g.difference.toLocaleString() + currency.symbol + '</td>';
                 body.appendChild(row);
                 cursor.setDate(cursor.getDate() + 1);
@@ -6255,7 +6256,7 @@ function translateLegacy(value) {
             if (foot) foot.innerHTML = '<tr class="bg-gray-100 font-bold">' +
                 '<td class="border border-gray-300 p-2">합계</td>' +
                 '<td class="border border-gray-300 p-2">' + totalSales.toLocaleString() + currency.symbol + '</td>' +
-                '<td class="border border-gray-300 p-2">' + totalProfit.toLocaleString() + currency.symbol + '</td>' +
+                '<td class="border border-gray-300 p-2">' + (totalSales > 0 ? (totalProfit / totalSales * 100).toFixed(2) : '0.00') + '%</td>' +
                 '<td class="border border-gray-300 p-2">' + totalDifference.toLocaleString() + currency.symbol + '</td></tr>';
             if (window.localizeLegacyUI) window.localizeLegacyUI();
         }
@@ -6277,14 +6278,14 @@ function translateLegacy(value) {
                 const row = document.createElement('tr');
                 row.innerHTML = '<td class="border border-gray-300 p-2">' + month + '월</td>' +
                     '<td class="border border-gray-300 p-2">' + g.sales.toLocaleString() + currency.symbol + '</td>' +
-                    '<td class="border border-gray-300 p-2">' + g.profit.toLocaleString() + currency.symbol + '</td>' +
+                    '<td class="border border-gray-300 p-2">' + (g.sales > 0 ? (g.profit / g.sales * 100).toFixed(2) : '0.00') + '%</td>' +
                     '<td class="border border-gray-300 p-2">' + g.difference.toLocaleString() + currency.symbol + '</td>';
                 body.appendChild(row);
             }
             if (foot) foot.innerHTML = '<tr class="bg-gray-100 font-bold">' +
                 '<td class="border border-gray-300 p-2">합계</td>' +
                 '<td class="border border-gray-300 p-2">' + totalSales.toLocaleString() + currency.symbol + '</td>' +
-                '<td class="border border-gray-300 p-2">' + totalProfit.toLocaleString() + currency.symbol + '</td>' +
+                '<td class="border border-gray-300 p-2">' + (totalSales > 0 ? (totalProfit / totalSales * 100).toFixed(2) : '0.00') + '%</td>' +
                 '<td class="border border-gray-300 p-2">' + totalDifference.toLocaleString() + currency.symbol + '</td></tr>';
             if (window.localizeLegacyUI) window.localizeLegacyUI();
         }
@@ -6642,8 +6643,8 @@ function translateLegacy(value) {
 
         function showExportDialog(data, startDate, endDate, exportType) {
             const defaultFileName = exportType === 'statistics' ? 
-                `통계_${startDate}_${endDate}` : 
-                `전체데이터_${currentAdmin.username}_${new Date().toISOString().split('T')[0]}`;
+                `export_${startDate}_${endDate}` : 
+                `all_data_${currentAdmin.username}_${new Date().toISOString().split('T')[0]}`;
                 
             const content = `
                 <div class="space-y-4">
@@ -6666,13 +6667,6 @@ function translateLegacy(value) {
                                class="w-full border rounded px-3 py-2" 
                                placeholder="내보낼 파일명을 입력하세요">
                         <div class="text-xs text-gray-500 mt-1">* .csv 확장자는 자동으로 추가됩니다</div>
-                    </div>
-                    
-                    <div class="bg-yellow-50 border border-yellow-200 rounded p-3">
-                        <div class="text-sm text-yellow-800">
-                            <strong>참고:</strong> 브라우저 보안상 저장 경로는 기본 다운로드 폴더로 설정됩니다.<br>
-                            다운로드 후 원하는 위치로 파일을 이동하실 수 있습니다.
-                        </div>
                     </div>
                     
                     <div class="flex gap-2 justify-center">
@@ -7059,13 +7053,6 @@ function translateLegacy(value) {
                         <p class="text-gray-600 mb-4">구글 드라이브에 데이터를 백업합니다.</p>
                     </div>
                     
-                    <div class="bg-blue-50 border border-blue-200 rounded p-3">
-                        <div class="text-sm text-blue-800">
-                            <strong>참고:</strong> 구글 계정에 로그인하여 드라이브에 백업 파일을 저장합니다.<br>
-                            백업 파일은 "massage_backup_[날짜].json" 형식으로 저장됩니다.
-                        </div>
-                    </div>
-                    
                     <div>
                         <label class="block text-sm font-medium mb-2">파일명:</label>
                         <input type="text" id="googleBackupFileName" 
@@ -7097,15 +7084,15 @@ function translateLegacy(value) {
                     
                     <div class="bg-red-50 border border-red-200 rounded p-3">
                         <div class="text-sm text-red-800">
-                            <strong>⚠️ 주의:</strong> 현재 데이터가 모두 삭제되고 백업 데이터로 대체됩니다.<br>
-                            복원 전에 현재 데이터를 백업하는 것을 권장합니다.
+                            <strong>⚠️ ${translatePopupMessage('주의:')}</strong> ${translatePopupMessage('현재 데이터가 모두 삭제되고 백업 데이터로 대체됩니다.')}<br>
+                            ${translatePopupMessage('복원 전에 현재 데이터를 백업하는 것을 권장합니다.')}
                         </div>
                     </div>
                     
                     <div class="bg-blue-50 border border-blue-200 rounded p-3">
                         <div class="text-sm text-blue-800">
-                            <strong>참고:</strong> 구글 계정에 로그인하여 드라이브에서 백업 파일을 선택합니다.<br>
-                            JSON 형식의 백업 파일만 복원 가능합니다.
+                            <strong>${translatePopupMessage('참고:')}</strong> ${translatePopupMessage('구글 계정에 로그인하여 드라이브에서 백업 파일을 선택합니다.')}<br>
+                            ${translatePopupMessage('JSON 형식의 백업 파일만 복원 가능합니다.')}
                         </div>
                     </div>
                     
