@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Report v3.09</title>
+  <title>Daily Report v3.10</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -174,7 +174,7 @@
    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
      <div>
-      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.09</span></div>
+      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.10</span></div>
       <p id="shopName" class="text-lg text-gray-600 mt-1"></p>
      </div>
      <div class="flex gap-2"><button onclick="showLanguageModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="changeLanguage">언어 변경</button> <button onclick="showFontModal()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600" data-translate="changeFont">폰트 변경</button> <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" data-translate="logout">로그아웃</button>
@@ -625,8 +625,8 @@
         // D1/Cloudflare Worker API endpoint. This keeps GitHub-hosted test.html connected to the same backend.
         const API_BASE_URL = 'https://massage.guidrthai.workers.dev';
         // 앱 버전: 기능/화면이 변경될 때마다 0.01씩 증가시킵니다.
-        // 현재 버전은 v3.09입니다.
-        const APP_VERSION = 'v3.09';
+        // 현재 버전은 v3.10입니다.
+        const APP_VERSION = 'v3.10';
         let currentPaymentReservationId = null;
         let selectedStaff = null;
         let menuRowCounter = 0;
@@ -6490,15 +6490,13 @@ function translateLegacy(value) {
                 const salesPct = maxSales > 0 ? (sales / maxSales) * 100 : 0;
                 const profitPct = maxSales > 0 ? (profit / maxSales) * 100 : 0;
                 const row = document.createElement('div');
-                row.className = 'mb-3';
+                row.className = 'mb-3 flex items-center gap-2 w-full';
                 row.innerHTML =
-                    '<div class="flex items-center gap-2 mb-1">' +
-                    '<div class="w-28 md:w-36 text-sm font-medium truncate" title="' + e.label + '">' + e.label + '</div>' +
-                    '</div>' +
-                    '<div class="ml-0 md:ml-36 relative h-9 bg-gray-100 rounded-full overflow-hidden border border-gray-200">' +
+                    '<div class="w-24 md:w-32 flex-none text-sm font-medium truncate" title="' + e.label + '">' + e.label + '</div>' +
+                    '<div class="flex-1 min-w-0 relative h-9 bg-gray-100 rounded-full overflow-hidden border border-gray-200">' +
                     '<div class="absolute inset-y-0 left-0 bg-blue-200 rounded-full flex items-center justify-end pr-2" style="width:' + Math.max(salesPct, sales > 0 ? 4 : 0) + '%">' +
                     '<span class="text-xs font-bold text-blue-800 whitespace-nowrap">' + sales.toLocaleString() + currency.symbol + '</span></div>' +
-                    '<div class="absolute inset-y-0 left-0 bg-blue-700 rounded-full flex items-center justify-center" style="width:' + Math.min(profitPct, 100) + '%">' +
+                    '<div class="absolute inset-y-0 left-0 bg-blue-700 rounded-full flex items-center justify-start pl-2" style="width:' + Math.min(profitPct, 100) + '%">' +
                     '<span class="text-xs font-bold text-white whitespace-nowrap">' + profit.toLocaleString() + currency.symbol + '</span></div>' +
                     '</div>';
                 container.appendChild(row);
@@ -7075,15 +7073,24 @@ function translateLegacy(value) {
                     </div>
                     
                     <div class="flex gap-2 justify-center">
-                        <button onclick="performGoogleBackup()" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">구글 로그인 후 백업</button>
-                        <button onclick="closeManagementModal()" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">취소</button>
+                        <button type="button" data-google-action="backup" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">구글 로그인 후 백업</button>
+                        <button type="button" data-google-action="cancel" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">취소</button>
                     </div>
                 </div>
             `;
             
-            document.getElementById('managementTitle').textContent = '구글 드라이브 백업';
-            document.getElementById('managementContent').innerHTML = content;
-            document.getElementById('managementModal').style.display = 'block';
+            const titleEl = document.getElementById('managementTitle');
+            const bodyEl = document.getElementById('managementContent');
+            const modalEl = document.getElementById('managementModal');
+            titleEl.textContent = translatePopupMessage('구글 드라이브 백업');
+            bodyEl.innerHTML = content;
+            const backupButton = bodyEl.querySelector('[data-google-action="backup"]');
+            if (backupButton) backupButton.addEventListener('click', performGoogleBackup);
+            const cancelButton = bodyEl.querySelector('[data-google-action="cancel"]');
+            if (cancelButton) cancelButton.addEventListener('click', closeManagementModal);
+            modalEl.style.zIndex = '1100';
+            modalEl.style.display = 'block';
+            localizeDynamicManagementModal();
         }
 
         function showGoogleRestoreDialog() {
@@ -7116,14 +7123,18 @@ function translateLegacy(value) {
                     </div>
                     
                     <div class="flex gap-2 justify-center">
-                        <button onclick="performGoogleRestore()" class="bg-orange-500 text-white px-6 py-2 rounded hover:bg-orange-600">구글 로그인 후 복원</button>
-                        <button onclick="closeManagementModal()" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">취소</button>
+                        <button type="button" data-google-action="restore" class="bg-orange-500 text-white px-6 py-2 rounded hover:bg-orange-600">구글 로그인 후 복원</button>
+                        <button type="button" data-google-action="cancel" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">취소</button>
                     </div>
                 </div>
             `;
             
             title.textContent = translatePopupMessage('구글 드라이브 복원');
             body.innerHTML = content;
+            const restoreButton = body.querySelector('[data-google-action="restore"]');
+            if (restoreButton) restoreButton.addEventListener('click', performGoogleRestore);
+            const cancelButton = body.querySelector('[data-google-action="cancel"]');
+            if (cancelButton) cancelButton.addEventListener('click', closeManagementModal);
             modal.style.zIndex = '1100';
             modal.style.display = 'block';
             localizeDynamicManagementModal();
@@ -7344,9 +7355,30 @@ function translateLegacy(value) {
             }
         }
 
-        function downloadExcelUploadSample() {
-            if (typeof XLSX === 'undefined') {
-                alert('엑셀 기능을 불러오지 못했습니다. 인터넷 연결을 확인해주세요.');
+        function loadExcelLibrary() {
+            return new Promise((resolve, reject) => {
+                if (typeof XLSX !== 'undefined') { resolve(); return; }
+                const existing = document.querySelector('script[data-mashop-xlsx]');
+                if (existing) {
+                    existing.addEventListener('load', () => resolve(), {once:true});
+                    existing.addEventListener('error', () => reject(new Error('Excel library load failed')), {once:true});
+                    return;
+                }
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+                script.async = true;
+                script.dataset.mashopXlsx = '1';
+                script.onload = () => resolve();
+                script.onerror = () => reject(new Error('Excel library load failed'));
+                document.head.appendChild(script);
+            });
+        }
+
+        async function downloadExcelUploadSample() {
+            try {
+                await loadExcelLibrary();
+            } catch (error) {
+                alert(translatePopupMessage('엑셀 기능을 불러오지 못했습니다. 인터넷 연결을 확인해주세요.'));
                 return;
             }
             const excelSampleByLanguage = {
@@ -7424,11 +7456,13 @@ function translateLegacy(value) {
             return m ? String(m[1]).padStart(2,'0') + ':' + String(m[2]).padStart(2,'0') : textValue;
         }
 
-        function uploadExcelData(event) {
+        async function uploadExcelData(event) {
             const file = event.target.files && event.target.files[0];
             if (!file) return;
-            if (typeof XLSX === 'undefined') {
-                alert('엑셀 기능을 불러오지 못했습니다. 인터넷 연결을 확인해주세요.');
+            try {
+                await loadExcelLibrary();
+            } catch (error) {
+                alert(translatePopupMessage('엑셀 기능을 불러오지 못했습니다. 인터넷 연결을 확인해주세요.'));
                 event.target.value = '';
                 return;
             }
@@ -8664,7 +8698,40 @@ function translateLegacy(value) {
                 'zh-TW':{'메뉴명:':'選單名稱：','가격/커미션:':'價格/佣金：','메뉴명을 입력하세요':'請輸入選單名稱','가격':'價格','커미션':'佣金','직원명:':'員工姓名：','전화번호:':'電話號碼：','은행명:':'銀行名稱：','계좌번호:':'帳戶號碼：','방번호:':'房號：','수용인원:':'容納人數：','고객명:':'顧客姓名：','고객번호:':'顧客編號：','입금방식명:':'付款方式名稱：','금액:':'金額：','메모:':'備註：'},
                 id:{'메뉴명:':'Nama Menu:','가격/커미션:':'Harga/Komisi:','메뉴명을 입력하세요':'Masukkan nama menu','가격':'Harga','커미션':'Komisi','직원명:':'Nama Karyawan:','전화번호:':'Nomor Telepon:','은행명:':'Nama Bank:','계좌번호:':'Nomor Rekening:','방번호:':'Nomor Kamar:','수용인원:':'Kapasitas:','고객명:':'Nama Pelanggan:','고객번호:':'Nomor Pelanggan:','입금방식명:':'Nama Metode Pembayaran:','금액:':'Jumlah:','메모:':'Catatan:'}
             };
+            const aliases = {
+                '메뉴명:':['Menu Name:','ชื่อเมนู:','Tên menu:','菜单名称：','選單名稱：','Nama Menu:'],
+                '가격/커미션:':['Price/Commission:','ราคา/คอมมิชชั่น:','Giá/Hoa hồng:','价格/佣金：','價格/佣金：','Harga/Komisi:'],
+                '은행명:':['Bank Name:','ชื่อธนาคาร:','Tên ngân hàng:','银行名称：','銀行名稱：','Nama Bank:'],
+                '고객명:':['Customer Name:','ชื่อลูกค้า:','Tên khách hàng:','客户姓名：','顧客姓名：','Nama Pelanggan:'],
+                '입금방식명:':['Payment Method Name:','ชื่อวิธีชำระเงิน:','Tên phương thức thanh toán:','付款方式名称：','付款方式名稱：','Nama Metode Pembayaran:'],
+                '직원명:':['Staff Name:','ชื่อพนักงาน:','Tên nhân viên:','员工姓名：','員工姓名：','Nama Karyawan:'],
+                '전화번호:':['Phone Number:','หมายเลขโทรศัพท์:','Số điện thoại:','电话号码：','電話號碼：','Nomor Telepon:'],
+                '계좌번호:':['Account Number:','เลขที่บัญชี:','Số tài khoản:','账户号码：','帳戶號碼：','Nomor Rekening:'],
+                '방번호:':['Room Number:','หมายเลขห้อง:','Số phòng:','房间号：','房號：','Nomor Kamar:'],
+                '수용인원:':['Capacity:','ความจุ:','Sức chứa:','容纳人数：','容納人數：','Kapasitas:'],
+                '고객번호:':['Customer Number:','หมายเลขลูกค้า:','Số khách hàng:','客户编号：','顧客編號：','Nomor Pelanggan:'],
+                '금액:':['Amount:','จำนวนเงิน:','Số tiền:','金额：','金額：','Jumlah:'],
+                '메모:':['Memo:','หมายเหตุ:','Ghi chú:','备注：','備註：','Catatan:']
+            };
+            Object.keys(aliases).forEach(key => {
+                if (!managementFragments.en[key]) return;
+                aliases[key].forEach(alias => { if (!managementFragments.en[alias]) managementFragments.en[alias] = managementFragments.en[key]; });
+            });
             const fragments = managementFragments[currentLanguage] || {};
+            // 이전 언어로 이미 렌더링된 팝업도 현재 언어로 다시 변환할 수 있도록
+            // 모든 지원 언어의 표시 문자열을 현재 언어 문자열로 직접 매핑합니다.
+            const canonicalTerms = {
+                'Price/Commission:':'가격/커미션:','Bank Name:':'은행명:','Customer Name:':'고객명:','Payment Method Name:':'입금방식명:'
+            };
+            Object.keys(canonicalTerms).forEach(display => {
+                const ko = canonicalTerms[display];
+                if (!aliases[ko]) return;
+                const target = fragments[ko] || ko;
+                aliases[ko].forEach(alias => {
+                    if (alias !== target) fragments[alias] = target;
+                });
+                fragments[display] = target;
+            });
             const blankPlaceholders = new Set(['직원명을 입력하세요','전화번호를 입력하세요','은행명을 입력하세요','계좌번호를 입력하세요','방번호를 입력하세요','수용인원을 입력하세요','고객명을 입력하세요','고객번호를 입력하세요','입금방식명을 입력하세요','금액을 입력하세요','메모를 입력하세요 (선택사항)']);
             const translateFromSource = source => {
                 if (!source) return source;
