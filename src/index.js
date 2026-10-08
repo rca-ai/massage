@@ -227,6 +227,54 @@ export default {
       }
     }
 
+    if (url.pathname === "/api/admin/profile" && request.method === "PUT") {
+      const session = await requireSession(request, env);
+      if (!session) return json({ ok:false, error:"unauthorized" }, 401, request);
+
+      try {
+        const body = await request.json();
+        const password = String(body?.password || "");
+        const shopName = String(body?.shopName || "").trim();
+        const email = String(body?.email || "").trim();
+        const phone = String(body?.phone || "").trim();
+        const googleMapsUrl = String(body?.googleMapsUrl || "").trim();
+        const languageValue = String(body?.language || "");
+        const language = ["ko","en","th","vi","zh-CN","zh-TW","id"].includes(languageValue) ? languageValue : "ko";
+
+        if (!shopName) return json({ ok:false, error:"shop_name_required" }, 400, request);
+        if (email && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) return json({ ok:false, error:"invalid_email" }, 400, request);
+        if (password && password.length < 4) return json({ ok:false, error:"invalid_password" }, 400, request);
+
+        const updates = ["display_name = ?", "email = ?", "phone = ?", "google_maps_url = ?", "language = ?", "updated_at = CURRENT_TIMESTAMP"];
+        const binds = [shopName, email, phone, googleMapsUrl, language];
+
+        if (password) {
+          const salt = crypto.randomUUID();
+          const passwordHash = await hashPassword(password, salt);
+          updates.push("password_hash = ?");
+          binds.push(salt + ":" + passwordHash);
+        }
+
+        binds.push(session.admin_id, session.shop_id);
+        await env.DB.prepare("UPDATE admins SET " + updates.join(", ") + " WHERE id = ? AND shop_id = ?").bind(...binds).run();
+        await env.DB.prepare("UPDATE shops SET shop_name = ?, email = ?, google_maps_url = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(shopName, email, googleMapsUrl, session.shop_id).run();
+
+        const updated = await env.DB.prepare(
+          "SELECT a.id, a.shop_id, a.username, a.display_name, a.role, a.email, a.phone, a.google_maps_url, a.language, a.status, a.valid_until, a.updated_at, s.shop_name FROM admins a LEFT JOIN shops s ON s.id = a.shop_id WHERE a.id = ? AND a.shop_id = ? LIMIT 1"
+        ).bind(session.admin_id, session.shop_id).first();
+
+        return json({ ok:true, admin:{
+          id:updated.id, shopId:updated.shop_id, username:updated.username,
+          type:updated.role === "super" ? "super" : "normal", role:updated.role,
+          shopName:updated.display_name || updated.shop_name || "", displayName:updated.display_name || updated.shop_name || "",
+          email:updated.email || "", phone:updated.phone || "", googleMapsUrl:updated.google_maps_url || "",
+          language:updated.language || "ko", validUntil:updated.valid_until || null, updatedAt:updated.updated_at
+        }}, 200, request);
+      } catch (error) {
+        return json({ ok:false, error:error instanceof Error ? error.message : String(error) }, 500, request);
+      }
+    }
+
     if (url.pathname === "/api/admins" && (request.method === "GET" || request.method === "POST")) {
       const session = await requireSession(request, env);
       if (!session) return json({ ok: false, error: "unauthorized" }, 401, request);
@@ -273,7 +321,8 @@ export default {
         const email = String(body?.email || "").trim();
         const phone = String(body?.phone || "").trim();
         const googleMapsUrl = String(body?.googleMapsUrl || "").trim();
-        const language = ["ko","en","th","vi"].includes(String(body?.language || "")) ? String(body.language) : "ko";
+        const languageValue = String(body?.language || "");
+        const language = ["ko","en","th","vi","zh-CN","zh-TW","id"].includes(languageValue) ? languageValue : "ko";
         const validUntil = type === "super" ? null : String(body?.validUntil || "").trim();
 
         if (!username || !password) {
@@ -343,8 +392,8 @@ export default {
       if (session.role !== "super") return json({ ok:false, error:"forbidden" }, 403, request);
       try {
         const body = await request.json();
-        const id = Number(body?.id);
-        if (!Number.isFinite(id)) return json({ ok:false, error:"invalid_admin_id" }, 400, request);
+        const id = String(body?.id || "").trim();
+        if (!id) return json({ ok:false, error:"invalid_admin_id" }, 400, request);
 
         const target = await env.DB.prepare(
           "SELECT id, username, role FROM admins WHERE id = ? AND shop_id = ? LIMIT 1"
@@ -366,7 +415,8 @@ export default {
         const email = String(body?.email || "").trim();
         const phone = String(body?.phone || "").trim();
         const googleMapsUrl = String(body?.googleMapsUrl || "").trim();
-        const language = ["ko","en","th","vi"].includes(String(body?.language || "")) ? String(body.language) : "ko";
+        const languageValue = String(body?.language || "");
+        const language = ["ko","en","th","vi","zh-CN","zh-TW","id"].includes(languageValue) ? languageValue : "ko";
         const validUntil = type === "super" ? null : String(body?.validUntil || "").trim();
         if (!username || !shopName) return json({ ok:false, error:"required_fields" }, 400, request);
 
@@ -413,7 +463,8 @@ export default {
         const email = String(body?.email || "").trim();
         const phone = String(body?.phone || "").trim();
         const googleMapsUrl = String(body?.googleMapsUrl || "").trim();
-        const language = ["ko","en","th","vi"].includes(String(body?.language || "")) ? String(body.language) : "ko";
+        const languageValue = String(body?.language || "");
+        const language = ["ko","en","th","vi","zh-CN","zh-TW","id"].includes(languageValue) ? languageValue : "ko";
         if (!username || !password || !shopName) return json({ ok:false, error:"required_fields" }, 400, request);
         if (username.length < 3 || username.length > 50) return json({ ok:false, error:"invalid_username" }, 400, request);
         if (password.length < 4) return json({ ok:false, error:"invalid_password" }, 400, request);
