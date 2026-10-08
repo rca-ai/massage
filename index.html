@@ -2895,8 +2895,8 @@ async function initializeApp() {
                     <div>
                         <label class="block text-sm font-medium mb-2" data-translate="selectMenu">메뉴 선택</label>
                         <div id="menuSelection_${menuRowId}" class="menu-selection-grid">
-                            ${menus.map(m => `
-                                <div class="selection-item" data-menu-id="${m.id}" onclick="selectMenuForRow(${menuRowId}, ${m.id}, '${m.name}')">
+                            ${menus.filter(m => isMenuAvailable(m)).map(m => `
+                                <div class="selection-item" data-menu-id="${m.id}" onclick="selectMenuForRow(${menuRowId}, ${m.id}, '${String(m.name).replace(/'/g,"\\'")}')">
                                     ${m.name}
                                 </div>
                             `).join('')}
@@ -2971,6 +2971,10 @@ async function initializeApp() {
             const menu = menus.find(m => m.id === menuId);
             
             if (menu) {
+                if (!isMenuAvailable(menu)) {
+                    alert('메뉴 만료일이 지나 가격과 커미션을 적용할 수 없습니다.');
+                    return;
+                }
                 menuRow.menuId = menuId;
                 menuRow.menuName = menuName;
                 
@@ -3026,7 +3030,7 @@ async function initializeApp() {
             const menus = JSON.parse(localStorage.getItem(getAdminKey('menus')) || '[]');
             const menu = menus.find(m => m.id === menuRow.menuId);
             
-            if (menu && menu.prices[duration]) {
+            if (menu && isMenuAvailable(menu) && menu.prices[duration]) {
                 menuRow.duration = duration;
                 menuRow.price = menu.prices[duration].price;
                 menuRow.commission = calculateCommission(menuRow.price, menu.prices[duration].commission);
