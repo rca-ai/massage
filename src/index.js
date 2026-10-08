@@ -420,6 +420,12 @@ export default {
         const language = ["ko","en","th","vi","zh-CN","zh-TW","id"].includes(languageValue) ? languageValue : "ko";
         const validUntil = type === "super" ? null : String(body?.validUntil || "").trim();
         if (!username || !shopName) return json({ ok:false, error:"required_fields" }, 400, request);
+        if (email && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
+          return json({ ok:false, error:"invalid_email" }, 400, request);
+        }
+        if (type === "normal" && !/^\\d{4}-\\d{2}-\\d{2}$/.test(validUntil)) {
+          return json({ ok:false, error:"invalid_valid_until" }, 400, request);
+        }
 
         const duplicate = await env.DB.prepare(
           "SELECT id FROM admins WHERE username = ? AND id <> ? LIMIT 1"
@@ -436,17 +442,33 @@ export default {
         }
         sql += " WHERE id = ? AND shop_id = ?";
         binds.push(id, session.shop_id);
-        await env.DB.prepare(sql).bind(...binds).run();
-        await env.DB.prepare("UPDATE shops SET shop_name = ?, email = ?, google_maps_url = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?")
-          .bind(shopName, email, googleMapsUrl, session.shop_id).run();
+
+        const adminUpdate = await env.DB.prepare(sql).bind(...binds).run();
+        if (Number(adminUpdate?.meta?.changes || 0) !== 1) {
+          return json({ ok:false, error:"admin_update_not_applied" }, 404, request);
+        }
+
+        const shopExists = await env.DB.prepare(
+          "SELECT id FROM shops WHERE id = ? LIMIT 1"
+        ).bind(session.shop_id).first();
+        if (!shopExists) {
+          return json({ ok:false, error:"shop_not_found" }, 500, request);
+        }
+
+        await env.DB.prepare(
+          "UPDATE shops SET shop_name = ?, email = ?, google_maps_url = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?"
+        ).bind(shopName, email, googleMapsUrl, session.shop_id).run();
 
         const updated = await env.DB.prepare(
           `SELECT id, username, display_name, role, email, phone, google_maps_url, language, status, valid_until, created_at, updated_at
            FROM admins WHERE id = ? AND shop_id = ? LIMIT 1`
         ).bind(id, session.shop_id).first();
+        if (!updated) {
+          return json({ ok:false, error:"admin_update_readback_failed" }, 500, request);
+        }
 
         return json({ ok:true, admin:{
-          id:updated.id, username:updated.username, displayName:updated.display_name || "",
+          id:String(updated.id), username:updated.username, displayName:updated.display_name || "",
           role:updated.role, type:updated.role === "super" ? "super" : "normal",
           email:updated.email || "", phone:updated.phone || "", googleMapsUrl:updated.google_maps_url || "",
           language:updated.language || "ko", status:updated.status, validUntil:updated.valid_until || null,
