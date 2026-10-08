@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Report v3.23</title>
+  <title>Daily Report v3.24</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -174,7 +174,7 @@
    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
      <div>
-      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.23</span></div>
+      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.24</span></div>
       <p id="shopName" class="text-lg text-gray-600 mt-1"></p>
      </div>
      <div class="flex gap-2"><button onclick="showLanguageModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="changeLanguage">언어 변경</button> <button onclick="showFontModal()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600" data-translate="changeFont">폰트 변경</button> <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" data-translate="logout">로그아웃</button>
@@ -665,8 +665,8 @@
         // D1/Cloudflare Worker API endpoint. This keeps GitHub-hosted test.html connected to the same backend.
         const API_BASE_URL = 'https://massage.guidrthai.workers.dev';
         // 앱 버전: 기능/화면이 변경될 때마다 0.01씩 증가시킵니다.
-        // 현재 버전은 v3.23입니다.
-        const APP_VERSION = 'v3.23';
+        // 현재 버전은 v3.24입니다.
+        const APP_VERSION = 'v3.24';
         let currentPaymentReservationId = null;
         let selectedStaff = null;
         let menuRowCounter = 0;
@@ -1535,6 +1535,29 @@
             paymentMethodStatisticsTitle:'Statistik Metode Pembayaran', paymentMethodColumn:'Metode Pembayaran', amountColumn:'Jumlah'
         });
 
+        // 메뉴 만료일 고정 번역 key 보완: 현재 선택 언어의 번역값만 사용합니다.
+        Object.assign(translations['ko'], {
+            expirationDate:'만료일', expirationDateHint:'가격/커미션 적용 종료일'
+        });
+        Object.assign(translations['en'], {
+            expirationDate:'Expiration Date', expirationDateHint:'Price/commission application end date'
+        });
+        Object.assign(translations['th'], {
+            expirationDate:'วันหมดอายุ', expirationDateHint:'วันที่สิ้นสุดการใช้ราคา/ค่าคอมมิชชัน'
+        });
+        Object.assign(translations['vi'], {
+            expirationDate:'Ngày hết hạn', expirationDateHint:'Ngày kết thúc áp dụng giá/hoa hồng'
+        });
+        Object.assign(translations['zh-CN'], {
+            expirationDate:'到期日', expirationDateHint:'价格/佣金适用结束日期'
+        });
+        Object.assign(translations['zh-TW'], {
+            expirationDate:'到期日', expirationDateHint:'價格／佣金適用結束日期'
+        });
+        Object.assign(translations['id'], {
+            expirationDate:'Tanggal Kedaluwarsa', expirationDateHint:'Tanggal berakhirnya penerapan harga/komisi'
+        });
+
         // 새로 추가된 로그인/DB 관리 UI 키를 7개 언어에 보강합니다.
         Object.assign(translations['en'], {
             languageSelection:'Language', guaranteeManagement:'Guarantee Management', dbDelete:'Delete DB', deleteTargetDate:'Target Date', viewStatus:'View Status', deletePaidAll:'Delete All Paid Data for Selected Date'
@@ -2136,6 +2159,8 @@ async function initializeApp() {
                     }
                 ]));
             }
+
+            normalizeMenuExpirationDates();
 
             if (!localStorage.getItem(getAdminKey('staff'))) {
                 localStorage.setItem(getAdminKey('staff'), JSON.stringify([
@@ -5128,7 +5153,9 @@ async function initializeApp() {
             };
 
             try {
-                const response = await apiFetch('/api/admins/item', {method:'PUT', body:JSON.stringify({id,username,password,type,shopName,email,phone,googleMapsUrl,language,validUntil:endDate})});
+                const adminId = String(id ?? '').trim();
+                if (!adminId) throw new Error('관리자 ID가 없습니다.');
+                const response = await apiFetch('/api/admins/item', {method:'PUT', body:JSON.stringify({id:adminId,username,password,type,shopName,email,phone,googleMapsUrl,language,validUntil:endDate})});
                 const result = await response.json();
                 if (!response.ok || !result.ok) throw new Error(result?.error || '관리자 수정 실패');
                 const updated = result.admin || {};
@@ -7728,6 +7755,7 @@ function translateLegacy(value) {
         }
 
         function buildExcelReferenceData(rows) {
+            normalizeMenuExpirationDates();
             const staff=JSON.parse(localStorage.getItem(getAdminKey('staff'))||'[]');
             const menus=JSON.parse(localStorage.getItem(getAdminKey('menus'))||'[]');
             const customers=JSON.parse(localStorage.getItem(getAdminKey('customers'))||'[]');
@@ -7757,7 +7785,8 @@ function translateLegacy(value) {
                 }
                 if(menuName){
                     let menu=menuByName.get(menuName);
-                    if(!menu){menu={id:nextMenuId++,name:menuName,prices:{}};menus.push(menu);menuByName.set(menuName,menu);added.menus++;}
+                    if(!menu){menu={id:nextMenuId++,name:menuName,expirationDate:'2027-12-31',prices:{}};menus.push(menu);menuByName.set(menuName,menu);added.menus++;}
+                    if(!menu.expirationDate)menu.expirationDate='2027-12-31';
                     if(duration>0){
                         if(!menu.prices)menu.prices={};
                         const p=menu.prices[duration];
