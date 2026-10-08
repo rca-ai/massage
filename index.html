@@ -665,8 +665,8 @@
         // D1/Cloudflare Worker API endpoint. This keeps GitHub-hosted test.html connected to the same backend.
         const API_BASE_URL = 'https://massage.guidrthai.workers.dev';
         // 앱 버전: 기능/화면이 변경될 때마다 0.01씩 증가시킵니다.
-        // 현재 버전은 v3.21입니다.
-        const APP_VERSION = 'v3.21';
+        // 현재 버전은 v3.22입니다.
+        const APP_VERSION = 'v3.22';
         let currentPaymentReservationId = null;
         let selectedStaff = null;
         let menuRowCounter = 0;
@@ -1649,7 +1649,13 @@
             selectDate:'Pilih Tanggal', startDate:'Tanggal Mulai', endDate:'Tanggal Selesai'
         });
 
-        Object.assign(translations.ko,{expirationDateLabel:'만료일:',superAdminScreen:'최고 관리자 화면',adminScreen:'관리자 화면'});
+        Object.assign(translations.ko,{expirationDateLabel:'만료일:',superAdminScreen:'최고 관리자 화면',adminScreen:'관리자 화면',adminProfileManagement:'관리자 정보수정'});
+        Object.assign(translations.en,{adminProfileManagement:'Edit Admin Information'});
+        Object.assign(translations.th,{adminProfileManagement:'แก้ไขข้อมูลผู้ดูแลระบบ'});
+        Object.assign(translations.vi,{adminProfileManagement:'Chỉnh sửa thông tin quản trị viên'});
+        Object.assign(translations['zh-CN'],{adminProfileManagement:'修改管理员信息'});
+        Object.assign(translations['zh-TW'],{adminProfileManagement:'修改管理員資訊'});
+        Object.assign(translations.id,{adminProfileManagement:'Edit Informasi Admin'});
         Object.assign(translations.en,{expirationDateLabel:'Expiration date:',superAdminScreen:'Super Admin Screen',adminScreen:'Admin Screen'});
         Object.assign(translations.th,{expirationDateLabel:'วันหมดอายุ:',superAdminScreen:'หน้าจอผู้ดูแลระบบระดับสูง',adminScreen:'หน้าจอผู้ดูแลระบบ'});
         Object.assign(translations.vi,{expirationDateLabel:'Ngày hết hạn:',superAdminScreen:'Màn hình quản trị viên cấp cao',adminScreen:'Màn hình quản trị viên'});
@@ -5693,6 +5699,10 @@ function translateLegacy(value) {
             document.getElementById('managementTitle').textContent = '관리자 관리';
             document.getElementById('managementContent').innerHTML = content;
             document.getElementById('managementModal').style.display = 'block';
+        }
+
+        function escapeHtmlAttribute(value) {
+            return String(value ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
         }
 
         function editMyAdminInfo() {
