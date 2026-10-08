@@ -5683,8 +5683,8 @@ function translateLegacy(value) {
                         <td class="border border-gray-300 p-2">${admin.language || 'ko'}</td>
                         <td class="border border-gray-300 p-2 ${isExpired ? 'text-red-600 font-bold' : ''}">${validityStatus}</td>
                         <td class="border border-gray-300 p-2">
-                            <button onclick="editAdmin(${JSON.stringify(admin.id)})" class="bg-blue-500 text-white px-2 py-1 rounded text-sm mr-1">수정</button>
-                            ${String(admin.id) !== '1' ? `<button onclick="deleteAdmin(${JSON.stringify(admin.id)})" class="bg-red-500 text-white px-2 py-1 rounded text-sm">삭제</button>` : ''}
+                            <button onclick='editAdmin(${JSON.stringify(admin.id)})' class="bg-blue-500 text-white px-2 py-1 rounded text-sm mr-1">수정</button>
+                            ${String(admin.id) !== '1' ? `<button onclick='deleteAdmin(${JSON.stringify(admin.id)})' class="bg-red-500 text-white px-2 py-1 rounded text-sm">삭제</button>` : ''}
                         </td>
                     </tr>
                 `;
