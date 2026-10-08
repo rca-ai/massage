@@ -436,6 +436,8 @@ export default {
         sql += " WHERE id = ? AND shop_id = ?";
         binds.push(id, session.shop_id);
         await env.DB.prepare(sql).bind(...binds).run();
+        await env.DB.prepare("UPDATE shops SET shop_name = ?, email = ?, google_maps_url = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?")
+          .bind(shopName, email, googleMapsUrl, session.shop_id).run();
 
         const updated = await env.DB.prepare(
           `SELECT id, username, display_name, role, email, phone, google_maps_url, language, status, valid_until, created_at, updated_at
