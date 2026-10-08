@@ -411,6 +411,7 @@ export default {
         const username = String(body?.username || "").trim();
         const password = String(body?.password || "");
         const type = body?.type === "super" ? "super" : "normal";
+        const dbRole = type === "super" ? "super" : "manager";
         const shopName = String(body?.shopName || "").trim();
         const email = String(body?.email || "").trim();
         const phone = String(body?.phone || "").trim();
@@ -426,7 +427,7 @@ export default {
         if (duplicate) return json({ ok:false, error:"username_exists" }, 409, request);
 
         let sql = `UPDATE admins SET username = ?, display_name = ?, role = ?, email = ?, phone = ?, google_maps_url = ?, language = ?, valid_until = ?, updated_at = CURRENT_TIMESTAMP`;
-        const binds = [username, shopName, type, email, phone, googleMapsUrl, language, validUntil];
+        const binds = [username, shopName, dbRole, email, phone, googleMapsUrl, language, validUntil];
         if (password) {
           const salt = crypto.randomUUID();
           const passwordHash = await hashPassword(password, salt);
