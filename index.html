@@ -2006,8 +2006,10 @@ async function initializeApp() {
                     }
                 }
 
+                normalizeMenuExpirationDates();
                 return true;
             } catch (error) {
+                normalizeMenuExpirationDates();
                 console.warn('D1 앱 데이터 동기화 실패. 현재 기기의 로컬 캐시를 사용합니다:', error);
                 return false;
             } finally {
