@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Report v3.21</title>
+  <title>Daily Report v3.22</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -174,7 +174,7 @@
    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
      <div>
-      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.21</span></div>
+      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.22</span></div>
       <p id="shopName" class="text-lg text-gray-600 mt-1"></p>
      </div>
      <div class="flex gap-2"><button onclick="showLanguageModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="changeLanguage">언어 변경</button> <button onclick="showFontModal()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600" data-translate="changeFont">폰트 변경</button> <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" data-translate="logout">로그아웃</button>
@@ -4934,7 +4934,7 @@ async function initializeApp() {
 
         function editAdmin(id) {
             const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
-            const admin = admins.find(a => a.id === id);
+            const admin = admins.find(a => String(a.id) === String(id));
             
             if (!admin) return;
 
@@ -4950,15 +4950,15 @@ async function initializeApp() {
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium mb-2">아이디:</label>
-                        <input type="text" id="editAdminUsername" value="${admin.username}" class="w-full border rounded px-3 py-2" ${id === 1 ? 'readonly' : ''}>
+                        <input type="text" id="editAdminUsername" value="${admin.username}" class="w-full border rounded px-3 py-2" ${String(id) === '1' ? 'readonly' : ''}>
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2">비밀번호:</label>
-                        <input type="password" id="editAdminPassword" value="${admin.password}" class="w-full border rounded px-3 py-2">
+                        <input type="password" id="editAdminPassword" value="${escapeHtmlAttribute(admin.password || '')}" class="w-full border rounded px-3 py-2" autocomplete="new-password" placeholder="변경하지 않으려면 비워두세요.">
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2">타입:</label>
-                        <select id="editAdminType" class="w-full border rounded px-3 py-2" ${id === 1 ? 'disabled' : ''} onchange="toggleValidityFields()">
+                        <select id="editAdminType" class="w-full border rounded px-3 py-2" ${String(id) === '1' ? 'disabled' : ''} onchange="toggleValidityFields()">
                             <option value="normal" ${admin.type === 'normal' ? 'selected' : ''}>일반관리자</option>
                             <option value="super" ${admin.type === 'super' ? 'selected' : ''}>최고관리자</option>
                         </select>
@@ -5037,8 +5037,8 @@ async function initializeApp() {
             const googleMapsUrl = document.getElementById('editAdminGoogleMaps').value.trim();
             const language = document.getElementById('editAdminLanguage').value;
 
-            if (!username || !password) {
-                alert('아이디와 비밀번호를 입력해주세요.');
+            if (!username) {
+                alert('아이디를 입력해주세요.');
                 return;
             }
 
@@ -5062,7 +5062,7 @@ async function initializeApp() {
             }
 
             const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
-            const adminIndex = admins.findIndex(a => a.id === id);
+            const adminIndex = admins.findIndex(a => String(a.id) === String(id));
             
             if (adminIndex === -1) return;
 
@@ -5099,7 +5099,7 @@ async function initializeApp() {
         }
 
         async function deleteAdmin(id) {
-            if (id === 1) {
+            if (String(id) === '1') {
                 alert('기본 관리자는 삭제할 수 없습니다.');
                 return;
             }
@@ -5683,8 +5683,8 @@ function translateLegacy(value) {
                         <td class="border border-gray-300 p-2">${admin.language || 'ko'}</td>
                         <td class="border border-gray-300 p-2 ${isExpired ? 'text-red-600 font-bold' : ''}">${validityStatus}</td>
                         <td class="border border-gray-300 p-2">
-                            <button onclick="editAdmin(${admin.id})" class="bg-blue-500 text-white px-2 py-1 rounded text-sm mr-1">수정</button>
-                            ${admin.id !== 1 ? `<button onclick="deleteAdmin(${admin.id})" class="bg-red-500 text-white px-2 py-1 rounded text-sm">삭제</button>` : ''}
+                            <button onclick="editAdmin(${JSON.stringify(admin.id)})" class="bg-blue-500 text-white px-2 py-1 rounded text-sm mr-1">수정</button>
+                            ${String(admin.id) !== '1' ? `<button onclick="deleteAdmin(${JSON.stringify(admin.id)})" class="bg-red-500 text-white px-2 py-1 rounded text-sm">삭제</button>` : ''}
                         </td>
                     </tr>
                 `;
