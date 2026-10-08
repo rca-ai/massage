@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Report v3.17</title>
+  <title>Daily Report v3.18</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -174,7 +174,7 @@
    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
      <div>
-      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.17</span></div>
+      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.18</span></div>
       <p id="shopName" class="text-lg text-gray-600 mt-1"></p>
      </div>
      <div class="flex gap-2"><button onclick="showLanguageModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="changeLanguage">언어 변경</button> <button onclick="showFontModal()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600" data-translate="changeFont">폰트 변경</button> <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" data-translate="logout">로그아웃</button>
@@ -625,8 +625,8 @@
         // D1/Cloudflare Worker API endpoint. This keeps GitHub-hosted test.html connected to the same backend.
         const API_BASE_URL = 'https://massage.guidrthai.workers.dev';
         // 앱 버전: 기능/화면이 변경될 때마다 0.01씩 증가시킵니다.
-        // 현재 버전은 v3.17입니다.
-        const APP_VERSION = 'v3.17';
+        // 현재 버전은 v3.18입니다.
+        const APP_VERSION = 'v3.18';
         let currentPaymentReservationId = null;
         let selectedStaff = null;
         let menuRowCounter = 0;
@@ -7598,11 +7598,48 @@ function translateLegacy(value) {
                         '\\n\\n기존 데이터는 삭제되지 않습니다. 계속하시겠습니까?';
                     if(!confirm(message))return;
 
+                    // 엑셀 업로드 데이터가 직원별/방번호별 현황판에서도 표시되도록 기준정보를 보완합니다.
+                    // 1) 엑셀에 있는 방번호가 방 관리에 없으면 자동 등록
+                    // 2) 업로드된 날짜에 직원 순번이 없으면 기존 순번 다음 번호를 자동 배정
+                    const uploadedDates=[...new Set(rows.map(row=>excelDateToISO(row['날짜'])).filter(Boolean))];
+                    const roomsForUpload=JSON.parse(localStorage.getItem(getAdminKey('rooms'))||'[]');
+                    let nextRoomId=Math.max(...roomsForUpload.map(x=>Number(x.id)||0),0)+1;
+                    const roomByNumber=new Map(roomsForUpload.map(x=>[String(x.roomNumber||'').trim(),x]));
+                    rows.forEach(row=>{
+                        const roomNumber=String(row['방번호']??'').trim();
+                        if(roomNumber&&!roomByNumber.has(roomNumber)){
+                            const room={id:nextRoomId++,roomNumber,capacity:1};
+                            roomsForUpload.push(room);
+                            roomByNumber.set(roomNumber,room);
+                        }
+                    });
+
                     localStorage.setItem(getAdminKey('staff'),JSON.stringify(referenceData.staff));
                     localStorage.setItem(getAdminKey('menus'),JSON.stringify(referenceData.menus));
                     localStorage.setItem(getAdminKey('customers'),JSON.stringify(referenceData.customers));
                     localStorage.setItem(getAdminKey('paymentMethods'),JSON.stringify(referenceData.paymentMethods));
+                    localStorage.setItem(getAdminKey('rooms'),JSON.stringify(roomsForUpload));
                     localStorage.setItem(getAdminKey('reservations'),JSON.stringify(reservations));
+
+                    // 직원별 현황판은 순번이 배정된 직원만 표시하므로,
+                    // 엑셀에 포함된 직원에게 업로드 날짜별로 미배정 순번을 자동 배정합니다.
+                    const uploadedStaffIds=[...new Set(rows.map(row=>{
+                        const name=String(row['직원명']??'').trim();
+                        const member=referenceData.staff.find(x=>String(x.name||'').trim()===name);
+                        return member?.id;
+                    }).filter(id=>id!==undefined&&id!==null&&id!=='') )];
+                    uploadedDates.forEach(date=>{
+                        const key=getDailyStaffOrderKey(date);
+                        const orderMap=JSON.parse(localStorage.getItem(key)||'{}');
+                        const usedOrders=Object.values(orderMap).map(Number).filter(n=>Number.isFinite(n)&&n>0);
+                        let nextOrder=Math.max(0,...usedOrders)+1;
+                        uploadedStaffIds.forEach(staffId=>{
+                            if(orderMap[staffId]===undefined||Number(orderMap[staffId])<=0){
+                                orderMap[staffId]=nextOrder++;
+                            }
+                        });
+                        localStorage.setItem(key,JSON.stringify(orderMap));
+                    });
 
                     if(added.staff&&currentAdmin?.sessionToken)await syncStaffToD1();
                     alert('엑셀 데이터 업로드가 완료되었습니다. '+imported+'건이 추가되었습니다.'+
