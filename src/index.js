@@ -242,7 +242,7 @@ export default {
         const language = ["ko","en","th","vi","zh-CN","zh-TW","id"].includes(languageValue) ? languageValue : "ko";
 
         if (!shopName) return json({ ok:false, error:"shop_name_required" }, 400, request);
-        if (email && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) return json({ ok:false, error:"invalid_email" }, 400, request);
+        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ ok:false, error:"invalid_email" }, 400, request);
         if (password && password.length < 4) return json({ ok:false, error:"invalid_password" }, 400, request);
 
         const updates = ["display_name = ?", "email = ?", "phone = ?", "google_maps_url = ?", "language = ?", "updated_at = CURRENT_TIMESTAMP"];
@@ -288,6 +288,7 @@ export default {
                     s.shop_name
              FROM admins a
              LEFT JOIN shops s ON s.id = a.shop_id
+             WHERE a.status = 'active'
              ORDER BY a.id`
           ).all();
 
@@ -402,10 +403,14 @@ export default {
 
         if (request.method === "DELETE") {
           if (target.id === session.admin_id) return json({ ok:false, error:"cannot_delete_current_admin" }, 400, request);
-          await env.DB.prepare("UPDATE admins SET status = 'inactive', updated_at = CURRENT_TIMESTAMP WHERE id = ? AND shop_id = ?")
-            .bind(id, session.shop_id).run();
           await env.DB.prepare("DELETE FROM sessions WHERE admin_id = ?").bind(id).run();
-          return json({ ok:true }, 200, request);
+          const deleted = await env.DB.prepare(
+            "DELETE FROM admins WHERE id = ? AND shop_id = ?"
+          ).bind(id, session.shop_id).run();
+          if (Number(deleted?.meta?.changes || 0) !== 1) {
+            return json({ ok:false, error:"admin_delete_not_applied" }, 404, request);
+          }
+          return json({ ok:true, deletedId:String(id) }, 200, request);
         }
 
         const username = String(body?.username || "").trim();
@@ -423,7 +428,7 @@ export default {
         if (email && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
           return json({ ok:false, error:"invalid_email" }, 400, request);
         }
-        if (type === "normal" && !/^\\d{4}-\\d{2}-\\d{2}$/.test(validUntil)) {
+        if (type === "normal" && !/^\d{4}-\d{2}-\d{2}$/.test(validUntil)) {
           return json({ ok:false, error:"invalid_valid_until" }, 400, request);
         }
 
