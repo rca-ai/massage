@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Report v3.24</title>
+  <title>Daily Report v3.25</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -174,7 +174,7 @@
    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
      <div>
-      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.24</span></div>
+      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.25</span></div>
       <p id="shopName" class="text-lg text-gray-600 mt-1"></p>
      </div>
      <div class="flex gap-2"><button onclick="showLanguageModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="changeLanguage">언어 변경</button> <button onclick="showFontModal()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600" data-translate="changeFont">폰트 변경</button> <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" data-translate="logout">로그아웃</button>
@@ -665,8 +665,8 @@
         // D1/Cloudflare Worker API endpoint. This keeps GitHub-hosted test.html connected to the same backend.
         const API_BASE_URL = 'https://massage.guidrthai.workers.dev';
         // 앱 버전: 기능/화면이 변경될 때마다 0.01씩 증가시킵니다.
-        // 현재 버전은 v3.24입니다.
-        const APP_VERSION = 'v3.24';
+        // 현재 버전은 v3.25입니다.
+        const APP_VERSION = 'v3.25';
         let currentPaymentReservationId = null;
         let selectedStaff = null;
         let menuRowCounter = 0;
@@ -5079,7 +5079,7 @@ async function initializeApp() {
                         </div>
                     </div>
                     <div class="flex gap-2">
-                        <button onclick="updateAdmin(${id})" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">수정</button>
+                        <button onclick="updateAdmin(${id})" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">저장</button>
                         <button onclick="manageAdmins()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
                     </div>
                 </div>
@@ -5172,18 +5172,13 @@ async function initializeApp() {
         }
 
         async function deleteAdmin(id) {
-            if (String(id) === '1') {
-                alert('기본 관리자는 삭제할 수 없습니다.');
-                return;
-            }
-
             if (confirm('정말 삭제하시겠습니까?')) {
                 try {
                     const response = await apiFetch('/api/admins/item', {method:'DELETE', body:JSON.stringify({id})});
                     const result = await response.json();
                     if (!response.ok || !result.ok) throw new Error(result?.error || '관리자 삭제 실패');
                     const admins = JSON.parse(localStorage.getItem('globalAdmins') || '[]');
-                    localStorage.setItem('globalAdmins', JSON.stringify(admins.filter(a => a.id !== id)));
+                    localStorage.setItem('globalAdmins', JSON.stringify(admins.filter(a => String(a.id) !== String(id))));
                     alert('관리자가 삭제되었습니다.');
                     await manageAdmins();
                 } catch (error) {
