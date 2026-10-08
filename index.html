@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Report v3.22</title>
+  <title>Daily Report v3.23</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -174,7 +174,7 @@
    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
      <div>
-      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.22</span></div>
+      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.23</span></div>
       <p id="shopName" class="text-lg text-gray-600 mt-1"></p>
      </div>
      <div class="flex gap-2"><button onclick="showLanguageModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="changeLanguage">언어 변경</button> <button onclick="showFontModal()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600" data-translate="changeFont">폰트 변경</button> <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" data-translate="logout">로그아웃</button>
@@ -665,8 +665,8 @@
         // D1/Cloudflare Worker API endpoint. This keeps GitHub-hosted test.html connected to the same backend.
         const API_BASE_URL = 'https://massage.guidrthai.workers.dev';
         // 앱 버전: 기능/화면이 변경될 때마다 0.01씩 증가시킵니다.
-        // 현재 버전은 v3.22입니다.
-        const APP_VERSION = 'v3.22';
+        // 현재 버전은 v3.23입니다.
+        const APP_VERSION = 'v3.23';
         let currentPaymentReservationId = null;
         let selectedStaff = null;
         let menuRowCounter = 0;
@@ -811,6 +811,8 @@
                 staffStats: '직원별 통계',
                 menuStatisticsTitle: '메뉴별 통계',
                 menuName: '메뉴명',
+                expirationDate: '만료일',
+                expirationDateHint: '가격/커미션 적용 종료일',
                 salesCount: '판매 횟수',
                 totalSales: '총 매출',
                 staffTotal: '직원별 합계',
@@ -1173,6 +1175,8 @@
                 staffStats: 'สถิติพนักงาน',
                 menuStatisticsTitle: 'สถิติเมนู',
                 menuName: 'ชื่อเมนู',
+                expirationDate: 'วันหมดอายุ',
+                expirationDateHint: 'วันที่สิ้นสุดการใช้ราคา/ค่าคอมมิชชัน',
                 salesCount: 'จำนวนครั้งที่ขาย',
                 totalSales: 'ยอดขายรวม',
                 staffTotal: 'รวมพนักงาน',
@@ -1354,6 +1358,8 @@
                 staffStats: 'Thống kê nhân viên',
                 menuStatisticsTitle: 'Thống kê menu',
                 menuName: 'Tên menu',
+                expirationDate: 'Ngày hết hạn',
+                expirationDateHint: 'Ngày kết thúc áp dụng giá/hoa hồng',
                 salesCount: 'Số lần bán',
                 totalSales: 'Tổng doanh thu',
                 staffTotal: 'Tổng nhân viên',
@@ -2070,6 +2076,35 @@ async function initializeApp() {
         }
 
         // 관리자별 데이터 초기화
+        function getLocalISODate() {
+            const now = new Date();
+            return String(now.getFullYear()).padStart(4,'0') + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+        }
+
+        function normalizeMenuExpirationDates() {
+            const key = getAdminKey('menus');
+            let menus = [];
+            try { menus = JSON.parse(localStorage.getItem(key) || '[]'); } catch (e) { menus = []; }
+            if (!Array.isArray(menus)) return;
+            let changed = false;
+            menus = menus.map(menu => {
+                if (!menu || typeof menu !== 'object') return menu;
+                if (!menu.expirationDate) {
+                    changed = true;
+                    return {...menu, expirationDate:'2027-12-31'};
+                }
+                return menu;
+            });
+            if (changed) localStorage.setItem(key, JSON.stringify(menus));
+        }
+
+        function isMenuAvailable(menu, dateValue) {
+            if (!menu) return false;
+            const expiry = String(menu.expirationDate || '2027-12-31');
+            const target = String(dateValue || document.getElementById('currentDate')?.value || getLocalISODate());
+            return target <= expiry;
+        }
+
         function initializeAdminData() {
             const adminPrefix = currentAdmin.username;
 
@@ -2079,6 +2114,7 @@ async function initializeApp() {
                     {
                         id: 1, 
                         name: '타이 마사지',
+                        expirationDate: '2027-12-31',
                         prices: {
                             30: {price: 30000, commission: 15000},
                             60: {price: 50000, commission: 25000},
@@ -2089,6 +2125,7 @@ async function initializeApp() {
                     {
                         id: 2, 
                         name: '오일 마사지',
+                        expirationDate: '2027-12-31',
                         prices: {
                             60: {price: 80000, commission: 40000},
                             90: {price: 110000, commission: 55000},
@@ -2148,6 +2185,7 @@ async function initializeApp() {
             if (!localStorage.getItem(getAdminKey('guarantees'))) {
                 localStorage.setItem(getAdminKey('guarantees'), JSON.stringify([]));
             }
+            normalizeMenuExpirationDates();
         }
 
         // 로그인 처리
@@ -4106,7 +4144,8 @@ async function initializeApp() {
                     <table class="w-full border-collapse border border-gray-300">
                         <thead>
                             <tr class="bg-gray-100">
-                                <th class="border border-gray-300 p-2">메뉴명</th>
+                                <th class="border border-gray-300 p-2" data-translate="menuName">메뉴명</th>
+                                <th class="border border-gray-300 p-2" data-translate="expirationDate">만료일</th>
                                 <th class="border border-gray-300 p-2">30분</th>
                                 <th class="border border-gray-300 p-2">60분</th>
                                 <th class="border border-gray-300 p-2">90분</th>
@@ -4121,6 +4160,7 @@ async function initializeApp() {
                 content += `
                     <tr>
                         <td class="border border-gray-300 p-2">${menu.name}</td>
+                        <td class="border border-gray-300 p-2">${menu.expirationDate || '2027-12-31'}</td>
                         <td class="border border-gray-300 p-2">${menu.prices[30] ? `${menu.prices[30].price}/${formatCommissionConfig(menu.prices[30].commission)}` : '-'}</td>
                         <td class="border border-gray-300 p-2">${menu.prices[60] ? `${menu.prices[60].price}/${formatCommissionConfig(menu.prices[60].commission)}` : '-'}</td>
                         <td class="border border-gray-300 p-2">${menu.prices[90] ? `${menu.prices[90].price}/${formatCommissionConfig(menu.prices[90].commission)}` : '-'}</td>
@@ -7947,7 +7987,12 @@ function translateLegacy(value) {
             const durations = [30, 60, 90, 120];
             const content = '<div class="space-y-4">' +
                 '<div><label class="block text-sm font-medium mb-2">메뉴명:</label>' +
+                '<div class="flex gap-3 items-end">' +
+                '<div class="flex-1"><label class="block text-sm font-medium mb-2" data-translate="menuName">메뉴명:</label>' +
                 '<input type="text" id="newMenuName" class="w-full border rounded px-3 py-2" placeholder="메뉴명을 입력하세요"></div>' +
+                '<div class="w-48"><label class="block text-sm font-medium mb-2" data-translate="expirationDate">만료일:</label>' +
+                '<input type="date" id="newMenuExpirationDate" value="2027-12-31" class="w-full border rounded px-3 py-2"></div></div>' +
+                '<div class="text-xs text-gray-500" data-translate="expirationDateHint">가격/커미션 적용 종료일</div>' +
                 '<div class="menu-duration-grid">' +
                 durations.map(function(duration) { return '<div>' +
                     '<label class="block text-sm font-medium mb-2">' + duration + '분 가격/커미션:</label>' +
@@ -7965,7 +8010,8 @@ function translateLegacy(value) {
         }
 
         function saveNewMenu() {
-            const name = document.getElementById('newMenuName').value;
+            const name = document.getElementById('newMenuName').value.trim();
+            const expirationDate = document.getElementById('newMenuExpirationDate').value || '2027-12-31';
             if (!name) {
                 alert('메뉴명을 입력해주세요.');
                 return;
@@ -7993,6 +8039,7 @@ function translateLegacy(value) {
             menus.push({
                 id: newId,
                 name: name,
+                expirationDate: expirationDate,
                 prices: prices
             });
 
@@ -8023,7 +8070,12 @@ function translateLegacy(value) {
             const safeName = String(menu.name ?? '').replace(/"/g, '&quot;');
             const content = '<div class="space-y-4">' +
                 '<div><label class="block text-sm font-medium mb-2">메뉴명:</label>' +
+                '<div class="flex gap-3 items-end">' +
+                '<div class="flex-1"><label class="block text-sm font-medium mb-2" data-translate="menuName">메뉴명:</label>' +
                 '<input type="text" id="editMenuName" value="' + safeName + '" class="w-full border rounded px-3 py-2"></div>' +
+                '<div class="w-48"><label class="block text-sm font-medium mb-2" data-translate="expirationDate">만료일:</label>' +
+                '<input type="date" id="editMenuExpirationDate" value="' + (menu.expirationDate || '2027-12-31') + '" class="w-full border rounded px-3 py-2"></div></div>' +
+                '<div class="text-xs text-gray-500" data-translate="expirationDateHint">가격/커미션 적용 종료일</div>' +
                 '<div class="menu-duration-grid">' + durations.map(renderDuration).join('') + '</div>' +
                 '<div class="flex gap-2"><button onclick="updateMenu(' + id + ')" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">수정</button>' +
                 '<button onclick="manageMenus()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button></div></div>';
@@ -8033,6 +8085,7 @@ function translateLegacy(value) {
 
         function updateMenu(id) {
             const name = document.getElementById('editMenuName').value.trim();
+            const expirationDate = document.getElementById('editMenuExpirationDate').value || '2027-12-31';
             if (!name) { alert('메뉴명을 입력해주세요.'); return; }
             const menus = JSON.parse(localStorage.getItem(getAdminKey('menus')) || '[]');
             const menuIndex = menus.findIndex(function(m) { return m.id === id; });
@@ -8054,7 +8107,7 @@ function translateLegacy(value) {
                 }
             });
             if (Object.keys(prices).length === 0) { alert('최소 하나의 시간대에 대한 가격과 커미션을 입력해주세요.'); return; }
-            menus[menuIndex] = Object.assign({}, oldMenu, { id: id, name: name, prices: prices });
+            menus[menuIndex] = Object.assign({}, oldMenu, { id: id, name: name, expirationDate: expirationDate, prices: prices });
             localStorage.setItem(getAdminKey('menus'), JSON.stringify(menus));
             alert('메뉴가 수정되었습니다.');
             manageMenus();
