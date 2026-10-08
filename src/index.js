@@ -425,7 +425,7 @@ export default {
         const language = ["ko","en","th","vi","zh-CN","zh-TW","id"].includes(languageValue) ? languageValue : "ko";
         const validUntil = type === "super" ? null : String(body?.validUntil || "").trim();
         if (!username || !shopName) return json({ ok:false, error:"required_fields" }, 400, request);
-        if (email && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
+        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
           return json({ ok:false, error:"invalid_email" }, 400, request);
         }
         if (type === "normal" && !/^\d{4}-\d{2}-\d{2}$/.test(validUntil)) {
