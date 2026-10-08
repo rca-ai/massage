@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Report v3.19</title>
+  <title>Daily Report v3.20</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -174,7 +174,7 @@
    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
      <div>
-      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.19</span></div>
+      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.20</span></div>
       <p id="shopName" class="text-lg text-gray-600 mt-1"></p>
      </div>
      <div class="flex gap-2"><button onclick="showLanguageModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="changeLanguage">언어 변경</button> <button onclick="showFontModal()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600" data-translate="changeFont">폰트 변경</button> <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" data-translate="logout">로그아웃</button>
@@ -665,8 +665,8 @@
         // D1/Cloudflare Worker API endpoint. This keeps GitHub-hosted test.html connected to the same backend.
         const API_BASE_URL = 'https://massage.guidrthai.workers.dev';
         // 앱 버전: 기능/화면이 변경될 때마다 0.01씩 증가시킵니다.
-        // 현재 버전은 v3.19입니다.
-        const APP_VERSION = 'v3.19';
+        // 현재 버전은 v3.20입니다.
+        const APP_VERSION = 'v3.20';
         let currentPaymentReservationId = null;
         let selectedStaff = null;
         let menuRowCounter = 0;
@@ -6297,11 +6297,16 @@ function translateLegacy(value) {
             const weekdayNames = ['월','화','수','목','금','토','일'];
             const rows = {};
             weekdayNames.forEach(day => rows[day] = {sales:0, profit:0, difference:0});
-            const daily = buildAdjustedProfitRows(reservations, 'date', startDate, endDate).groups;
+
+            // 날짜별 기존 수익 계산을 먼저 수행하여 Guarantee 보정 기준을 그대로 유지합니다.
+            const dailyResult = buildAdjustedProfitRows(reservations, 'date', startDate, endDate);
+            const daily = dailyResult && dailyResult.groups ? dailyResult.groups : {};
+
             Object.entries(daily).forEach(([date, value]) => {
-                const parts = String(date).split('-').map(Number);
-                if (parts.length !== 3 || !parts[0] || !parts[1] || !parts[2]) return;
-                const localDate = new Date(parts[0], parts[1] - 1, parts[2]);
+                const match = String(date).match(/^(\\d{4})-(\\d{1,2})-(\\d{1,2})$/);
+                if (!match) return;
+                const localDate = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+                if (isNaN(localDate.getTime())) return;
                 const jsDay = localDate.getDay();
                 const day = weekdayNames[jsDay === 0 ? 6 : jsDay - 1];
                 rows[day].sales += Number(value.sales) || 0;
@@ -6310,6 +6315,7 @@ function translateLegacy(value) {
             });
             return rows;
         }
+
 
         function displayWeekdaySalesProfitStatistics(reservations, startDate, endDate, targetPrefix) {
             const prefix = targetPrefix || '';
@@ -6444,6 +6450,7 @@ function translateLegacy(value) {
             displayStaffStatistics(staffStats);
             displayMenuSalesStatistics(menuSales);
             displayDailySalesProfitStatistics(filteredReservations, startDate, endDate);
+            displayWeekdaySalesProfitStatistics(filteredReservations, startDate, endDate, '');
             
             // 입금방식별 통계도 함께 표시
             const paymentStats = calculatePaymentStatistics(filteredReservations);
@@ -6655,8 +6662,8 @@ function translateLegacy(value) {
 
             displayAnnualMenuSalesStatistics(menuSales);
             displayMonthlySalesProfitStatistics(filteredReservations, year);
-            displayWeekdaySalesProfitStatistics(filteredReservations, String(year).padStart(4,'0') + '-01-01', String(year).padStart(4,'0') + '-12-31', 'annual');
             displayAnnualStatistics(filteredReservations);
+            displayWeekdaySalesProfitStatistics(filteredReservations, String(year).padStart(4,'0') + '-01-01', String(year).padStart(4,'0') + '-12-31', 'annual');
         }
 
         function displayAnnualMenuSalesStatistics(menuSales) {
