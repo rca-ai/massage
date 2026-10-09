@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Report v3.26</title>
+  <title>Daily Report v3.27</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -135,6 +135,22 @@
       border-color: #1d4ed8 !important;
       box-shadow: 0 0 0 2px rgba(37, 99, 235, .22);
     }
+
+    /* Statistics and DB-management submenu buttons share grey/bold defaults. */
+    .subnav-button {
+      background-color: #e5e7eb !important;
+      color: #1f2937 !important;
+      font-weight: 700 !important;
+      border: 1px solid #9ca3af !important;
+      transition: background-color .15s ease, color .15s ease, box-shadow .15s ease;
+    }
+    .subnav-button:hover { background-color: #d1d5db !important; }
+    .subnav-button.is-active {
+      background-color: #2563eb !important;
+      color: #ffffff !important;
+      border-color: #1d4ed8 !important;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, .18);
+    }
 </style>
   <style>@view-transition { navigation: auto; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
@@ -190,7 +206,7 @@
    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
      <div>
-      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.26</span></div>
+      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.27</span></div>
       <p id="shopName" class="text-lg text-gray-600 mt-1"></p>
      </div>
      <div class="flex gap-2"><button onclick="showLanguageModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="changeLanguage">언어 변경</button> <button onclick="showFontModal()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600" data-translate="changeFont">폰트 변경</button> <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" data-translate="logout">로그아웃</button>
@@ -333,7 +349,7 @@
    </div><!-- 통계 섹션 -->
    <div id="statisticsSection" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
     <h2 class="text-2xl font-bold mb-4" data-translate="statistics">통계</h2>
-    <div class="mb-4 flex gap-4 flex-wrap"><button onclick="showDailyStats()" id="dailyStatsBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" data-translate="daily">일간</button> <button onclick="showWeeklyStats()" id="weeklyStatsBtn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400" data-translate="weekly">주간</button> <button onclick="showMonthlyStats()" id="monthlyStatsBtn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400" data-translate="monthly">월간</button> <button onclick="showMenuSales()" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600" data-translate="monthlyMenuSales">월간 매출</button> <button onclick="showMonthlySalesChart()" class="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600" data-translate="monthlySalesChart">월간 매출 그래프</button> <button onclick="showAnnualMenuSales()" class="bg-teal-500 text-white px-4 py-2 rounded hover:bg-teal-600" data-translate="annualMenuSales">년간 매출</button> <button onclick="showAnnualSalesChart()" class="bg-cyan-500 text-white px-4 py-2 rounded hover:bg-cyan-600" data-translate="annualSalesChart">년간 매출 그래프</button> <button onclick="downloadExcel()" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700" data-translate="download">다운로드</button>
+    <div class="mb-4 flex gap-4 flex-wrap"><button onclick="showDailyStats()" id="dailyStatsBtn" class="subnav-button px-4 py-2 rounded" data-translate="daily">일간</button> <button onclick="showWeeklyStats()" id="weeklyStatsBtn" class="subnav-button px-4 py-2 rounded" data-translate="weekly">주간</button> <button onclick="showMonthlyStats()" id="monthlyStatsBtn" class="subnav-button px-4 py-2 rounded" data-translate="monthly">월간</button> <button onclick="showMenuSales()" id="menuSalesBtn" class="subnav-button px-4 py-2 rounded" data-translate="monthlyMenuSales">월간 매출</button> <button onclick="showMonthlySalesChart()" id="monthlySalesChartBtn" class="subnav-button px-4 py-2 rounded" data-translate="monthlySalesChart">월간 매출 그래프</button> <button onclick="showAnnualMenuSales()" id="annualMenuSalesBtn" class="subnav-button px-4 py-2 rounded" data-translate="annualMenuSales">년간 매출</button> <button onclick="showAnnualSalesChart()" id="annualSalesChartBtn" class="subnav-button px-4 py-2 rounded" data-translate="annualSalesChart">년간 매출 그래프</button> <button onclick="downloadExcel()" id="statsDownloadBtn" class="subnav-button px-4 py-2 rounded" data-translate="download">다운로드</button>
     </div><!-- 날짜 선택 영역 -->
     <div class="mb-6 p-4 bg-gray-50 rounded"><!-- 일간 선택 -->
      <div id="dailyDateSelection" class="mb-4"><label class="block text-sm font-medium mb-2" data-translate="selectDate">날짜 선택</label> <input type="date" id="statsDate" class="border rounded px-3 py-2" onchange="updateStats()">
@@ -562,8 +578,8 @@
      <div class="mt-4"><button onclick="exportAllDataExcel()" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700" data-translate="exportAllDataButton">전체 데이터 엑셀 내보내기</button>
      </div>
     </div>
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4"><button onclick="manageMenus()" class="bg-blue-500 text-white py-3 px-4 rounded hover:bg-blue-600" data-translate="menuManagement">메뉴 관리</button> <button onclick="manageStaff()" class="bg-green-500 text-white py-3 px-4 rounded hover:bg-green-600" data-translate="staffManagement">직원 관리</button> <button onclick="manageRooms()" class="bg-purple-500 text-white py-3 px-4 rounded hover:bg-purple-600" data-translate="roomManagement">방 관리</button> <button onclick="manageCustomers()" class="bg-orange-500 text-white py-3 px-4 rounded hover:bg-orange-600" data-translate="customerManagement">고객 관리</button> <button onclick="manageCurrency()" class="bg-pink-500 text-white py-3 px-4 rounded hover:bg-pink-600" data-translate="currencyManagement">화폐 단위</button> <button onclick="managePaymentMethods()" class="bg-yellow-500 text-white py-3 px-4 rounded hover:bg-yellow-600" data-translate="paymentMethodManagement">입금방식 관리</button> <button onclick="manageGuarantee()" class="bg-teal-500 text-white py-3 px-4 rounded hover:bg-teal-600" data-translate="guaranteeManagement">Guarantee 관리</button> <button id="adminProfileButton" onclick="editMyAdminInfo()" class="bg-indigo-500 text-white py-3 px-4 rounded hover:bg-indigo-600" data-translate="adminProfileManagement" style="display:none;">관리자 정보수정</button> <button onclick="showDBDeleteSection()" class="bg-red-600 text-white py-3 px-4 rounded hover:bg-red-700" data-translate="dbDelete">DB 삭제</button>
-     <div id="superAdminButtons" style="display: none;"><button onclick="manageAdmins()" class="bg-red-500 text-white py-3 px-4 rounded hover:bg-red-600" data-translate="adminManagement">관리자 관리</button>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4"><button id="dbSubMenus" onclick="setActiveDBSubmenu(this); manageMenus()" class="subnav-button py-3 px-4 rounded" data-translate="menuManagement">메뉴 관리</button> <button id="dbSubStaff" onclick="setActiveDBSubmenu(this); manageStaff()" class="subnav-button py-3 px-4 rounded" data-translate="staffManagement">직원 관리</button> <button id="dbSubRooms" onclick="setActiveDBSubmenu(this); manageRooms()" class="subnav-button py-3 px-4 rounded" data-translate="roomManagement">방 관리</button> <button id="dbSubCustomers" onclick="setActiveDBSubmenu(this); manageCustomers()" class="subnav-button py-3 px-4 rounded" data-translate="customerManagement">고객 관리</button> <button id="dbSubCurrency" onclick="setActiveDBSubmenu(this); manageCurrency()" class="subnav-button py-3 px-4 rounded" data-translate="currencyManagement">화폐 단위</button> <button id="dbSubPaymentMethods" onclick="setActiveDBSubmenu(this); managePaymentMethods()" class="subnav-button py-3 px-4 rounded" data-translate="paymentMethodManagement">입금방식 관리</button> <button id="dbSubGuarantee" onclick="setActiveDBSubmenu(this); manageGuarantee()" class="subnav-button py-3 px-4 rounded" data-translate="guaranteeManagement">Guarantee 관리</button> <button id="adminProfileButton" onclick="setActiveDBSubmenu(this); editMyAdminInfo()" class="subnav-button py-3 px-4 rounded" data-translate="adminProfileManagement" style="display:none;">관리자 정보수정</button> <button id="dbSubDelete" onclick="setActiveDBSubmenu(this); showDBDeleteSection()" class="subnav-button py-3 px-4 rounded" data-translate="dbDelete">DB 삭제</button>
+     <div id="superAdminButtons" style="display: none;"><button id="dbSubAdmins" onclick="setActiveDBSubmenu(this); manageAdmins()" class="subnav-button py-3 px-4 rounded" data-translate="adminManagement">관리자 관리</button>
      </div>
     </div>
     <div id="dbDeleteSection" class="mt-6 p-4 border-2 border-red-200 rounded-lg bg-red-50" style="display: none;">
@@ -681,8 +697,8 @@
         // D1/Cloudflare Worker API endpoint. This keeps GitHub-hosted test.html connected to the same backend.
         const API_BASE_URL = 'https://massage.guidrthai.workers.dev';
         // 앱 버전: 기능/화면이 변경될 때마다 0.01씩 증가시킵니다.
-        // 현재 버전은 v3.26입니다.
-        const APP_VERSION = 'v3.26';
+        // 현재 버전은 v3.27입니다.
+        const APP_VERSION = 'v3.27';
         let currentPaymentReservationId = null;
         let selectedStaff = null;
         let menuRowCounter = 0;
@@ -2705,7 +2721,18 @@ function showDashboard() {
             loadStaffOrder();
         }
 
-        function showDBManagement() {
+                function setActiveDBSubmenu(button) {
+            const container = document.getElementById('dbManagementSection');
+            if (!container || !button) return;
+            container.querySelectorAll('.subnav-button').forEach(item => {
+                if (!item.id || !item.id.startsWith('dbSub')) return;
+                const active = item === button;
+                item.classList.toggle('is-active', active);
+                item.setAttribute('aria-current', active ? 'page' : 'false');
+            });
+        }
+
+function showDBManagement() {
             setActiveMainNav('mainNavDB');
             hideAllSections();
             document.getElementById('dbManagementSection').style.display = 'block';
@@ -6062,22 +6089,27 @@ function translateLegacy(value) {
         }
 
         function updateStatsButtonStyles() {
-            // 모든 버튼을 기본 스타일로 초기화
-            document.getElementById('dailyStatsBtn').className = 'bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400';
-            document.getElementById('weeklyStatsBtn').className = 'bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400';
-            document.getElementById('monthlyStatsBtn').className = 'bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400';
-            
-            // 선택된 버튼만 활성화 스타일 적용
-            if (currentStatsType === 'daily') {
-                document.getElementById('dailyStatsBtn').className = 'bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600';
-            } else if (currentStatsType === 'weekly') {
-                document.getElementById('weeklyStatsBtn').className = 'bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600';
-            } else if (currentStatsType === 'monthly') {
-                document.getElementById('monthlyStatsBtn').className = 'bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600';
-            } else if (currentStatsType === 'menuSales') {
-                // 월간 메뉴 매출 버튼 활성화 (오렌지색 유지)
-            } else if (currentStatsType === 'monthlySalesChart') {
-                // 월간 매출 그래프 버튼 활성화 (핑크색 유지)
+            const buttonByType = {
+                daily: 'dailyStatsBtn',
+                weekly: 'weeklyStatsBtn',
+                monthly: 'monthlyStatsBtn',
+                menuSales: 'menuSalesBtn',
+                monthlySalesChart: 'monthlySalesChartBtn',
+                annualMenuSales: 'annualMenuSalesBtn',
+                annualSalesChart: 'annualSalesChartBtn'
+            };
+            Object.values(buttonByType).forEach(id => {
+                const button = document.getElementById(id);
+                if (!button) return;
+                const active = buttonByType[currentStatsType] === id;
+                button.classList.add('subnav-button');
+                button.classList.toggle('is-active', active);
+                button.setAttribute('aria-current', active ? 'page' : 'false');
+            });
+            const downloadButton = document.getElementById('statsDownloadBtn');
+            if (downloadButton) {
+                downloadButton.classList.add('subnav-button');
+                downloadButton.classList.remove('is-active');
             }
         }
 
