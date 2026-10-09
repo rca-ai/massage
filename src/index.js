@@ -396,9 +396,11 @@ export default {
         const id = String(body?.id || "").trim();
         if (!id) return json({ ok:false, error:"invalid_admin_id" }, 400, request);
 
+        // Admin management lists admins across shops, so resolve the target first and
+        // use that target's own shop_id for all reads/writes below.
         const target = await env.DB.prepare(
-          "SELECT id, username, role FROM admins WHERE id = ? AND shop_id = ? LIMIT 1"
-        ).bind(id, session.shop_id).first();
+          "SELECT id, shop_id, username, role FROM admins WHERE id = ? LIMIT 1"
+        ).bind(id).first();
         if (!target) return json({ ok:false, error:"admin_not_found" }, 404, request);
 
         if (request.method === "DELETE") {
@@ -406,7 +408,7 @@ export default {
           await env.DB.prepare("DELETE FROM sessions WHERE admin_id = ?").bind(id).run();
           const deleted = await env.DB.prepare(
             "DELETE FROM admins WHERE id = ? AND shop_id = ?"
-          ).bind(id, session.shop_id).run();
+          ).bind(id, target.shop_id).run();
           if (Number(deleted?.meta?.changes || 0) !== 1) {
             return json({ ok:false, error:"admin_delete_not_applied" }, 404, request);
           }
@@ -433,8 +435,8 @@ export default {
         }
 
         const duplicate = await env.DB.prepare(
-          "SELECT id FROM admins WHERE username = ? AND id <> ? LIMIT 1"
-        ).bind(username, id).first();
+          "SELECT id FROM admins WHERE username = ? AND id <> ? AND shop_id = ? LIMIT 1"
+        ).bind(username, id, target.shop_id).first();
         if (duplicate) return json({ ok:false, error:"username_exists" }, 409, request);
 
         let sql = `UPDATE admins SET username = ?, display_name = ?, role = ?, email = ?, phone = ?, google_maps_url = ?, language = ?, valid_until = ?, updated_at = CURRENT_TIMESTAMP`;
@@ -446,7 +448,7 @@ export default {
           binds.push(salt + ":" + passwordHash);
         }
         sql += " WHERE id = ? AND shop_id = ?";
-        binds.push(id, session.shop_id);
+        binds.push(id, target.shop_id);
 
         const adminUpdate = await env.DB.prepare(sql).bind(...binds).run();
         if (Number(adminUpdate?.meta?.changes || 0) !== 1) {
@@ -455,19 +457,19 @@ export default {
 
         const shopExists = await env.DB.prepare(
           "SELECT id FROM shops WHERE id = ? LIMIT 1"
-        ).bind(session.shop_id).first();
+        ).bind(target.shop_id).first();
         if (!shopExists) {
           return json({ ok:false, error:"shop_not_found" }, 500, request);
         }
 
         await env.DB.prepare(
           "UPDATE shops SET shop_name = ?, email = ?, google_maps_url = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?"
-        ).bind(shopName, email, googleMapsUrl, session.shop_id).run();
+        ).bind(shopName, email, googleMapsUrl, target.shop_id).run();
 
         const updated = await env.DB.prepare(
           `SELECT id, username, display_name, role, email, phone, google_maps_url, language, status, valid_until, created_at, updated_at
            FROM admins WHERE id = ? AND shop_id = ? LIMIT 1`
-        ).bind(id, session.shop_id).first();
+        ).bind(id, target.shop_id).first();
         if (!updated) {
           return json({ ok:false, error:"admin_update_readback_failed" }, 500, request);
         }
