@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Report v3.27</title>
+  <title>Daily Report v3.28</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -206,7 +206,7 @@
    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
      <div>
-      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.27</span></div>
+      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.28</span></div>
       <p id="shopName" class="text-lg text-gray-600 mt-1"></p>
      </div>
      <div class="flex gap-2"><button onclick="showLanguageModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="changeLanguage">언어 변경</button> <button onclick="showFontModal()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600" data-translate="changeFont">폰트 변경</button> <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" data-translate="logout">로그아웃</button>
@@ -697,8 +697,8 @@
         // D1/Cloudflare Worker API endpoint. This keeps GitHub-hosted test.html connected to the same backend.
         const API_BASE_URL = 'https://massage.guidrthai.workers.dev';
         // 앱 버전: 기능/화면이 변경될 때마다 0.01씩 증가시킵니다.
-        // 현재 버전은 v3.27입니다.
-        const APP_VERSION = 'v3.27';
+        // 현재 버전은 v3.28입니다.
+        const APP_VERSION = 'v3.28';
         let currentPaymentReservationId = null;
         let selectedStaff = null;
         let menuRowCounter = 0;
@@ -1953,35 +1953,82 @@ async function initializeApp() {
             return key !== getAdminKey('staff');
         }
 
-        function queueD1DataSync(key, value) {
+        async function writeAppDataToD1(key, value) {
+            const response = await apiFetch('/api/app-data', {
+                method: 'PUT',
+                body: JSON.stringify({ key, value })
+            });
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok || !result.ok) throw new Error(result?.error || 'D1 data save failed');
+            return true;
+        }
+
+        function queueD1DataSync(key, value, attempt = 0) {
             if (!currentAdmin?.sessionToken || !isServerDataKey(key) || d1Hydrating) return;
             const previous = d1SyncTimers.get(key);
             if (previous) clearTimeout(previous);
             const timer = setTimeout(async () => {
                 d1SyncTimers.delete(key);
-                // Hydration has priority over queued local writes. This prevents
-                // a new device's temporary default local data from overwriting
-                // the server data that is being restored during login.
+                // Server hydration must never be overwritten by temporary local defaults.
                 if (d1Hydrating || !currentAdmin?.sessionToken || !isServerDataKey(key)) return;
                 try {
-                    const response = await apiFetch('/api/app-data', {
-                        method: 'PUT',
-                        body: JSON.stringify({ key, value })
-                    });
-                    if (!response.ok) {
-                        const result = await response.json().catch(() => ({}));
-                        throw new Error(result?.error || 'D1 data save failed');
-                    }
+                    // Read the latest cache value at send time, avoiding stale debounced writes.
+                    const latestValue = localStorage.getItem(key);
+                    if (latestValue === null) return;
+                    await writeAppDataToD1(key, latestValue);
+                    console.info('D1 data sync succeeded:', key);
                 } catch (error) {
-                    console.warn('D1 앱 데이터 저장 실패:', key, error);
+                    console.error('D1 앱 데이터 저장 실패:', key, error);
+                    // Retry transient network/session failures a few times; do not fail silently.
+                    if (attempt < 3 && currentAdmin?.sessionToken && !d1Hydrating) {
+                        const retryTimer = setTimeout(() => {
+                            d1SyncTimers.delete(key);
+                            queueD1DataSync(key, localStorage.getItem(key) ?? value, attempt + 1);
+                        }, 1000 * (attempt + 1));
+                        d1SyncTimers.set(key, retryTimer);
+                    } else {
+                        showD1SyncWarning(error);
+                    }
                 }
-            }, 250);
+            }, attempt === 0 ? 250 : 0);
             d1SyncTimers.set(key, timer);
+        }
+
+        function showD1SyncWarning(error) {
+            const message = '서버 데이터 동기화에 실패했습니다. 다른 기기에 최신 데이터가 표시되지 않을 수 있습니다. 네트워크와 로그인 상태를 확인한 후 다시 시도하세요.';
+            console.error(message, error);
+            if (typeof showToast === 'function') showToast(message);
+            else if (document.visibilityState === 'visible') alert(message);
+        }
+
+        async function syncLocalDataToD1() {
+            if (!currentAdmin?.sessionToken || !currentAdmin?.username) {
+                throw new Error('로그인 세션이 없어 서버 동기화를 할 수 없습니다.');
+            }
+            for (const timer of d1SyncTimers.values()) clearTimeout(timer);
+            d1SyncTimers.clear();
+            const prefix = currentAdmin.username + '_';
+            const items = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (!key || !key.startsWith(prefix) || !isServerDataKey(key)) continue;
+                const value = localStorage.getItem(key);
+                if (value !== null) items.push({ key, value });
+            }
+            for (const item of items) await writeAppDataToD1(item.key, item.value);
+            return items.length;
         }
 
         function installD1StorageSync() {
             if (window.__d1StorageSyncInstalled) return;
             window.__d1StorageSyncInstalled = true;
+            window.addEventListener('online', () => {
+                if (!currentAdmin?.sessionToken || d1Hydrating) return;
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && isServerDataKey(key)) queueD1DataSync(key, localStorage.getItem(key) || '');
+                }
+            });
             const originalSetItem = Storage.prototype.setItem;
             const originalRemoveItem = Storage.prototype.removeItem;
 
@@ -2051,21 +2098,15 @@ async function initializeApp() {
                 // This is the one-time migration path for the first device.
                 for (const item of uploads) {
                     if (d1Hydrating !== true) break;
-                    const uploadResponse = await apiFetch('/api/app-data', {
-                        method: 'PUT',
-                        body: JSON.stringify(item)
-                    });
-                    if (!uploadResponse.ok) {
-                        const uploadResult = await uploadResponse.json().catch(() => ({}));
-                        throw new Error(uploadResult?.error || 'D1 initial data sync failed');
-                    }
+                    await writeAppDataToD1(item.key, item.value);
                 }
 
                 normalizeMenuExpirationDates();
                 return true;
             } catch (error) {
                 normalizeMenuExpirationDates();
-                console.warn('D1 앱 데이터 동기화 실패. 현재 기기의 로컬 캐시를 사용합니다:', error);
+                console.error('D1 앱 데이터 동기화 실패. 현재 기기의 로컬 캐시를 사용합니다:', error);
+                showD1SyncWarning(error);
                 return false;
             } finally {
                 d1Hydrating = false;
