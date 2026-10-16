@@ -2024,9 +2024,12 @@ async function initializeApp() {
             window.__d1StorageSyncInstalled = true;
             window.addEventListener('online', () => {
                 if (!currentAdmin?.sessionToken || d1Hydrating) return;
-                for (let i = 0; i < localStorage.length; i++) {
-                    const key = localStorage.key(i);
-                    if (key && isServerDataKey(key)) queueD1DataSync(key, localStorage.getItem(key) || '');
+                // Retry only keys that already had a pending/failed local write.
+                // Never upload every local key on mobile reconnect, as that could
+                // overwrite newer server data with an older device cache.
+                const pendingKeys = [...d1SyncTimers.keys()];
+                for (const key of pendingKeys) {
+                    if (isServerDataKey(key)) queueD1DataSync(key, localStorage.getItem(key) || '');
                 }
             });
             const originalSetItem = Storage.prototype.setItem;
