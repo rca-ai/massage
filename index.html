@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Report v3.30</title>
+  <title>Daily Report v3.31</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -206,7 +206,7 @@
    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
      <div>
-      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.30</span></div>
+      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.31</span></div>
       <p id="shopName" class="text-lg text-gray-600 mt-1"></p>
      </div>
      <div class="flex gap-2"><button onclick="showLanguageModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="changeLanguage">언어 변경</button> <button onclick="showFontModal()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600" data-translate="changeFont">폰트 변경</button> <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" data-translate="logout">로그아웃</button>
@@ -697,8 +697,8 @@
         // D1/Cloudflare Worker API endpoint. This keeps GitHub-hosted test.html connected to the same backend.
         const API_BASE_URL = 'https://massage.guidrthai.workers.dev';
         // 앱 버전: 기능/화면이 변경될 때마다 0.01씩 증가시킵니다.
-        // 현재 버전은 v3.30입니다.
-        const APP_VERSION = 'v3.30';
+        // 현재 버전은 v3.31입니다.
+        const APP_VERSION = 'v3.31';
         let currentPaymentReservationId = null;
         let selectedStaff = null;
         let menuRowCounter = 0;
@@ -2010,6 +2010,21 @@ async function initializeApp() {
             }
             if (typeof showToast === 'function') showToast(message);
             else if (document.visibilityState === 'visible') alert(message);
+        }
+
+        async function syncKeysToD1(keys) {
+            if (!currentAdmin?.sessionToken || !currentAdmin?.username) {
+                throw new Error('로그인 세션이 없어 서버 동기화를 할 수 없습니다.');
+            }
+            const uniqueKeys = [...new Set(keys)].filter(key => isServerDataKey(key));
+            for (const key of uniqueKeys) {
+                const timer = d1SyncTimers.get(key);
+                if (timer) clearTimeout(timer);
+                d1SyncTimers.delete(key);
+                const value = localStorage.getItem(key);
+                if (value !== null) await writeAppDataToD1(key, value);
+            }
+            return uniqueKeys.length;
         }
 
         async function syncLocalDataToD1() {
@@ -8052,10 +8067,30 @@ function translateLegacy(value) {
                         localStorage.setItem(key,JSON.stringify(orderMap));
                     });
 
-                    if(added.staff&&currentAdmin?.sessionToken)await syncStaffToD1();
-                    alert('엑셀 데이터 업로드가 완료되었습니다. '+imported+'건이 추가되었습니다.'+
+                    // 업로드 완료 전에 이번 작업에서 변경된 항목을 D1에 직접 저장해,
+                    // debounce 기반 백그라운드 저장보다 먼저 서버 저장 결과를 확인합니다.
+                    let serverSyncOk = false;
+                    try {
+                        if (!currentAdmin?.sessionToken) throw new Error('로그인 세션이 없습니다. 다시 로그인해 주세요.');
+                        const keysToSync = [
+                            getAdminKey('menus'),
+                            getAdminKey('customers'),
+                            getAdminKey('paymentMethods'),
+                            getAdminKey('rooms'),
+                            getAdminKey('reservations'),
+                            ...uploadedDates.map(date => getDailyStaffOrderKey(date))
+                        ];
+                        await syncKeysToD1(keysToSync);
+                        if (!await syncStaffToD1()) throw new Error('직원 정보를 서버에 저장하지 못했습니다.');
+                        serverSyncOk = true;
+                    } catch (syncError) {
+                        console.error('엑셀 업로드 후 서버 동기화 실패:', syncError);
+                    }
+                    alert('엑셀 데이터 '+imported+'건이 '+(serverSyncOk?'업로드 및 서버 저장 완료':'현재 기기에 반영되었습니다. 서버 저장은 확인되지 않았습니다.')+
                         (addedText?'\\n추가된 기준정보: '+addedText:'')+
-                        (errors.length?'\\n제외된 행: '+errors.length+'건':''));
+                        (errors.length?'\\n제외된 행: '+errors.length+'건':'')+
+                        (!serverSyncOk?'\\n다른 기기에 표시하려면 로그인 상태를 확인하고 다시 시도해 주세요.':''));
+                    if (!serverSyncOk) showD1SyncWarning(new Error('엑셀 업로드 후 서버 동기화 실패. 네트워크/로그인 상태를 확인해 주세요.'));
                     loadReservationData();
                 }catch(error){alert('엑셀 업로드 중 오류가 발생했습니다: '+error.message);}
                 finally{event.target.value='';}
