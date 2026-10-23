@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Report v3.37</title>
+  <title>Daily Report v3.38</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -206,7 +206,7 @@
    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
      <div>
-      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.37</span></div>
+      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.38</span></div>
       <p id="shopName" class="text-lg text-gray-600 mt-1"></p>
      </div>
      <div class="flex gap-2"><button onclick="showLanguageModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="changeLanguage">언어 변경</button> <button onclick="showFontModal()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600" data-translate="changeFont">폰트 변경</button> <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" data-translate="logout">로그아웃</button>
@@ -698,7 +698,7 @@
         const API_BASE_URL = 'https://massage.guidrthai.workers.dev';
         // 앱 버전: 기능/화면이 변경될 때마다 0.01씩 증가시킵니다.
         // 현재 버전은 v3.34입니다.
-        const APP_VERSION = 'v3.37';
+        const APP_VERSION = 'v3.38';
         let currentPaymentReservationId = null;
         let selectedStaff = null;
         let menuRowCounter = 0;
@@ -6163,25 +6163,58 @@ function translateLegacy(value) {
             const startDate = document.getElementById('statsStartDate').value;
             const endDate = document.getElementById('statsEndDate').value;
             const container = document.getElementById('dailyCommissionBreakdown');
-            if (!container || !startDate || !endDate || startDate > endDate) { if (container) container.style.display = 'none'; return; }
+            if (!container || !startDate || !endDate || startDate > endDate) {
+                if (container) container.style.display = 'none';
+                return;
+            }
             const reservations = JSON.parse(localStorage.getItem(getAdminKey('reservations')) || '[]');
             const staffList = JSON.parse(localStorage.getItem(getAdminKey('staff')) || '[]');
             const guarantees = JSON.parse(localStorage.getItem(getAdminKey('guarantees')) || '[]');
-            const staffNames = [...new Set([...staffList.map(x => x.name || x.staffName).filter(Boolean), ...reservations.filter(r => r.date >= startDate && r.date <= endDate && r.paid).map(r => r.staffName).filter(Boolean), ...guarantees.filter(g => g.date <= startDate).map(g => g.staffName).filter(Boolean)])];
-            const dates = []; const cursor = new Date(startDate + 'T12:00:00'); const last = new Date(endDate + 'T12:00:00');
+            const paidInRange = reservations.filter(r => r.paid && r.date >= startDate && r.date <= endDate);
+            const staffNames = [...new Set([
+                ...staffList.map(x => String(x.name || x.staffName || '').trim()).filter(Boolean),
+                ...paidInRange.map(r => String(r.staffName || '').trim()).filter(Boolean),
+                ...guarantees.filter(g => g.date <= endDate).map(g => String(g.staffName || '').trim()).filter(Boolean)
+            ])];
+            const dates = [];
+            const cursor = new Date(startDate + 'T12:00:00');
+            const last = new Date(endDate + 'T12:00:00');
             const formatDate = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
             while (cursor <= last && dates.length < 62) { dates.push(new Date(cursor)); cursor.setDate(cursor.getDate() + 1); }
-            const currency = JSON.parse(localStorage.getItem(getAdminKey('currency')) || '{"symbol":"","name":"원"}'); const dayNames = ['일','월','화','수','목','금','토'];
-            const rawCommissionFor = (name, date) => reservations.filter(r => r.paid && r.date === date && r.staffName === name).reduce((sum,r) => sum + (Number(r.commission)||0), 0);
-            const guaranteeFor = name => { const gs = guarantees.filter(g => g.staffName === name && g.date <= endDate); if (!gs.length) return 0; const latest = gs.reduce((x,y) => y.date > x.date ? y : x); return Math.max(0, Number(latest.amount)||0); };
+            const currency = JSON.parse(localStorage.getItem(getAdminKey('currency')) || '{"symbol":"","name":"원"}');
+            const dayNames = ['일','월','화','수','목','금','토'];
+            const rawCommissionFor = (name, date) => paidInRange.filter(r => String(r.staffName || '').trim() === name && r.date === date).reduce((sum,r) => sum + (Number(r.commission)||0), 0);
+            const hasPaidReservationFor = (name, date) => paidInRange.some(r => String(r.staffName || '').trim() === name && r.date === date);
+            const guaranteeFor = (name, date) => {
+                const eligible = guarantees.filter(g => String(g.staffName || '').trim() === name && String(g.date || '') !== '' && String(g.date) <= date);
+                if (!eligible.length) return 0;
+                const latest = eligible.reduce((a,b) => String(b.date) > String(a.date) ? b : a);
+                return Math.max(0, Number(latest.amount) || 0);
+            };
             const values = {};
-            staffNames.forEach(name => { const vals = dates.map(d => rawCommissionFor(name, formatDate(d))); const rawTotal = vals.reduce((x,y)=>x+y,0); const supplement = Math.max(0, guaranteeFor(name)-rawTotal); if (vals.length) vals[0] += supplement; values[name] = {vals, total:rawTotal+supplement, supplement}; });
+            staffNames.forEach(name => {
+                const vals = dates.map(d => {
+                    const date = formatDate(d);
+                    const raw = rawCommissionFor(name, date);
+                    if (!hasPaidReservationFor(name, date)) return 0;
+                    return Math.max(raw, guaranteeFor(name, date));
+                });
+                const rawTotal = dates.reduce((sum,d) => sum + rawCommissionFor(name, formatDate(d)), 0);
+                const total = vals.reduce((sum,v) => sum + v, 0);
+                values[name] = { vals, total, supplement: total - rawTotal };
+            });
             const esc = v => String(v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
             const header = '<th class="border p-2 whitespace-nowrap">마사지사</th>' + dates.map(d=>'<th class="border p-2 whitespace-nowrap">'+d.getDate()+'일('+dayNames[d.getDay()]+')</th>').join('') + '<th class="border p-2">합계</th><th class="border p-2">평균</th>';
-            const rows = staffNames.map(name => { const x=values[name], avg=dates.length?x.total/dates.length:0; return '<tr><td class="border p-2 whitespace-nowrap">'+esc(name)+'</td>'+x.vals.map((v,i)=>'<td class="border p-2 text-right whitespace-nowrap"'+(i===0&&x.supplement>0?' title="Guarantee 보정액 '+x.supplement.toLocaleString()+' 포함"':'')+'>'+(v?v.toLocaleString():'-')+'</td>').join('')+'<td class="border p-2 text-right font-bold">'+x.total.toLocaleString()+'</td><td class="border p-2 text-right">'+Math.round(avg).toLocaleString()+'</td></tr>'; }).join('');
-            container.innerHTML = '<h3 class="text-lg font-bold mb-3">날짜별 커미션내역</h3><div class="text-sm text-gray-600 mb-2">'+startDate+' ~ '+endDate+' · 금액 단위: '+esc(currency.symbol||currency.name||'')+' · Guarantee 차액은 첫 날짜 칸에 포함됩니다.</div><div class="overflow-x-auto"><table class="w-full border-collapse text-sm"><thead><tr class="bg-gray-100">'+header+'</tr></thead><tbody>'+(rows||'<tr><td class="border p-3" colspan="'+(dates.length+3)+'">표시할 마사지사 데이터가 없습니다.</td></tr>')+'</tbody><tfoot><tr class="bg-gray-100 font-bold"><td class="border p-2">일별 합계</td>'+dates.map((d,i)=>'<td class="border p-2 text-right">'+staffNames.reduce((sum,n)=>sum+(values[n]?.vals[i]||0),0).toLocaleString()+'</td>').join('')+'<td class="border p-2 text-right">'+staffNames.reduce((sum,n)=>sum+(values[n]?.total||0),0).toLocaleString()+'</td><td class="border p-2">-</td></tr></tfoot></table></div>';
+            const rows = staffNames.map(name => {
+                const x = values[name], avg = dates.length ? x.total / dates.length : 0;
+                return '<tr><td class="border p-2 whitespace-nowrap">'+esc(name)+'</td>' +
+                    x.vals.map((v,i)=>'<td class="border p-2 text-right whitespace-nowrap"'+(i===0&&x.supplement>0?' title="Guarantee 보정액 '+x.supplement.toLocaleString()+' 포함"':'')+'>'+(v?v.toLocaleString():'-')+'</td>').join('') +
+                    '<td class="border p-2 text-right font-bold">'+x.total.toLocaleString()+'</td><td class="border p-2 text-right">'+Math.round(avg).toLocaleString()+'</td></tr>';
+            }).join('');
+            container.innerHTML = '<h3 class="text-lg font-bold mb-3">날짜별 커미션내역</h3><div class="text-sm text-gray-600 mb-2">'+startDate+' ~ '+endDate+' · 금액 단위: '+esc(currency.symbol||currency.name||'')+' · Guarantee는 적용일 이후 예약이 있는 날마다 최소 커미션으로 적용되며, 보정액은 해당 날짜 금액에 포함됩니다.</div><div class="overflow-x-auto"><table class="w-full border-collapse text-sm"><thead><tr class="bg-gray-100">'+header+'</tr></thead><tbody>'+(rows||'<tr><td class="border p-3" colspan="'+(dates.length+3)+'">표시할 마사지사 데이터가 없습니다.</td></tr>')+'</tbody><tfoot><tr class="bg-gray-100 font-bold"><td class="border p-2">일별 합계</td>'+dates.map((d,i)=>'<td class="border p-2 text-right">'+staffNames.reduce((sum,n)=>sum+(values[n]?.vals[i]||0),0).toLocaleString()+'</td>').join('')+'<td class="border p-2 text-right">'+staffNames.reduce((sum,n)=>sum+(values[n]?.total||0),0).toLocaleString()+'</td><td class="border p-2">-</td></tr></tfoot></table></div>';
             container.style.display = 'block';
         }
+
         function showMonthlyStats() {
             const commissionOption = document.getElementById('weeklyCommissionOption'); if (commissionOption) commissionOption.style.display = 'none'; const commissionBreakdown = document.getElementById('dailyCommissionBreakdown'); if (commissionBreakdown) commissionBreakdown.style.display = 'none';
             const annualMenu = document.getElementById('annualMenuSalesContainer');
@@ -6431,23 +6464,16 @@ function translateLegacy(value) {
 
         function calculateStaffStatistics(reservations) {
             const staffStats = {};
-            
             reservations.forEach(r => {
-                if (!staffStats[r.staffName]) {
-                    staffStats[r.staffName] = {
-                        totalPrice: 0,
-                        totalCommission: 0
-                    };
-                }
-                
-                staffStats[r.staffName].totalPrice += r.price;
-                staffStats[r.staffName].totalCommission += r.commission;
+                const name = String(r.staffName || '').trim();
+                if (!name) return;
+                if (!staffStats[name]) staffStats[name] = { totalPrice: 0, totalCommission: 0 };
+                staffStats[name].totalPrice += Number(r.price) || 0;
+                staffStats[name].totalCommission += Number(r.commission) || 0;
             });
 
-            // Guarantee 적용: 통계 기간과 직원별 guarantee 비교
+            // Guarantee는 주간 총액의 최저치가 아니라 적용일 이후 예약이 발생한 각 날짜의 최소 커미션으로 적용합니다.
             const guarantees = JSON.parse(localStorage.getItem(getAdminKey('guarantees')) || '[]');
-
-            // 현재 통계 기간의 시작/끝 날짜 구하기
             let statsStart, statsEnd;
             if (currentStatsType === 'daily') {
                 statsStart = statsEnd = document.getElementById('statsDate').value;
@@ -6455,28 +6481,36 @@ function translateLegacy(value) {
                 statsStart = document.getElementById('statsStartDate').value;
                 statsEnd = document.getElementById('statsEndDate').value;
             }
-
-            Object.keys(staffStats).forEach(staffName => {
-                // 해당 직원의 guarantee 중, 시작날짜가 통계기간 내에 있는 것을 찾음
-                // (여러 개면 가장 최근 날짜 기준)
-                const applicableGuarantees = guarantees.filter(g =>
-                    g.staffName === staffName &&
-                    g.date <= statsEnd
+            const commissionByDay = {};
+            reservations.forEach(r => {
+                const name = String(r.staffName || '').trim();
+                const date = String(r.date || '');
+                if (!name || !date || date < statsStart || date > statsEnd) return;
+                const key = name + '|' + date;
+                commissionByDay[key] = (commissionByDay[key] || 0) + (Number(r.commission) || 0);
+            });
+            const latestGuaranteeFor = (name, date) => {
+                const eligible = guarantees.filter(g =>
+                    String(g.staffName || '').trim() === name &&
+                    String(g.date || '') <= date &&
+                    String(g.date || '') !== ''
                 );
-
-                if (applicableGuarantees.length > 0) {
-                    // 가장 최근 guarantee 적용
-                    const latestGuarantee = applicableGuarantees.reduce((latest, g) =>
-                        g.date > latest.date ? g : latest
-                    );
-                    if (staffStats[staffName].totalCommission < latestGuarantee.amount) {
-                        staffStats[staffName].totalCommission = latestGuarantee.amount;
-                        staffStats[staffName].isGuaranteed = true;
-                        staffStats[staffName].guaranteeAmount = latestGuarantee.amount;
-                    }
+                if (!eligible.length) return 0;
+                const latest = eligible.reduce((a, b) => String(b.date) > String(a.date) ? b : a);
+                return Math.max(0, Number(latest.amount) || 0);
+            };
+            Object.keys(commissionByDay).forEach(key => {
+                const [name, date] = key.split('|');
+                const raw = commissionByDay[key];
+                const guarantee = latestGuaranteeFor(name, date);
+                if (guarantee > raw) {
+                    const supplement = guarantee - raw;
+                    staffStats[name].totalCommission += supplement;
+                    staffStats[name].isGuaranteed = true;
+                    staffStats[name].guaranteeAmount = guarantee;
+                    staffStats[name].guaranteeSupplement = (staffStats[name].guaranteeSupplement || 0) + supplement;
                 }
             });
-            
             return staffStats;
         }
 
