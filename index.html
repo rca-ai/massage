@@ -6461,7 +6461,7 @@ function translateLegacy(value) {
                 // (여러 개면 가장 최근 날짜 기준)
                 const applicableGuarantees = guarantees.filter(g =>
                     g.staffName === staffName &&
-                    g.date <= statsStart
+                    g.date <= statsEnd
                 );
 
                 if (applicableGuarantees.length > 0) {
