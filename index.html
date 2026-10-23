@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Report v3.36</title>
+  <title>Daily Report v3.37</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -206,7 +206,7 @@
    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
      <div>
-      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.36</span></div>
+      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.37</span></div>
       <p id="shopName" class="text-lg text-gray-600 mt-1"></p>
      </div>
      <div class="flex gap-2"><button onclick="showLanguageModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="changeLanguage">언어 변경</button> <button onclick="showFontModal()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600" data-translate="changeFont">폰트 변경</button> <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" data-translate="logout">로그아웃</button>
@@ -698,7 +698,7 @@
         const API_BASE_URL = 'https://massage.guidrthai.workers.dev';
         // 앱 버전: 기능/화면이 변경될 때마다 0.01씩 증가시킵니다.
         // 현재 버전은 v3.34입니다.
-        const APP_VERSION = 'v3.36';
+        const APP_VERSION = 'v3.37';
         let currentPaymentReservationId = null;
         let selectedStaff = null;
         let menuRowCounter = 0;
@@ -9619,6 +9619,17 @@ function translateLegacy(value) {
                 'zh-TW': {'고객':'顧客','고객 관리':'顧客管理','고객 추가':'新增顧客','쿠폰 판매':'販售優惠券','마일리지/포인트 설정':'里程/點數設定','이름/전화번호/고객번호 검색':'搜尋姓名/電話/顧客編號','고객명':'顧客姓名','전화번호':'電話','고객번호':'顧客編號','소셜/아이디':'社群平台/帳號','쿠폰':'優惠券','쿠폰 잔액':'優惠券餘額','마일리지':'里程','포인트':'點數','작업':'操作','저장':'儲存','취소':'取消','수정':'編輯','삭제':'刪除','쿠폰 상품 관리':'優惠券管理','쿠폰 추가':'新增優惠券','쿠폰명':'優惠券名稱','판매금액':'售價','적립금액':'儲值金額','서비스 금액 적립률(%)':'服務金額累積比例(%)','사용 최소 잔액':'最低使用餘額','유효기간(일)':'有效期限（天）','적립 기준금액(1포인트당)':'每點消費額','1포인트 환산 가치':'每點價值','사용 최소 포인트':'最低點數','고객 선택':'選擇顧客','쿠폰 상품':'優惠券商品','메모':'備註','판매 및 적립':'販售並儲值','일시':'日期時間','유형':'類型','내용':'操作','금액':'金額','내역이 없습니다.':'沒有紀錄','잔액 조정':'調整餘額','소셜 플랫폼':'社群平台','소셜 아이디':'社群帳號'},
                 id: {'고객':'Pelanggan','고객 관리':'Manajemen Pelanggan','고객 추가':'Tambah Pelanggan','쿠폰 판매':'Jual Kupon','마일리지/포인트 설정':'Pengaturan Mileage/Poin','이름/전화번호/고객번호 검색':'Cari nama/telepon/nomor pelanggan','고객명':'Nama Pelanggan','전화번호':'Telepon','고객번호':'Nomor Pelanggan','소셜/아이디':'Sosial/ID','쿠폰':'Kupon','쿠폰 잔액':'Saldo Kupon','마일리지':'Mileage','포인트':'Poin','작업':'Aksi','저장':'Simpan','취소':'Batal','수정':'Ubah','삭제':'Hapus','쿠폰 상품 관리':'Kelola Kupon','쿠폰 추가':'Tambah Kupon','쿠폰명':'Nama Kupon','판매금액':'Harga Jual','적립금액':'Jumlah Kredit','서비스 금액 적립률(%)':'Persentase akumulasi layanan (%)','사용 최소 잔액':'Saldo minimum penggunaan','유효기간(일)':'Masa berlaku (hari)','적립 기준금액(1포인트당)':'Belanja per poin','1포인트 환산 가치':'Nilai per poin','사용 최소 포인트':'Poin minimum','고객 선택':'Pilih Pelanggan','쿠폰 상품':'Produk Kupon','메모':'Catatan','판매 및 적립':'Jual & Kredit','일시':'Tanggal/Waktu','유형':'Jenis','내용':'Aksi','금액':'Jumlah','내역이 없습니다.':'Tidak ada riwayat','잔액 조정':'Sesuaikan Saldo','소셜 플랫폼':'Platform Sosial','소셜 아이디':'ID Sosial'}
             };
+
+            const extraTerms = {
+                en: {'새 고객 추가':'Add New Customer','고객명을 입력하세요':'Enter customer name','전화번호를 입력하세요':'Enter phone number','고객번호를 입력하세요':'Enter customer number','고객명을 입력해주세요.':'Please enter customer name.','고객이 추가되었습니다.':'Customer added.','쿠폰 잔액':'Coupon Balance','현재 잔액:':'Current Balance:','조정 사유(예: 기존 잔액 이관, 과거 잔액 수정):':'Reason for adjustment (e.g. balance migration or correction):','조정 금액을 입력하세요. 증가 금액은 양수, 차감 금액은 음수로 입력합니다.':'Enter adjustment amount. Positive adds; negative deducts.','잔액보다 많이 차감할 수 없습니다.':'Cannot deduct more than the current balance.','올바른 금액을 입력해 주세요.':'Please enter a valid amount.','설정이 저장되었습니다.':'Settings saved.','먼저 쿠폰 상품을 추가해 주세요.':'Please add a coupon product first.','유효한 고객과 쿠폰 상품을 선택해 주세요.':'Select a valid customer and coupon product.','선택사항':'Optional','고객번호:':'Customer No.:','전화번호:':'Phone:'},
+                th: {'새 고객 추가':'เพิ่มลูกค้าใหม่','고객명을 입력하세요':'กรอกชื่อลูกค้า','전화번호를 입력하세요':'กรอกหมายเลขโทรศัพท์','고객번호를 입력하세요':'กรอกรหัสลูกค้า','고객명을 입력해주세요.':'กรุณากรอกชื่อลูกค้า','고객이 추가되었습니다.':'เพิ่มลูกค้าแล้ว','현재 잔액:':'ยอดคงเหลือปัจจุบัน:','설정이 저장되었습니다.':'บันทึกการตั้งค่าแล้ว','먼저 쿠폰 상품을 추가해 주세요.':'กรุณาเพิ่มคูปองก่อน','선택사항':'ไม่บังคับ','고객번호:':'รหัสลูกค้า:','전화번호:':'โทรศัพท์:'},
+                vi: {'새 고객 추가':'Thêm khách hàng mới','고객명을 입력하세요':'Nhập tên khách hàng','전화번호를 입력하세요':'Nhập số điện thoại','고객번호를 입력하세요':'Nhập mã khách hàng','고객명을 입력해주세요.':'Vui lòng nhập tên khách hàng.','고객이 추가되었습니다.':'Đã thêm khách hàng.','현재 잔액:':'Số dư hiện tại:','설정이 저장되었습니다.':'Đã lưu cài đặt.','먼저 쿠폰 상품을 추가해 주세요.':'Vui lòng thêm sản phẩm phiếu trước.','선택사항':'Tùy chọn','고객번호:':'Mã khách hàng:','전화번호:':'Điện thoại:'},
+                'zh-CN': {'새 고객 추가':'添加新客户','고객명을 입력하세요':'请输入客户姓名','전화번호를 입력하세요':'请输入电话号码','고객번호를 입력하세요':'请输入客户编号','고객명을 입력해주세요.':'请输入客户姓名。','고객이 추가되었습니다.':'客户已添加。','현재 잔액:':'当前余额：','설정이 저장되었습니다.':'设置已保存。','먼저 쿠폰 상품을 추가해 주세요.':'请先添加优惠券商品。','선택사항':'可选','고객번호:':'客户编号：','전화번호:':'电话：'},
+                'zh-TW': {'새 고객 추가':'新增顧客','고객명을 입력하세요':'請輸入顧客姓名','전화번호를 입력하세요':'請輸入電話號碼','고객번호를 입력하세요':'請輸入顧客編號','고객명을 입력해주세요.':'請輸入顧客姓名。','고객이 추가되었습니다.':'已新增顧客。','현재 잔액:':'目前餘額：','설정이 저장되었습니다.':'設定已儲存。','먼저 쿠폰 상품을 추가해 주세요.':'請先新增優惠券商品。','선택사항':'選填','고객번호:':'顧客編號：','전화번호:':'電話：'},
+                id: {'새 고객 추가':'Tambah Pelanggan Baru','고객명을 입력하세요':'Masukkan nama pelanggan','전화번호를 입력하세요':'Masukkan nomor telepon','고객번호를 입력하세요':'Masukkan nomor pelanggan','고객명을 입력해주세요.':'Silakan masukkan nama pelanggan.','고객이 추가되었습니다.':'Pelanggan ditambahkan.','현재 잔액:':'Saldo saat ini:','설정이 저장되었습니다.':'Pengaturan disimpan.','먼저 쿠폰 상품을 추가해 주세요.':'Tambahkan produk kupon terlebih dahulu.','선택사항':'Opsional','고객번호:':'Nomor Pelanggan:','전화번호:':'Telepon:'}
+            };
+            Object.assign(dicts.en, extraTerms.en); Object.assign(dicts.th, extraTerms.th); Object.assign(dicts.vi, extraTerms.vi);
+            Object.assign(dicts['zh-CN'], extraTerms['zh-CN']); Object.assign(dicts['zh-TW'], extraTerms['zh-TW']); Object.assign(dicts.id, extraTerms.id);
             const dict = dicts[currentLanguage] || dicts.en;
             const roots = [document.getElementById('customerSection'), document.getElementById('managementModal')].filter(Boolean);
             roots.forEach(root => {
