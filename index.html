@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Report v3.34</title>
+  <title>Daily Report v3.35</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -206,7 +206,7 @@
    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
      <div>
-      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.34</span></div>
+      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.35</span></div>
       <p id="shopName" class="text-lg text-gray-600 mt-1"></p>
      </div>
      <div class="flex gap-2"><button onclick="showLanguageModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="changeLanguage">언어 변경</button> <button onclick="showFontModal()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600" data-translate="changeFont">폰트 변경</button> <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" data-translate="logout">로그아웃</button>
@@ -375,7 +375,7 @@
        </select>
       </div>
      </div>
-    </div><div id="weeklyCommissionOption" class="mb-4" style="display:none;"><button type="button" onclick="showDailyCommissionBreakdown()" class="subnav-button px-4 py-2 rounded">날짜별 커미션내역</button></div><div id="dailyCommissionBreakdown" class="mb-6" style="display:none;"></div><!-- 차트 영역 -->
+    </div><div id="weeklyCommissionOption" class="mb-4" style="display:none;"><h3 class="text-lg font-bold">날짜별 커미션내역</h3></div><div id="dailyCommissionBreakdown" class="mb-6" style="display:none;"></div><!-- 차트 영역 -->
     <div id="chartContainer" class="mb-6" style="display: none;">
      <canvas id="statsChart" width="800" height="400" style="display:none;"></canvas>
     </div>
@@ -698,7 +698,7 @@
         const API_BASE_URL = 'https://massage.guidrthai.workers.dev';
         // 앱 버전: 기능/화면이 변경될 때마다 0.01씩 증가시킵니다.
         // 현재 버전은 v3.34입니다.
-        const APP_VERSION = 'v3.34';
+        const APP_VERSION = 'v3.35';
         let currentPaymentReservationId = null;
         let selectedStaff = null;
         let menuRowCounter = 0;
@@ -6153,60 +6153,34 @@ function translateLegacy(value) {
             showDateSelection('range');
             setThisWeek(); // 기본값으로 이번 주 설정
             loadStatistics();
+            showDailyCommissionBreakdown();
         }
 
 
         function showDailyCommissionBreakdown() {
-            if (currentStatsType !== 'weekly') {
-                alert('주간 메뉴에서 날짜 범위를 선택한 후 이용해 주세요.');
-                return;
-            }
+            if (currentStatsType !== 'weekly') return;
             const startDate = document.getElementById('statsStartDate').value;
             const endDate = document.getElementById('statsEndDate').value;
-            if (!startDate || !endDate || startDate > endDate) {
-                alert('올바른 주간 시작일과 종료일을 선택해 주세요.');
-                return;
-            }
+            const container = document.getElementById('dailyCommissionBreakdown');
+            if (!container || !startDate || !endDate || startDate > endDate) { if (container) container.style.display = 'none'; return; }
             const reservations = JSON.parse(localStorage.getItem(getAdminKey('reservations')) || '[]');
             const staffList = JSON.parse(localStorage.getItem(getAdminKey('staff')) || '[]');
-            const staffNames = [...new Set([
-                ...staffList.map(x => x.name || x.staffName).filter(Boolean),
-                ...reservations.filter(r => r.date >= startDate && r.date <= endDate && r.paid).map(r => r.staffName).filter(Boolean)
-            ])];
-            const dates = [];
-            const cursor = new Date(startDate + 'T12:00:00');
-            const last = new Date(endDate + 'T12:00:00');
-            while (cursor <= last && dates.length < 62) {
-                dates.push(new Date(cursor));
-                cursor.setDate(cursor.getDate() + 1);
-            }
-            const currency = JSON.parse(localStorage.getItem(getAdminKey('currency')) || '{"symbol":"","name":"원"}');
-            const dayNames = ['일','월','화','수','목','금','토'];
-            const commissionFor = (staffName, date) => reservations
-                .filter(r => r.paid && r.date === date && r.staffName === staffName)
-                .reduce((sum, r) => sum + (Number(r.commission) || 0), 0);
-            const header = '<th class="border border-gray-300 p-2 whitespace-nowrap">마사지사</th>' +
-                dates.map(d => '<th class="border border-gray-300 p-2 whitespace-nowrap">' + d.getDate() + '일(' + dayNames[d.getDay()] + ')</th>').join('') +
-                '<th class="border border-gray-300 p-2 whitespace-nowrap">합계</th><th class="border border-gray-300 p-2 whitespace-nowrap">평균</th>';
-            const rows = staffNames.map(name => {
-                const vals = dates.map(d => commissionFor(name, d.toISOString().slice(0,10)));
-                const total = vals.reduce((a,b)=>a+b,0);
-                const average = dates.length ? total / dates.length : 0;
-                return '<tr><td class="border border-gray-300 p-2 whitespace-nowrap">' + String(name).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])) + '</td>' +
-                    vals.map(v=>'<td class="border border-gray-300 p-2 text-right whitespace-nowrap">'+(v ? v.toLocaleString() : '-')+'</td>').join('') +
-                    '<td class="border border-gray-300 p-2 text-right font-bold whitespace-nowrap">'+total.toLocaleString()+'</td><td class="border border-gray-300 p-2 text-right whitespace-nowrap">'+Math.round(average).toLocaleString()+'</td></tr>';
-            }).join('');
-            const container = document.getElementById('dailyCommissionBreakdown');
-            if (!container) return;
-            container.innerHTML = '<h3 class="text-lg font-bold mb-3">날짜별 커미션내역</h3><div class="text-sm text-gray-600 mb-2">'+startDate+' ~ '+endDate+' · 금액 단위: '+String(currency.symbol||currency.name||'')+'</div><div class="overflow-x-auto"><table class="w-full border-collapse text-sm"><thead><tr class="bg-gray-100">'+header+'</tr></thead><tbody>' +
-                (rows || '<tr><td class="border p-3" colspan="'+(dates.length+3)+'">표시할 마사지사 데이터가 없습니다.</td></tr>') +
-                '</tbody><tfoot><tr class="bg-gray-100 font-bold"><td class="border p-2">일별 합계</td>' +
-                dates.map(d=>'<td class="border p-2 text-right">'+staffNames.reduce((sum,n)=>sum+commissionFor(n,d.toISOString().slice(0,10)),0).toLocaleString()+'</td>').join('') +
-                '<td class="border p-2 text-right">'+staffNames.reduce((sum,n)=>sum+dates.reduce((a,d)=>a+commissionFor(n,d.toISOString().slice(0,10)),0),0).toLocaleString()+'</td><td class="border p-2">-</td></tr></tfoot></table></div>';
+            const guarantees = JSON.parse(localStorage.getItem(getAdminKey('guarantees')) || '[]');
+            const staffNames = [...new Set([...staffList.map(x => x.name || x.staffName).filter(Boolean), ...reservations.filter(r => r.date >= startDate && r.date <= endDate && r.paid).map(r => r.staffName).filter(Boolean), ...guarantees.filter(g => g.date <= startDate).map(g => g.staffName).filter(Boolean)])];
+            const dates = []; const cursor = new Date(startDate + 'T12:00:00'); const last = new Date(endDate + 'T12:00:00');
+            const formatDate = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+            while (cursor <= last && dates.length < 62) { dates.push(new Date(cursor)); cursor.setDate(cursor.getDate() + 1); }
+            const currency = JSON.parse(localStorage.getItem(getAdminKey('currency')) || '{"symbol":"","name":"원"}'); const dayNames = ['일','월','화','수','목','금','토'];
+            const rawCommissionFor = (name, date) => reservations.filter(r => r.paid && r.date === date && r.staffName === name).reduce((sum,r) => sum + (Number(r.commission)||0), 0);
+            const guaranteeFor = name => { const gs = guarantees.filter(g => g.staffName === name && g.date <= startDate); if (!gs.length) return 0; const latest = gs.reduce((x,y) => y.date > x.date ? y : x); return Math.max(0, Number(latest.amount)||0); };
+            const values = {};
+            staffNames.forEach(name => { const vals = dates.map(d => rawCommissionFor(name, formatDate(d))); const rawTotal = vals.reduce((x,y)=>x+y,0); const supplement = Math.max(0, guaranteeFor(name)-rawTotal); if (vals.length) vals[0] += supplement; values[name] = {vals, total:rawTotal+supplement, supplement}; });
+            const esc = v => String(v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+            const header = '<th class="border p-2 whitespace-nowrap">마사지사</th>' + dates.map(d=>'<th class="border p-2 whitespace-nowrap">'+d.getDate()+'일('+dayNames[d.getDay()]+')</th>').join('') + '<th class="border p-2">합계</th><th class="border p-2">평균</th>';
+            const rows = staffNames.map(name => { const x=values[name], avg=dates.length?x.total/dates.length:0; return '<tr><td class="border p-2 whitespace-nowrap">'+esc(name)+'</td>'+x.vals.map((v,i)=>'<td class="border p-2 text-right whitespace-nowrap"'+(i===0&&x.supplement>0?' title="Guarantee 보정액 '+x.supplement.toLocaleString()+' 포함"':'')+'>'+(v?v.toLocaleString():'-')+'</td>').join('')+'<td class="border p-2 text-right font-bold">'+x.total.toLocaleString()+'</td><td class="border p-2 text-right">'+Math.round(avg).toLocaleString()+'</td></tr>'; }).join('');
+            container.innerHTML = '<h3 class="text-lg font-bold mb-3">날짜별 커미션내역</h3><div class="text-sm text-gray-600 mb-2">'+startDate+' ~ '+endDate+' · 금액 단위: '+esc(currency.symbol||currency.name||'')+' · Guarantee 차액은 첫 날짜 칸에 포함됩니다.</div><div class="overflow-x-auto"><table class="w-full border-collapse text-sm"><thead><tr class="bg-gray-100">'+header+'</tr></thead><tbody>'+(rows||'<tr><td class="border p-3" colspan="'+(dates.length+3)+'">표시할 마사지사 데이터가 없습니다.</td></tr>')+'</tbody><tfoot><tr class="bg-gray-100 font-bold"><td class="border p-2">일별 합계</td>'+dates.map((d,i)=>'<td class="border p-2 text-right">'+staffNames.reduce((sum,n)=>sum+(values[n]?.vals[i]||0),0).toLocaleString()+'</td>').join('')+'<td class="border p-2 text-right">'+staffNames.reduce((sum,n)=>sum+(values[n]?.total||0),0).toLocaleString()+'</td><td class="border p-2">-</td></tr></tfoot></table></div>';
             container.style.display = 'block';
-            container.scrollIntoView({behavior:'smooth',block:'start'});
         }
-
         function showMonthlyStats() {
             const commissionOption = document.getElementById('weeklyCommissionOption'); if (commissionOption) commissionOption.style.display = 'none'; const commissionBreakdown = document.getElementById('dailyCommissionBreakdown'); if (commissionBreakdown) commissionBreakdown.style.display = 'none';
             const annualMenu = document.getElementById('annualMenuSalesContainer');
@@ -6416,6 +6390,7 @@ function translateLegacy(value) {
                 loadAnnualSalesChart();
             } else {
                 loadStatistics();
+                if (currentStatsType === 'weekly') showDailyCommissionBreakdown();
             }
         }
 
