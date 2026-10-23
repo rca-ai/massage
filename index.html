@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Report v3.38</title>
+  <title>Daily Report v3.39</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -206,7 +206,7 @@
    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
      <div>
-      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.38</span></div>
+      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.39</span></div>
       <p id="shopName" class="text-lg text-gray-600 mt-1"></p>
      </div>
      <div class="flex gap-2"><button onclick="showLanguageModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="changeLanguage">언어 변경</button> <button onclick="showFontModal()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600" data-translate="changeFont">폰트 변경</button> <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" data-translate="logout">로그아웃</button>
@@ -698,7 +698,7 @@
         const API_BASE_URL = 'https://massage.guidrthai.workers.dev';
         // 앱 버전: 기능/화면이 변경될 때마다 0.01씩 증가시킵니다.
         // 현재 버전은 v3.34입니다.
-        const APP_VERSION = 'v3.38';
+        const APP_VERSION = 'v3.39';
         let currentPaymentReservationId = null;
         let selectedStaff = null;
         let menuRowCounter = 0;
@@ -6205,13 +6205,14 @@ function translateLegacy(value) {
             });
             const esc = v => String(v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
             const header = '<th class="border p-2 whitespace-nowrap">마사지사</th>' + dates.map(d=>'<th class="border p-2 whitespace-nowrap">'+d.getDate()+'일('+dayNames[d.getDay()]+')</th>').join('') + '<th class="border p-2">합계</th><th class="border p-2">평균</th>';
-            const rows = staffNames.map(name => {
+            const displayStaffNames = staffNames.filter(name => values[name] && values[name].total > 0);
+            const rows = displayStaffNames.map(name => {
                 const x = values[name], avg = dates.length ? x.total / dates.length : 0;
                 return '<tr><td class="border p-2 whitespace-nowrap">'+esc(name)+'</td>' +
                     x.vals.map((v,i)=>'<td class="border p-2 text-right whitespace-nowrap"'+(i===0&&x.supplement>0?' title="Guarantee 보정액 '+x.supplement.toLocaleString()+' 포함"':'')+'>'+(v?v.toLocaleString():'-')+'</td>').join('') +
                     '<td class="border p-2 text-right font-bold">'+x.total.toLocaleString()+'</td><td class="border p-2 text-right">'+Math.round(avg).toLocaleString()+'</td></tr>';
             }).join('');
-            container.innerHTML = '<h3 class="text-lg font-bold mb-3">날짜별 커미션내역</h3><div class="text-sm text-gray-600 mb-2">'+startDate+' ~ '+endDate+' · 금액 단위: '+esc(currency.symbol||currency.name||'')+' · Guarantee는 적용일 이후 예약이 있는 날마다 최소 커미션으로 적용되며, 보정액은 해당 날짜 금액에 포함됩니다.</div><div class="overflow-x-auto"><table class="w-full border-collapse text-sm"><thead><tr class="bg-gray-100">'+header+'</tr></thead><tbody>'+(rows||'<tr><td class="border p-3" colspan="'+(dates.length+3)+'">표시할 마사지사 데이터가 없습니다.</td></tr>')+'</tbody><tfoot><tr class="bg-gray-100 font-bold"><td class="border p-2">일별 합계</td>'+dates.map((d,i)=>'<td class="border p-2 text-right">'+staffNames.reduce((sum,n)=>sum+(values[n]?.vals[i]||0),0).toLocaleString()+'</td>').join('')+'<td class="border p-2 text-right">'+staffNames.reduce((sum,n)=>sum+(values[n]?.total||0),0).toLocaleString()+'</td><td class="border p-2">-</td></tr></tfoot></table></div>';
+            container.innerHTML = '<div class="text-sm text-gray-600 mb-2">'+startDate+' ~ '+endDate+' · 금액 단위: '+esc(currency.symbol||currency.name||'')+' · Guarantee는 적용일 이후 예약이 있는 날마다 최소 커미션으로 적용되며, 보정액은 해당 날짜 금액에 포함됩니다.</div><div class="overflow-x-auto"><table class="w-full border-collapse text-sm"><thead><tr class="bg-gray-100">'+header+'</tr></thead><tbody>'+(rows||'<tr><td class="border p-3" colspan="'+(dates.length+3)+'">표시할 마사지사 데이터가 없습니다.</td></tr>')+'</tbody><tfoot><tr class="bg-gray-100 font-bold"><td class="border p-2">일별 합계</td>'+dates.map((d,i)=>'<td class="border p-2 text-right">'+displayStaffNames.reduce((sum,n)=>sum+(values[n]?.vals[i]||0),0).toLocaleString()+'</td>').join('')+'<td class="border p-2 text-right">'+displayStaffNames.reduce((sum,n)=>sum+(values[n]?.total||0),0).toLocaleString()+'</td><td class="border p-2">-</td></tr></tfoot></table></div>';
             container.style.display = 'block';
         }
 
