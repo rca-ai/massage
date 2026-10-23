@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Report v3.32</title>
+  <title>Daily Report v3.33</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -206,7 +206,7 @@
    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
      <div>
-      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.32</span></div>
+      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.33</span></div>
       <p id="shopName" class="text-lg text-gray-600 mt-1"></p>
      </div>
      <div class="flex gap-2"><button onclick="showLanguageModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="changeLanguage">언어 변경</button> <button onclick="showFontModal()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600" data-translate="changeFont">폰트 변경</button> <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" data-translate="logout">로그아웃</button>
@@ -697,8 +697,8 @@
         // D1/Cloudflare Worker API endpoint. This keeps GitHub-hosted test.html connected to the same backend.
         const API_BASE_URL = 'https://massage.guidrthai.workers.dev';
         // 앱 버전: 기능/화면이 변경될 때마다 0.01씩 증가시킵니다.
-        // 현재 버전은 v3.32입니다.
-        const APP_VERSION = 'v3.32';
+        // 현재 버전은 v3.33입니다.
+        const APP_VERSION = 'v3.33';
         let currentPaymentReservationId = null;
         let selectedStaff = null;
         let menuRowCounter = 0;
@@ -4306,6 +4306,10 @@ function showDBManagement() {
                                 <th class="border border-gray-300 p-2">60분</th>
                                 <th class="border border-gray-300 p-2">90분</th>
                                 <th class="border border-gray-300 p-2">120분</th>
+                                <th class="border border-gray-300 p-2">150분</th>
+                                <th class="border border-gray-300 p-2">180분</th>
+                                <th class="border border-gray-300 p-2">210분</th>
+                                <th class="border border-gray-300 p-2">240분</th>
                                 <th class="border border-gray-300 p-2">작업</th>
                             </tr>
                         </thead>
@@ -4321,6 +4325,10 @@ function showDBManagement() {
                         <td class="border border-gray-300 p-2">${menu.prices[60] ? `${menu.prices[60].price}/${formatCommissionConfig(menu.prices[60].commission)}` : '-'}</td>
                         <td class="border border-gray-300 p-2">${menu.prices[90] ? `${menu.prices[90].price}/${formatCommissionConfig(menu.prices[90].commission)}` : '-'}</td>
                         <td class="border border-gray-300 p-2">${menu.prices[120] ? `${menu.prices[120].price}/${formatCommissionConfig(menu.prices[120].commission)}` : '-'}</td>
+                        <td class="border border-gray-300 p-2">${menu.prices[150] ? `${menu.prices[150].price}/${formatCommissionConfig(menu.prices[150].commission)}` : '-'}</td>
+                        <td class="border border-gray-300 p-2">${menu.prices[180] ? `${menu.prices[180].price}/${formatCommissionConfig(menu.prices[180].commission)}` : '-'}</td>
+                        <td class="border border-gray-300 p-2">${menu.prices[210] ? `${menu.prices[210].price}/${formatCommissionConfig(menu.prices[210].commission)}` : '-'}</td>
+                        <td class="border border-gray-300 p-2">${menu.prices[240] ? `${menu.prices[240].price}/${formatCommissionConfig(menu.prices[240].commission)}` : '-'}</td>
                         <td class="border border-gray-300 p-2">
                             <button onclick="editMenu(${menu.id})" class="bg-blue-500 text-white px-2 py-1 rounded text-sm mr-1">수정</button>
                             <button onclick="deleteMenu(${menu.id})" class="bg-red-500 text-white px-2 py-1 rounded text-sm">삭제</button>
@@ -8164,7 +8172,7 @@ function translateLegacy(value) {
         }
 
         function addNewMenu() {
-            const durations = [30, 60, 90, 120];
+            const durations = [30, 60, 90, 120, 150, 180, 210, 240];
             const content = '<div class="space-y-4">' +
                 '<div><label class="block text-sm font-medium mb-2">메뉴명:</label>' +
                 '<div class="flex gap-3 items-end">' +
@@ -8201,7 +8209,7 @@ function translateLegacy(value) {
             const newId = Math.max(...menus.map(m => m.id), 0) + 1;
             
             const prices = {};
-            const durations = [30, 60, 90, 120];
+            const durations = [30, 60, 90, 120, 150, 180, 210, 240];
             
             durations.forEach(duration => {
                 const price = parseInt(document.getElementById(`menu${duration}Price`).value);
@@ -8232,7 +8240,7 @@ function translateLegacy(value) {
             const menus = JSON.parse(localStorage.getItem(getAdminKey('menus')) || '[]');
             const menu = menus.find(function(m) { return m.id === id; });
             if (!menu) return;
-            const durations = [30, 60, 90, 120];
+            const durations = [30, 60, 90, 120, 150, 180, 210, 240];
             const renderDuration = function(duration) {
                 const priceData = menu.prices && menu.prices[duration] ? menu.prices[duration] : {};
                 const commissionData = priceData.commission;
@@ -8272,7 +8280,7 @@ function translateLegacy(value) {
             if (menuIndex === -1) return;
             const oldMenu = menus[menuIndex];
             const prices = {};
-            const durations = [30, 60, 90, 120];
+            const durations = [30, 60, 90, 120, 150, 180, 210, 240];
             durations.forEach(function(duration) {
                 const priceInput = document.getElementById('editMenu' + duration + 'Price');
                 const commissionInput = document.getElementById('editMenu' + duration + 'Commission');
@@ -9409,7 +9417,7 @@ function translateLegacy(value) {
         refreshShopNameHeader();
     </script>
  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99a6c0c3942d55a1',t:'MTc2MjQ1NDc4MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();
-        // v3.32 customer loyalty and coupon extension. Existing customer/menu records are migrated in-place without changing IDs.
+        // v3.33 customer loyalty and coupon extension. Existing customer/menu records are migrated in-place without changing IDs.
         const LOYALTY_TYPES = ['couponBalance','mileageBalance','pointBalance'];
         function loyaltyRead(key, fallback) { try { const v=JSON.parse(localStorage.getItem(getAdminKey(key)) || 'null'); return v == null ? fallback : v; } catch(e) { return fallback; } }
         function loyaltySave(key, value) { localStorage.setItem(getAdminKey(key), JSON.stringify(value)); }
@@ -9537,7 +9545,7 @@ function translateLegacy(value) {
         function showCustomerMain() {
             setActiveMainNav('mainNavCustomer');hideAllSections();
             let section=document.getElementById('customerSection');
-            if(!section){section=document.createElement('section');section.id='customerSection';section.className='bg-white rounded-lg shadow-md p-6';document.querySelector('main')?.appendChild(section);}
+            if(!section){section=document.createElement('section');section.id='customerSection';section.className='bg-white rounded-lg shadow-md p-6';(document.getElementById('mainScreen') || document.body).appendChild(section);}
             section.style.display='block';
             section.innerHTML='<div class="flex flex-wrap justify-between items-center gap-2 mb-4"><h2 class="text-2xl font-bold">고객 관리</h2><div class="flex flex-wrap gap-2"><button class="bg-green-600 text-white rounded px-3 py-2" onclick="addNewCustomer()">고객 추가</button><button class="bg-blue-600 text-white rounded px-3 py-2" onclick="sellCouponToCustomer()">쿠폰 판매</button><button class="bg-gray-700 text-white rounded px-3 py-2" onclick="manageLoyaltySettings()">마일리지/포인트 설정</button></div></div><input id="customerSearchInput" oninput="renderCustomerMain(this.value)" class="border rounded px-3 py-2 w-full mb-3" placeholder="이름/전화번호/고객번호 검색"><div id="customerMainTable"></div>';
             renderCustomerMain('');
