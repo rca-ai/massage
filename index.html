@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Report v3.35</title>
+  <title>Daily Report v3.36</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -206,7 +206,7 @@
    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
      <div>
-      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.35</span></div>
+      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.36</span></div>
       <p id="shopName" class="text-lg text-gray-600 mt-1"></p>
      </div>
      <div class="flex gap-2"><button onclick="showLanguageModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="changeLanguage">언어 변경</button> <button onclick="showFontModal()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600" data-translate="changeFont">폰트 변경</button> <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" data-translate="logout">로그아웃</button>
@@ -698,7 +698,7 @@
         const API_BASE_URL = 'https://massage.guidrthai.workers.dev';
         // 앱 버전: 기능/화면이 변경될 때마다 0.01씩 증가시킵니다.
         // 현재 버전은 v3.34입니다.
-        const APP_VERSION = 'v3.35';
+        const APP_VERSION = 'v3.36';
         let currentPaymentReservationId = null;
         let selectedStaff = null;
         let menuRowCounter = 0;
@@ -2414,6 +2414,7 @@ async function initializeApp() {
                     }
                     updateTranslations();
                     if (window.localizeLegacyUI) window.localizeLegacyUI();
+            if (window.localizeCustomerScreens) window.localizeCustomerScreens();
         localizeDynamicManagementModal();
                     localStorage.setItem('currentAdmin', JSON.stringify(admin));
                     
@@ -6172,7 +6173,7 @@ function translateLegacy(value) {
             while (cursor <= last && dates.length < 62) { dates.push(new Date(cursor)); cursor.setDate(cursor.getDate() + 1); }
             const currency = JSON.parse(localStorage.getItem(getAdminKey('currency')) || '{"symbol":"","name":"원"}'); const dayNames = ['일','월','화','수','목','금','토'];
             const rawCommissionFor = (name, date) => reservations.filter(r => r.paid && r.date === date && r.staffName === name).reduce((sum,r) => sum + (Number(r.commission)||0), 0);
-            const guaranteeFor = name => { const gs = guarantees.filter(g => g.staffName === name && g.date <= startDate); if (!gs.length) return 0; const latest = gs.reduce((x,y) => y.date > x.date ? y : x); return Math.max(0, Number(latest.amount)||0); };
+            const guaranteeFor = name => { const gs = guarantees.filter(g => g.staffName === name && g.date <= endDate); if (!gs.length) return 0; const latest = gs.reduce((x,y) => y.date > x.date ? y : x); return Math.max(0, Number(latest.amount)||0); };
             const values = {};
             staffNames.forEach(name => { const vals = dates.map(d => rawCommissionFor(name, formatDate(d))); const rawTotal = vals.reduce((x,y)=>x+y,0); const supplement = Math.max(0, guaranteeFor(name)-rawTotal); if (vals.length) vals[0] += supplement; values[name] = {vals, total:rawTotal+supplement, supplement}; });
             const esc = v => String(v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -9604,6 +9605,37 @@ function translateLegacy(value) {
             const baseManageMenus=manageMenus;
             manageMenus=function(){baseManageMenus();const buttons=document.querySelectorAll('#managementContent button');buttons.forEach(b=>{if(b.textContent.trim()==='새 메뉴 추가')b.textContent='메뉴 추가';});const box=document.getElementById('managementContent');if(box&&!box.querySelector('#couponProductsButton')){const b=document.createElement('button');b.id='couponProductsButton';b.className='bg-blue-600 text-white px-4 py-2 rounded ml-2';b.textContent='쿠폰 추가';b.onclick=manageCouponProducts;box.querySelector('div')?.appendChild(b);}};
         })();
+
+
+        // Customer UI localization: dynamically generated customer screens and dialogs
+        // use the same seven languages as the rest of the app.
+        function localizeCustomerScreens() {
+            const dicts = {
+                ko: {'고객':'고객','고객 관리':'고객 관리','고객 추가':'고객 추가','쿠폰 판매':'쿠폰 판매','마일리지/포인트 설정':'마일리지/포인트 설정','이름/전화번호/고객번호 검색':'이름/전화번호/고객번호 검색','고객명':'고객명','전화번호':'전화번호','고객번호':'고객번호','소셜/아이디':'소셜/아이디','쿠폰':'쿠폰','쿠폰 잔액':'쿠폰 잔액','마일리지':'마일리지','포인트':'포인트','작업':'작업','저장':'저장','취소':'취소','수정':'수정','삭제':'삭제','쿠폰 상품 관리':'쿠폰 상품 관리','쿠폰 추가':'쿠폰 추가','쿠폰명':'쿠폰명','판매금액':'판매금액','적립금액':'적립금액','서비스 금액 적립률(%)':'서비스 금액 적립률(%)','사용 최소 잔액':'사용 최소 잔액','유효기간(일)':'유효기간(일)','적립 기준금액(1포인트당)':'적립 기준금액(1포인트당)','1포인트 환산 가치':'1포인트 환산 가치','사용 최소 포인트':'사용 최소 포인트','고객 선택':'고객 선택','쿠폰 상품':'쿠폰 상품','메모':'메모','판매 및 적립':'판매 및 적립','일시':'일시','유형':'유형','내용':'내용','금액':'금액','내역이 없습니다.':'내역이 없습니다.','잔액 조정':'잔액 조정','소셜 플랫폼':'소셜 플랫폼','소셜 아이디':'소셜 아이디','이름/전화번호/고객번호 검색':'이름/전화번호/고객번호 검색'},
+                en: {'고객':'Customers','고객 관리':'Customer Management','고객 추가':'Add Customer','쿠폰 판매':'Sell Coupon','마일리지/포인트 설정':'Mileage/Points Settings','이름/전화번호/고객번호 검색':'Search name/phone/customer number','고객명':'Customer Name','전화번호':'Phone','고객번호':'Customer No.','소셜/아이디':'Social/ID','쿠폰':'Coupon','쿠폰 잔액':'Coupon Balance','마일리지':'Mileage','포인트':'Points','작업':'Actions','저장':'Save','취소':'Cancel','수정':'Edit','삭제':'Delete','쿠폰 상품 관리':'Coupon Products','쿠폰 추가':'Add Coupon','쿠폰명':'Coupon Name','판매금액':'Sale Amount','적립금액':'Credit Amount','서비스 금액 적립률(%)':'Service accrual rate (%)','사용 최소 잔액':'Minimum balance to use','유효기간(일)':'Validity (days)','적립 기준금액(1포인트당)':'Spend per point','1포인트 환산 가치':'Value per point','사용 최소 포인트':'Minimum points to use','고객 선택':'Select Customer','쿠폰 상품':'Coupon Product','메모':'Note','판매 및 적립':'Sell & Credit','일시':'Date/Time','유형':'Type','내용':'Action','금액':'Amount','내역이 없습니다.':'No history available.','잔액 조정':'Adjust Balance','소셜 플랫폼':'Social Platform','소셜 아이디':'Social ID'},
+                th: {'고객':'ลูกค้า','고객 관리':'จัดการลูกค้า','고객 추가':'เพิ่มลูกค้า','쿠폰 판매':'ขายคูปอง','마일리지/포인트 설정':'ตั้งค่าไมล์สะสม/คะแนน','이름/전화번호/고객번호 검색':'ค้นหาชื่อ/โทรศัพท์/รหัสลูกค้า','고객명':'ชื่อลูกค้า','전화번호':'โทรศัพท์','고객번호':'รหัสลูกค้า','소셜/아이디':'โซเชียล/ไอดี','쿠폰':'คูปอง','쿠폰 잔액':'ยอดคูปอง','마일리지':'ไมล์สะสม','포인트':'คะแนน','작업':'จัดการ','저장':'บันทึก','취소':'ยกเลิก','수정':'แก้ไข','삭제':'ลบ','쿠폰 상품 관리':'จัดการคูปอง','쿠폰 추가':'เพิ่มคูปอง','쿠폰명':'ชื่อคูปอง','판매금액':'ราคาขาย','적립금액':'ยอดเครดิต','서비스 금액 적립률(%)':'อัตราสะสมจากค่าบริการ (%)','사용 최소 잔액':'ยอดขั้นต่ำในการใช้','유효기간(일)':'อายุใช้งาน (วัน)','적립 기준금액(1포인트당)':'ยอดใช้ต่อคะแนน','1포인트 환산 가치':'มูลค่าต่อคะแนน','사용 최소 포인트':'คะแนนขั้นต่ำ','고객 선택':'เลือกลูกค้า','쿠폰 상품':'คูปอง','메모':'หมายเหตุ','판매 및 적립':'ขายและเพิ่มเครดิต','일시':'วันเวลา','유형':'ประเภท','내용':'รายการ','금액':'จำนวนเงิน','내역이 없습니다.':'ไม่มีประวัติ','잔액 조정':'ปรับยอด','소셜 플랫폼':'แพลตฟอร์มโซเชียล','소셜 아이디':'โซเชียลไอดี'},
+                vi: {'고객':'Khách hàng','고객 관리':'Quản lý khách hàng','고객 추가':'Thêm khách hàng','쿠폰 판매':'Bán phiếu','마일리지/포인트 설정':'Cài đặt dặm/điểm','이름/전화번호/고객번호 검색':'Tìm tên/điện thoại/mã khách hàng','고객명':'Tên khách hàng','전화번호':'Điện thoại','고객번호':'Mã khách hàng','소셜/아이디':'Mạng xã hội/ID','쿠폰':'Phiếu','쿠폰 잔액':'Số dư phiếu','마일리지':'Dặm','포인트':'Điểm','작업':'Thao tác','저장':'Lưu','취소':'Hủy','수정':'Sửa','삭제':'Xóa','쿠폰 상품 관리':'Quản lý phiếu','쿠폰 추가':'Thêm phiếu','쿠폰명':'Tên phiếu','판매금액':'Giá bán','적립금액':'Số tiền cộng','서비스 금액 적립률(%)':'Tỷ lệ tích lũy dịch vụ (%)','사용 최소 잔액':'Số dư tối thiểu','유효기간(일)':'Thời hạn (ngày)','적립 기준금액(1포인트당)':'Chi tiêu mỗi điểm','1포인트 환산 가치':'Giá trị mỗi điểm','사용 최소 포인트':'Điểm tối thiểu','고객 선택':'Chọn khách hàng','쿠폰 상품':'Phiếu','메모':'Ghi chú','판매 및 적립':'Bán và cộng','일시':'Thời gian','유형':'Loại','내용':'Nội dung','금액':'Số tiền','내역이 없습니다.':'Không có lịch sử','잔액 조정':'Điều chỉnh số dư','소셜 플랫폼':'Nền tảng xã hội','소셜 아이디':'ID xã hội'},
+                'zh-CN': {'고객':'客户','고객 관리':'客户管理','고객 추가':'添加客户','쿠폰 판매':'销售优惠券','마일리지/포인트 설정':'里程/积分设置','이름/전화번호/고객번호 검색':'搜索姓名/电话/客户编号','고객명':'客户姓名','전화번호':'电话','고객번호':'客户编号','소셜/아이디':'社交平台/账号','쿠폰':'优惠券','쿠폰 잔액':'优惠券余额','마일리지':'里程','포인트':'积分','작업':'操作','저장':'保存','취소':'取消','수정':'编辑','삭제':'删除','쿠폰 상품 관리':'优惠券管理','쿠폰 추가':'添加优惠券','쿠폰명':'优惠券名称','판매금액':'售价','적립금액':'充值金额','서비스 금액 적립률(%)':'服务金额累计比例(%)','사용 최소 잔액':'最低使用余额','유효기간(일)':'有效期（天）','적립 기준금액(1포인트당)':'每积分消费额','1포인트 환산 가치':'每积分价值','사용 최소 포인트':'最低积分','고객 선택':'选择客户','쿠폰 상품':'优惠券商品','메모':'备注','판매 및 적립':'销售并充值','일시':'日期时间','유형':'类型','내용':'操作','금액':'金额','내역이 없습니다.':'暂无记录','잔액 조정':'调整余额','소셜 플랫폼':'社交平台','소셜 아이디':'社交账号'},
+                'zh-TW': {'고객':'顧客','고객 관리':'顧客管理','고객 추가':'新增顧客','쿠폰 판매':'販售優惠券','마일리지/포인트 설정':'里程/點數設定','이름/전화번호/고객번호 검색':'搜尋姓名/電話/顧客編號','고객명':'顧客姓名','전화번호':'電話','고객번호':'顧客編號','소셜/아이디':'社群平台/帳號','쿠폰':'優惠券','쿠폰 잔액':'優惠券餘額','마일리지':'里程','포인트':'點數','작업':'操作','저장':'儲存','취소':'取消','수정':'編輯','삭제':'刪除','쿠폰 상품 관리':'優惠券管理','쿠폰 추가':'新增優惠券','쿠폰명':'優惠券名稱','판매금액':'售價','적립금액':'儲值金額','서비스 금액 적립률(%)':'服務金額累積比例(%)','사용 최소 잔액':'最低使用餘額','유효기간(일)':'有效期限（天）','적립 기준금액(1포인트당)':'每點消費額','1포인트 환산 가치':'每點價值','사용 최소 포인트':'最低點數','고객 선택':'選擇顧客','쿠폰 상품':'優惠券商品','메모':'備註','판매 및 적립':'販售並儲值','일시':'日期時間','유형':'類型','내용':'操作','금액':'金額','내역이 없습니다.':'沒有紀錄','잔액 조정':'調整餘額','소셜 플랫폼':'社群平台','소셜 아이디':'社群帳號'},
+                id: {'고객':'Pelanggan','고객 관리':'Manajemen Pelanggan','고객 추가':'Tambah Pelanggan','쿠폰 판매':'Jual Kupon','마일리지/포인트 설정':'Pengaturan Mileage/Poin','이름/전화번호/고객번호 검색':'Cari nama/telepon/nomor pelanggan','고객명':'Nama Pelanggan','전화번호':'Telepon','고객번호':'Nomor Pelanggan','소셜/아이디':'Sosial/ID','쿠폰':'Kupon','쿠폰 잔액':'Saldo Kupon','마일리지':'Mileage','포인트':'Poin','작업':'Aksi','저장':'Simpan','취소':'Batal','수정':'Ubah','삭제':'Hapus','쿠폰 상품 관리':'Kelola Kupon','쿠폰 추가':'Tambah Kupon','쿠폰명':'Nama Kupon','판매금액':'Harga Jual','적립금액':'Jumlah Kredit','서비스 금액 적립률(%)':'Persentase akumulasi layanan (%)','사용 최소 잔액':'Saldo minimum penggunaan','유효기간(일)':'Masa berlaku (hari)','적립 기준금액(1포인트당)':'Belanja per poin','1포인트 환산 가치':'Nilai per poin','사용 최소 포인트':'Poin minimum','고객 선택':'Pilih Pelanggan','쿠폰 상품':'Produk Kupon','메모':'Catatan','판매 및 적립':'Jual & Kredit','일시':'Tanggal/Waktu','유형':'Jenis','내용':'Aksi','금액':'Jumlah','내역이 없습니다.':'Tidak ada riwayat','잔액 조정':'Sesuaikan Saldo','소셜 플랫폼':'Platform Sosial','소셜 아이디':'ID Sosial'}
+            };
+            const dict = dicts[currentLanguage] || dicts.en;
+            const roots = [document.getElementById('customerSection'), document.getElementById('managementModal')].filter(Boolean);
+            roots.forEach(root => {
+                const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+                const nodes=[]; while(walker.nextNode()) nodes.push(walker.currentNode);
+                nodes.forEach(node => { const raw=node.nodeValue.trim(); if(dict[raw] && raw) node.nodeValue=node.nodeValue.replace(raw,dict[raw]); });
+                root.querySelectorAll('input[placeholder],textarea[placeholder]').forEach(el => { const raw=el.getAttribute('placeholder'); if(dict[raw]) el.setAttribute('placeholder',dict[raw]); });
+            });
+            const nav = document.getElementById('mainNavCustomer'); if(nav) nav.textContent=(dicts[currentLanguage]||dicts.en)['고객'];
+        }
+        const customerLocalizeTargets = ['showCustomerMain','renderCustomerMain','manageCustomerDirectory','addNewCustomer','editCustomer','manageCouponProducts','manageLoyaltySettings','sellCouponToCustomer','showLoyaltyHistory'];
+        customerLocalizeTargets.forEach(name => {
+            const original = window[name];
+            if (typeof original !== 'function' || original.__customerLocalizationWrapped) return;
+            const wrapped = function(...args) { const result=original.apply(this,args); localizeCustomerScreens(); return result; };
+            wrapped.__customerLocalizationWrapped = true; window[name] = wrapped;
+        });
 
 </script></body>
 </html>
