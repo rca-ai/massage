@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Report v3.31</title>
+  <title>Daily Report v3.32</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -206,7 +206,7 @@
    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
      <div>
-      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.31</span></div>
+      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.32</span></div>
       <p id="shopName" class="text-lg text-gray-600 mt-1"></p>
      </div>
      <div class="flex gap-2"><button onclick="showLanguageModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="changeLanguage">언어 변경</button> <button onclick="showFontModal()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600" data-translate="changeFont">폰트 변경</button> <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" data-translate="logout">로그아웃</button>
@@ -697,8 +697,8 @@
         // D1/Cloudflare Worker API endpoint. This keeps GitHub-hosted test.html connected to the same backend.
         const API_BASE_URL = 'https://massage.guidrthai.workers.dev';
         // 앱 버전: 기능/화면이 변경될 때마다 0.01씩 증가시킵니다.
-        // 현재 버전은 v3.31입니다.
-        const APP_VERSION = 'v3.31';
+        // 현재 버전은 v3.32입니다.
+        const APP_VERSION = 'v3.32';
         let currentPaymentReservationId = null;
         let selectedStaff = null;
         let menuRowCounter = 0;
@@ -9408,5 +9408,157 @@ function translateLegacy(value) {
         bindDBManagementActions();
         refreshShopNameHeader();
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99a6c0c3942d55a1',t:'MTc2MjQ1NDc4MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99a6c0c3942d55a1',t:'MTc2MjQ1NDc4MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();
+        // v3.32 customer loyalty and coupon extension. Existing customer/menu records are migrated in-place without changing IDs.
+        const LOYALTY_TYPES = ['couponBalance','mileageBalance','pointBalance'];
+        function loyaltyRead(key, fallback) { try { const v=JSON.parse(localStorage.getItem(getAdminKey(key)) || 'null'); return v == null ? fallback : v; } catch(e) { return fallback; } }
+        function loyaltySave(key, value) { localStorage.setItem(getAdminKey(key), JSON.stringify(value)); }
+        function ensureLoyaltyCustomerFields(customer) {
+            if (!customer || typeof customer !== 'object') return customer;
+            if (!Array.isArray(customer.loyaltyHistory)) customer.loyaltyHistory = [];
+            if (!Number.isFinite(Number(customer.couponBalance))) customer.couponBalance = 0;
+            if (!Number.isFinite(Number(customer.mileageBalance))) customer.mileageBalance = 0;
+            if (!Number.isFinite(Number(customer.pointBalance))) customer.pointBalance = 0;
+            if (!customer.socialPlatform) customer.socialPlatform = '';
+            if (!customer.socialId) customer.socialId = '';
+            return customer;
+        }
+        function loyaltyGetCustomers() {
+            const customers = JSON.parse(localStorage.getItem(getAdminKey('customers')) || '[]');
+            let changed = false;
+            customers.forEach(c => { const before = JSON.stringify(c); ensureLoyaltyCustomerFields(c); if (JSON.stringify(c) !== before) changed = true; });
+            if (changed) loyaltySave('customers', customers);
+            return customers;
+        }
+        function loyaltyEscape(value) { return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+        function loyaltyLog(customer, type, amount, action, note, reference) {
+            ensureLoyaltyCustomerFields(customer);
+            customer.loyaltyHistory.push({id:Date.now()+'-'+Math.random().toString(36).slice(2,8),type,amount:Number(amount)||0,action,note:String(note||''),reference:reference||'',date:new Date().toISOString()});
+        }
+        function loyaltyAdjustBalance(customerId, type, direction) {
+            const customers=loyaltyGetCustomers(), c=customers.find(x=>String(x.id)===String(customerId));
+            if(!c) return;
+            const labels={couponBalance:'쿠폰 잔액',mileageBalance:'마일리지 잔액',pointBalance:'포인트 잔액'};
+            const raw=prompt(labels[type]+' 조정 금액을 입력하세요. 증가 금액은 양수, 차감 금액은 음수로 입력합니다.\n현재 잔액: '+Number(c[type]||0).toLocaleString());
+            if(raw===null)return;
+            const amount=Number(String(raw).replace(/,/g,''));
+            if(!Number.isFinite(amount)||amount===0){alert('0이 아닌 올바른 금액을 입력해 주세요.');return;}
+            if(Number(c[type]||0)+amount<0){alert('잔액보다 많이 차감할 수 없습니다.');return;}
+            const note=prompt('조정 사유(예: 기존 잔액 이관, 과거 잔액 수정):','기존 잔액 조정');
+            if(note===null)return;
+            c[type]=Number(c[type]||0)+amount;
+            loyaltyLog(c,type,amount,amount>0?'manual_credit':'manual_debit',note,'manual-'+Date.now());
+            loyaltySave('customers',customers);
+            manageCustomerDirectory(document.getElementById('customerSearchInput')?.value||'');
+        }
+        function showLoyaltyHistory(customerId,type) {
+            const c=loyaltyGetCustomers().find(x=>String(x.id)===String(customerId)); if(!c)return;
+            const names={couponBalance:'쿠폰',mileageBalance:'마일리지',pointBalance:'포인트'};
+            const rows=(c.loyaltyHistory||[]).filter(x=>!type||x.type===type);
+            const body=rows.length?rows.slice().reverse().map(x=>'<tr><td class="border p-2">'+loyaltyEscape(new Date(x.date).toLocaleString())+'</td><td class="border p-2">'+loyaltyEscape(names[x.type]||x.type)+'</td><td class="border p-2">'+loyaltyEscape(x.action)+'</td><td class="border p-2 text-right">'+Number(x.amount||0).toLocaleString()+'</td><td class="border p-2">'+loyaltyEscape(x.note)+'</td></tr>').join(''):'<tr><td colspan="5" class="border p-3 text-center">내역이 없습니다.</td></tr>';
+            document.getElementById('managementTitle').textContent=c.name+' - '+(names[type]||'쿠폰/마일리지/포인트 내역');
+            document.getElementById('managementContent').innerHTML='<div class="mb-3">현재 잔액: '+loyaltyEscape(names[type]||'쿠폰')+' '+Number(c[type]||0).toLocaleString()+'</div><div class="overflow-x-auto"><table class="w-full border-collapse"><thead><tr><th class="border p-2">일시</th><th class="border p-2">구분</th><th class="border p-2">작업</th><th class="border p-2">금액</th><th class="border p-2">메모</th></tr></thead><tbody>'+body+'</tbody></table></div>';
+            document.getElementById('managementModal').style.display='block';
+        }
+        function manageCustomerDirectory(query='') {
+            const q=String(query||'').trim().toLowerCase(), customers=loyaltyGetCustomers().filter(c=>!q||[c.name,c.phone,c.customerNumber,c.socialPlatform,c.socialId].some(v=>String(v||'').toLowerCase().includes(q)));
+            const rows=customers.map(c=>'<tr><td class="border p-2">'+loyaltyEscape(c.name)+'</td><td class="border p-2">'+loyaltyEscape(c.phone)+'</td><td class="border p-2">'+loyaltyEscape(c.customerNumber)+'</td><td class="border p-2">'+loyaltyEscape([c.socialPlatform,c.socialId].filter(Boolean).join(': '))+'</td><td class="border p-2 text-right"><button class="underline" onclick="showLoyaltyHistory('+JSON.stringify(c.id)+',\'couponBalance\')">'+Number(c.couponBalance||0).toLocaleString()+'</button> <button title="기존 잔액 조정" onclick="loyaltyAdjustBalance('+JSON.stringify(c.id)+',\'couponBalance\')">±</button></td><td class="border p-2 text-right"><button class="underline" onclick="showLoyaltyHistory('+JSON.stringify(c.id)+',\'mileageBalance\')">'+Number(c.mileageBalance||0).toLocaleString()+'</button> <button title="기존 잔액 조정" onclick="loyaltyAdjustBalance('+JSON.stringify(c.id)+',\'mileageBalance\')">±</button></td><td class="border p-2 text-right"><button class="underline" onclick="showLoyaltyHistory('+JSON.stringify(c.id)+',\'pointBalance\')">'+Number(c.pointBalance||0).toLocaleString()+'</button> <button title="기존 잔액 조정" onclick="loyaltyAdjustBalance('+JSON.stringify(c.id)+',\'pointBalance\')">±</button></td><td class="border p-2 whitespace-nowrap"><button class="bg-blue-500 text-white rounded px-2 py-1" onclick="editCustomer('+JSON.stringify(c.id)+')">수정</button> <button class="bg-green-600 text-white rounded px-2 py-1" onclick="sellCouponToCustomer('+JSON.stringify(c.id)+')">쿠폰판매</button></td></tr>').join('');
+            document.getElementById('managementTitle').textContent='고객 관리';
+            document.getElementById('managementContent').innerHTML='<div class="flex flex-wrap gap-2 mb-3"><input id="customerSearchInput" value="'+loyaltyEscape(query)+'" oninput="manageCustomerDirectory(this.value)" class="border rounded px-3 py-2 flex-1" placeholder="이름/전화번호/고객번호 검색"><button class="bg-green-600 text-white rounded px-3 py-2" onclick="addNewCustomer()">고객 추가</button><button class="bg-blue-600 text-white rounded px-3 py-2" onclick="manageCouponProducts()">쿠폰 상품 관리</button><button class="bg-gray-700 text-white rounded px-3 py-2" onclick="manageLoyaltySettings()">마일리지/포인트 설정</button></div><div class="overflow-x-auto"><table class="w-full border-collapse text-sm"><thead><tr><th class="border p-2">고객명</th><th class="border p-2">전화번호</th><th class="border p-2">고객번호</th><th class="border p-2">소셜/아이디</th><th class="border p-2">쿠폰 잔액</th><th class="border p-2">마일리지</th><th class="border p-2">포인트</th><th class="border p-2">작업</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+            document.getElementById('managementModal').style.display='block';
+        }
+        function manageCustomers() { manageCustomerDirectory(''); }
+        function addNewCustomer() {
+            const content='<div class="space-y-3"><label class="block">고객명<input id="newCustomerName" class="border rounded w-full p-2"></label><label class="block">전화번호<input id="newCustomerPhone" class="border rounded w-full p-2"></label><label class="block">고객번호<input id="newCustomerNumber" class="border rounded w-full p-2"></label><label class="block">소셜 플랫폼<select id="newCustomerSocialPlatform" class="border rounded w-full p-2"><option value="">선택 안 함</option><option>KakaoTalk</option><option>LINE</option><option>WeChat</option><option>Zalo</option><option>Other</option></select></label><label class="block">소셜 아이디<input id="newCustomerSocialId" class="border rounded w-full p-2"></label><div class="flex gap-2"><button class="bg-green-600 text-white rounded p-2" onclick="saveNewCustomer()">저장</button><button class="bg-gray-500 text-white rounded p-2" onclick="manageCustomers()">취소</button></div></div>';
+            document.getElementById('managementTitle').textContent='고객 추가';document.getElementById('managementContent').innerHTML=content;
+        }
+        function saveNewCustomer() {
+            const name=document.getElementById('newCustomerName').value.trim();if(!name){alert('고객명을 입력해 주세요.');return;}
+            const customers=loyaltyGetCustomers(), id=Math.max(0,...customers.map(c=>Number(c.id)||0))+1;
+            customers.push(ensureLoyaltyCustomerFields({id,name,phone:document.getElementById('newCustomerPhone').value.trim(),customerNumber:document.getElementById('newCustomerNumber').value.trim(),socialPlatform:document.getElementById('newCustomerSocialPlatform').value,socialId:document.getElementById('newCustomerSocialId').value.trim()}));
+            loyaltySave('customers',customers);manageCustomers();
+        }
+        function editCustomer(id) {
+            const c=loyaltyGetCustomers().find(x=>String(x.id)===String(id));if(!c)return;
+            const opts=['','KakaoTalk','LINE','WeChat','Zalo','Other'].map(x=>'<option value="'+x+'" '+(c.socialPlatform===x?'selected':'')+'>'+ (x||'선택 안 함')+'</option>').join('');
+            document.getElementById('managementTitle').textContent='고객 수정';
+            document.getElementById('managementContent').innerHTML='<div class="space-y-3"><label class="block">고객명<input id="editCustomerName" class="border rounded w-full p-2" value="'+loyaltyEscape(c.name)+'"></label><label class="block">전화번호<input id="editCustomerPhone" class="border rounded w-full p-2" value="'+loyaltyEscape(c.phone)+'"></label><label class="block">고객번호<input id="editCustomerNumber" class="border rounded w-full p-2" value="'+loyaltyEscape(c.customerNumber)+'"></label><label class="block">소셜 플랫폼<select id="editCustomerSocialPlatform" class="border rounded w-full p-2">'+opts+'</select></label><label class="block">소셜 아이디<input id="editCustomerSocialId" class="border rounded w-full p-2" value="'+loyaltyEscape(c.socialId)+'"></label><div class="text-sm">현재 쿠폰: '+Number(c.couponBalance||0).toLocaleString()+' <button onclick="loyaltyAdjustBalance('+JSON.stringify(c.id)+',\'couponBalance\')">잔액 조정</button><br>마일리지: '+Number(c.mileageBalance||0).toLocaleString()+' <button onclick="loyaltyAdjustBalance('+JSON.stringify(c.id)+',\'mileageBalance\')">잔액 조정</button><br>포인트: '+Number(c.pointBalance||0).toLocaleString()+' <button onclick="loyaltyAdjustBalance('+JSON.stringify(c.id)+',\'pointBalance\')">잔액 조정</button></div><button class="bg-blue-600 text-white rounded p-2" onclick="updateCustomer('+JSON.stringify(c.id)+')">저장</button> <button class="bg-gray-500 text-white rounded p-2" onclick="manageCustomers()">취소</button>';
+        }
+        function updateCustomer(id) {
+            const customers=loyaltyGetCustomers(), c=customers.find(x=>String(x.id)===String(id));if(!c)return;
+            const name=document.getElementById('editCustomerName').value.trim();if(!name){alert('고객명을 입력해 주세요.');return;}
+            c.name=name;c.phone=document.getElementById('editCustomerPhone').value.trim();c.customerNumber=document.getElementById('editCustomerNumber').value.trim();c.socialPlatform=document.getElementById('editCustomerSocialPlatform').value;c.socialId=document.getElementById('editCustomerSocialId').value.trim();
+            loyaltySave('customers',customers);manageCustomers();
+        }
+        function manageCouponProducts() {
+            const products=loyaltyRead('couponProducts',[]);
+            const rows=products.map(p=>'<tr><td class="border p-2">'+loyaltyEscape(p.name)+'</td><td class="border p-2 text-right">'+Number(p.saleAmount).toLocaleString()+'</td><td class="border p-2 text-right">'+Number(p.creditAmount).toLocaleString()+'</td><td class="border p-2"><button onclick="deleteCouponProduct('+p.id+')" class="text-red-600">삭제</button></td></tr>').join('');
+            document.getElementById('managementTitle').textContent='메뉴/쿠폰 관리';
+            document.getElementById('managementContent').innerHTML='<div class="grid gap-2 md:grid-cols-3 mb-3"><input id="couponProductName" class="border rounded p-2" placeholder="쿠폰 상품명"><input id="couponSaleAmount" type="number" min="1" class="border rounded p-2" placeholder="판매금액"><input id="couponCreditAmount" type="number" min="1" class="border rounded p-2" placeholder="적립금액"></div><button class="bg-green-600 text-white rounded p-2 mb-3" onclick="saveCouponProduct()">쿠폰 추가</button><div class="overflow-x-auto"><table class="w-full border-collapse"><thead><tr><th class="border p-2">쿠폰명</th><th class="border p-2">판매금액</th><th class="border p-2">적립금액</th><th class="border p-2">작업</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+            document.getElementById('managementModal').style.display='block';
+        }
+        function saveCouponProduct() {
+            const name=document.getElementById('couponProductName').value.trim(), saleAmount=Number(document.getElementById('couponSaleAmount').value), creditAmount=Number(document.getElementById('couponCreditAmount').value);
+            if(!name||saleAmount<=0||creditAmount<=0){alert('쿠폰명, 판매금액, 적립금액을 올바르게 입력해 주세요.');return;}
+            const p=loyaltyRead('couponProducts',[]);p.push({id:Math.max(0,...p.map(x=>Number(x.id)||0))+1,name,saleAmount,creditAmount,active:true});loyaltySave('couponProducts',p);manageCouponProducts();
+        }
+        function deleteCouponProduct(id) { if(!confirm('이 쿠폰 상품을 비활성화하시겠습니까?'))return;const p=loyaltyRead('couponProducts',[]);const x=p.find(y=>Number(y.id)===Number(id));if(x)x.active=false;loyaltySave('couponProducts',p);manageCouponProducts(); }
+        function sellCouponToCustomer(customerId=null) {
+            const customers=loyaltyGetCustomers(), products=loyaltyRead('couponProducts',[]).filter(p=>p.active!==false);
+            if(!products.length){alert('먼저 쿠폰 상품을 추가해 주세요.');manageCouponProducts();return;}
+            const customerOptions=customers.map(c=>'<option value="'+loyaltyEscape(c.id)+'" '+(String(c.id)===String(customerId)?'selected':'')+'>'+loyaltyEscape(c.name+' / '+(c.phone||c.customerNumber||''))+'</option>').join('');
+            const productOptions=products.map(p=>'<option value="'+p.id+'">'+loyaltyEscape(p.name)+' — 판매 '+Number(p.saleAmount).toLocaleString()+' / 적립 '+Number(p.creditAmount).toLocaleString()+'</option>').join('');
+            document.getElementById('managementTitle').textContent='쿠폰 판매';
+            document.getElementById('managementContent').innerHTML='<div class="space-y-3"><label class="block">고객 선택<select id="couponSaleCustomer" class="border rounded w-full p-2">'+customerOptions+'</select></label><label class="block">쿠폰 상품<select id="couponSaleProduct" class="border rounded w-full p-2">'+productOptions+'</select></label><label class="block">메모<input id="couponSaleNote" class="border rounded w-full p-2" placeholder="선택사항"></label><button class="bg-green-600 text-white rounded p-2" onclick="confirmCouponSale()">판매 및 적립</button></div>';
+            document.getElementById('managementModal').style.display='block';
+        }
+        function confirmCouponSale() {
+            const customers=loyaltyGetCustomers(), c=customers.find(x=>String(x.id)===String(document.getElementById('couponSaleCustomer').value)), products=loyaltyRead('couponProducts',[]), p=products.find(x=>String(x.id)===String(document.getElementById('couponSaleProduct').value));
+            if(!c||!p||p.active===false){alert('유효한 고객과 쿠폰 상품을 선택해 주세요.');return;}
+            const sales=loyaltyRead('couponSales',[]), saleId='coupon-'+Date.now();
+            c.couponBalance=Number(c.couponBalance||0)+Number(p.creditAmount);
+            loyaltyLog(c,'couponBalance',p.creditAmount,'coupon_sale_credit',document.getElementById('couponSaleNote').value||('쿠폰 판매: '+p.name),saleId);
+            sales.push({id:saleId,customerId:c.id,customerName:c.name,productId:p.id,productName:p.name,saleAmount:p.saleAmount,creditAmount:p.creditAmount,date:new Date().toISOString()});
+            loyaltySave('customers',customers);loyaltySave('couponSales',sales);
+            alert('쿠폰 판매 및 '+Number(p.creditAmount).toLocaleString()+' 적립이 완료되었습니다. 판매금액 '+Number(p.saleAmount).toLocaleString()+'은 별도 결제 기록으로 보관됩니다.');
+            manageCustomerDirectory('');
+        }
+        function manageLoyaltySettings() {
+            const x=loyaltyRead('loyaltySettings',{mileageRate:0,mileageMinUse:0,mileageExpiryDays:365,pointEarnAmount:100,pointValue:1,pointMinUse:1});
+            document.getElementById('managementTitle').textContent='마일리지/포인트 설정';
+            document.getElementById('managementContent').innerHTML='<div class="space-y-3"><h4 class="font-bold">마일리지</h4><label class="block">서비스 금액 적립률(%)<input id="loyMileageRate" type="number" min="0" max="100" value="'+Number(x.mileageRate||0)+'" class="border rounded w-full p-2"></label><label class="block">사용 최소 잔액<input id="loyMileageMinUse" type="number" min="0" value="'+Number(x.mileageMinUse||0)+'" class="border rounded w-full p-2"></label><label class="block">유효기간(일)<input id="loyMileageExpiry" type="number" min="1" value="'+Number(x.mileageExpiryDays||365)+'" class="border rounded w-full p-2"></label><hr><h4 class="font-bold">포인트</h4><label class="block">적립 기준금액(1포인트당)<input id="loyPointEarnAmount" type="number" min="1" value="'+Number(x.pointEarnAmount||100)+'" class="border rounded w-full p-2"></label><label class="block">1포인트 환산 가치<input id="loyPointValue" type="number" min="0" value="'+Number(x.pointValue||1)+'" class="border rounded w-full p-2"></label><label class="block">사용 최소 포인트<input id="loyPointMinUse" type="number" min="0" value="'+Number(x.pointMinUse||1)+'" class="border rounded w-full p-2"></label><button class="bg-green-600 text-white rounded p-2" onclick="saveLoyaltySettings()">설정 저장</button></div>';
+            document.getElementById('managementModal').style.display='block';
+        }
+        function saveLoyaltySettings() {
+            const x={mileageRate:Number(document.getElementById('loyMileageRate').value),mileageMinUse:Number(document.getElementById('loyMileageMinUse').value),mileageExpiryDays:Number(document.getElementById('loyMileageExpiry').value),pointEarnAmount:Number(document.getElementById('loyPointEarnAmount').value),pointValue:Number(document.getElementById('loyPointValue').value),pointMinUse:Number(document.getElementById('loyPointMinUse').value)};
+            if(x.mileageRate<0||x.mileageRate>100||x.mileageMinUse<0||x.mileageExpiryDays<1||x.pointEarnAmount<1||x.pointValue<0||x.pointMinUse<0){alert('설정값을 확인해 주세요.');return;}
+            loyaltySave('loyaltySettings',x);alert('설정이 저장되었습니다.');manageCustomerDirectory('');
+        }
+        function showCustomerMain() {
+            setActiveMainNav('mainNavCustomer');hideAllSections();
+            let section=document.getElementById('customerSection');
+            if(!section){section=document.createElement('section');section.id='customerSection';section.className='bg-white rounded-lg shadow-md p-6';document.querySelector('main')?.appendChild(section);}
+            section.style.display='block';
+            section.innerHTML='<div class="flex flex-wrap justify-between items-center gap-2 mb-4"><h2 class="text-2xl font-bold">고객 관리</h2><div class="flex flex-wrap gap-2"><button class="bg-green-600 text-white rounded px-3 py-2" onclick="addNewCustomer()">고객 추가</button><button class="bg-blue-600 text-white rounded px-3 py-2" onclick="sellCouponToCustomer()">쿠폰 판매</button><button class="bg-gray-700 text-white rounded px-3 py-2" onclick="manageLoyaltySettings()">마일리지/포인트 설정</button></div></div><input id="customerSearchInput" oninput="renderCustomerMain(this.value)" class="border rounded px-3 py-2 w-full mb-3" placeholder="이름/전화번호/고객번호 검색"><div id="customerMainTable"></div>';
+            renderCustomerMain('');
+        }
+        function renderCustomerMain(query='') {
+            const target=document.getElementById('customerMainTable');if(!target)return;
+            const q=String(query||'').toLowerCase().trim(), customers=loyaltyGetCustomers().filter(c=>!q||[c.name,c.phone,c.customerNumber].some(v=>String(v||'').toLowerCase().includes(q)));
+            target.innerHTML='<div class="overflow-x-auto"><table class="w-full border-collapse text-sm"><thead><tr><th class="border p-2">고객명</th><th class="border p-2">전화번호</th><th class="border p-2">고객번호</th><th class="border p-2">쿠폰</th><th class="border p-2">마일리지</th><th class="border p-2">포인트</th><th class="border p-2">작업</th></tr></thead><tbody>'+customers.map(c=>'<tr><td class="border p-2">'+loyaltyEscape(c.name)+'</td><td class="border p-2">'+loyaltyEscape(c.phone)+'</td><td class="border p-2">'+loyaltyEscape(c.customerNumber)+'</td><td class="border p-2 text-right"><button class="underline" onclick="showLoyaltyHistory('+JSON.stringify(c.id)+',\'couponBalance\')">'+Number(c.couponBalance||0).toLocaleString()+'</button> <button onclick="loyaltyAdjustBalance('+JSON.stringify(c.id)+',\'couponBalance\')">±</button></td><td class="border p-2 text-right"><button class="underline" onclick="showLoyaltyHistory('+JSON.stringify(c.id)+',\'mileageBalance\')">'+Number(c.mileageBalance||0).toLocaleString()+'</button> <button onclick="loyaltyAdjustBalance('+JSON.stringify(c.id)+',\'mileageBalance\')">±</button></td><td class="border p-2 text-right"><button class="underline" onclick="showLoyaltyHistory('+JSON.stringify(c.id)+',\'pointBalance\')">'+Number(c.pointBalance||0).toLocaleString()+'</button> <button onclick="loyaltyAdjustBalance('+JSON.stringify(c.id)+',\'pointBalance\')">±</button></td><td class="border p-2"><button class="bg-blue-500 text-white rounded px-2 py-1" onclick="editCustomer('+JSON.stringify(c.id)+')">수정</button> <button class="bg-green-600 text-white rounded px-2 py-1" onclick="sellCouponToCustomer('+JSON.stringify(c.id)+')">쿠폰 판매</button></td></tr>').join('')+'</tbody></table></div>';
+        }
+        function hideAllSectionsWithCustomer() { hideAllSections(); const s=document.getElementById('customerSection');if(s)s.style.display='none'; }
+        // Add the customer screen to the primary navigation and include it in section hiding.
+        (function installCustomerNavigation(){
+            const nav=document.querySelector('#mainNavCustomer')?.parentElement || document.querySelector('#mainNavDashboard')?.parentElement;
+            if(nav && !document.getElementById('mainNavCustomer')){const b=document.createElement('button');b.id='mainNavCustomer';b.className='main-nav-button py-4 px-6 rounded-lg text-lg';b.textContent='고객';b.onclick=showCustomerMain;const db=document.getElementById('mainNavDB');nav.insertBefore(b,db);}
+            const baseHide=hideAllSections;
+            hideAllSections=function(){baseHide();const c=document.getElementById('customerSection');if(c)c.style.display='none';};
+            const baseActive=setActiveMainNav;
+            setActiveMainNav=function(id){baseActive(id);const c=document.getElementById('mainNavCustomer');if(c)c.classList.toggle('active',id==='mainNavCustomer');};
+            const baseManageMenus=manageMenus;
+            manageMenus=function(){baseManageMenus();const buttons=document.querySelectorAll('#managementContent button');buttons.forEach(b=>{if(b.textContent.trim()==='새 메뉴 추가')b.textContent='메뉴 추가';});const box=document.getElementById('managementContent');if(box&&!box.querySelector('#couponProductsButton')){const b=document.createElement('button');b.id='couponProductsButton';b.className='bg-blue-600 text-white px-4 py-2 rounded ml-2';b.textContent='쿠폰 추가';b.onclick=manageCouponProducts;box.querySelector('div')?.appendChild(b);}};
+        })();
+
+</script></body>
 </html>
