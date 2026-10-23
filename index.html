@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Report v3.33</title>
+  <title>Daily Report v3.34</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -206,7 +206,7 @@
    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
      <div>
-      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.33</span></div>
+      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.34</span></div>
       <p id="shopName" class="text-lg text-gray-600 mt-1"></p>
      </div>
      <div class="flex gap-2"><button onclick="showLanguageModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="changeLanguage">언어 변경</button> <button onclick="showFontModal()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600" data-translate="changeFont">폰트 변경</button> <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" data-translate="logout">로그아웃</button>
@@ -375,7 +375,7 @@
        </select>
       </div>
      </div>
-    </div><!-- 차트 영역 -->
+    </div><div id="weeklyCommissionOption" class="mb-4" style="display:none;"><button type="button" onclick="showDailyCommissionBreakdown()" class="subnav-button px-4 py-2 rounded">날짜별 커미션내역</button></div><div id="dailyCommissionBreakdown" class="mb-6" style="display:none;"></div><!-- 차트 영역 -->
     <div id="chartContainer" class="mb-6" style="display: none;">
      <canvas id="statsChart" width="800" height="400" style="display:none;"></canvas>
     </div>
@@ -697,8 +697,8 @@
         // D1/Cloudflare Worker API endpoint. This keeps GitHub-hosted test.html connected to the same backend.
         const API_BASE_URL = 'https://massage.guidrthai.workers.dev';
         // 앱 버전: 기능/화면이 변경될 때마다 0.01씩 증가시킵니다.
-        // 현재 버전은 v3.33입니다.
-        const APP_VERSION = 'v3.33';
+        // 현재 버전은 v3.34입니다.
+        const APP_VERSION = 'v3.34';
         let currentPaymentReservationId = null;
         let selectedStaff = null;
         let menuRowCounter = 0;
@@ -6120,6 +6120,7 @@ function translateLegacy(value) {
         }
 
         function showDailyStats() {
+            const commissionOption = document.getElementById('weeklyCommissionOption'); if (commissionOption) commissionOption.style.display = 'none'; const commissionBreakdown = document.getElementById('dailyCommissionBreakdown'); if (commissionBreakdown) commissionBreakdown.style.display = 'none';
             const annualMenu = document.getElementById('annualMenuSalesContainer');
             const annualGraph = document.getElementById('annualSalesGraphsContainer');
             if (annualMenu) annualMenu.style.display = 'none';
@@ -6142,6 +6143,10 @@ function translateLegacy(value) {
             const graphsContainer = document.getElementById('monthlySalesGraphsContainer');
             if (graphsContainer) graphsContainer.style.display = 'none';
             currentStatsType = 'weekly';
+            const commissionOption = document.getElementById('weeklyCommissionOption');
+            if (commissionOption) commissionOption.style.display = 'block';
+            const commissionBreakdown = document.getElementById('dailyCommissionBreakdown');
+            if (commissionBreakdown) commissionBreakdown.style.display = 'none';
             const menuContainer = document.getElementById('menuStatisticsContainer');
             if (menuContainer) menuContainer.style.display = 'none';
             updateStatsButtonStyles();
@@ -6150,7 +6155,60 @@ function translateLegacy(value) {
             loadStatistics();
         }
 
+
+        function showDailyCommissionBreakdown() {
+            if (currentStatsType !== 'weekly') {
+                alert('주간 메뉴에서 날짜 범위를 선택한 후 이용해 주세요.');
+                return;
+            }
+            const startDate = document.getElementById('statsStartDate').value;
+            const endDate = document.getElementById('statsEndDate').value;
+            if (!startDate || !endDate || startDate > endDate) {
+                alert('올바른 주간 시작일과 종료일을 선택해 주세요.');
+                return;
+            }
+            const reservations = JSON.parse(localStorage.getItem(getAdminKey('reservations')) || '[]');
+            const staffList = JSON.parse(localStorage.getItem(getAdminKey('staff')) || '[]');
+            const staffNames = [...new Set([
+                ...staffList.map(x => x.name || x.staffName).filter(Boolean),
+                ...reservations.filter(r => r.date >= startDate && r.date <= endDate && r.paid).map(r => r.staffName).filter(Boolean)
+            ])];
+            const dates = [];
+            const cursor = new Date(startDate + 'T12:00:00');
+            const last = new Date(endDate + 'T12:00:00');
+            while (cursor <= last && dates.length < 62) {
+                dates.push(new Date(cursor));
+                cursor.setDate(cursor.getDate() + 1);
+            }
+            const currency = JSON.parse(localStorage.getItem(getAdminKey('currency')) || '{"symbol":"","name":"원"}');
+            const dayNames = ['일','월','화','수','목','금','토'];
+            const commissionFor = (staffName, date) => reservations
+                .filter(r => r.paid && r.date === date && r.staffName === staffName)
+                .reduce((sum, r) => sum + (Number(r.commission) || 0), 0);
+            const header = '<th class="border border-gray-300 p-2 whitespace-nowrap">마사지사</th>' +
+                dates.map(d => '<th class="border border-gray-300 p-2 whitespace-nowrap">' + d.getDate() + '일(' + dayNames[d.getDay()] + ')</th>').join('') +
+                '<th class="border border-gray-300 p-2 whitespace-nowrap">합계</th><th class="border border-gray-300 p-2 whitespace-nowrap">평균</th>';
+            const rows = staffNames.map(name => {
+                const vals = dates.map(d => commissionFor(name, d.toISOString().slice(0,10)));
+                const total = vals.reduce((a,b)=>a+b,0);
+                const average = dates.length ? total / dates.length : 0;
+                return '<tr><td class="border border-gray-300 p-2 whitespace-nowrap">' + String(name).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])) + '</td>' +
+                    vals.map(v=>'<td class="border border-gray-300 p-2 text-right whitespace-nowrap">'+(v ? v.toLocaleString() : '-')+'</td>').join('') +
+                    '<td class="border border-gray-300 p-2 text-right font-bold whitespace-nowrap">'+total.toLocaleString()+'</td><td class="border border-gray-300 p-2 text-right whitespace-nowrap">'+Math.round(average).toLocaleString()+'</td></tr>';
+            }).join('');
+            const container = document.getElementById('dailyCommissionBreakdown');
+            if (!container) return;
+            container.innerHTML = '<h3 class="text-lg font-bold mb-3">날짜별 커미션내역</h3><div class="text-sm text-gray-600 mb-2">'+startDate+' ~ '+endDate+' · 금액 단위: '+String(currency.symbol||currency.name||'')+'</div><div class="overflow-x-auto"><table class="w-full border-collapse text-sm"><thead><tr class="bg-gray-100">'+header+'</tr></thead><tbody>' +
+                (rows || '<tr><td class="border p-3" colspan="'+(dates.length+3)+'">표시할 마사지사 데이터가 없습니다.</td></tr>') +
+                '</tbody><tfoot><tr class="bg-gray-100 font-bold"><td class="border p-2">일별 합계</td>' +
+                dates.map(d=>'<td class="border p-2 text-right">'+staffNames.reduce((sum,n)=>sum+commissionFor(n,d.toISOString().slice(0,10)),0).toLocaleString()+'</td>').join('') +
+                '<td class="border p-2 text-right">'+staffNames.reduce((sum,n)=>sum+dates.reduce((a,d)=>a+commissionFor(n,d.toISOString().slice(0,10)),0),0).toLocaleString()+'</td><td class="border p-2">-</td></tr></tfoot></table></div>';
+            container.style.display = 'block';
+            container.scrollIntoView({behavior:'smooth',block:'start'});
+        }
+
         function showMonthlyStats() {
+            const commissionOption = document.getElementById('weeklyCommissionOption'); if (commissionOption) commissionOption.style.display = 'none'; const commissionBreakdown = document.getElementById('dailyCommissionBreakdown'); if (commissionBreakdown) commissionBreakdown.style.display = 'none';
             const annualMenu = document.getElementById('annualMenuSalesContainer');
             const annualGraph = document.getElementById('annualSalesGraphsContainer');
             if (annualMenu) annualMenu.style.display = 'none';
@@ -6288,6 +6346,7 @@ function translateLegacy(value) {
         }
 
         function showMenuSales() {
+            const commissionOption = document.getElementById('weeklyCommissionOption'); if (commissionOption) commissionOption.style.display = 'none'; const commissionBreakdown = document.getElementById('dailyCommissionBreakdown'); if (commissionBreakdown) commissionBreakdown.style.display = 'none';
             document.getElementById('monthlySalesGraphsContainer').style.display = 'none';
             document.getElementById('annualMenuSalesContainer').style.display = 'none';
             document.getElementById('annualSalesGraphsContainer').style.display = 'none';
@@ -6302,6 +6361,7 @@ function translateLegacy(value) {
         }
 
         function showMonthlySalesChart() {
+            const commissionOption = document.getElementById('weeklyCommissionOption'); if (commissionOption) commissionOption.style.display = 'none'; const commissionBreakdown = document.getElementById('dailyCommissionBreakdown'); if (commissionBreakdown) commissionBreakdown.style.display = 'none';
             currentStatsType = 'monthlySalesChart';
             document.getElementById('monthlySalesGraphsContainer').style.display = 'block';
             document.getElementById('annualMenuSalesContainer').style.display = 'none';
@@ -6316,6 +6376,7 @@ function translateLegacy(value) {
         }
 
         function showAnnualMenuSales() {
+            const commissionOption = document.getElementById('weeklyCommissionOption'); if (commissionOption) commissionOption.style.display = 'none'; const commissionBreakdown = document.getElementById('dailyCommissionBreakdown'); if (commissionBreakdown) commissionBreakdown.style.display = 'none';
             currentStatsType = 'annualMenuSales';
             document.getElementById('monthlySalesGraphsContainer').style.display = 'none';
             document.getElementById('annualSalesGraphsContainer').style.display = 'none';
@@ -6328,6 +6389,7 @@ function translateLegacy(value) {
         }
 
         function showAnnualSalesChart() {
+            const commissionOption = document.getElementById('weeklyCommissionOption'); if (commissionOption) commissionOption.style.display = 'none'; const commissionBreakdown = document.getElementById('dailyCommissionBreakdown'); if (commissionBreakdown) commissionBreakdown.style.display = 'none';
             currentStatsType = 'annualSalesChart';
             document.getElementById('monthlySalesGraphsContainer').style.display = 'none';
             document.getElementById('annualMenuSalesContainer').style.display = 'none';
@@ -9417,7 +9479,7 @@ function translateLegacy(value) {
         refreshShopNameHeader();
     </script>
  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99a6c0c3942d55a1',t:'MTc2MjQ1NDc4MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();
-        // v3.33 customer loyalty and coupon extension. Existing customer/menu records are migrated in-place without changing IDs.
+        // v3.34 customer loyalty and coupon extension. Existing customer/menu records are migrated in-place without changing IDs.
         const LOYALTY_TYPES = ['couponBalance','mileageBalance','pointBalance'];
         function loyaltyRead(key, fallback) { try { const v=JSON.parse(localStorage.getItem(getAdminKey(key)) || 'null'); return v == null ? fallback : v; } catch(e) { return fallback; } }
         function loyaltySave(key, value) { localStorage.setItem(getAdminKey(key), JSON.stringify(value)); }
