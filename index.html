@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Report v3.40</title>
+  <title>Daily Report v3.41</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -206,7 +206,7 @@
    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
      <div>
-      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.40</span></div>
+      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.41</span></div>
       <p id="shopName" class="text-lg text-gray-600 mt-1"></p>
      </div>
      <div class="flex gap-2"><button onclick="showLanguageModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="changeLanguage">언어 변경</button> <button onclick="showFontModal()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600" data-translate="changeFont">폰트 변경</button> <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" data-translate="logout">로그아웃</button>
@@ -633,6 +633,7 @@
      </div>
     </div>
     <div class="mb-3 text-sm text-gray-600" data-translate="paymentMethodClickHint">결제방식 이름을 클릭하면 남은 금액이 자동 입력됩니다. 입력 후 금액을 직접 수정할 수 있습니다.</div>
+    <label class="block mb-3 text-sm">고객 선택(쿠폰/마일리지/포인트 결제 시 필수)<select id="paymentCustomer" class="border rounded w-full p-2"><option value="">고객 선택</option></select></label>
     <div id="paymentMethods" class="space-y-3 mb-4">
     </div>
     <div class="flex gap-2"><button onclick="processPayment()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600" data-translate="confirm">확인</button> <button onclick="closePaymentModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="cancel">취소</button>
@@ -699,7 +700,7 @@
         const API_BASE_URL = 'https://massage.guidrthai.workers.dev';
         // 앱 버전: 기능/화면이 변경될 때마다 0.01씩 증가시킵니다.
         // 현재 버전은 v3.34입니다.
-        const APP_VERSION = 'v3.40';
+        const APP_VERSION = 'v3.41';
         let currentPaymentReservationId = null;
         let selectedStaff = null;
         let menuRowCounter = 0;
@@ -3767,6 +3768,16 @@ function showDBManagement() {
                 } else { cell.textContent = '-'; cell.style.color = '#6b7280'; }
             });
         }
+        function getPaymentSemanticType(method) {
+            const saved=String(method?.semanticType||'').toLowerCase();
+            if(['coupon','mileage','point'].includes(saved)) return saved;
+            const name=String(method?.name||'').toLowerCase();
+            if(name.includes('coupon')||name.includes('쿠폰')) return 'coupon';
+            if(name.includes('mileage')||name.includes('마일리지')) return 'mileage';
+            if(name.includes('point')||name.includes('포인트')) return 'point';
+            return 'cash';
+        }
+
         // 입금 관련 함수
         function showPaymentModal(reservationId) {
             currentPaymentReservationId = reservationId;
@@ -3774,6 +3785,9 @@ function showDBManagement() {
             const reservation = reservations.find(r => r.id === reservationId);
             const paymentMethods = JSON.parse(localStorage.getItem(getAdminKey('paymentMethods')) || '[]');
             const currency = JSON.parse(localStorage.getItem(getAdminKey('currency')) || '{"symbol":"","name":"원"}');
+            const customers = JSON.parse(localStorage.getItem(getAdminKey('customers')) || '[]');
+            const customerSelect = document.getElementById('paymentCustomer');
+            if (customerSelect) customerSelect.innerHTML = '<option value="">고객 선택(쿠폰/마일리지/포인트 결제 시 필수)</option>' + customers.map(c => '<option value="' + String(c.id).replace(/"/g,'&quot;') + '" ' + (String(c.name||'')===String(reservation.customerName||'')?'selected':'') + '>' + String(c.name||'').replace(/&/g,'&amp;').replace(/</g,'&lt;') + ' / 쿠폰 ' + Number(c.couponBalance||0).toLocaleString() + '</option>').join('');
 
             document.getElementById('paymentTotalAmount').textContent = reservation.price.toLocaleString();
             document.getElementById('paymentCurrency').textContent = currency.symbol;
@@ -3842,45 +3856,29 @@ function showDBManagement() {
         }
 
         function processPayment() {
-            const reservations = JSON.parse(localStorage.getItem(getAdminKey('reservations')) || '[]');
-            const reservation = reservations.find(r => r.id === currentPaymentReservationId);
-            const paymentMethods = JSON.parse(localStorage.getItem(getAdminKey('paymentMethods')) || '[]');
-            const enteredAmount = parseInt(document.getElementById('paymentEnteredAmount').textContent.replace(/,/g, ''));
-
-            // QR TIP 금액 계산
-            let qrTipAmount = 0;
-            paymentMethods.forEach(method => {
-                if (method.name === 'QR TIP') {
-                    const input = document.getElementById(`payment_${method.id}`);
-                    if (input) {
-                        qrTipAmount += parseInt(input.value) || 0;
-                    }
-                }
-            });
-
-            // QR TIP을 제외한 금액이 예약 가격과 일치하는지 확인
-            const amountExcludingTip = enteredAmount - qrTipAmount;
-            if (amountExcludingTip !== reservation.price) {
-                alert('QR TIP을 제외한 입력된 금액이 총 금액과 일치하지 않습니다.');
-                return;
+            const reservations=JSON.parse(localStorage.getItem(getAdminKey('reservations'))||'[]');
+            const reservation=reservations.find(r=>Number(r.id)===Number(currentPaymentReservationId));
+            if(!reservation){alert('예약 데이터를 찾을 수 없습니다.');return;}
+            const methods=JSON.parse(localStorage.getItem(getAdminKey('paymentMethods'))||'[]');
+            const entered=parseInt(document.getElementById('paymentEnteredAmount').textContent.replace(/,/g,''))||0;
+            let tip=0; methods.forEach(m=>{if(m.name==='QR TIP'){const el=document.getElementById('payment_'+m.id);if(el)tip+=parseInt(el.value)||0;}});
+            if(entered-tip!==Number(reservation.price)){alert('QR TIP을 제외한 입력된 금액이 총 금액과 일치하지 않습니다.');return;}
+            const details={}, amounts={coupon:0,mileage:0,point:0};
+            methods.forEach(m=>{const el=document.getElementById('payment_'+m.id),amount=el?(parseInt(el.value)||0):0;if(amount>0){details[m.name]=amount;const type=getPaymentSemanticType(m);if(Object.prototype.hasOwnProperty.call(amounts,type))amounts[type]+=amount;}});
+            const customers=JSON.parse(localStorage.getItem(getAdminKey('customers'))||'[]');
+            const customerId=document.getElementById('paymentCustomer')?.value||'';
+            const customer=customers.find(c=>String(c.id)===String(customerId));
+            if((amounts.coupon||amounts.mileage||amounts.point)&&!customer){alert('쿠폰/마일리지/포인트 결제에는 고객을 선택해야 합니다.');return;}
+            const fields={coupon:'couponBalance',mileage:'mileageBalance',point:'pointBalance'};
+            for(const type of ['coupon','mileage','point']){const amount=amounts[type]||0;if(amount>Number(customer?.[fields[type]]||0)){alert('고객의 '+({coupon:'쿠폰',mileage:'마일리지',point:'포인트'}[type])+' 잔액이 부족합니다.');return;}}
+            if(customer){
+                for(const type of ['coupon','mileage','point']){const amount=amounts[type]||0;if(!amount)continue;const field=fields[type];customer[field]=Number(customer[field]||0)-amount;if(typeof loyaltyLog==='function')loyaltyLog(customer,field,-amount,type+'_service_payment','예약 결제 차감: '+(reservation.menuName||''),reservation.id);}
+                localStorage.setItem(getAdminKey('customers'),JSON.stringify(customers));
+                reservation.customerId=customer.id;reservation.customerName=customer.name;
             }
-
-            // 입금 방식별 상세 정보 저장
-            const paymentDetails = {};
-            paymentMethods.forEach(method => {
-                const input = document.getElementById(`payment_${method.id}`);
-                if (input && parseInt(input.value) > 0) {
-                    paymentDetails[method.name] = parseInt(input.value);
-                }
-            });
-
-            reservation.paid = true;
-            reservation.paymentDetails = paymentDetails;
-            localStorage.setItem(getAdminKey('reservations'), JSON.stringify(reservations));
-
-            alert('입금이 완료되었습니다.');
-            closePaymentModal();
-            loadDashboard();
+            reservation.paid=true;reservation.paymentDetails=details;reservation.paymentSemanticDetails=amounts;
+            localStorage.setItem(getAdminKey('reservations'),JSON.stringify(reservations));
+            alert('입금이 완료되었습니다.');closePaymentModal();loadDashboard();
         }
 
         function closePaymentModal() {
@@ -4748,6 +4746,7 @@ function showDBManagement() {
                         <label class="block text-sm font-medium mb-2">입금방식명:</label>
                         <input type="text" id="newPaymentMethodName" class="w-full border rounded px-3 py-2" placeholder="입금방식명을 입력하세요">
                     </div>
+                    <div><label class="block text-sm font-medium mb-2">연결 기능</label><select id="newPaymentMethodSemantic" class="w-full border rounded px-3 py-2"><option value="cash">일반 결제</option><option value="coupon">쿠폰 잔액 차감</option><option value="mileage">마일리지 차감</option><option value="point">포인트 차감</option></select></div>
                     <div class="flex gap-2">
                         <button onclick="saveNewPaymentMethod()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">저장</button>
                         <button onclick="managePaymentMethods()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
@@ -4770,10 +4769,7 @@ function showDBManagement() {
             const paymentMethods = JSON.parse(localStorage.getItem(getAdminKey('paymentMethods')) || '[]');
             const newId = Math.max(...paymentMethods.map(p => p.id), 0) + 1;
 
-            paymentMethods.push({
-                id: newId,
-                name: name
-            });
+            paymentMethods.push({id:newId,name:name,semanticType:document.getElementById('newPaymentMethodSemantic')?.value||'cash'});
 
             localStorage.setItem(getAdminKey('paymentMethods'), JSON.stringify(paymentMethods));
             alert('입금방식이 추가되었습니다.');
@@ -4792,6 +4788,7 @@ function showDBManagement() {
                         <label class="block text-sm font-medium mb-2">입금방식명:</label>
                         <input type="text" id="editPaymentMethodName" value="${method.name}" class="w-full border rounded px-3 py-2">
                     </div>
+                    <div><label class="block text-sm font-medium mb-2">연결 기능</label><select id="editPaymentMethodSemantic" class="w-full border rounded px-3 py-2"><option value="cash" ${getPaymentSemanticType(method)==='cash'?'selected':''}>일반 결제</option><option value="coupon" ${getPaymentSemanticType(method)==='coupon'?'selected':''}>쿠폰 잔액 차감</option><option value="mileage" ${getPaymentSemanticType(method)==='mileage'?'selected':''}>마일리지 차감</option><option value="point" ${getPaymentSemanticType(method)==='point'?'selected':''}>포인트 차감</option></select></div>
                     <div class="flex gap-2">
                         <button onclick="updatePaymentMethod(${id})" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">수정</button>
                         <button onclick="managePaymentMethods()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">취소</button>
@@ -4815,7 +4812,7 @@ function showDBManagement() {
             if (methodIndex === -1) return;
 
             const oldName = paymentMethods[methodIndex].name;
-            paymentMethods[methodIndex] = { id: Number(id), name: name };
+            paymentMethods[methodIndex] = {...paymentMethods[methodIndex],id:Number(id),name:name,semanticType:document.getElementById('editPaymentMethodSemantic')?.value||'cash'};
             localStorage.setItem(getAdminKey('paymentMethods'), JSON.stringify(paymentMethods));
 
             if (oldName !== name) updateHistoricalReferences('paymentMethod', oldName, name);
@@ -6058,6 +6055,7 @@ function translateLegacy(value) {
                         <thead>
                             <tr class="bg-gray-100">
                                 <th class="border border-gray-300 p-2">입금방식명</th>
+                                <th class="border border-gray-300 p-2">연결 기능</th>
                                 <th class="border border-gray-300 p-2">작업</th>
                             </tr>
                         </thead>
@@ -6068,6 +6066,7 @@ function translateLegacy(value) {
                 content += `
                     <tr>
                         <td class="border border-gray-300 p-2">${method.name}</td>
+                        <td class="border border-gray-300 p-2">${({coupon:'쿠폰',mileage:'마일리지',point:'포인트',cash:'일반 결제'}[getPaymentSemanticType(method)]||'일반 결제')}</td>
                         <td class="border border-gray-300 p-2">
                             <button onclick="editPaymentMethod(${method.id})" class="bg-blue-500 text-white px-2 py-1 rounded text-sm mr-1">수정</button>
                             <button onclick="deletePaymentMethod(${method.id})" class="bg-red-500 text-white px-2 py-1 rounded text-sm">삭제</button>
