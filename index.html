@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Report v3.42</title>
+  <title>Daily Report v3.43</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -206,7 +206,7 @@
    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
      <div>
-      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.42</span></div>
+      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.43</span></div>
       <p id="shopName" class="text-lg text-gray-600 mt-1"></p>
      </div>
      <div class="flex gap-2"><button onclick="showLanguageModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="changeLanguage">언어 변경</button> <button onclick="showFontModal()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600" data-translate="changeFont">폰트 변경</button> <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" data-translate="logout">로그아웃</button>
@@ -700,7 +700,7 @@
         const API_BASE_URL = 'https://massage.guidrthai.workers.dev';
         // 앱 버전: 기능/화면이 변경될 때마다 0.01씩 증가시킵니다.
         // 현재 버전은 v3.34입니다.
-        const APP_VERSION = 'v3.42';
+        const APP_VERSION = 'v3.43';
         let currentPaymentReservationId = null;
         let selectedStaff = null;
         let menuRowCounter = 0;
@@ -6560,6 +6560,7 @@ function translateLegacy(value) {
                 <th class="border border-gray-300 p-2" data-translate="staff">마사지사</th>
                 <th class="border border-gray-300 p-2" data-translate="totalPrice">총 가격</th>
                 <th class="border border-gray-300 p-2" data-translate="totalCommissionRatio">총커미션(비율)</th>
+                <th class="border border-gray-300 p-2">쿠폰판매 매출(별도)</th>
             `;
             
             Object.entries(staffStats).forEach(([staffName, stats]) => {
@@ -6568,12 +6569,16 @@ function translateLegacy(value) {
                     <td class="border border-gray-300 p-2">${staffName}</td>
                     <td class="border border-gray-300 p-2">${(Number(stats.totalPrice) || 0).toLocaleString()}${currency.symbol}</td>
                     <td class="border border-gray-300 p-2">${(Number(stats.totalCommission) || 0).toLocaleString()}${currency.symbol} (${(Number(stats.totalPrice) > 0 ? ((Number(stats.totalCommission) || 0) / Number(stats.totalPrice) * 100).toFixed(2) : '0.00')}%)</td>
+                    <td class="border border-gray-300 p-2 text-right">-</td>
                 `;
                 tableBody.appendChild(row);
             });
             const totalPrice=Object.values(staffStats).reduce((s,x)=>s+(Number(x.totalPrice)||0),0);
             const totalCommission=Object.values(staffStats).reduce((s,x)=>s+(Number(x.totalCommission)||0),0);
-            if(staffFooter) staffFooter.innerHTML=`<tr class="bg-gray-100 font-bold"><td class="border border-gray-300 p-2">직원별 합계</td><td class="border border-gray-300 p-2">${totalPrice.toLocaleString()}${currency.symbol}</td><td class="border border-gray-300 p-2">${totalCommission.toLocaleString()}${currency.symbol} (${totalPrice > 0 ? (totalCommission / totalPrice * 100).toFixed(2) : '0.00'}%)</td></tr>`;
+            let rangeStart, rangeEnd;
+            if(currentStatsType==='daily'){rangeStart=rangeEnd=document.getElementById('statsDate')?.value||'';}else{rangeStart=document.getElementById('statsStartDate')?.value||'';rangeEnd=document.getElementById('statsEndDate')?.value||'';}
+            const couponSales=loyaltyRead('couponSales',[]).filter(s=>{const d=String(s.date||'').slice(0,10);return d&&d>=rangeStart&&d<=rangeEnd;}).reduce((sum,s)=>sum+(Number(s.saleAmount)||0),0);
+            if(staffFooter) staffFooter.innerHTML=`<tr class="bg-gray-100 font-bold"><td class="border border-gray-300 p-2">직원별 합계</td><td class="border border-gray-300 p-2">${totalPrice.toLocaleString()}${currency.symbol}</td><td class="border border-gray-300 p-2">${totalCommission.toLocaleString()}${currency.symbol} (${totalPrice > 0 ? (totalCommission / totalPrice * 100).toFixed(2) : '0.00'}%)</td><td class="border border-gray-300 p-2 text-right">-</td></tr><tr class="bg-blue-50 font-bold"><td class="border border-gray-300 p-2" colspan="3">쿠폰판매 매출(서비스 매출과 별도)</td><td class="border border-gray-300 p-2 text-right">${couponSales.toLocaleString()}${currency.symbol}</td></tr>`;
             if(window.localizeLegacyUI) window.localizeLegacyUI();
         }
 
