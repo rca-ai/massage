@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Report v3.41</title>
+  <title>Daily Report v3.42</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -206,7 +206,7 @@
    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
      <div>
-      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.41</span></div>
+      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.42</span></div>
       <p id="shopName" class="text-lg text-gray-600 mt-1"></p>
      </div>
      <div class="flex gap-2"><button onclick="showLanguageModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="changeLanguage">언어 변경</button> <button onclick="showFontModal()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600" data-translate="changeFont">폰트 변경</button> <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" data-translate="logout">로그아웃</button>
@@ -700,7 +700,7 @@
         const API_BASE_URL = 'https://massage.guidrthai.workers.dev';
         // 앱 버전: 기능/화면이 변경될 때마다 0.01씩 증가시킵니다.
         // 현재 버전은 v3.34입니다.
-        const APP_VERSION = 'v3.41';
+        const APP_VERSION = 'v3.42';
         let currentPaymentReservationId = null;
         let selectedStaff = null;
         let menuRowCounter = 0;
@@ -9602,18 +9602,23 @@ function translateLegacy(value) {
             const customerOptions=customers.map(c=>'<option value="'+loyaltyEscape(c.id)+'" '+(String(c.id)===String(customerId)?'selected':'')+'>'+loyaltyEscape(c.name+' / '+(c.phone||c.customerNumber||''))+'</option>').join('');
             const productOptions=products.map(p=>'<option value="'+p.id+'">'+loyaltyEscape(p.name)+' — 판매 '+Number(p.saleAmount).toLocaleString()+' / 적립 '+Number(p.creditAmount).toLocaleString()+'</option>').join('');
             document.getElementById('managementTitle').textContent='쿠폰 판매';
-            document.getElementById('managementContent').innerHTML='<div class="space-y-3"><label class="block">고객 선택<select id="couponSaleCustomer" class="border rounded w-full p-2">'+customerOptions+'</select></label><label class="block">쿠폰 상품<select id="couponSaleProduct" class="border rounded w-full p-2">'+productOptions+'</select></label><label class="block">메모<input id="couponSaleNote" class="border rounded w-full p-2" placeholder="선택사항"></label><button class="bg-green-600 text-white rounded p-2" onclick="confirmCouponSale()">판매 및 적립</button></div>';
+            const methods=JSON.parse(localStorage.getItem(getAdminKey('paymentMethods'))||'[]').filter(m=>!['coupon','mileage','point'].includes(getPaymentSemanticType(m))&&m.name!=='QR TIP');
+            const methodOptions=methods.map(m=>'<option value="'+m.id+'">'+loyaltyEscape(m.name)+'</option>').join('');
+            document.getElementById('managementContent').innerHTML='<div class="space-y-3"><label class="block">고객 선택<select id="couponSaleCustomer" class="border rounded w-full p-2">'+customerOptions+'</select></label><label class="block">쿠폰 상품<select id="couponSaleProduct" class="border rounded w-full p-2">'+productOptions+'</select></label><label class="block">판매 입금방식<select id="couponSalePaymentMethod" class="border rounded w-full p-2">'+methodOptions+'</select></label><label class="block">메모<input id="couponSaleNote" class="border rounded w-full p-2" placeholder="선택사항"></label><button class="bg-green-600 text-white rounded p-2" onclick="confirmCouponSale()">판매 및 적립</button></div>';
             document.getElementById('managementModal').style.display='block';
         }
         function confirmCouponSale() {
             const customers=loyaltyGetCustomers(), c=customers.find(x=>String(x.id)===String(document.getElementById('couponSaleCustomer').value)), products=loyaltyRead('couponProducts',[]), p=products.find(x=>String(x.id)===String(document.getElementById('couponSaleProduct').value));
             if(!c||!p||p.active===false){alert('유효한 고객과 쿠폰 상품을 선택해 주세요.');return;}
             const sales=loyaltyRead('couponSales',[]), saleId='coupon-'+Date.now();
+            const paymentMethods=JSON.parse(localStorage.getItem(getAdminKey('paymentMethods'))||'[]');
+            const paymentMethod=paymentMethods.find(m=>String(m.id)===String(document.getElementById('couponSalePaymentMethod')?.value||''));
+            if(!paymentMethod){alert('쿠폰 판매 입금방식을 선택해 주세요.');return;}
             c.couponBalance=Number(c.couponBalance||0)+Number(p.creditAmount);
             loyaltyLog(c,'couponBalance',p.creditAmount,'coupon_sale_credit',document.getElementById('couponSaleNote').value||('쿠폰 판매: '+p.name),saleId);
-            sales.push({id:saleId,customerId:c.id,customerName:c.name,productId:p.id,productName:p.name,saleAmount:p.saleAmount,creditAmount:p.creditAmount,date:new Date().toISOString()});
+            sales.push({id:saleId,customerId:c.id,customerName:c.name,productId:p.id,productName:p.name,saleAmount:Number(p.saleAmount)||0,creditAmount:Number(p.creditAmount)||0,paymentMethod:paymentMethod.name,paymentSemanticType:getPaymentSemanticType(paymentMethod),paymentDetails:{[paymentMethod.name]:Number(p.saleAmount)||0},date:new Date().toISOString()});
             loyaltySave('customers',customers);loyaltySave('couponSales',sales);
-            alert('쿠폰 판매 및 '+Number(p.creditAmount).toLocaleString()+' 적립이 완료되었습니다. 판매금액 '+Number(p.saleAmount).toLocaleString()+'은 별도 결제 기록으로 보관됩니다.');
+            alert('쿠폰 판매 및 '+Number(p.creditAmount).toLocaleString()+' 적립이 완료되었습니다. 판매금액 '+Number(p.saleAmount).toLocaleString()+' / 입금방식 '+paymentMethod.name+'으로 기록했습니다.');
             manageCustomerDirectory('');
         }
         function manageLoyaltySettings() {
