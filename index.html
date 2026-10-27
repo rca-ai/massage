@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Report v3.39</title>
+  <title>Daily Report v3.40</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -206,7 +206,7 @@
    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
      <div>
-      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.39</span></div>
+      <div class="flex items-center gap-3"><div aria-label="MaShop" class="shrink-0"><span style="font-family:'Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:-1.5px;"><span style="color:#1247B8;">M</span><span style="color:#137A45;">A</span><span style="color:#D9A900;">SHOP</span></span></div><h1 class="text-3xl font-bold text-gray-800" data-translate="title">Daily Report</h1><span id="appVersion" class="text-sm font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">v3.40</span></div>
       <p id="shopName" class="text-lg text-gray-600 mt-1"></p>
      </div>
      <div class="flex gap-2"><button onclick="showLanguageModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600" data-translate="changeLanguage">언어 변경</button> <button onclick="showFontModal()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600" data-translate="changeFont">폰트 변경</button> <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" data-translate="logout">로그아웃</button>
@@ -266,6 +266,7 @@
         <th class="border border-gray-300 p-2" data-translate="price">가격</th>
         <th class="border border-gray-300 p-2" data-translate="commission">커미션</th>
         <th class="border border-gray-300 p-2 cursor-pointer hover:bg-blue-100" data-translate="roomNumber" onclick="sortDashboardByRoom()">방번호 ↕</th>
+        <th class="border border-gray-300 p-2" data-translate="customerName">고객명</th>
         <th class="border border-gray-300 p-2" data-translate="actions">작업</th>
        </tr>
       </thead>
@@ -337,7 +338,7 @@
       </div>
       <div><label class="block text-sm font-medium mb-2" data-translate="roomNumber">방번호 (선택사항)</label> <select id="reservationRoom" class="w-full border rounded px-3 py-2"> <option value="" data-translate="selectRoom">방 선택</option> </select>
       </div>
-      <div><label class="block text-sm font-medium mb-2" data-translate="customerName">고객명 (선택사항)</label> <input type="text" id="reservationCustomer" class="w-full border rounded px-3 py-2" data-translate-placeholder="enterCustomerName">
+      <div><label class="block text-sm font-medium mb-2" data-translate="customerName">고객명 (선택사항)</label> <input type="text" id="reservationCustomer" list="reservationCustomerOptions" class="w-full border rounded px-3 py-2" data-translate-placeholder="enterCustomerName" oninput="filterReservationCustomers()"><datalist id="reservationCustomerOptions"></datalist>
       </div>
      </div><!-- 메뉴별 시간 설정 -->
      <div id="menuTimeSettings" class="mt-6" style="display: none;">
@@ -698,7 +699,7 @@
         const API_BASE_URL = 'https://massage.guidrthai.workers.dev';
         // 앱 버전: 기능/화면이 변경될 때마다 0.01씩 증가시킵니다.
         // 현재 버전은 v3.34입니다.
-        const APP_VERSION = 'v3.39';
+        const APP_VERSION = 'v3.40';
         let currentPaymentReservationId = null;
         let selectedStaff = null;
         let menuRowCounter = 0;
@@ -3396,6 +3397,17 @@ function showDBManagement() {
             });
         }
 
+
+        function filterReservationCustomers() {
+            const input = document.getElementById('reservationCustomer');
+            const list = document.getElementById('reservationCustomerOptions');
+            if (!input || !list) return;
+            const customers = JSON.parse(localStorage.getItem(getAdminKey('customers')) || '[]');
+            const q = String(input.value || '').toLowerCase().trim();
+            list.innerHTML = customers.filter(c => !q || [c.name,c.phone,c.customerNumber].some(v => String(v||'').toLowerCase().includes(q)))
+                .slice(0,30).map(c => '<option value="' + String(c.name||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;') + '"></option>').join('');
+        }
+
         function addReservation() {
             if (!selectedStaff) {
                 alert('직원을 선택해주세요.');
@@ -3525,6 +3537,7 @@ function showDBManagement() {
                     <td class="border border-gray-300 p-2">${reservation.price.toLocaleString()}${currency.symbol}</td>
                     <td class="border border-gray-300 p-2">${reservation.commission.toLocaleString()}${currency.symbol}</td>
                     <td class="border border-gray-300 p-2">${reservation.roomNumber || '-'}</td>
+                    <td class="border border-gray-300 p-2">${reservation.customerName || '-'}</td>
                     <td class="border border-gray-300 p-2">
                         ${reservation.paid ? 
                             `<span class="bg-green-500 text-white px-3 py-1 rounded text-sm font-bold">${translations[currentLanguage].paymentCompleteStatus || '입금 완료'}</span>` :
